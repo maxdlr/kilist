@@ -1,15 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import useSWR from "swr";
 
 const GroceryList = () => {
-  useEffect(() => {
-    const fetchLists = async () => {
-      return await fetch("https://jsonplaceholder.typicode.com/todos");
-    };
-
-    console.log(fetchLists());
-  }, []);
+  const { data } = useSWR({ url: "health" });
+  console.log(data);
   return "GroceryList";
 };
 export default GroceryList;

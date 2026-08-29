@@ -29,10 +29,12 @@ function getDevMenuHint() {
   );
 }
 
-export default async function HomeScreen() {
+export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
-      {/* <GroceryList /> */}
+      <ThemedText>
+        <GroceryList />
+      </ThemedText>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <AnimatedIcon />
