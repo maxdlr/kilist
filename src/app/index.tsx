@@ -32,9 +32,6 @@ function getDevMenuHint() {
 export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
-      <ThemedText>
-        <GroceryList />
-      </ThemedText>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <AnimatedIcon />
