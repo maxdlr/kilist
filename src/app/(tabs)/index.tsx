@@ -1,5 +1,4 @@
-import GroceryList from "@/components/elements/GroceryList/GroceryList";
-import { ThemedText } from "@/components/themed-text";
+import List from "@/components/elements/List";
 import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { StyleSheet } from "react-native";
@@ -8,7 +7,7 @@ const ListsScreen = () => {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.titleContainer}>
-        <GroceryList />
+        <List />
       </ThemedView>
     </ThemedView>
   );

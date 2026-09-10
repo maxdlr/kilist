@@ -1,16 +1,16 @@
-export interface GroceryListType {
+export interface ListType {
   id: number;
   title: string;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-  items: GroceryItemType[];
+  items: FoodType[];
 }
 
-export interface GroceryItemType {
+export interface FoodType {
   id: number;
   name: string;
   imageUrl?: string;
-  lists: GroceryListType[] | number[];
+  lists: ListType[] | number[];
   description?: string;
 }

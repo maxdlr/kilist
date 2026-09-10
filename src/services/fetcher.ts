@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios";
 import axios from "@/services/axios";
-import { KilistApiError } from "@/types/apiTypes";
+import { KilistApiError } from "@/types/api";
 
 export const onError = (err: AxiosError) =>
   err?.response?.data as KilistApiError;

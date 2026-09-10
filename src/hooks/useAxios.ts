@@ -1,5 +1,5 @@
 import axios from "@/services/axios";
-import { KilistResponseError } from "@/types/apiTypes";
+import { KilistResponseError } from "@/types/api";
 import { FetchRequestInit } from "expo/fetch";
 import { useEffect, useRef } from "react";
 
