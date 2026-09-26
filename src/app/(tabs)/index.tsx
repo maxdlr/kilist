@@ -1,4 +1,4 @@
-import List from "@/components/elements/List";
+import List from "@/components/elements/Lists/ListList";
 import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { StyleSheet } from "react-native";

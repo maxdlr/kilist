@@ -9,6 +9,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 import useGroceryListStyles from "./style";
 import ListRow from "./_components/ListRow";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
 const List = () => {
   const { data: lists } = useSWR<ListType[]>({ url: "lists/browse" });
@@ -18,6 +20,7 @@ const List = () => {
     bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
   };
   const style = useGroceryListStyles();
+  const router = useRouter();
   const contentPlatformStyle = Platform.select({
     android: {
       paddingTop: insets.top,
@@ -29,6 +32,12 @@ const List = () => {
       paddingTop: Spacing.six,
       paddingBottom: Spacing.four,
     },
+  });
+
+  useEffect(() => {
+    if (lists?.length === 1) {
+      router.navigate(`/${lists[0].id}`);
+    }
   });
 
   return (
