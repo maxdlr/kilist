@@ -1,69 +1,30 @@
-import List from "@/components/elements/Lists/ListList";
+import FoodList from "@/components/elements/Foods";
+import ListsList from "@/components/elements/Lists/ListsList";
 import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
+import { FoodListProvider } from "@/providers/FoodListProvider";
+import { ListType } from "@/types/model";
 import { StyleSheet } from "react-native";
+import useSWR from "swr";
 
 const ListsScreen = () => {
+  const { data: mainList } = useSWR<ListType>({ url: "lists/read?main=true" });
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.titleContainer}>
-        <List />
-      </ThemedView>
+      <FoodListProvider listIds={[Number(mainList?.id)]}>
+        <FoodList />
+      </FoodListProvider>
     </ThemedView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
   container: {
     maxWidth: MaxContentWidth,
     flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: "center",
-    paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: "center",
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: "row",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: "center",
-    gap: Spacing.one,
-    alignItems: "center",
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: "center",
-  },
-  imageTutorial: {
-    width: "100%",
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
+    paddingHorizontal: Spacing.two,
   },
 });
 

@@ -34,38 +34,20 @@ const FoodList = () => {
 
         {foods
           ?.filter((f) => f.inStockScore < 1)
-          ?.map((food, i) => (
-            <FoodRow
-              onPress={handleOnPress}
-              food={food}
-              key={food.id}
-              style={{
-                backgroundColor:
-                  i % 2 === 0 ? theme.colors.card : theme.colors.background,
-              }}
-            />
+          ?.map((food) => (
+            <FoodRow onPress={handleOnPress} food={food} key={food.id} />
           ))}
       </>
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   listContainer: {
     display: "flex",
     flexDirection: "column",
     gap: 10,
     height: "auto" as DimensionValue,
-  },
-  item: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-  },
-  name: {
-    fontSize: 26,
-    fontWeight: "bold",
   },
 });
 

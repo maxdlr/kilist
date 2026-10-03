@@ -12,7 +12,7 @@ import ListRow from "./_components/ListRow";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 
-const List = () => {
+const ListsList = () => {
   const { data: lists } = useSWR<ListType[]>({ url: "lists/browse" });
   const safeAreaInsets = useSafeAreaInsets();
   const insets = {
@@ -58,4 +58,4 @@ const List = () => {
   );
 };
 
-export default List;
+export default ListsList;
