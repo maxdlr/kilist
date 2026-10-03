@@ -1,5 +1,4 @@
 import FoodList from "@/components/elements/Foods";
-import ListsList from "@/components/elements/Lists/ListsList";
 import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { FoodListProvider } from "@/providers/FoodListProvider";

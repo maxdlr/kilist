@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 
 const FoodList = () => {
   const theme = useTheme();
-  const { foods, isFoodLoading, buyFood, suggestedFoodIds } = useFoodList();
+  const { foods, isFoodLoading, suggestedFoodIds, buyFood } = useFoodList();
 
   if (isFoodLoading) {
     return (
@@ -16,10 +16,6 @@ const FoodList = () => {
       </ThemedView>
     );
   }
-
-  const handleOnPress = async (currentFoodId: number) => {
-    await buyFood(currentFoodId);
-  };
 
   return (
     <ScrollView
@@ -35,7 +31,7 @@ const FoodList = () => {
         {foods
           ?.filter((f) => f.inStockScore < 1)
           ?.map((food) => (
-            <FoodRow onPress={handleOnPress} food={food} key={food.id} />
+            <FoodRow food={food} key={food.id} onBuy={buyFood} />
           ))}
       </>
     </ScrollView>

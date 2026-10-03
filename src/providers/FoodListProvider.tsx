@@ -1,7 +1,8 @@
 import useAxios from "@/hooks/useAxios";
+import { KRes } from "@/types/api";
 import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode, useState } from "react";
-import useSWR from "swr";
+import useSWR, { SWRConfiguration } from "swr";
 
 export type FoodListContextType = {
   foods?: FoodType[];
@@ -30,12 +31,24 @@ export const FoodListProvider = ({
     data: foods,
     isLoading: isFoodLoading,
     mutate: mutateFood,
-  } = useSWR<FoodType[]>({
-    url: "foods/browse",
-    params: {
-      listIds,
+  } = useSWR<FoodType[]>(
+    {
+      url: "foods/browse",
+      params: {
+        listIds,
+      },
     },
-  });
+    {
+      // onSuccess: () => setLoading(false),
+      // onError: () => setLoading(false),
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      retryCount: 3,
+      revalidateOnMount: true,
+      loadingTimeout: 5000,
+      keepPreviousData: true,
+    } as SWRConfiguration,
+  );
 
   const { postData } = useAxios("foods/buy");
 

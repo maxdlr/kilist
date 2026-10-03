@@ -1,33 +1,41 @@
 import { ThemedText } from "@/components/themed-text";
 import useFoodList from "@/providers/FoodListProvider";
 import { FoodType } from "@/types/model";
-import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { calculateValueFromInStockScore } from "../utils";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import SwipeGesture from "@/components/elements/SwipeGesture";
 
 const FoodRow = ({
   food,
   style,
-  onPress,
+  onBuy,
+  onDismiss,
+  onOptions,
 }: {
   food: FoodType;
   style?: StyleProp<ViewStyle>;
-  onPress: (foodId: number) => void;
+  onBuy: (foodId: number) => void;
+  onDismiss?: (foodId: number) => void;
+  onOptions?: (foodId: number) => void;
 }) => {
   const { id, name, inStockScore } = food;
   const { foods } = useFoodList();
   const theme = useTheme();
 
   return (
-    <Pressable
-      onPress={() => onPress(food.id)}
-      key={id}
-      style={{
-        height: calculateValueFromInStockScore(inStockScore, foods, 50, 100),
-        ...styles.item,
-        borderBottomColor: theme.textSecondary,
-        ...style,
+    <SwipeGesture
+      onSwipeRight={() => onBuy(id)}
+      onSwipeLeft={() => onDismiss?.(id)}
+      onLongPress={() => onOptions?.(id)}
+      styles={{
+        box: {
+          height: calculateValueFromInStockScore(inStockScore, foods, 50, 100),
+          ...styles.item,
+          borderBottomColor: theme.textSecondary,
+          ...style,
+        },
       }}
     >
       <ThemedText
@@ -39,7 +47,7 @@ const FoodRow = ({
         {name}
       </ThemedText>
       <ThemedText>{Number((inStockScore * 100).toFixed(2))} %</ThemedText>
-    </Pressable>
+    </SwipeGesture>
   );
 };
 
