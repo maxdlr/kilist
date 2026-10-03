@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 
 const FoodList = () => {
   const theme = useTheme();
-  const { foods, isFoodLoading } = useFoodList();
+  const { foods, isFoodLoading, buyFood, suggestedFoodIds } = useFoodList();
 
   if (isFoodLoading) {
     return (
@@ -17,22 +17,35 @@ const FoodList = () => {
     );
   }
 
+  const handleOnPress = async (currentFoodId: number) => {
+    await buyFood(currentFoodId);
+  };
+
   return (
     <ScrollView
       style={
         (styles.listContainer, { backgroundColor: theme.colors.background })
       }
     >
-      {foods?.map((food, i) => (
-        <FoodRow
-          food={food}
-          key={food.id}
-          style={{
-            backgroundColor:
-              i % 2 === 0 ? theme.colors.card : theme.colors.background,
-          }}
-        />
-      ))}
+      <>
+        <ThemedText>
+          {foods?.find((f) => f.id === suggestedFoodIds[0])?.name || "none"}
+        </ThemedText>
+
+        {foods
+          ?.filter((f) => f.inStockScore < 1)
+          ?.map((food, i) => (
+            <FoodRow
+              onPress={handleOnPress}
+              food={food}
+              key={food.id}
+              style={{
+                backgroundColor:
+                  i % 2 === 0 ? theme.colors.card : theme.colors.background,
+              }}
+            />
+          ))}
+      </>
     </ScrollView>
   );
 };
