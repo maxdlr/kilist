@@ -1,7 +1,7 @@
-import SwipeFoods from "@/components/elements/SwipeFoods";
-import TapGesture from "@/components/elements/TapGesture";
+import TapGesture from "@/components/gestures/TapGesture";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import SwipeFoods from "@/components/views/SwipeFoods";
 import { FoodType } from "@/types/model";
 import { useState } from "react";
 import { useTapGesture } from "react-native-gesture-handler";

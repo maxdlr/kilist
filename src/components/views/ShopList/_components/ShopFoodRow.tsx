@@ -2,12 +2,12 @@ import { ThemedText } from "@/components/themed-text";
 import useFoodList from "@/providers/FoodListProvider";
 import { FoodType } from "@/types/model";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
-import { calculateValueFromInStockScore } from "../utils";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import SwipeGesture from "@/components/elements/SwipeGesture";
+import SwipeGesture from "@/components/gestures/SwipeGesture";
+import { calculateValueFromInStockScore } from "@/utils/scoreUtils";
 
-const FoodRow = ({
+const ShopFoodRow = ({
   food,
   style,
   onBuy,
@@ -67,4 +67,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FoodRow;
+export default ShopFoodRow;

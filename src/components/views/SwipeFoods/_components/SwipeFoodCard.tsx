@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { SwipeFoodCardProps } from "../interface";
-import PanGesture from "../../PanGesture";
+import PanGesture from "@/components/gestures/PanGesture";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;

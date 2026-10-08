@@ -1,5 +1,4 @@
 import useAxios from "@/hooks/useAxios";
-import { KRes } from "@/types/api";
 import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
@@ -25,7 +24,7 @@ export const FoodListProvider = ({
   listIds,
 }: {
   children: ReactNode;
-  listIds: number[];
+  listIds?: number[];
 }) => {
   const {
     data: foods,
@@ -33,7 +32,7 @@ export const FoodListProvider = ({
     mutate: mutateFood,
   } = useSWR<FoodType[]>(
     {
-      url: "foods/browse",
+      url: listIds ? "foods/browse" : null,
       params: {
         listIds,
       },

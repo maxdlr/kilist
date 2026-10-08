@@ -1,4 +1,4 @@
-import FoodList from "@/components/elements/Foods";
+import FoodList from "@/components/views/FoodList";
 import { FoodListProvider } from "@/providers/FoodListProvider";
 import { useLocalSearchParams } from "expo-router";
 

@@ -1,11 +1,11 @@
 import { DimensionValue, ScrollView, StyleSheet } from "react-native";
-import FoodRow from "./_components/FoodRow";
 import { useTheme } from "expo-router";
 import useFoodList from "@/providers/FoodListProvider";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
+import ShopFoodRow from "./_components/ShopFoodRow";
 
-const FoodList = () => {
+const ShopList = () => {
   const theme = useTheme();
   const { foods, isFoodLoading, suggestedFoodIds, buyFood } = useFoodList();
 
@@ -31,7 +31,7 @@ const FoodList = () => {
         {foods
           ?.filter((f) => f.inStockScore < 1)
           ?.map((food) => (
-            <FoodRow food={food} key={food.id} onBuy={buyFood} />
+            <ShopFoodRow food={food} key={food.id} onBuy={buyFood} />
           ))}
       </>
     </ScrollView>
@@ -47,4 +47,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FoodList;
+export default ShopList;
