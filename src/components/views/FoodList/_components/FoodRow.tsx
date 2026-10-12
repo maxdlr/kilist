@@ -24,11 +24,11 @@ const FoodRow = ({
       style={{
         ...styles.item,
 
-        backgroundColor: transparentColor(display.color, 0.4),
+        backgroundColor: display.color[500],
 
         height: 70,
 
-        borderBottomColor: display.color,
+        borderBottomColor: display.color[500],
 
         ...style,
       }}
@@ -42,7 +42,7 @@ const FoodRow = ({
         {name}
       </ThemedText>
 
-      <Pill label={display.label} color={display.color} />
+      <Pill label={display.label} color={display.color[500]} />
     </ThemedView>
   );
 };

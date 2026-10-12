@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
+import { Spacing } from "@/constants/theme";
 import { Href, Link } from "expo-router";
-import { Image, Pressable } from "react-native";
+import { Image, Pressable, StyleSheet } from "react-native";
 
 const KilButton = ({
   label,
@@ -31,7 +32,10 @@ const KilButton = ({
 
   if (onTouch) {
     return (
-      <Pressable onPress={onTouch} style={{ ...(style?.container || {}) }}>
+      <Pressable
+        onPress={onTouch}
+        style={{ ...(style?.container || {}), ...styles.container }}
+      >
         {content}
       </Pressable>
     );
@@ -39,7 +43,10 @@ const KilButton = ({
 
   if (href) {
     return (
-      <Link href={href} style={{ ...(style?.container || {}) }}>
+      <Link
+        href={href}
+        style={{ ...(style?.container || {}), ...styles.container }}
+      >
         {content}
       </Link>
     );
@@ -47,4 +54,14 @@ const KilButton = ({
 
   return <>{content}</>;
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.six,
+    backgroundColor: "#007AFF",
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+});
 export default KilButton;

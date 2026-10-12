@@ -30,13 +30,17 @@ export const calculateValueFromInStockScore = (
 export interface FoodTypeDisplay {
   level: 1 | 2 | 3 | 4 | 5;
   label: string;
-  color: string;
+  color: Record<5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90, string>;
 }
 
 export const inStockScoreToDisplay = (
-  inStockScore: number,
-  theme: (typeof Colors)["light" | "dark"],
+  inStockScore?: number,
+  theme: (typeof Colors)["light" | "dark"] = Colors.light,
 ): FoodTypeDisplay => {
+  if (!inStockScore) {
+    return { level: 1, label: "Needed", color: theme.foods[1] };
+  }
+
   const map: Record<number, FoodTypeDisplay> = {
     0: { level: 1, label: "Needed", color: theme.foods[1] },
     0.25: { level: 2, label: "Should buy", color: theme.foods[2] },

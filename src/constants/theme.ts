@@ -4,6 +4,7 @@
  */
 
 import "@/global.css";
+import { generateColorVariants } from "@/utils/colorUtils";
 
 import { Platform } from "react-native";
 
@@ -16,11 +17,11 @@ export const Colors = {
     textSecondary: "#60646C",
 
     foods: {
-      1: "#C8E6C9",
-      2: "#BBDEFB",
-      3: "#FFF9C4",
-      4: "#FFE0B2",
-      5: "#FFCDD2",
+      1: generateColorVariants("#C8E6C9"),
+      2: generateColorVariants("#BBDEFB"),
+      3: generateColorVariants("#FFF9C4"),
+      4: generateColorVariants("#FFE0B2"),
+      5: generateColorVariants("#FFCDD2"),
     },
   },
   dark: {
@@ -31,11 +32,11 @@ export const Colors = {
     textSecondary: "#B0B4BA",
 
     foods: {
-      1: "#C8E6C9",
-      2: "#BBDEFB",
-      3: "#FFF9C4",
-      4: "#FFE0B2",
-      5: "#FFCDD2",
+      1: generateColorVariants("#C8E6C9"),
+      2: generateColorVariants("#BBDEFB"),
+      3: generateColorVariants("#FFF9C4"),
+      4: generateColorVariants("#FFE0B2"),
+      5: generateColorVariants("#FFCDD2"),
     },
   },
 } as const;

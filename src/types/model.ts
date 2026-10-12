@@ -15,3 +15,12 @@ export interface FoodType {
   description?: string;
   inStockScore: number;
 }
+
+export interface SessionType {
+  id: number;
+}
+
+export interface ShopType {
+  foods: FoodType[];
+  session: SessionType;
+}

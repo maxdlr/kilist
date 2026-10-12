@@ -1,13 +1,22 @@
 import { ThemedText } from "@/components/themed-text";
-import { StyleSheet } from "react-native";
+import { StyleProp, StyleSheet, TextStyle } from "react-native";
 
-const Pill = ({ label, color }: { label: string; color?: string }) => {
+const Pill = ({
+  label,
+  color,
+  style,
+}: {
+  label: string;
+  color?: string;
+  style?: StyleProp<TextStyle>;
+}) => {
   return (
     <ThemedText
       type="small"
       style={{
         ...styles.label,
-        backgroundColor: color ?? "#E0E0E0",
+        backgroundColor: color ?? "transparent",
+        ...style,
       }}
     >
       {label}
@@ -20,7 +29,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: "#E0E0E0",
+    // backgroundColor: "#E0E0E0",
   },
 });
 

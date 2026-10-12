@@ -7,10 +7,10 @@ import {
 } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
-  runOnJS,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSwipeGesture } from "./useSwipeGesture";
+import { scheduleOnRN } from "react-native-worklets";
 
 const SwipeGesture = ({
   children,
@@ -18,6 +18,8 @@ const SwipeGesture = ({
   onSwipeLeft,
   onSwipeRight,
   onLongPress,
+  onSwipingLeft,
+  onSwipingRight,
   swipeThreshold,
   animatedStyles,
 }: {
@@ -28,12 +30,16 @@ const SwipeGesture = ({
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
   onLongPress?: () => void;
+  onSwipingLeft?: (value: number) => void;
+  onSwipingRight?: (value: number) => void;
   swipeThreshold?: number;
   animatedStyles?: AnimatedStyle<ViewStyle>;
 }) => {
   const { translationX, pan } = useSwipeGesture({
     onSwipeLeft,
     onSwipeRight,
+    onSwipingLeft,
+    onSwipingRight,
     swipeThreshold,
   });
 
@@ -44,7 +50,7 @@ const SwipeGesture = ({
   const longPress = useLongPressGesture({
     onActivate: () => {
       if (onLongPress) {
-        runOnJS(onLongPress)();
+        scheduleOnRN(onLongPress);
       }
     },
   });

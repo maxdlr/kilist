@@ -8,6 +8,7 @@ export type FoodListContextType = {
   isFoodLoading: boolean;
   mutateFood: () => void;
   buyFood: (currentFoodId: number) => Promise<void>;
+  snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
 };
 
@@ -16,6 +17,7 @@ const FoodListContext = createContext<FoodListContextType>({
   isFoodLoading: false,
   mutateFood: () => {},
   buyFood: async () => {},
+  snoozeFood: async () => {},
   suggestedFoodIds: [],
 });
 
@@ -26,6 +28,7 @@ export const FoodListProvider = ({
   children: ReactNode;
   listIds?: number[];
 }) => {
+  const [buyingFoodId, setBuyingFoodId] = useState<number | null>(null);
   const {
     data: foods,
     isLoading: isFoodLoading,
@@ -35,38 +38,49 @@ export const FoodListProvider = ({
       url: listIds ? "foods/browse" : null,
       params: {
         listIds,
+        maxInStockScore: 1,
       },
     },
     {
-      // onSuccess: () => setLoading(false),
-      // onError: () => setLoading(false),
+      onSuccess: () => {},
+      onError: () => {},
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
       revalidateOnMount: true,
       loadingTimeout: 5000,
-      keepPreviousData: true,
+      // keepPreviousData: true,
     } as SWRConfiguration,
   );
 
-  const { postData } = useAxios("foods/buy");
-
-  const [previousFoodId, setPreviousFoodId] = useState<number | undefined>(
-    undefined,
-  );
+  const { postData: buy } = useAxios("foods/buy");
+  const { postData: snooze } = useAxios("foods/snooze");
 
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
 
   const buyFood = async (currentFoodId: number) => {
-    const res = await postData({ previousFoodId, currentFoodId });
-    setPreviousFoodId(currentFoodId);
+    const res = await buy({ previousFoodId: buyingFoodId, currentFoodId });
+    setBuyingFoodId(currentFoodId);
+    setSuggestedFoodIds((res.data as number[]) || []);
+    mutateFood();
+  };
+
+  const snoozeFood = async (foodId: number) => {
+    const res = await snooze({ foodId });
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
   };
 
   return (
     <FoodListContext.Provider
-      value={{ foods, isFoodLoading, mutateFood, buyFood, suggestedFoodIds }}
+      value={{
+        foods,
+        isFoodLoading,
+        mutateFood,
+        buyFood,
+        snoozeFood,
+        suggestedFoodIds,
+      }}
     >
       {children}
     </FoodListContext.Provider>
