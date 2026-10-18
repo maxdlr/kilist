@@ -11,6 +11,7 @@ export type ShopContextType = {
   mutateFood: () => void;
   buyFood: (currentFoodId: number) => Promise<void>;
   startNewSession: () => Promise<SessionType>;
+  endCurrentSession: () => Promise<SessionType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
 };
@@ -23,6 +24,7 @@ const ShopContext = createContext<ShopContextType>({
   mutateFood: () => {},
   buyFood: async () => {},
   startNewSession: async () => ({}) as Promise<SessionType>,
+  endCurrentSession: async () => ({}) as Promise<SessionType>,
   snoozeFood: async () => {},
   suggestedFoodIds: [],
 });
@@ -34,7 +36,7 @@ export const ShopProvider = ({
   listIds?: number[];
 }) => {
   const [session, setSession] = useState<SessionType | undefined>(undefined);
-  const [buyingFoodId, setBuyingFoodId] = useState<number | null>(null);
+  const [previousFoodId, setPreviousFoodId] = useState<number | null>(null);
   const {
     data: foods,
     isLoading: isFoodLoading,
@@ -56,23 +58,32 @@ export const ShopProvider = ({
     } as SWRConfiguration,
   );
 
-  // const [foods, setFoods] = useState<FoodType[]>(shop?.foods || []);
-
   const { postData: startSession } = useAxios("shop/session/start");
-  const { postData: buy } = useAxios("shop/buy");
-  const { postData: snooze } = useAxios("shop/snooze");
+  const { postData: endSession } = useAxios(
+    `shop/session/end?session=${session?.id}`,
+  );
+  const { putData: editFood } = useAxios(
+    `shop/foods/edit?sessionId=${session?.id}`,
+  );
 
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
 
-  const buyFood = async (currentFoodId: number) => {
-    const res = await buy({ previousFoodId: buyingFoodId, currentFoodId });
-    setBuyingFoodId(currentFoodId);
+  const buyFood = async (foodId: number) => {
+    const res = await editFood({
+      foodId: foodId,
+      previousFoodId,
+      action: "buy",
+    });
+    setPreviousFoodId(foodId);
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
   };
 
   const snoozeFood = async (foodId: number) => {
-    const res = await snooze({ foodId });
+    const res = await editFood({
+      foodId,
+      action: "snooze",
+    });
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
   };
@@ -80,6 +91,11 @@ export const ShopProvider = ({
   const startNewSession = async () => {
     const res = await startSession({});
     setSession(res.data as SessionType);
+    return res.data as SessionType;
+  };
+
+  const endCurrentSession = async () => {
+    const res = await endSession({});
     return res.data as SessionType;
   };
 
@@ -94,6 +110,7 @@ export const ShopProvider = ({
         suggestedFoodIds,
         session,
         startNewSession,
+        endCurrentSession,
       }}
     >
       {children}

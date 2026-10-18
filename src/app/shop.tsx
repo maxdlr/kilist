@@ -1,10 +1,10 @@
-import Session from "@/components/views/Session/Session";
+import ShopList from "@/components/views/ShopList";
 import { ShopProvider } from "@/providers/ShopProvider";
 
 const ShopView = () => {
   return (
     <ShopProvider>
-      <Session />
+      <ShopList />
     </ShopProvider>
   );
 };

@@ -23,6 +23,9 @@ export const Colors = {
       4: generateColorVariants("#FFE0B2"),
       5: generateColorVariants("#FFCDD2"),
     },
+
+    confirm: generateColorVariants("#B4FFA1"),
+    cancel: generateColorVariants("#FF6B6B"),
   },
   dark: {
     text: "#ffffff",
@@ -38,6 +41,9 @@ export const Colors = {
       4: generateColorVariants("#FFE0B2"),
       5: generateColorVariants("#FFCDD2"),
     },
+
+    confirm: generateColorVariants("#B4FFA1"),
+    cancel: generateColorVariants("#FF6B6B"),
   },
 } as const;
 

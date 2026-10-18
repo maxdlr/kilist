@@ -73,21 +73,24 @@ const hslToHex = ({ h, s, l }: HSL): string => {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
 
+export type ColorsStep = 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
+export type ColorScale = Record<ColorsStep, string>;
+
 /**
  * Generates a Tailwind-style 50-900 shade scale from a single base color,
  * using HSL lightness steps rather than opacity — each step is a genuinely
  * lighter or darker color, not a transparent overlay.
  *
  * @param hex - Base color in `#rrggbb` form, treated as the 500 shade
- * @returns A map of shade keys (50-900) to hex color strings
+ * @returns A map of shade keys (5-100) to hex color strings
  */
-export const generateColorVariants = (hex: string): Record<number, string> => {
+export const generateColorVariants = (hex: string): ColorScale => {
   const { h, s, l } = hexToHsl(hex);
 
   // Interpolate lightness relative to the base color's own lightness so the
   // ramp stays monotonic (lighter shades always lighter, darker always
   // darker) regardless of how light or dark the base color already is.
-  const lightnessSteps: Record<number, number> = {
+  const lightnessSteps: Record<ColorsStep, number> = {
     5: l + (1 - l) * 0.9,
     10: l + (1 - l) * 0.75,
     20: l + (1 - l) * 0.55,
@@ -106,5 +109,5 @@ export const generateColorVariants = (hex: string): Record<number, string> => {
       Number(shade),
       hslToHex({ h, s, l: targetL }),
     ]),
-  );
+  ) as ColorScale;
 };

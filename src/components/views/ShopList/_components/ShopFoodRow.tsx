@@ -4,7 +4,6 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import useFoodList from "@/providers/FoodListProvider";
 import useShop from "@/providers/ShopProvider";
 import { FoodType } from "@/types/model";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/utils/scoreUtils";
 import { useState } from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import ShopFoodRowSwipeBg from "./ShopFoodRowSwipeBg";
 
 const ShopFoodRow = ({
   food,
@@ -35,16 +35,7 @@ const ShopFoodRow = ({
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.background}>
-        <ThemedView style={{ paddingHorizontal: Spacing.four }}>
-          {isSwipingRight && <ThemedText>Buying (loading)</ThemedText>}
-          {!isSwipingRight && (
-            <ThemedText style={{ textAlign: "right" }}>
-              Snooze (loading)
-            </ThemedText>
-          )}
-        </ThemedView>
-      </ThemedView>
+      <ShopFoodRowSwipeBg buying={isSwipingRight} />
 
       <SwipeGesture
         onSwipeRight={() => onBuy(id)}
@@ -82,6 +73,7 @@ const ShopFoodRow = ({
         >
           {name}
         </ThemedText>
+
         <Pill
           label={display.label}
           color={display.color[60]}
@@ -109,6 +101,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: Spacing.four,
+  },
+
+  loading: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
 
   name: {

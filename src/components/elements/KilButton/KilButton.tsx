@@ -21,7 +21,7 @@ const KilButton = ({
 }) => {
   const content = (
     <ThemedText
-      style={{ ...(style?.label ? style.label : {}) }}
+      style={{ ...(style?.label ? style.label : {}), ...styles.content }}
       type="default"
       numberOfLines={1}
     >
@@ -61,7 +61,13 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.six,
     backgroundColor: "#007AFF",
     color: "#FFFFFF",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     textAlign: "center",
+  },
+  content: {
+    color: "#FFFFFF",
   },
 });
 export default KilButton;

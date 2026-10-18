@@ -25,8 +25,14 @@ const ShopList = () => {
     buyFood,
     snoozeFood,
     mutateFood,
+    session,
+    startNewSession,
   } = useShop();
   const ref = useRef<View>(null);
+
+  useEffect(() => {
+    if (!session) startNewSession();
+  }, [session]);
 
   const headerHeight = 110;
   const suggestionHeight = 158;
