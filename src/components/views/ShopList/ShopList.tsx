@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import useShop from "@/providers/ShopProvider";
+import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { useEffect, useRef } from "react";
@@ -13,8 +13,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import ShopFoodRow from "./_components/ShopFoodRow";
-import ShopFoodSuggestion from "./_components/ShopFoodSuggestion";
+import ShopListFoodRow from "./_components/ShopListFoodRow";
+import ShopListFoodSuggestion from "./_components/ShopListFoodSuggestion";
 
 const ShopList = () => {
   const theme = useTheme();
@@ -25,16 +25,16 @@ const ShopList = () => {
     buyFood,
     snoozeFood,
     mutateFood,
-    session,
-    startNewSession,
-  } = useShop();
+    shopList,
+    startNewShopList,
+  } = useShopList();
   const ref = useRef<View>(null);
 
   // console.log(foods);
 
   useEffect(() => {
-    if (!session) startNewSession();
-  }, [session]);
+    if (!shopList) startNewShopList();
+  }, [shopList]);
 
   const headerHeight = 110;
   const suggestionHeight = 158;
@@ -88,7 +88,7 @@ const ShopList = () => {
 
   const renderItem = ({ item }: { item: FoodType }) => {
     return (
-      <ShopFoodRow
+      <ShopListFoodRow
         food={item}
         onBuy={handleBuyFood}
         onDismiss={handleDismissFood}
@@ -130,7 +130,7 @@ const ShopList = () => {
             suggestionAnimStyle,
           ]}
         >
-          <ShopFoodSuggestion ref={ref} food={suggestionFood} onBuy={buyFood} />
+          <ShopListFoodSuggestion ref={ref} food={suggestionFood} onBuy={buyFood} />
         </Animated.View>
       )}
     </ThemedView>

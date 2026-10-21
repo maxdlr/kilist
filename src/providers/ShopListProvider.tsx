@@ -1,49 +1,49 @@
 import useAxios from "@/hooks/useAxios";
-import { FoodType, SessionType } from "@/types/model";
+import { FoodType, ShopListType } from "@/types/model";
 import React, { createContext, ReactNode, useMemo, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
-export type ShopContextType = {
+export type ShopListContextType = {
   foods?: FoodType[];
-  session?: SessionType;
+  shopList?: ShopListType;
 
   isFoodLoading: boolean;
   mutateFood: () => void;
   buyFood: (currentFoodId: number) => Promise<void>;
-  startNewSession: () => Promise<SessionType>;
-  endCurrentSession: () => Promise<SessionType>;
+  startNewShopList: () => Promise<ShopListType>;
+  endCurrentShopList: () => Promise<ShopListType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
 };
 
-const ShopContext = createContext<ShopContextType>({
+const ShopListContext = createContext<ShopListContextType>({
   foods: [],
-  session: undefined,
+  shopList: undefined,
 
   isFoodLoading: false,
   mutateFood: () => {},
   buyFood: async () => {},
-  startNewSession: async () => ({}) as Promise<SessionType>,
-  endCurrentSession: async () => ({}) as Promise<SessionType>,
+  startNewShopList: async () => ({}) as Promise<ShopListType>,
+  endCurrentShopList: async () => ({}) as Promise<ShopListType>,
   snoozeFood: async () => {},
   suggestedFoodIds: [],
 });
 
-export const ShopProvider = ({
+export const ShopListProvider = ({
   children,
 }: {
   children: ReactNode;
   listIds?: number[];
 }) => {
-  const [session, setSession] = useState<SessionType | undefined>(undefined);
+  const [shopList, setShopList] = useState<ShopListType | undefined>(undefined);
   const [previousFoodId, setPreviousFoodId] = useState<number | null>(null);
   const {
     data: shop,
     isLoading: isFoodLoading,
     mutate: mutateFood,
-  } = useSWR<SessionType>(
+  } = useSWR<ShopListType>(
     {
-      url: session?.id ? `shop/session/${session?.id}` : null,
+      url: shopList?.id ? `shop-list/${shopList?.id}` : null,
     },
     {
       onSuccess: () => {},
@@ -57,12 +57,12 @@ export const ShopProvider = ({
     } as SWRConfiguration,
   );
 
-  const { postData: startSession } = useAxios("shop/session/start");
-  const { postData: endSession } = useAxios(
-    `shop/session/end?session=${session?.id}`,
+  const { postData: startShopList } = useAxios("shop-list/start");
+  const { postData: endShopList } = useAxios(
+    `shop-list/end?shopList=${shopList?.id}`,
   );
   const { putData: editFood } = useAxios(
-    `shop/foods/edit?sessionId=${session?.id}`,
+    `shop-list/edit?shopListId=${shopList?.id}`,
   );
 
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
@@ -99,19 +99,19 @@ export const ShopProvider = ({
     mutateFood();
   };
 
-  const startNewSession = async () => {
-    const res = await startSession({});
-    setSession(res.data as SessionType);
-    return res.data as SessionType;
+  const startNewShopList = async () => {
+    const res = await startShopList({});
+    setShopList(res.data as ShopListType);
+    return res.data as ShopListType;
   };
 
-  const endCurrentSession = async () => {
-    const res = await endSession({});
-    return res.data as SessionType;
+  const endCurrentShopList = async () => {
+    const res = await endShopList({});
+    return res.data as ShopListType;
   };
 
   return (
-    <ShopContext.Provider
+    <ShopListContext.Provider
       value={{
         foods,
         isFoodLoading,
@@ -119,22 +119,22 @@ export const ShopProvider = ({
         buyFood,
         snoozeFood,
         suggestedFoodIds,
-        session,
-        startNewSession,
-        endCurrentSession,
+        shopList,
+        startNewShopList,
+        endCurrentShopList,
       }}
     >
       {children}
-    </ShopContext.Provider>
+    </ShopListContext.Provider>
   );
 };
 
-const useShop = () => {
-  const context = React.useContext(ShopContext);
+const useShopList = () => {
+  const context = React.useContext(ShopListContext);
   if (context === undefined) {
     throw new Error("useFoodList must be used within a FoodListProvider");
   }
   return context;
 };
 
-export default useShop;
+export default useShopList;

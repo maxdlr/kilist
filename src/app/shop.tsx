@@ -1,12 +1,12 @@
 import ShopList from "@/components/views/ShopList";
-import { ShopProvider } from "@/providers/ShopProvider";
+import { ShopListProvider } from "@/providers/ShopListProvider";
 
-const ShopView = () => {
+const ShopListView = () => {
   return (
-    <ShopProvider>
+    <ShopListProvider>
       <ShopList />
-    </ShopProvider>
+    </ShopListProvider>
   );
 };
 
-export default ShopView;
+export default ShopListView;

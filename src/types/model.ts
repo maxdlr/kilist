@@ -17,13 +17,8 @@ export interface FoodType {
   snoozedUntil?: Date;
 }
 
-export interface SessionType {
+export interface ShopListType {
   id: number;
   startFoods: FoodType[];
   boughtFoods: FoodType[];
-}
-
-export interface ShopType {
-  foods: FoodType[];
-  session: SessionType;
 }

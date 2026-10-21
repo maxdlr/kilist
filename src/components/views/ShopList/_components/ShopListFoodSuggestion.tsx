@@ -8,7 +8,7 @@ import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
-const ShopFoodSuggestion = ({
+const ShopListFoodSuggestion = ({
   food,
   style,
   onBuy,
@@ -83,4 +83,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShopFoodSuggestion;
+export default ShopListFoodSuggestion;

@@ -5,7 +5,7 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { StyleSheet } from "react-native";
 
-const ShopFoodRowSwipeBg = ({ buying = true }: { buying?: boolean }) => {
+const ShopListFoodRowSwipeBg = ({ buying = true }: { buying?: boolean }) => {
   const theme = useTheme();
 
   const buyingContent = (
@@ -75,4 +75,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShopFoodRowSwipeBg;
+export default ShopListFoodRowSwipeBg;

@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native";
 const ListsScreen = () => {
   return (
     <ThemedView style={styles.container}>
-      <KilButton label="Start Shopping" href="/shop" />
+      <KilButton label="Start ShopList" href="/shop" />
       <KilButton label="List" href="/list" />
     </ThemedView>
   );

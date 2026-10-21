@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import useShop from "@/providers/ShopProvider";
+import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import {
   calculateValueFromInStockScore,
@@ -12,9 +12,9 @@ import {
 } from "@/utils/scoreUtils";
 import { useState } from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
-import ShopFoodRowSwipeBg from "./ShopFoodRowSwipeBg";
+import ShopListFoodRowSwipeBg from "./ShopListFoodRowSwipeBg";
 
-const ShopFoodRow = ({
+const ShopListFoodRow = ({
   food,
   style,
   onBuy,
@@ -29,13 +29,13 @@ const ShopFoodRow = ({
 }) => {
   const [isSwipingRight, setIsSwipingRight] = useState<boolean>();
   const { id, name, inStockScore } = food;
-  const { foods } = useShop();
+  const { foods } = useShopList();
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
 
   return (
     <ThemedView style={styles.container}>
-      <ShopFoodRowSwipeBg buying={isSwipingRight} />
+      <ShopListFoodRowSwipeBg buying={isSwipingRight} />
 
       <SwipeGesture
         onSwipeRight={() => onBuy(id)}
@@ -117,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShopFoodRow;
+export default ShopListFoodRow;
