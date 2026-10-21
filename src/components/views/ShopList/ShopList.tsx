@@ -30,6 +30,8 @@ const ShopList = () => {
   } = useShop();
   const ref = useRef<View>(null);
 
+  // console.log(foods);
+
   useEffect(() => {
     if (!session) startNewSession();
   }, [session]);
@@ -75,14 +77,6 @@ const ShopList = () => {
   const handleOnRefresh = () => {
     mutateFood();
   };
-
-  // if (isFoodLoading) {
-  //   return (
-  //     <ThemedView>
-  //       <ThemedText>loading</ThemedText>
-  //     </ThemedView>
-  //   );
-  // }
 
   if (!foods || foods.length === 0) {
     return (

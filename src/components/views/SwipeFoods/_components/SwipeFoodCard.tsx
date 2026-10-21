@@ -1,16 +1,22 @@
+import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
-import { Dimensions, StyleSheet, type LayoutChangeEvent } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  type LayoutChangeEvent,
+} from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   clamp,
   interpolate,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { SwipeFoodCardProps } from "../interface";
-import PanGesture from "@/components/gestures/PanGesture";
+import { useTheme } from "@/hooks/use-theme";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -21,6 +27,7 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
   const translationY = useSharedValue(0);
   const grabbing = useSharedValue(false);
   const containerWidth = useSharedValue(SCREEN_WIDTH);
+  const theme = useTheme();
 
   const handleLayout = (event: LayoutChangeEvent) => {
     containerWidth.value = event.nativeEvent.layout.width;
@@ -80,13 +87,9 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
           (direction === "right" ? 1 : -1) * containerWidth.value * 1.5;
 
         translationX.value = withTiming(flingTarget, { duration: 250 }, () => {
-          // Reset only after the fly-off animation completes: SwipeFoods reuses
-          // this same mounted instance for the next card (no `key` prop), so the
-          // offset must not carry over, but resetting too early would cut the
-          // animation short.
           translationX.value = 0;
           translationY.value = 0;
-          runOnJS(triggerSwipe)(direction);
+          scheduleOnRN(triggerSwipe, direction);
         });
         return;
       }
@@ -103,13 +106,34 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
       onLayout={handleLayout}
       animatedStyles={cardStyle}
     >
-      <Animated.Text style={[styles.badge, styles.likeBadge, likeOpacity]}>
+      <Animated.Text
+        style={[
+          styles.badge,
+          styles.likeBadge,
+          {
+            borderColor: theme.confirm[60],
+            color: theme.confirm[60],
+          },
+          likeOpacity,
+        ]}
+      >
         LIKE
       </Animated.Text>
-      <Animated.Text style={[styles.badge, styles.nopeBadge, nopeOpacity]}>
+      <Animated.Text
+        style={[
+          styles.badge,
+          styles.nopeBadge,
+          {
+            borderColor: theme.cancel[60],
+            color: theme.cancel[60],
+          },
+          nopeOpacity,
+        ]}
+      >
         NOPE
       </Animated.Text>
       <ThemedText type="title">{food.name}</ThemedText>
+      <Image src={food.imageUrl} />
     </PanGesture>
   );
 };
@@ -126,7 +150,7 @@ const styles = StyleSheet.create({
   box: {
     width: SCREEN_WIDTH * 0.85,
     aspectRatio: 3 / 4,
-    backgroundColor: "#b58df1",
+    // backgroundColor: "#b58df1",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -143,14 +167,10 @@ const styles = StyleSheet.create({
   },
   likeBadge: {
     left: 24,
-    borderColor: "#4cd964",
-    color: "#4cd964",
     transform: [{ rotateZ: "-15deg" }],
   },
   nopeBadge: {
     right: 24,
-    borderColor: "#ff3b30",
-    color: "#ff3b30",
     transform: [{ rotateZ: "15deg" }],
   },
 });

@@ -1,6 +1,6 @@
 import useAxios from "@/hooks/useAxios";
 import { FoodType, SessionType } from "@/types/model";
-import React, { createContext, ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useMemo, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
 export type ShopContextType = {
@@ -38,13 +38,12 @@ export const ShopProvider = ({
   const [session, setSession] = useState<SessionType | undefined>(undefined);
   const [previousFoodId, setPreviousFoodId] = useState<number | null>(null);
   const {
-    data: foods,
+    data: shop,
     isLoading: isFoodLoading,
     mutate: mutateFood,
-  } = useSWR<FoodType[]>(
+  } = useSWR<SessionType>(
     {
-      url: session ? "shop/foods" : null,
-      params: { sessionId: session?.id },
+      url: session?.id ? `shop/session/${session?.id}` : null,
     },
     {
       onSuccess: () => {},
@@ -67,6 +66,18 @@ export const ShopProvider = ({
   );
 
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
+
+  const foods = useMemo(() => {
+    if (!shop) return [];
+    console.log(shop.startFoods.length, shop.boughtFoods.length);
+
+    return shop.startFoods.filter((food) => {
+      return (
+        !shop.boughtFoods.map((f) => f.id).includes(food.id) &&
+        new Date(food.snoozedUntil || 0) < new Date()
+      );
+    });
+  }, [shop]);
 
   const buyFood = async (foodId: number) => {
     const res = await editFood({

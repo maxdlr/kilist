@@ -14,10 +14,13 @@ export interface FoodType {
   lists: ListType[] | number[];
   description?: string;
   inStockScore: number;
+  snoozedUntil?: Date;
 }
 
 export interface SessionType {
   id: number;
+  startFoods: FoodType[];
+  boughtFoods: FoodType[];
 }
 
 export interface ShopType {
