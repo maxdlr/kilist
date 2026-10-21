@@ -6,7 +6,13 @@ import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { useEffect, useRef } from "react";
-import { Dimensions, FlatList, StyleSheet, View } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import Animated, {
   SlideOutDown,
   useAnimatedStyle,
@@ -15,6 +21,8 @@ import Animated, {
 } from "react-native-reanimated";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
 import ShopListFoodSuggestion from "./_components/ShopListFoodSuggestion";
+import { Button } from "expo-router/build/react-navigation";
+import KilButton from "@/components/elements/KilButton";
 
 const ShopList = () => {
   const theme = useTheme();
@@ -25,16 +33,15 @@ const ShopList = () => {
     buyFood,
     snoozeFood,
     mutateFood,
-    shopList,
+    shopListId,
     startNewShopList,
+    cancelShopList,
   } = useShopList();
   const ref = useRef<View>(null);
 
-  // console.log(foods);
-
   useEffect(() => {
-    if (!shopList) startNewShopList();
-  }, [shopList]);
+    if (!shopListId) startNewShopList();
+  }, [shopListId]);
 
   const headerHeight = 110;
   const suggestionHeight = 158;
@@ -74,8 +81,12 @@ const ShopList = () => {
     snoozeFood(foodId);
   };
 
-  const handleOnRefresh = () => {
+  const handleRefresh = () => {
     mutateFood();
+  };
+
+  const handleStopShopList = async () => {
+    await cancelShopList();
   };
 
   if (!foods || foods.length === 0) {
@@ -86,15 +97,19 @@ const ShopList = () => {
     );
   }
 
-  const renderItem = ({ item }: { item: FoodType }) => {
-    return (
-      <ShopListFoodRow
-        food={item}
-        onBuy={handleBuyFood}
-        onDismiss={handleDismissFood}
-      />
-    );
-  };
+  const renderItem = ({ item }: { item: FoodType }) => (
+    <ShopListFoodRow
+      food={item}
+      onBuy={handleBuyFood}
+      onDismiss={handleDismissFood}
+    />
+  );
+
+  const renderEmptyList = () => (
+    <ThemedView>
+      <ThemedText>No foods available</ThemedText>
+    </ThemedView>
+  );
 
   return (
     <ThemedView
@@ -104,20 +119,20 @@ const ShopList = () => {
         backgroundColor: suggestionDisplay.color[5],
       }}
     >
+      <ThemedView>
+        <KilButton label="End" onTouch={handleStopShopList} />
+      </ThemedView>
+
       <Animated.View style={[styles.container, listAnimStyle]}>
         <FlatList
           data={foods}
           renderItem={renderItem}
           inverted
           maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
-          // onViewableItemsChanged
-          ListEmptyComponent={() => (
-            <ThemedView>
-              <ThemedText>No foods available</ThemedText>
-            </ThemedView>
-          )}
-          onRefresh={handleOnRefresh}
+          ListEmptyComponent={renderEmptyList}
+          onRefresh={handleRefresh}
           refreshing={isFoodLoading}
+          // onViewableItemsChanged
         />
       </Animated.View>
 
@@ -130,7 +145,11 @@ const ShopList = () => {
             suggestionAnimStyle,
           ]}
         >
-          <ShopListFoodSuggestion ref={ref} food={suggestionFood} onBuy={buyFood} />
+          <ShopListFoodSuggestion
+            ref={ref}
+            food={suggestionFood}
+            onBuy={buyFood}
+          />
         </Animated.View>
       )}
     </ThemedView>

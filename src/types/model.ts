@@ -19,6 +19,7 @@ export interface FoodType {
 
 export interface ShopListType {
   id: number;
+  foods: FoodType[];
   startFoods: FoodType[];
   boughtFoods: FoodType[];
 }

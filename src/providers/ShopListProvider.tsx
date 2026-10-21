@@ -5,45 +5,42 @@ import useSWR, { SWRConfiguration } from "swr";
 
 export type ShopListContextType = {
   foods?: FoodType[];
-  shopList?: ShopListType;
+  shopListId?: number;
 
   isFoodLoading: boolean;
   mutateFood: () => void;
   buyFood: (currentFoodId: number) => Promise<void>;
-  startNewShopList: () => Promise<ShopListType>;
-  endCurrentShopList: () => Promise<ShopListType>;
+  startNewShopList: () => Promise<number | null>;
+  cancelShopList: () => Promise<ShopListType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
 };
 
 const ShopListContext = createContext<ShopListContextType>({
   foods: [],
-  shopList: undefined,
+  shopListId: undefined,
 
   isFoodLoading: false,
   mutateFood: () => {},
   buyFood: async () => {},
-  startNewShopList: async () => ({}) as Promise<ShopListType>,
-  endCurrentShopList: async () => ({}) as Promise<ShopListType>,
+  startNewShopList: async () => null,
+  cancelShopList: async () => ({}) as Promise<ShopListType>,
   snoozeFood: async () => {},
   suggestedFoodIds: [],
 });
 
-export const ShopListProvider = ({
-  children,
-}: {
-  children: ReactNode;
-  listIds?: number[];
-}) => {
-  const [shopList, setShopList] = useState<ShopListType | undefined>(undefined);
-  const [previousFoodId, setPreviousFoodId] = useState<number | null>(null);
+export const ShopListProvider = ({ children }: { children: ReactNode }) => {
+  const [shopListId, setShopListId] = useState<number | undefined>();
+  const [previousFoodId, setPreviousFoodId] = useState<number | undefined>();
+  const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
+
   const {
-    data: shop,
+    data: shopList,
     isLoading: isFoodLoading,
     mutate: mutateFood,
   } = useSWR<ShopListType>(
     {
-      url: shopList?.id ? `shop-list/${shopList?.id}` : null,
+      url: shopListId ? `shop-list/${shopListId}` : null,
     },
     {
       onSuccess: () => {},
@@ -58,26 +55,8 @@ export const ShopListProvider = ({
   );
 
   const { postData: startShopList } = useAxios("shop-list/start");
-  const { postData: endShopList } = useAxios(
-    `shop-list/end?shopList=${shopList?.id}`,
-  );
-  const { putData: editFood } = useAxios(
-    `shop-list/edit?shopListId=${shopList?.id}`,
-  );
-
-  const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
-
-  const foods = useMemo(() => {
-    if (!shop) return [];
-    console.log(shop.startFoods.length, shop.boughtFoods.length);
-
-    return shop.startFoods.filter((food) => {
-      return (
-        !shop.boughtFoods.map((f) => f.id).includes(food.id) &&
-        new Date(food.snoozedUntil || 0) < new Date()
-      );
-    });
-  }, [shop]);
+  const { postData: endShopList } = useAxios(`shop-list/cancel/${shopListId}`);
+  const { putData: editFood } = useAxios(`shop-list/edit/${shopListId}`);
 
   const buyFood = async (foodId: number) => {
     const res = await editFood({
@@ -101,11 +80,14 @@ export const ShopListProvider = ({
 
   const startNewShopList = async () => {
     const res = await startShopList({});
-    setShopList(res.data as ShopListType);
-    return res.data as ShopListType;
+    if (!res.data) {
+      return null;
+    }
+    setShopListId(res.data as number);
+    return res.data as number;
   };
 
-  const endCurrentShopList = async () => {
+  const cancelShopList = async () => {
     const res = await endShopList({});
     return res.data as ShopListType;
   };
@@ -113,15 +95,15 @@ export const ShopListProvider = ({
   return (
     <ShopListContext.Provider
       value={{
-        foods,
+        foods: shopList?.foods,
         isFoodLoading,
         mutateFood,
         buyFood,
         snoozeFood,
         suggestedFoodIds,
-        shopList,
+        shopListId,
         startNewShopList,
-        endCurrentShopList,
+        cancelShopList,
       }}
     >
       {children}
