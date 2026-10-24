@@ -1,6 +1,5 @@
-import { ThemedView } from "@/components/themed-view";
 import FoodList from "@/components/views/FoodList";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
+import { MaxContentWidth } from "@/constants/theme";
 import { FoodListProvider } from "@/providers/FoodListProvider";
 import { ListType } from "@/types/model";
 import { ScrollView, StyleSheet } from "react-native";

@@ -1,6 +1,6 @@
 import useAxios from "@/hooks/useAxios";
 import { FoodType, ShopListType } from "@/types/model";
-import React, { createContext, ReactNode, useMemo, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
 export type ShopListContextType = {
@@ -14,6 +14,10 @@ export type ShopListContextType = {
   cancelShopList: () => Promise<ShopListType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
+  orderFoodBy: (type: "score" | "name") => void;
+  reverseOrderFood: () => void;
+  orderedBy: "score" | "name";
+  setShopListId: (id: number | undefined) => void;
 };
 
 const ShopListContext = createContext<ShopListContextType>({
@@ -22,20 +26,25 @@ const ShopListContext = createContext<ShopListContextType>({
 
   isFoodLoading: false,
   mutateFood: () => {},
+  orderFoodBy: () => {},
   buyFood: async () => {},
   startNewShopList: async () => null,
   cancelShopList: async () => ({}) as Promise<ShopListType>,
   snoozeFood: async () => {},
   suggestedFoodIds: [],
+  reverseOrderFood: () => {},
+  orderedBy: "score",
+  setShopListId: () => {},
 });
 
 export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   const [shopListId, setShopListId] = useState<number | undefined>();
   const [previousFoodId, setPreviousFoodId] = useState<number | undefined>();
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
+  const [orderedBy, setOrderedBy] = useState<"score" | "name">("score");
 
   const {
-    data: shopList,
+    data,
     isLoading: isFoodLoading,
     mutate: mutateFood,
   } = useSWR<ShopListType>(
@@ -54,9 +63,42 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     } as SWRConfiguration,
   );
 
+  const [shopList, setShopList] = useState<ShopListType | undefined>(data);
+
+  useEffect(() => {
+    setShopList(data);
+    orderFoodBy("score");
+  }, [data]);
+
   const { postData: startShopList } = useAxios("shop-list/start");
   const { postData: endShopList } = useAxios(`shop-list/cancel/${shopListId}`);
   const { putData: editFood } = useAxios(`shop-list/edit/${shopListId}`);
+
+  const orderFoodBy = (type: "score" | "name") => {
+    setShopList((prev) => {
+      if (!prev) return prev;
+      const sortedFoods = [...prev.foods].sort((a, b) => {
+        if (type === "name") {
+          return a.name.localeCompare(b.name);
+        }
+        return (b.inStockScore || 0) - (a.inStockScore || 0);
+      });
+
+      return {
+        ...prev,
+        foods: type === "score" ? sortedFoods.reverse() : sortedFoods,
+      };
+    });
+    setOrderedBy(type);
+  };
+
+  const reverseOrderFood = () => {
+    setShopList((prev) => {
+      if (!prev) return prev;
+      const reversedFoods = [...prev.foods].reverse();
+      return { ...prev, foods: reversedFoods };
+    });
+  };
 
   const buyFood = async (foodId: number) => {
     const res = await editFood({
@@ -104,6 +146,10 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
         shopListId,
         startNewShopList,
         cancelShopList,
+        orderFoodBy,
+        reverseOrderFood,
+        orderedBy,
+        setShopListId,
       }}
     >
       {children}

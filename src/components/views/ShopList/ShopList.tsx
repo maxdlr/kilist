@@ -1,3 +1,5 @@
+import KilButton from "@/components/elements/KilButton";
+import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
@@ -6,13 +8,7 @@ import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { useEffect, useRef } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Dimensions, FlatList, StyleSheet, View } from "react-native";
 import Animated, {
   SlideOutDown,
   useAnimatedStyle,
@@ -21,8 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
 import ShopListFoodSuggestion from "./_components/ShopListFoodSuggestion";
-import { Button } from "expo-router/build/react-navigation";
-import KilButton from "@/components/elements/KilButton";
+import { router } from "expo-router";
 
 const ShopList = () => {
   const theme = useTheme();
@@ -36,6 +31,10 @@ const ShopList = () => {
     shopListId,
     startNewShopList,
     cancelShopList,
+    setShopListId,
+    orderFoodBy,
+    reverseOrderFood,
+    orderedBy,
   } = useShopList();
   const ref = useRef<View>(null);
 
@@ -87,6 +86,8 @@ const ShopList = () => {
 
   const handleStopShopList = async () => {
     await cancelShopList();
+    setShopListId(undefined);
+    router.push("/");
   };
 
   if (!foods || foods.length === 0) {
@@ -111,24 +112,61 @@ const ShopList = () => {
     </ThemedView>
   );
 
+  // const handleScrollToTop = () => {
+  //   if (ref.current) {
+  //     ref.current.scrollTop = 0;
+  //   }
+  // };
+
   return (
     <ThemedView
       style={{
         height: "100%",
-        position: "relative",
         backgroundColor: suggestionDisplay.color[5],
+        ...styles.container,
       }}
     >
-      <ThemedView>
-        <KilButton label="End" onTouch={handleStopShopList} />
+      <ThemedView style={styles.buttonContainer}>
+        <KilButton
+          onTouch={handleStopShopList}
+          style={{
+            container: { ...styles.button, backgroundColor: theme.cancel[50] },
+          }}
+          Icon={<XMarkIcon size={30} color={theme.cancel[10]} />}
+        />
+
+        <KilButton
+          onTouch={reverseOrderFood}
+          style={{
+            container: {
+              ...styles.button,
+              backgroundColor: theme.background,
+            },
+          }}
+          Icon={<ArrowsUpDownIcon size={30} color={theme.text} />}
+        />
+
+        <KilButton
+          onTouch={() => orderFoodBy(orderedBy === "score" ? "name" : "score")}
+          style={{
+            container: {
+              ...styles.button,
+              backgroundColor: theme.background,
+            },
+            label: { color: theme.textSecondary },
+          }}
+          label={orderedBy === "score" ? "AZ" : "09"}
+          // Icon={<ArrowsUpDownIcon size={30} color={theme.cancel[10]} />}
+        />
       </ThemedView>
 
-      <Animated.View style={[styles.container, listAnimStyle]}>
+      <Animated.View style={[styles.listContainer, listAnimStyle]}>
         <FlatList
+          // onViewableItemsChanged={handleScrollToTop}
           data={foods}
           renderItem={renderItem}
           inverted
-          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+          // maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListEmptyComponent={renderEmptyList}
           onRefresh={handleRefresh}
           refreshing={isFoodLoading}
@@ -158,10 +196,29 @@ const ShopList = () => {
 
 const styles = StyleSheet.create({
   container: {
+    position: "relative",
+  },
+
+  buttonContainer: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    paddingTop: Spacing.seven,
+    padding: Spacing.three,
+    backgroundColor: "transparent",
+    zIndex: 100,
+    gap: 20,
+  },
+  button: {
+    aspectRatio: 1,
+    alignSelf: "flex-end",
+  },
+
+  listContainer: {
+    paddingTop: Spacing.six,
     display: "flex",
     flexDirection: "column",
     gap: 10,
-    position: "relative",
   },
 
   suggestionContainer: {

@@ -27,8 +27,11 @@ export const calculateValueFromInStockScore = (
   );
 };
 
+export type FoodInStockScoreThreshold = 0 | 0.25 | 0.5 | 0.75 | 1;
+export type FoodInStockScoreLevel = 1 | 2 | 3 | 4 | 5;
+
 export interface FoodTypeDisplay {
-  level: 1 | 2 | 3 | 4 | 5;
+  level: FoodInStockScoreLevel;
   label: string;
   color: Record<5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90, string>;
 }
@@ -41,7 +44,7 @@ export const inStockScoreToDisplay = (
     return { level: 1, label: "Needed", color: theme.foods[1] };
   }
 
-  const map: Record<number, FoodTypeDisplay> = {
+  const map: Record<FoodInStockScoreThreshold, FoodTypeDisplay> = {
     0: { level: 1, label: "Needed", color: theme.foods[1] },
     0.25: { level: 2, label: "Should buy", color: theme.foods[2] },
     0.5: { level: 3, label: "Can wait", color: theme.foods[3] },
