@@ -1,7 +1,6 @@
 import { ThemedView } from "@/components/themed-view";
 import useSwipeFoods from "@/providers/SwipeFoodsProvider";
 import { FoodType } from "@/types/model";
-import { useState } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -21,16 +20,19 @@ const SwipeFoods = ({
   foods: FoodType[];
   onComplete: () => void;
 }) => {
-  const [step, setStep] = useState(0);
-  const { update, swipe, foodsCount } = useSwipeFoods();
+  const { update, swipe } = useSwipeFoods();
 
   const handleSwipe = async (foodId: number, direction: "left" | "right") => {
-    await update({ foodId, isInStock: direction === "right" });
+    try {
+      await update({ foodId, isInStock: direction === "right" });
+    } catch (error) {
+      console.error("Failed to update food swipe", error);
+      return;
+    }
+
     swipe(foodId);
 
-    setStep((prev) => prev + 1);
-
-    if (step === foodsCount - 1) {
+    if (foods.length === 1) {
       onComplete();
     }
   };
