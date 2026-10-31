@@ -15,7 +15,10 @@ export type SwipeFoodsContextType = {
   swipe: (foodId: number) => void;
   isLoading: boolean;
   mutateFoods: () => void;
-  update: (payload: { foodId: number; isInStock: boolean }) => Promise<void>;
+  update: (payload: {
+    foodId: number;
+    isInStock: boolean | null;
+  }) => Promise<void>;
 };
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
@@ -52,7 +55,10 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => setFoods(data), [data]);
 
-  const update = async (payload: { foodId: number; isInStock: boolean }) => {
+  const update = async (payload: {
+    foodId: number;
+    isInStock: boolean | null;
+  }) => {
     await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
   };
 

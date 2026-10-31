@@ -2,6 +2,7 @@ import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
 import { useTheme } from "@/hooks/use-theme";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
+import { Image } from "expo-image";
 import { Dimensions, StyleSheet, type LayoutChangeEvent } from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -13,9 +14,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { SwipeFoodCardProps } from "../interface";
+import { Spacing } from "@/constants/theme";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const VERTICAL_SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 const ROTATION_RANGE = 15; // degrees, at full drag distance
 
 const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
@@ -61,7 +64,15 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     ),
   }));
 
-  const triggerSwipe = (direction: "left" | "right") => {
+  const neutralOpacity = useAnimatedStyle(() => ({
+    opacity: clamp(
+      interpolate(translationY.value, [0, -VERTICAL_SWIPE_THRESHOLD], [0, 1]),
+      0,
+      1,
+    ),
+  }));
+
+  const triggerSwipe = (direction: "left" | "right" | "up") => {
     onSwipe(food.id, direction);
   };
 
@@ -77,14 +88,29 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     onFinalize: () => {
       grabbing.value = false;
 
-      if (Math.abs(translationX.value) > SWIPE_THRESHOLD) {
+      const horizontalDistance = Math.abs(translationX.value);
+      const verticalDistance = Math.abs(translationY.value);
+
+      const passedHorizontal = horizontalDistance > SWIPE_THRESHOLD;
+      // Only an upward swipe maps to a gesture (downward has no meaning here).
+      const passedVertical =
+        translationY.value < 0 && verticalDistance > VERTICAL_SWIPE_THRESHOLD;
+
+      if (passedVertical && verticalDistance > horizontalDistance) {
+        const flingTarget = -containerWidth.value * 1.5;
+
+        translationY.value = withTiming(flingTarget, { duration: 250 }, () => {
+          scheduleOnRN(triggerSwipe, "up");
+        });
+        return;
+      }
+
+      if (passedHorizontal) {
         const direction = translationX.value > 0 ? "right" : "left";
         const flingTarget =
           (direction === "right" ? 1 : -1) * containerWidth.value * 1.5;
 
         translationX.value = withTiming(flingTarget, { duration: 250 }, () => {
-          // translationX.value = 0;
-          // translationY.value = 0;
           scheduleOnRN(triggerSwipe, direction);
         });
         return;
@@ -95,12 +121,18 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     },
   });
 
+  console.log({ inStockScore: food.inStockScore });
+
   const foodDisplay = inStockScoreToDisplay(food.inStockScore, theme);
 
   return (
     <PanGesture
       styles={{
-        box: { ...styles.box, backgroundColor: foodDisplay.color[50] },
+        box: {
+          ...styles.box,
+          borderColor: foodDisplay.color[70],
+          backgroundColor: foodDisplay.color[50],
+        },
         container: styles.container,
         root: styles.root,
       }}
@@ -108,43 +140,67 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
       onLayout={handleLayout}
       animatedStyles={cardStyle}
     >
-      <Animated.Text
-        style={[
-          styles.badge,
-          styles.likeBadge,
-          {
-            borderColor: theme.confirm[60],
-            color: theme.confirm[60],
-          },
-          likeOpacity,
-        ]}
-      >
-        LIKE
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.badge,
-          styles.nopeBadge,
-          {
-            borderColor: theme.cancel[60],
-            color: theme.cancel[60],
-          },
-          nopeOpacity,
-        ]}
-      >
-        NOPE
-      </Animated.Text>
-
       <ThemedText
-        type="title"
+        type="subtitle"
         style={{
           color: theme.text,
+          textAlign: "center",
         }}
       >
         {food.name}
       </ThemedText>
 
-      {/* <Image src={food.imageUrl} /> */}
+      <Animated.View style={styles.badgeContainer}>
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.likeBadge,
+            {
+              // borderColor: theme.confirm[60],
+              color: theme.confirm[60],
+            },
+            likeOpacity,
+          ]}
+        >
+          J'ai !
+        </Animated.Text>
+
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.nopeBadge,
+            {
+              // borderColor: theme.cancel[60],
+              color: theme.cancel[60],
+            },
+            nopeOpacity,
+          ]}
+        >
+          J'ai pas !
+        </Animated.Text>
+
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.neutralBadge,
+            {
+              // borderColor: theme.textSecondary,
+              color: theme.textSecondary,
+            },
+            neutralOpacity,
+          ]}
+        >
+          Je sais pas !
+        </Animated.Text>
+      </Animated.View>
+
+      {food.imageUrl && (
+        <Image
+          source={{ uri: food.imageUrl }}
+          style={styles.foodImage}
+          contentFit="cover"
+        />
+      )}
     </PanGesture>
   );
 };
@@ -161,17 +217,28 @@ const styles = StyleSheet.create({
   box: {
     width: SCREEN_WIDTH * 0.85,
     aspectRatio: 3 / 4,
-    // backgroundColor: "#b58df1",
-    borderWidth: 1,
-    borderRadius: 20,
+    borderWidth: 4,
+    borderRadius: 60,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.five,
+  },
+  badgeContainer: {
+    // position: "absolute",
+    // top: "50%",
+    width: "100%",
+    flex: 1,
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   badge: {
+    top: Spacing.four,
     position: "absolute",
-    top: 24,
-    borderWidth: 3,
-    borderRadius: 8,
+    height: "auto",
+    // top: "50%",
+    // borderWidth: 3,
+    // borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 4,
     fontSize: 28,
@@ -184,6 +251,15 @@ const styles = StyleSheet.create({
   nopeBadge: {
     right: 24,
     transform: [{ rotateZ: "15deg" }],
+  },
+  neutralBadge: {
+    alignSelf: "center",
+  },
+  foodImage: {
+    width: "80%",
+    height: "60%",
+    // flex: 1,
+    borderRadius: 40,
   },
 });
 

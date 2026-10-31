@@ -22,9 +22,18 @@ const SwipeFoods = ({
 }) => {
   const { update, swipe } = useSwipeFoods();
 
-  const handleSwipe = async (foodId: number, direction: "left" | "right") => {
+  const handleSwipe = async (
+    foodId: number,
+    direction: "left" | "right" | "up",
+  ) => {
+    const directionIsInStockMap = {
+      right: true,
+      left: false,
+      up: null,
+    };
+
     try {
-      await update({ foodId, isInStock: direction === "right" });
+      await update({ foodId, isInStock: directionIsInStockMap[direction] });
     } catch (error) {
       console.error("Failed to update food swipe", error);
       return;
@@ -42,30 +51,26 @@ const SwipeFoods = ({
   }));
 
   return (
-    <ThemedView style={styles.root}>
-      <Animated.View style={[styles.container, deckAnimStyle]}>
-        {foods.map((food, index) => (
-          <ThemedView
-            key={food.id}
-            style={{
-              position: "absolute",
-              paddingBottom: index * 10,
-              paddingLeft: index * 5,
-            }}
-          >
-            <SwipeFoodCard key={food.id} food={food} onSwipe={handleSwipe} />
-          </ThemedView>
-        ))}
-      </Animated.View>
-    </ThemedView>
+    <Animated.View style={[styles.root, deckAnimStyle]}>
+      {foods.map((food, index) => (
+        <ThemedView
+          key={food.id}
+          style={{
+            position: "absolute",
+            paddingBottom: index * 10,
+            paddingLeft: index * 5,
+          }}
+        >
+          <SwipeFoodCard key={food.id} food={food} onSwipe={handleSwipe} />
+        </ThemedView>
+      ))}
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
-  },
-  container: {
+    width: "100%",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

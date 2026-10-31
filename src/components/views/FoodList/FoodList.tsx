@@ -2,12 +2,22 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import useFoodList from "@/providers/FoodListProvider";
+import { FoodType } from "@/types/model";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import FoodRow from "./_components/FoodRow";
-import { FoodType } from "@/types/model";
 
 const FoodList = () => {
   const { foods, isFoodLoading, mutateFood } = useFoodList();
+
+  // Re-fetch every time this tab becomes focused (initial mount, tab switch,
+  // or navigating back to it) so the list is never stale when the user sees it.
+  useFocusEffect(
+    useCallback(() => {
+      mutateFood();
+    }, [mutateFood]),
+  );
 
   if (isFoodLoading) {
     return (
@@ -30,7 +40,7 @@ const FoodList = () => {
   };
 
   return (
-    <ThemedView style={{ ...styles.listContainer }}>
+    <ThemedView style={styles.listContainer}>
       <FlatList
         // onViewableItemsChanged={handleScrollToTop}
         data={foods}
@@ -49,6 +59,7 @@ const FoodList = () => {
 
 const styles = StyleSheet.create({
   listContainer: {
+    flex: 1,
     paddingTop: Spacing.six,
   },
 });

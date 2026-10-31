@@ -2,7 +2,7 @@ import FoodList from "@/components/views/FoodList";
 import { MaxContentWidth } from "@/constants/theme";
 import { FoodListProvider } from "@/providers/FoodListProvider";
 import { ListType } from "@/types/model";
-import { ScrollView, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import useSWR from "swr";
 
 const ListsScreen = () => {
@@ -10,18 +10,18 @@ const ListsScreen = () => {
   const id = mainList?.id ? [Number(mainList.id)] : undefined;
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <FoodListProvider listIds={id}>
         <FoodList />
       </FoodListProvider>
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     maxWidth: MaxContentWidth,
-    flexGrow: 1,
   },
 });
 
