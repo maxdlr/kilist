@@ -2,11 +2,12 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import useFoodList from "@/providers/FoodListProvider";
-import { StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import FoodRow from "./_components/FoodRow";
+import { FoodType } from "@/types/model";
 
 const FoodList = () => {
-  const { foods, isFoodLoading } = useFoodList();
+  const { foods, isFoodLoading, mutateFood } = useFoodList();
 
   if (isFoodLoading) {
     return (
@@ -16,15 +17,31 @@ const FoodList = () => {
     );
   }
 
+  const renderItem = ({ item }: { item: FoodType }) => {
+    return <FoodRow food={item} key={item.id} />;
+  };
+
+  const emptyListComponent = () => {
+    return (
+      <ThemedView>
+        <ThemedText>No foods available</ThemedText>
+      </ThemedView>
+    );
+  };
+
   return (
     <ThemedView style={{ ...styles.listContainer }}>
-      <>
-        {foods
-          ?.filter((f) => f.inStockScore < 1)
-          ?.map((food) => (
-            <FoodRow food={food} key={food.id} />
-          ))}
-      </>
+      <FlatList
+        // onViewableItemsChanged={handleScrollToTop}
+        data={foods}
+        renderItem={renderItem}
+        // inverted
+        // maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+        ListEmptyComponent={emptyListComponent}
+        onRefresh={mutateFood}
+        refreshing={isFoodLoading}
+        // onViewableItemsChanged
+      />
     </ThemedView>
   );
 };

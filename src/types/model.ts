@@ -15,6 +15,7 @@ export interface FoodType {
   description?: string;
   inStockScore: number;
   snoozedUntil?: Date;
+  foodHistories?: number[];
 }
 
 export interface ShopListType {

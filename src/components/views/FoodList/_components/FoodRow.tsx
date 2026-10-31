@@ -4,7 +4,6 @@ import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { FoodType } from "@/types/model";
-import { transparentColor } from "@/utils/colorUtils";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 
@@ -15,7 +14,7 @@ const FoodRow = ({
   food: FoodType;
   style?: StyleProp<ViewStyle>;
 }) => {
-  const { name, inStockScore } = food;
+  const { name, inStockScore, foodHistories } = food;
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
 
@@ -24,11 +23,11 @@ const FoodRow = ({
       style={{
         ...styles.item,
 
-        backgroundColor: display.color[500],
+        backgroundColor: display.color[50],
 
         height: 70,
 
-        borderBottomColor: display.color[500],
+        borderBottomColor: display.color[60],
 
         ...style,
       }}
@@ -42,7 +41,17 @@ const FoodRow = ({
         {name}
       </ThemedText>
 
-      <Pill label={display.label} color={display.color[500]} />
+      <ThemedView
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: Spacing.four,
+        }}
+      >
+        <ThemedText type="small">{foodHistories?.length} swipes</ThemedText>
+        <Pill label={display.label} color={display.color[20]} />
+      </ThemedView>
     </ThemedView>
   );
 };

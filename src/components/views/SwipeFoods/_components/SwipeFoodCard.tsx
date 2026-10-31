@@ -1,11 +1,8 @@
 import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
-import {
-  Dimensions,
-  Image,
-  StyleSheet,
-  type LayoutChangeEvent,
-} from "react-native";
+import { useTheme } from "@/hooks/use-theme";
+import { inStockScoreToDisplay } from "@/utils/scoreUtils";
+import { Dimensions, StyleSheet, type LayoutChangeEvent } from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   clamp,
@@ -16,7 +13,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { SwipeFoodCardProps } from "../interface";
-import { useTheme } from "@/hooks/use-theme";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -87,8 +83,8 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
           (direction === "right" ? 1 : -1) * containerWidth.value * 1.5;
 
         translationX.value = withTiming(flingTarget, { duration: 250 }, () => {
-          translationX.value = 0;
-          translationY.value = 0;
+          // translationX.value = 0;
+          // translationY.value = 0;
           scheduleOnRN(triggerSwipe, direction);
         });
         return;
@@ -99,9 +95,15 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     },
   });
 
+  const foodDisplay = inStockScoreToDisplay(food.inStockScore, theme);
+
   return (
     <PanGesture
-      styles={styles}
+      styles={{
+        box: { ...styles.box, backgroundColor: foodDisplay.color[50] },
+        container: styles.container,
+        root: styles.root,
+      }}
       pan={pan}
       onLayout={handleLayout}
       animatedStyles={cardStyle}
@@ -132,8 +134,17 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
       >
         NOPE
       </Animated.Text>
-      <ThemedText type="title">{food.name}</ThemedText>
-      <Image src={food.imageUrl} />
+
+      <ThemedText
+        type="title"
+        style={{
+          color: theme.text,
+        }}
+      >
+        {food.name}
+      </ThemedText>
+
+      {/* <Image src={food.imageUrl} /> */}
     </PanGesture>
   );
 };
@@ -151,6 +162,7 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.85,
     aspectRatio: 3 / 4,
     // backgroundColor: "#b58df1",
+    borderWidth: 1,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

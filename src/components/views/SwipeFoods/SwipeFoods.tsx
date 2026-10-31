@@ -1,9 +1,13 @@
 import { ThemedView } from "@/components/themed-view";
-import useAxios from "@/hooks/useAxios";
+import useSwipeFoods from "@/providers/SwipeFoodsProvider";
 import { FoodType } from "@/types/model";
 import { useState } from "react";
-import SwipeFoodCard from "./_components/SwipeFoodCard";
 import { StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import SwipeFoodCard from "./_components/SwipeFoodCard";
 
 export interface FoodHistoryCreateType {
   foodId: number;
@@ -18,32 +22,39 @@ const SwipeFoods = ({
   onComplete: () => void;
 }) => {
   const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState<FoodHistoryCreateType[]>([]);
-
-  const { postData } = useAxios("food-histories/add");
+  const { update, swipe, foodsCount } = useSwipeFoods();
 
   const handleSwipe = async (foodId: number, direction: "left" | "right") => {
-    const updatedFormData = [
-      ...formData,
-      { foodId, isInStock: direction === "right" },
-    ];
+    await update({ foodId, isInStock: direction === "right" });
+    swipe(foodId);
 
-    setFormData(updatedFormData);
     setStep((prev) => prev + 1);
 
-    if (step === foods.length - 1) {
-      await postData(updatedFormData);
+    if (step === foodsCount - 1) {
       onComplete();
     }
   };
 
+  const deckAnimStyle = useAnimatedStyle(() => ({
+    marginRight: withTiming((foods.length - 1) * 2.5),
+  }));
+
   return (
     <ThemedView style={styles.root}>
-      <ThemedView style={styles.container}>
-        {step < foods.length && (
-          <SwipeFoodCard food={foods[step]} onSwipe={handleSwipe} />
-        )}
-      </ThemedView>
+      <Animated.View style={[styles.container, deckAnimStyle]}>
+        {foods.map((food, index) => (
+          <ThemedView
+            key={food.id}
+            style={{
+              position: "absolute",
+              paddingBottom: index * 10,
+              paddingLeft: index * 5,
+            }}
+          >
+            <SwipeFoodCard key={food.id} food={food} onSwipe={handleSwipe} />
+          </ThemedView>
+        ))}
+      </Animated.View>
     </ThemedView>
   );
 };
