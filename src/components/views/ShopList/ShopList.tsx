@@ -165,6 +165,7 @@ const ShopList = () => {
           // onViewableItemsChanged={handleScrollToTop}
           data={foods}
           renderItem={renderItem}
+          keyExtractor={(item) => String(item.id)}
           inverted
           // maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListEmptyComponent={renderEmptyList}

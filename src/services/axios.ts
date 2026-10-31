@@ -7,13 +7,19 @@ const baseURL = process.env.EXPO_PUBLIC_API_URL;
 const isDev = process.env.NODE_ENV === "development";
 
 const MAX_REFRESH_ATTEMPTS = 3;
-const REFRESH_COUNT_KEY = "auth_refresh_count";
 
-const getRefreshCount = () =>
-  parseInt(sessionStorage.getItem(REFRESH_COUNT_KEY) ?? "0", 10);
-const incrementRefreshCount = () =>
-  sessionStorage.setItem(REFRESH_COUNT_KEY, String(getRefreshCount() + 1));
-const resetRefreshCount = () => sessionStorage.removeItem(REFRESH_COUNT_KEY);
+// Tracks refresh attempts for the lifetime of the app session. Plain module
+// state is enough here — sessionStorage isn't available in React Native and
+// this counter doesn't need to survive an app restart anyway.
+let refreshCount = 0;
+
+const getRefreshCount = () => refreshCount;
+const incrementRefreshCount = () => {
+  refreshCount += 1;
+};
+const resetRefreshCount = () => {
+  refreshCount = 0;
+};
 
 let isRefreshing = false;
 let refreshSubscribers: Array<() => void> = [];
