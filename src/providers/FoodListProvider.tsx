@@ -1,18 +1,33 @@
+import axios from "@/services/axios";
+import useAxios from "@/hooks/useAxios";
 import useToast from "@/providers/ToastProvider";
 import { FoodType } from "@/types/model";
-import React, { createContext, ReactNode } from "react";
+import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
 export type FoodListContextType = {
   foods?: FoodType[];
   isFoodLoading: boolean;
   mutateFood: () => void;
+  search: string;
+  setSearch: (search: string) => void;
+  createFood: (data: { name: string; description?: string }) => Promise<boolean>;
+  editFood: (
+    foodId: number,
+    data: { name?: string; description?: string },
+  ) => Promise<boolean>;
+  removeFoodsFromList: (foodIds: number[]) => Promise<boolean>;
 };
 
 const FoodListContext = createContext<FoodListContextType>({
   foods: [],
   isFoodLoading: false,
   mutateFood: () => {},
+  search: "",
+  setSearch: () => {},
+  createFood: async () => false,
+  editFood: async () => false,
+  removeFoodsFromList: async () => false,
 });
 
 export const FoodListProvider = ({
@@ -23,6 +38,7 @@ export const FoodListProvider = ({
   listIds?: number[];
 }) => {
   const { showToast } = useToast();
+  const [search, setSearch] = useState("");
 
   const {
     data: foods,
@@ -34,6 +50,7 @@ export const FoodListProvider = ({
       params: {
         listIds,
         maxInStockScore: 1,
+        search: search || undefined,
       },
     },
     {
@@ -49,12 +66,60 @@ export const FoodListProvider = ({
     } as SWRConfiguration,
   );
 
+  const { postData: postCreateFood } = useAxios("foods/create");
+  const { putData: putRemoveFoods } = useAxios(
+    listIds?.[0] ? `lists/${listIds[0]}/remove-foods` : "",
+  );
+
+  const handleError = (message?: string) => {
+    showToast(message || "An unexpected error occurred");
+  };
+
+  const createFood = async (data: { name: string; description?: string }) => {
+    const res = await postCreateFood({ ...data, listId: listIds?.[0] });
+    if (res.error) {
+      handleError(res.error.message);
+      return false;
+    }
+    mutateFood();
+    return true;
+  };
+
+  const editFood = async (
+    foodId: number,
+    data: { name?: string; description?: string },
+  ) => {
+    try {
+      await axios.put(`foods/edit/${foodId}`, data);
+      mutateFood();
+      return true;
+    } catch (err: any) {
+      handleError(err?.response?.data?.message);
+      return false;
+    }
+  };
+
+  const removeFoodsFromList = async (foodIds: number[]) => {
+    const res = await putRemoveFoods({ foodIds });
+    if (res.error) {
+      handleError(res.error.message);
+      return false;
+    }
+    mutateFood();
+    return true;
+  };
+
   return (
     <FoodListContext.Provider
       value={{
         foods,
         isFoodLoading,
         mutateFood,
+        search,
+        setSearch,
+        createFood,
+        editFood,
+        removeFoodsFromList,
       }}
     >
       {children}

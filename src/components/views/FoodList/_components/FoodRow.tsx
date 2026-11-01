@@ -5,54 +5,101 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { Alert, Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { GestureDetector, useLongPressGesture } from "react-native-gesture-handler";
+import { scheduleOnRN } from "react-native-worklets";
 
 const FoodRow = ({
   food,
   style,
+  isSelectMode = false,
+  isSelected = false,
+  onToggleSelect,
+  onEdit,
+  onDelete,
 }: {
   food: FoodType;
   style?: StyleProp<ViewStyle>;
+  isSelectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (foodId: number) => void;
+  onEdit?: (food: FoodType) => void;
+  onDelete?: (food: FoodType) => void;
 }) => {
-  const { name, inStockScore, foodHistories } = food;
+  const { id, name, inStockScore, foodHistories } = food;
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
 
+  const openMenu = () => {
+    if (isSelectMode) return;
+    Alert.alert(name, undefined, [
+      { text: "Edit", onPress: () => onEdit?.(food) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => onDelete?.(food),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const longPress = useLongPressGesture({
+    onActivate: () => {
+      scheduleOnRN(openMenu);
+    },
+  });
+
+  const handlePress = () => {
+    if (isSelectMode) onToggleSelect?.(id);
+  };
+
   return (
-    <ThemedView
-      style={{
-        ...styles.item,
+    <GestureDetector gesture={longPress}>
+      <Pressable onPress={handlePress}>
+        <ThemedView
+          style={{
+            ...styles.item,
 
-        backgroundColor: display.color[50],
+            backgroundColor: isSelected ? theme.backgroundSelected : display.color[50],
 
-        height: 70,
+            height: 70,
 
-        borderBottomColor: display.color[60],
+            borderBottomColor: display.color[60],
 
-        ...style,
-      }}
-    >
-      <ThemedText
-        type="default"
-        style={{
-          ...styles.name,
-        }}
-      >
-        {name}
-      </ThemedText>
+            ...style,
+          }}
+        >
+          <ThemedView style={styles.nameSection}>
+            {isSelectMode && (
+              <ThemedView
+                style={[
+                  styles.checkbox,
+                  {
+                    borderColor: theme.textSecondary,
+                    backgroundColor: isSelected ? theme.text : "transparent",
+                  },
+                ]}
+              />
+            )}
+            <ThemedText type="default" style={styles.name}>
+              {name}
+            </ThemedText>
+          </ThemedView>
 
-      <ThemedView
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: Spacing.four,
-        }}
-      >
-        <ThemedText type="small">{foodHistories?.length} swipes</ThemedText>
-        <Pill label={display.label} color={display.color[20]} />
-      </ThemedView>
-    </ThemedView>
+          <ThemedView
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: Spacing.four,
+            }}
+          >
+            <ThemedText type="small">{foodHistories?.length} swipes</ThemedText>
+            <Pill label={display.label} color={display.color[20]} />
+          </ThemedView>
+        </ThemedView>
+      </Pressable>
+    </GestureDetector>
   );
 };
 
@@ -66,8 +113,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
 
+  nameSection: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.three,
+  },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+  },
+
   name: {
-    // fontSize: 26,
     fontWeight: "bold",
   },
 });
