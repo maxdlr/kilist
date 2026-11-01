@@ -159,7 +159,10 @@ const FoodList = () => {
         title="Edit item"
         initialName={editingFood?.name}
         initialDescription={editingFood?.description}
-        onSubmit={(data) => editFood(editingFood!.id, data)}
+        onSubmit={async (data) => {
+          if (!editingFood) return false;
+          return editFood(editingFood.id, data);
+        }}
         onClose={() => setEditingFood(null)}
       />
     </ThemedView>
