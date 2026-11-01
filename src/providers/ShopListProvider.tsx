@@ -1,4 +1,5 @@
 import useAxios from "@/hooks/useAxios";
+import useToast from "@/providers/ToastProvider";
 import { FoodType, ShopListType } from "@/types/model";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
@@ -38,6 +39,7 @@ const ShopListContext = createContext<ShopListContextType>({
 });
 
 export const ShopListProvider = ({ children }: { children: ReactNode }) => {
+  const { showToast } = useToast();
   const [shopListId, setShopListId] = useState<number | undefined>();
   const [previousFoodId, setPreviousFoodId] = useState<number | undefined>();
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
@@ -53,7 +55,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: () => {},
+      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -106,6 +108,10 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
       previousFoodId,
       action: "buy",
     });
+    if (res.error) {
+      showToast(res.error.message || "An unexpected error occurred");
+      return;
+    }
     setPreviousFoodId(foodId);
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
@@ -116,12 +122,19 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
       foodId,
       action: "snooze",
     });
+    if (res.error) {
+      showToast(res.error.message || "An unexpected error occurred");
+      return;
+    }
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
   };
 
   const startNewShopList = async () => {
     const res = await startShopList({});
+    if (res.error) {
+      showToast(res.error.message || "An unexpected error occurred");
+    }
     if (!res.data) {
       return null;
     }
@@ -131,6 +144,9 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
 
   const cancelShopList = async () => {
     const res = await endShopList({});
+    if (res.error) {
+      showToast(res.error.message || "An unexpected error occurred");
+    }
     return res.data as ShopListType;
   };
 

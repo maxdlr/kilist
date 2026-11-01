@@ -1,3 +1,4 @@
+import useToast from "@/providers/ToastProvider";
 import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode } from "react";
 import useSWR, { SWRConfiguration } from "swr";
@@ -21,6 +22,8 @@ export const FoodListProvider = ({
   children: ReactNode;
   listIds?: number[];
 }) => {
+  const { showToast } = useToast();
+
   const {
     data: foods,
     isLoading: isFoodLoading,
@@ -35,7 +38,7 @@ export const FoodListProvider = ({
     },
     {
       onSuccess: () => {},
-      onError: () => {},
+      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
       revalidateOnFocus: true,
       revalidateIfStale: true,
       revalidateOnReconnect: true,

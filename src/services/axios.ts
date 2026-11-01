@@ -22,16 +22,25 @@ const resetRefreshCount = () => {
 };
 
 let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
+let refreshSubscribers: {
+  resolve: () => void;
+  reject: (error: unknown) => void;
+}[] = [];
 
-const subscribeToRefresh = (cb: () => void) => {
-  refreshSubscribers.push(cb);
+const subscribeToRefresh = (
+  resolve: () => void,
+  reject: (error: unknown) => void,
+) => {
+  refreshSubscribers.push({ resolve, reject });
 };
 
-const flushRefreshSubscribers = () => {
-  refreshSubscribers.forEach((cb) => {
-    cb();
-  });
+const resolveRefreshSubscribers = () => {
+  refreshSubscribers.forEach(({ resolve }) => resolve());
+  refreshSubscribers = [];
+};
+
+const rejectRefreshSubscribers = (error: unknown) => {
+  refreshSubscribers.forEach(({ reject }) => reject(error));
   refreshSubscribers = [];
 };
 
@@ -55,6 +64,12 @@ instance.interceptors.response.use(
       _retry?: boolean;
     };
 
+    // A failing /refresh call must never trigger another refresh attempt —
+    // otherwise it deadlocks waiting on itself via the isRefreshing queue.
+    if (originalRequest?.url === "/refresh") {
+      return Promise.reject(error);
+    }
+
     if ([403, 404].includes(status ?? 0)) {
       return Promise.reject(error);
     }
@@ -68,9 +83,13 @@ instance.interceptors.response.use(
       if (!canRefresh) return Promise.reject(error);
 
       if (isRefreshing) {
-        // Queue this request to replay once the in-flight refresh completes
-        return new Promise<AxiosResponse>((resolve) => {
-          subscribeToRefresh(() => resolve(instance(originalRequest)));
+        // Queue this request to replay once the in-flight refresh completes,
+        // or reject it if the refresh itself fails — otherwise it hangs forever.
+        return new Promise<AxiosResponse>((resolve, reject) => {
+          subscribeToRefresh(
+            () => resolve(instance(originalRequest)),
+            reject,
+          );
         });
       }
 
@@ -80,10 +99,10 @@ instance.interceptors.response.use(
       try {
         await instance.post("/refresh");
         resetRefreshCount();
-        flushRefreshSubscribers();
+        resolveRefreshSubscribers();
         return instance(originalRequest);
       } catch (refreshError) {
-        refreshSubscribers = [];
+        rejectRefreshSubscribers(refreshError);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

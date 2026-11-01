@@ -24,3 +24,18 @@ export interface ShopListType {
   startFoods: FoodType[];
   boughtFoods: FoodType[];
 }
+
+export interface HouseholdType {
+  id: number;
+  name?: string;
+  joinCode: string;
+}
+
+export interface UserType {
+  id: number;
+  username: string;
+  email: string;
+  description?: string;
+  type: "user" | "admin";
+  household: HouseholdType;
+}

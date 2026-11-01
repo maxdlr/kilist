@@ -1,4 +1,5 @@
 import axios from "@/services/axios";
+import useToast from "@/providers/ToastProvider";
 import { FoodType } from "@/types/model";
 import React, {
   createContext,
@@ -31,6 +32,8 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
 });
 
 export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
+  const { showToast } = useToast();
+
   const {
     data,
     isLoading,
@@ -41,7 +44,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: () => {},
+      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -59,7 +62,13 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     foodId: number;
     isInStock: boolean | null;
   }) => {
-    await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
+    try {
+      await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
+    } catch (err: any) {
+      showToast(
+        err?.response?.data?.message || "An unexpected error occurred",
+      );
+    }
   };
 
   const swipe = (foodId: number) => {
