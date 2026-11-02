@@ -71,7 +71,11 @@ const SwipeFoodGame = () => {
 
   return (
     <ThemedView
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      style={{
+        flex: 1,
+        justifyContent: "flex-end",
+        alignItems: "center",
+      }}
     >
       <SwipeFoods foods={foods} onComplete={handleOnComplete} />
     </ThemedView>

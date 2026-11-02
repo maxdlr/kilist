@@ -2,10 +2,7 @@ import { ThemedView } from "@/components/themed-view";
 import useSwipeFoods from "@/providers/SwipeFoodsProvider";
 import { FoodType } from "@/types/model";
 import { StyleSheet } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import SwipeFoodCard from "./_components/SwipeFoodCard";
 
 export interface FoodHistoryCreateType {
@@ -46,19 +43,20 @@ const SwipeFoods = ({
     }
   };
 
-  const deckAnimStyle = useAnimatedStyle(() => ({
-    marginRight: withTiming((foods.length - 1) * 2.5),
-  }));
+  // const deckAnimStyle = useAnimatedStyle(() => ({
+  //   marginRight: withTiming((foods.length - 1) * 2.5),
+  // }));
 
   return (
-    <Animated.View style={[styles.root, deckAnimStyle]}>
+    <Animated.View style={[styles.root]}>
       {foods.map((food, index) => (
         <ThemedView
           key={food.id}
           style={{
             position: "absolute",
-            paddingBottom: index * 10,
-            paddingLeft: index * 5,
+            bottom: 0,
+            paddingBottom: index * 5,
+            // paddingLeft: index * 5,
           }}
         >
           <SwipeFoodCard key={food.id} food={food} onSwipe={handleSwipe} />

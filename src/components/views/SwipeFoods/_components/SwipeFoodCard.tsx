@@ -1,10 +1,22 @@
 import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
+import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { Image } from "expo-image";
-import { Dimensions, StyleSheet, type LayoutChangeEvent } from "react-native";
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  type LayoutChangeEvent,
+} from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
+import {
+  EllipsisVerticalIcon,
+  HeartIcon,
+  StarIcon,
+  XMarkIcon,
+} from "react-native-heroicons/solid";
 import Animated, {
   clamp,
   interpolate,
@@ -14,12 +26,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { SwipeFoodCardProps } from "../interface";
-import { Spacing } from "@/constants/theme";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 const VERTICAL_SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 const ROTATION_RANGE = 15; // degrees, at full drag distance
+const FLING_DURATION = 250;
 
 const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
   const translationX = useSharedValue(0);
@@ -76,6 +88,31 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     onSwipe(food.id, direction);
   };
 
+  const flingTo = (direction: "left" | "right" | "up") => {
+    "worklet";
+    if (direction === "up") {
+      const flingTarget = -containerWidth.value * 1.5;
+      translationY.value = withTiming(
+        flingTarget,
+        { duration: FLING_DURATION },
+        () => {
+          scheduleOnRN(triggerSwipe, "up");
+        },
+      );
+      return;
+    }
+
+    const flingTarget =
+      (direction === "right" ? 1 : -1) * containerWidth.value * 1.5;
+    translationX.value = withTiming(
+      flingTarget,
+      { duration: FLING_DURATION },
+      () => {
+        scheduleOnRN(triggerSwipe, direction);
+      },
+    );
+  };
+
   const pan = usePanGesture({
     minDistance: 1,
     onBegin: () => {
@@ -97,22 +134,12 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
         translationY.value < 0 && verticalDistance > VERTICAL_SWIPE_THRESHOLD;
 
       if (passedVertical && verticalDistance > horizontalDistance) {
-        const flingTarget = -containerWidth.value * 1.5;
-
-        translationY.value = withTiming(flingTarget, { duration: 250 }, () => {
-          scheduleOnRN(triggerSwipe, "up");
-        });
+        flingTo("up");
         return;
       }
 
       if (passedHorizontal) {
-        const direction = translationX.value > 0 ? "right" : "left";
-        const flingTarget =
-          (direction === "right" ? 1 : -1) * containerWidth.value * 1.5;
-
-        translationX.value = withTiming(flingTarget, { duration: 250 }, () => {
-          scheduleOnRN(triggerSwipe, direction);
-        });
+        flingTo(translationX.value > 0 ? "right" : "left");
         return;
       }
 
@@ -128,8 +155,11 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
       styles={{
         box: {
           ...styles.box,
-          borderColor: foodDisplay.color[70],
-          backgroundColor: foodDisplay.color[50],
+          backgroundColor: food.imageUrl
+            ? theme.background
+            : foodDisplay.color[50],
+          borderColor: foodDisplay.color[60],
+          borderWidth: 2,
         },
         container: styles.container,
         root: styles.root,
@@ -138,60 +168,6 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
       onLayout={handleLayout}
       animatedStyles={cardStyle}
     >
-      <ThemedText
-        type="subtitle"
-        style={{
-          color: theme.text,
-          textAlign: "center",
-        }}
-      >
-        {food.name}
-      </ThemedText>
-
-      <Animated.View style={styles.badgeContainer}>
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.likeBadge,
-            {
-              // borderColor: theme.confirm[60],
-              color: theme.confirm[60],
-            },
-            likeOpacity,
-          ]}
-        >
-          J'ai !
-        </Animated.Text>
-
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.nopeBadge,
-            {
-              // borderColor: theme.cancel[60],
-              color: theme.cancel[60],
-            },
-            nopeOpacity,
-          ]}
-        >
-          J'ai pas !
-        </Animated.Text>
-
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.neutralBadge,
-            {
-              // borderColor: theme.textSecondary,
-              color: theme.textSecondary,
-            },
-            neutralOpacity,
-          ]}
-        >
-          Je sais pas !
-        </Animated.Text>
-      </Animated.View>
-
       {food.imageUrl && (
         <Image
           source={{ uri: food.imageUrl }}
@@ -199,6 +175,87 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
           contentFit="cover"
         />
       )}
+
+      <Animated.View style={styles.topBar}>
+        <Pressable style={styles.topBarButton} onPress={() => {}}>
+          <EllipsisVerticalIcon size={20} color="#FFFFFF" />
+        </Pressable>
+      </Animated.View>
+
+      <Animated.View style={styles.badgeContainer}>
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.likeBadge,
+            { color: theme.confirm[60] },
+            likeOpacity,
+          ]}
+        >
+          In stock!
+        </Animated.Text>
+
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.nopeBadge,
+            { color: theme.cancel[60] },
+            nopeOpacity,
+          ]}
+        >
+          Out!
+        </Animated.Text>
+
+        <Animated.Text
+          style={[
+            styles.badge,
+            styles.neutralBadge,
+            { color: theme.textSecondary },
+            neutralOpacity,
+          ]}
+        >
+          Not sure!
+        </Animated.Text>
+      </Animated.View>
+
+      <Animated.View style={styles.bottomSection}>
+        <Animated.View style={styles.infoOverlay}>
+          <ThemedText type="subtitle" style={styles.foodName}>
+            {food.name}
+          </ThemedText>
+          {food.description && (
+            <ThemedText
+              type="default"
+              style={styles.foodDescription}
+              numberOfLines={1}
+            >
+              {food.description}
+            </ThemedText>
+          )}
+        </Animated.View>
+
+        <Animated.View style={styles.actionsRow}>
+          <Pressable
+            style={[styles.actionButton, styles.actionButtonSmall]}
+            onPress={() => flingTo("left")}
+          >
+            <XMarkIcon size={24} color={theme.cancel[60]} />
+          </Pressable>
+
+          <Pressable
+            style={[styles.actionButton, styles.actionButtonLarge]}
+            onPress={() => flingTo("up")}
+          >
+            <StarIcon size={22} color={theme.textSecondary} />
+          </Pressable>
+
+          <Pressable
+            style={[styles.actionButton, styles.actionButtonSmall]}
+            onPress={() => flingTo("right")}
+          >
+            <HeartIcon size={24} color={theme.confirm[60]} />
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
     </PanGesture>
   );
 };
@@ -210,33 +267,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
   },
   box: {
-    width: SCREEN_WIDTH * 0.85,
-    aspectRatio: 3 / 4,
-    borderWidth: 4,
-    borderRadius: 60,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.9,
+    borderRadius: 32,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+  },
+  foodImage: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+  topBar: {
+    position: "absolute",
+    top: Spacing.three,
+    right: Spacing.three,
+  },
+  topBarButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.35)",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.five,
+    justifyContent: "center",
   },
   badgeContainer: {
-    // position: "absolute",
-    // top: "50%",
+    position: "absolute",
     width: "100%",
-    flex: 1,
-    // alignItems: "center",
-    // justifyContent: "center",
+    height: "100%",
   },
   badge: {
     top: Spacing.four,
     position: "absolute",
-    height: "auto",
-    // top: "50%",
-    // borderWidth: 3,
-    // borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 4,
     fontSize: 28,
@@ -253,11 +318,50 @@ const styles = StyleSheet.create({
   neutralBadge: {
     alignSelf: "center",
   },
-  foodImage: {
-    width: "80%",
-    height: "60%",
-    // flex: 1,
-    borderRadius: 40,
+  bottomSection: {
+    width: "100%",
+  },
+  infoOverlay: {
+    width: "100%",
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.two,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  foodName: {
+    color: "#FFFFFF",
+  },
+  foodDescription: {
+    color: "#FFFFFF",
+    opacity: 0.85,
+  },
+  actionsRow: {
+    width: "100%",
+    paddingVertical: Spacing.three,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.four,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  actionButton: {
+    borderRadius: 100,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  actionButtonSmall: {
+    width: 52,
+    height: 52,
+  },
+  actionButtonLarge: {
+    width: 44,
+    height: 44,
   },
 });
 
