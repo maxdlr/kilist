@@ -1,5 +1,6 @@
 import axios from "@/services/axios";
 import useAxios from "@/hooks/useAxios";
+import useDebounce from "@/hooks/useDebounce";
 import useToast from "@/providers/ToastProvider";
 import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode, useState } from "react";
@@ -39,6 +40,7 @@ export const FoodListProvider = ({
 }) => {
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
   const {
     data: foods,
@@ -49,8 +51,7 @@ export const FoodListProvider = ({
       url: listIds ? "foods/browse" : null,
       params: {
         listIds,
-        maxInStockScore: 1,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
       },
     },
     {
@@ -62,7 +63,7 @@ export const FoodListProvider = ({
       retryCount: 3,
       revalidateOnMount: true,
       loadingTimeout: 5000,
-      // keepPreviousData: true,
+      keepPreviousData: true,
     } as SWRConfiguration,
   );
 

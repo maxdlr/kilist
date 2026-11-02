@@ -121,8 +121,6 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
     },
   });
 
-  console.log({ inStockScore: food.inStockScore });
-
   const foodDisplay = inStockScoreToDisplay(food.inStockScore, theme);
 
   return (

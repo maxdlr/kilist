@@ -6,6 +6,7 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
 import { Modal, StyleSheet } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 const FoodFormModal = ({
   visible,
@@ -36,7 +37,11 @@ const FoodFormModal = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <ThemedView style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior="padding"
+        automaticOffset
+      >
         <ThemedView style={[styles.card, { backgroundColor: theme.background }]}>
           <ThemedText type="smallBold">{title}</ThemedText>
 
@@ -52,7 +57,7 @@ const FoodFormModal = ({
             <KilButton label="Save" onTouch={handleSubmit} />
           </ThemedView>
         </ThemedView>
-      </ThemedView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

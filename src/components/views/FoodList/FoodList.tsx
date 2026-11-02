@@ -1,29 +1,38 @@
+import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import BottomActionBar from "@/components/elements/BottomActionBar";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { BottomTabInset, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import useFoodList from "@/providers/FoodListProvider";
 import { FoodType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, FlatList, StyleSheet } from "react-native";
+import { Alert, StyleSheet } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import FoodFormModal from "./_components/FoodFormModal";
 import FoodRow from "./_components/FoodRow";
 
 const FoodList = () => {
-  const { foods, isFoodLoading, mutateFood, search, setSearch, createFood, editFood, removeFoodsFromList } =
-    useFoodList();
   const theme = useTheme();
-
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodType | null>(null);
 
-  // Re-fetch every time this tab becomes focused (initial mount, tab switch,
-  // or navigating back to it) so the list is never stale when the user sees it.
+  const {
+    foods,
+    isFoodLoading,
+    mutateFood,
+    search,
+    setSearch,
+    createFood,
+    editFood,
+    removeFoodsFromList,
+  } = useFoodList();
+
   useFocusEffect(
     useCallback(() => {
       mutateFood();
@@ -44,18 +53,14 @@ const FoodList = () => {
   };
 
   const handleDeleteOne = (food: FoodType) => {
-    Alert.alert(
-      "Remove from list",
-      `Remove "${food.name}" from this list?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => removeFoodsFromList([food.id]),
-        },
-      ],
-    );
+    Alert.alert("Remove from list", `Remove "${food.name}" from this list?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => removeFoodsFromList([food.id]),
+      },
+    ]);
   };
 
   const handleDeleteSelected = () => {
@@ -76,7 +81,7 @@ const FoodList = () => {
     );
   };
 
-  if (isFoodLoading) {
+  if (isFoodLoading && foods === undefined) {
     return (
       <ThemedView>
         <ThemedText>loading</ThemedText>
@@ -86,15 +91,16 @@ const FoodList = () => {
 
   const renderItem = ({ item }: { item: FoodType }) => {
     return (
-      <FoodRow
-        food={item}
-        key={item.id}
-        isSelectMode={isSelectMode}
-        isSelected={selectedIds.includes(item.id)}
-        onToggleSelect={toggleSelect}
-        onEdit={setEditingFood}
-        onDelete={handleDeleteOne}
-      />
+      <AnimatedListItem key={item.id}>
+        <FoodRow
+          food={item}
+          isSelectMode={isSelectMode}
+          isSelected={selectedIds.includes(item.id)}
+          onToggleSelect={toggleSelect}
+          onEdit={setEditingFood}
+          onDelete={handleDeleteOne}
+        />
+      </AnimatedListItem>
     );
   };
 
@@ -107,22 +113,31 @@ const FoodList = () => {
   };
 
   return (
-    <ThemedView style={styles.listContainer}>
-      <FlatList
+    <KeyboardAvoidingView
+      style={[styles.listContainer, { backgroundColor: theme.background }]}
+      behavior="height"
+    >
+      <Animated.FlatList
         data={foods}
         renderItem={renderItem}
         keyExtractor={(item) => String(item.id)}
+        itemLayoutAnimation={LinearTransition.duration(250)}
         ListEmptyComponent={emptyListComponent}
         onRefresh={mutateFood}
         refreshing={isFoodLoading}
-        contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.seven }}
+        contentContainerStyle={{
+          paddingBottom: 80,
+        }}
       />
 
       {isSelectMode ? (
         <ThemedView
           style={[
             styles.selectBar,
-            { backgroundColor: theme.backgroundElement, bottom: BottomTabInset },
+            {
+              backgroundColor: theme.backgroundElement,
+              bottom: Spacing.three,
+            },
           ]}
         >
           <ThemedText type="small">{selectedIds.length} selected</ThemedText>
@@ -155,6 +170,7 @@ const FoodList = () => {
       />
 
       <FoodFormModal
+        key={editingFood?.id ?? "edit-food-modal"}
         visible={editingFood !== null}
         title="Edit item"
         initialName={editingFood?.name}
@@ -165,7 +181,7 @@ const FoodList = () => {
         }}
         onClose={() => setEditingFood(null)}
       />
-    </ThemedView>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -8,7 +8,8 @@ import useAuth from "@/providers/AuthProvider";
 import useToast from "@/providers/ToastProvider";
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 const STRONG_PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
@@ -65,122 +66,134 @@ const LoginScreen = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">{isSignup ? "Sign up" : "Log in"}</ThemedText>
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ThemedText type="title">{isSignup ? "Sign up" : "Log in"}</ThemedText>
 
-      <FormInput
-        label="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-
-      {isSignup && (
         <FormInput
-          label="Email"
-          type="email"
-          value={email}
-          onChangeText={setEmail}
+          label="Username"
+          value={username}
+          onChangeText={setUsername}
         />
-      )}
 
-      <FormInput
-        label="Password"
-        type="password"
-        value={password}
-        onChangeText={setPassword}
-      />
+        {isSignup && (
+          <FormInput
+            label="Email"
+            type="email"
+            value={email}
+            onChangeText={setEmail}
+          />
+        )}
 
-      {isSignup && (
         <FormInput
-          label="Confirm password"
+          label="Password"
           type="password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          value={password}
+          onChangeText={setPassword}
         />
-      )}
 
-      {isSignup && (
-        <ThemedView style={styles.householdSection}>
-          <ThemedText type="small">Household</ThemedText>
-          <ThemedView style={styles.householdToggle}>
-            <KilButton
-              label="Create new"
-              onTouch={() => setHouseholdChoice("create")}
-              style={{
-                container: {
-                  opacity: householdChoice === "create" ? 1 : 0.5,
-                },
-              }}
-            />
-            <KilButton
-              label="Join existing"
-              onTouch={() => setHouseholdChoice("join")}
-              style={{
-                container: {
-                  opacity: householdChoice === "join" ? 1 : 0.5,
-                },
-              }}
-            />
-          </ThemedView>
+        {isSignup && (
+          <FormInput
+            label="Confirm password"
+            type="password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+        )}
 
-          {householdChoice === "create" ? (
-            <FormInput
-              label="Household name (optional)"
-              value={householdName}
-              onChangeText={setHouseholdName}
-            />
-          ) : showScanner ? (
-            <ThemedView style={{ gap: Spacing.two }}>
-              <QrCodeScanner
-                onScanned={(data) => {
-                  setJoinCode(data);
-                  setShowScanner(false);
+        {isSignup && (
+          <ThemedView style={styles.householdSection}>
+            <ThemedText type="small">Household</ThemedText>
+            <ThemedView style={styles.householdToggle}>
+              <KilButton
+                label="Create new"
+                onTouch={() => setHouseholdChoice("create")}
+                style={{
+                  container: {
+                    opacity: householdChoice === "create" ? 1 : 0.5,
+                  },
                 }}
               />
-              <ThemedText type="link" onPress={() => setShowScanner(false)}>
-                Enter code manually instead
-              </ThemedText>
-            </ThemedView>
-          ) : (
-            <ThemedView style={{ gap: Spacing.two }}>
-              <FormInput
-                label="Household code"
-                value={joinCode}
-                onChangeText={setJoinCode}
-                autoCapitalize="characters"
-                maxLength={6}
+              <KilButton
+                label="Join existing"
+                onTouch={() => setHouseholdChoice("join")}
+                style={{
+                  container: {
+                    opacity: householdChoice === "join" ? 1 : 0.5,
+                  },
+                }}
               />
-              <ThemedText type="link" onPress={() => setShowScanner(true)}>
-                Scan QR code instead
-              </ThemedText>
             </ThemedView>
-          )}
-        </ThemedView>
-      )}
 
-      <KilButton label={isSignup ? "Sign up" : "Log in"} onTouch={handleSubmit} />
+            {householdChoice === "create" ? (
+              <FormInput
+                label="Household name (optional)"
+                value={householdName}
+                onChangeText={setHouseholdName}
+              />
+            ) : showScanner ? (
+              <ThemedView style={{ gap: Spacing.two }}>
+                <QrCodeScanner
+                  onScanned={(data) => {
+                    setJoinCode(data);
+                    setShowScanner(false);
+                  }}
+                />
+                <ThemedText type="link" onPress={() => setShowScanner(false)}>
+                  Enter code manually instead
+                </ThemedText>
+              </ThemedView>
+            ) : (
+              <ThemedView style={{ gap: Spacing.two }}>
+                <FormInput
+                  label="Household code"
+                  value={joinCode}
+                  onChangeText={setJoinCode}
+                  autoCapitalize="characters"
+                  maxLength={6}
+                />
+                <ThemedText type="link" onPress={() => setShowScanner(true)}>
+                  Scan QR code instead
+                </ThemedText>
+              </ThemedView>
+            )}
+          </ThemedView>
+        )}
 
-      <ThemedText
-        type="link"
-        onPress={() => setMode(isSignup ? "login" : "signup")}
-      >
-        {isSignup
-          ? "Already have an account? Log in"
-          : "No account yet? Sign up"}
-      </ThemedText>
-    </ThemedView>
+        <KilButton
+          label={isSignup ? "Sign up" : "Log in"}
+          onTouch={handleSubmit}
+        />
+
+        <ThemedText
+          type="link"
+          onPress={() => setMode(isSignup ? "login" : "signup")}
+        >
+          {isSignup
+            ? "Already have an account? Log in"
+            : "No account yet? Sign up"}
+        </ThemedText>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
+  },
+  container: {
+    flexGrow: 1,
     maxWidth: MaxContentWidth,
     width: "100%",
     alignSelf: "center",
     justifyContent: "center",
     gap: Spacing.three,
     paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.four,
   },
   householdSection: {
     gap: Spacing.two,

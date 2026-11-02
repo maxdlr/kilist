@@ -1,3 +1,4 @@
+import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import KilButton from "@/components/elements/KilButton";
 import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
 import { ThemedText } from "@/components/themed-text";
@@ -8,8 +9,9 @@ import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { useEffect, useRef } from "react";
-import { Dimensions, FlatList, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Animated, {
+  LinearTransition,
   SlideOutDown,
   useAnimatedStyle,
   useSharedValue,
@@ -99,11 +101,13 @@ const ShopList = () => {
   }
 
   const renderItem = ({ item }: { item: FoodType }) => (
-    <ShopListFoodRow
-      food={item}
-      onBuy={handleBuyFood}
-      onDismiss={handleDismissFood}
-    />
+    <AnimatedListItem key={item.id}>
+      <ShopListFoodRow
+        food={item}
+        onBuy={handleBuyFood}
+        onDismiss={handleDismissFood}
+      />
+    </AnimatedListItem>
   );
 
   const renderEmptyList = () => (
@@ -161,11 +165,12 @@ const ShopList = () => {
       </ThemedView>
 
       <Animated.View style={[styles.listContainer, listAnimStyle]}>
-        <FlatList
+        <Animated.FlatList
           // onViewableItemsChanged={handleScrollToTop}
           data={foods}
           renderItem={renderItem}
           keyExtractor={(item) => String(item.id)}
+          itemLayoutAnimation={LinearTransition.duration(250)}
           inverted
           // maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListEmptyComponent={renderEmptyList}

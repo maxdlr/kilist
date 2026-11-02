@@ -1,5 +1,5 @@
 import { ThemedView } from "@/components/themed-view";
-import { BottomTabInset, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
 import { EllipsisVerticalIcon } from "react-native-heroicons/solid";
@@ -24,25 +24,21 @@ const BottomActionBar = ({
   const theme = useTheme();
 
   const openMenu = () => {
-    Alert.alert(
-      "",
-      undefined,
-      [
-        ...menuActions.map((action) => ({
-          text: action.label,
-          style: action.destructive ? ("destructive" as const) : undefined,
-          onPress: action.onPress,
-        })),
-        { text: "Cancel", style: "cancel" as const },
-      ],
-    );
+    Alert.alert("", undefined, [
+      ...menuActions.map((action) => ({
+        text: action.label,
+        style: action.destructive ? ("destructive" as const) : undefined,
+        onPress: action.onPress,
+      })),
+      { text: "Cancel", style: "cancel" as const },
+    ]);
   };
 
   return (
     <ThemedView
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundElement, bottom: BottomTabInset },
+        { backgroundColor: theme.backgroundElement, bottom: 1 },
       ]}
     >
       <TextInput
@@ -63,19 +59,17 @@ const BottomActionBar = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    left: Spacing.three,
-    right: Spacing.three,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: Spacing.five,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    padding: Spacing.three,
     gap: Spacing.two,
+    width: "100%",
+    height: 80,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    paddingVertical: Spacing.one,
+    paddingVertical: Spacing.two,
   },
   menuButton: {
     padding: Spacing.one,

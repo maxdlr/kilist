@@ -9,14 +9,14 @@ export const onError = (err: KilistApiError) => {
 
 const fetcher = async ({
   url,
-  query,
+  params,
 }: {
   url: string;
-  query: Record<any, any>;
+  params?: Record<any, any>;
 }) => {
   try {
     if (!url) return null;
-    const res = await axios.get(url, { params: query });
+    const res = await axios.get(url, { params });
     return res?.data;
   } catch (error) {
     const axiosError = error as AxiosError;
