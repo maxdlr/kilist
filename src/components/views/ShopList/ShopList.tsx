@@ -1,6 +1,5 @@
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import KilButton from "@/components/elements/KilButton";
-import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
@@ -8,8 +7,10 @@ import { useTheme } from "@/hooks/use-theme";
 import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
+import { router } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
+import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
 import Animated, {
   LinearTransition,
   SlideOutDown,
@@ -19,7 +20,6 @@ import Animated, {
 } from "react-native-reanimated";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
 import ShopListFoodSuggestion from "./_components/ShopListFoodSuggestion";
-import { router } from "expo-router";
 
 const ShopList = () => {
   const theme = useTheme();
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
 
   listContainer: {
-    paddingTop: Spacing.six,
+    // paddingTop: Spacing.six,
     display: "flex",
     flexDirection: "column",
     gap: 10,

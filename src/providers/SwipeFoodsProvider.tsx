@@ -12,6 +12,7 @@ import useSWR, { SWRConfiguration } from "swr";
 
 export type SwipeFoodsContextType = {
   foods?: FoodType[];
+  swipes?: FoodType[];
   foodsCount: number;
   swipe: (foodId: number) => void;
   isLoading: boolean;
@@ -24,6 +25,7 @@ export type SwipeFoodsContextType = {
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   foods: undefined,
+  swipes: undefined,
   foodsCount: 0,
   swipe: () => {},
   isLoading: false,
@@ -44,7 +46,8 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
+      onError: (err) =>
+        showToast(err?.message || "An unexpected error occurred"),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -65,9 +68,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     try {
       await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
     } catch (err: any) {
-      showToast(
-        err?.response?.data?.message || "An unexpected error occurred",
-      );
+      showToast(err?.response?.data?.message || "An unexpected error occurred");
     }
   };
 
@@ -77,10 +78,13 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
 
   const foodsCount = useMemo(() => data?.length || 0, [data]);
 
+  const swipes = useMemo(() => foods?.slice(0, 3), [foods]);
+
   return (
     <SwipeFoodsContext.Provider
       value={{
         foods,
+        swipes,
         foodsCount,
         swipe,
         isLoading,

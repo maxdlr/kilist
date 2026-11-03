@@ -33,7 +33,9 @@ const Dashboard = ({ dashboard }: { dashboard: DashboardType }) => {
 
   return (
     <ThemedView>
-      <ThemedView style={styles.section}>
+      <ThemedView
+        style={{ ...styles.section, backgroundColor: theme.background }}
+      >
         <ThemedText type="title" style={{ color: theme.foods[1][80] }}>
           Status
         </ThemedText>
@@ -51,6 +53,8 @@ const Dashboard = ({ dashboard }: { dashboard: DashboardType }) => {
       </ThemedView>
       <ThemedView
         style={{
+          ...styles.section,
+          backgroundColor: theme.background,
           width: "100%",
           display: "flex",
           alignItems: "center",
@@ -76,7 +80,10 @@ const Dashboard = ({ dashboard }: { dashboard: DashboardType }) => {
           }
         />
       </ThemedView>
-      <ThemedView style={{ ...styles.section }}>
+
+      <ThemedView
+        style={{ ...styles.section, backgroundColor: theme.background }}
+      >
         <ThemedText type="title">En ce moment</ThemedText>
         {[
           {
@@ -119,8 +126,10 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     gap: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.three,
+    marginBottom: Spacing.three,
+    borderRadius: Spacing.five,
   },
   startShopListButtonContainer: {
     aspectRatio: 1,

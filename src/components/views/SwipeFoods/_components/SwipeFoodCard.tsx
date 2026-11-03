@@ -2,6 +2,7 @@ import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import AnimationService from "@/services/animation";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { Image } from "expo-image";
 import {
@@ -29,11 +30,11 @@ import { SwipeFoodCardProps } from "../interface";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
-const VERTICAL_SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const VERTICAL_SWIPE_THRESHOLD = SCREEN_WIDTH * 0.1;
 const ROTATION_RANGE = 15; // degrees, at full drag distance
 const FLING_DURATION = 250;
 
-const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
+const SwipeFoodCard = ({ food, onSwipe, i }: SwipeFoodCardProps) => {
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const grabbing = useSharedValue(false);
@@ -150,119 +151,137 @@ const SwipeFoodCard = ({ food, onSwipe }: SwipeFoodCardProps) => {
 
   const foodDisplay = inStockScoreToDisplay(food.inStockScore, theme);
 
+  const animatedScaleStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: withTiming(i ? 1 - 0.1 * i : 1, AnimationService.config) },
+      { translateY: withTiming(i * 80, AnimationService.config) },
+    ],
+  }));
+
   return (
-    <PanGesture
-      styles={{
-        box: {
-          ...styles.box,
-          backgroundColor: food.imageUrl
-            ? theme.background
-            : foodDisplay.color[50],
-          borderColor: foodDisplay.color[60],
-          borderWidth: 2,
-        },
-        container: styles.container,
-        root: styles.root,
-      }}
-      pan={pan}
-      onLayout={handleLayout}
-      animatedStyles={cardStyle}
+    <Animated.View
+      style={[styles.root, { zIndex: 100 - i }, animatedScaleStyle]}
     >
-      {food.imageUrl && (
-        <Image
-          source={{ uri: food.imageUrl }}
-          style={styles.foodImage}
-          contentFit="cover"
-        />
-      )}
+      <PanGesture
+        disabled={i !== 0}
+        styles={{
+          box: {
+            ...styles.box,
+            backgroundColor: food.imageUrl
+              ? theme.background
+              : foodDisplay.color[50],
+            borderColor: foodDisplay.color[60],
+            borderWidth: 2,
+          },
+          container: {
+            ...styles.container,
+            // opacity: 0.4,
+          },
+          root: { flex: 1 },
+        }}
+        pan={pan}
+        onLayout={handleLayout}
+        animatedStyles={cardStyle}
+      >
+        {food.imageUrl && (
+          <Image
+            source={{ uri: food.imageUrl }}
+            style={styles.foodImage}
+            contentFit="cover"
+          />
+        )}
 
-      <Animated.View style={styles.topBar}>
-        <Pressable style={styles.topBarButton} onPress={() => {}}>
-          <EllipsisVerticalIcon size={20} color="#FFFFFF" />
-        </Pressable>
-      </Animated.View>
+        <Animated.View style={styles.topBar}>
+          <Pressable style={styles.topBarButton} onPress={() => {}}>
+            <EllipsisVerticalIcon size={20} color="#FFFFFF" />
+          </Pressable>
+        </Animated.View>
 
-      <Animated.View style={styles.badgeContainer}>
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.likeBadge,
-            { color: theme.confirm[60] },
-            likeOpacity,
-          ]}
-        >
-          In stock!
-        </Animated.Text>
+        <Animated.View style={styles.badgeContainer}>
+          <Animated.Text
+            style={[
+              styles.badge,
+              styles.likeBadge,
+              { color: theme.confirm[60] },
+              likeOpacity,
+            ]}
+          >
+            In stock!
+          </Animated.Text>
 
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.nopeBadge,
-            { color: theme.cancel[60] },
-            nopeOpacity,
-          ]}
-        >
-          Out!
-        </Animated.Text>
+          <Animated.Text
+            style={[
+              styles.badge,
+              styles.nopeBadge,
+              { color: theme.cancel[60] },
+              nopeOpacity,
+            ]}
+          >
+            Out!
+          </Animated.Text>
 
-        <Animated.Text
-          style={[
-            styles.badge,
-            styles.neutralBadge,
-            { color: theme.textSecondary },
-            neutralOpacity,
-          ]}
-        >
-          Not sure!
-        </Animated.Text>
-      </Animated.View>
+          <Animated.Text
+            style={[
+              styles.badge,
+              styles.neutralBadge,
+              { color: theme.textSecondary },
+              neutralOpacity,
+            ]}
+          >
+            Not sure!
+          </Animated.Text>
+        </Animated.View>
 
-      <Animated.View style={styles.bottomSection}>
-        <Animated.View style={styles.infoOverlay}>
-          <ThemedText type="subtitle" style={styles.foodName}>
-            {food.name}
-          </ThemedText>
-          {food.description && (
-            <ThemedText
-              type="default"
-              style={styles.foodDescription}
-              numberOfLines={1}
-            >
-              {food.description}
+        <Animated.View style={styles.bottomSection}>
+          <Animated.View style={styles.infoOverlay}>
+            <ThemedText type="subtitle" style={styles.foodName}>
+              {food.name} - {food.id}
             </ThemedText>
-          )}
+            {food.description && (
+              <ThemedText
+                type="default"
+                style={styles.foodDescription}
+                numberOfLines={1}
+              >
+                {food.description}
+              </ThemedText>
+            )}
+          </Animated.View>
+
+          <Animated.View style={styles.actionsRow}>
+            <Pressable
+              style={[styles.actionButton, styles.actionButtonSmall]}
+              onPress={() => flingTo("left")}
+            >
+              <XMarkIcon size={24} color={theme.cancel[60]} />
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.actionButtonLarge]}
+              onPress={() => flingTo("up")}
+            >
+              <StarIcon size={22} color={theme.textSecondary} />
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.actionButtonSmall]}
+              onPress={() => flingTo("right")}
+            >
+              <HeartIcon size={24} color={theme.confirm[60]} />
+            </Pressable>
+          </Animated.View>
         </Animated.View>
-
-        <Animated.View style={styles.actionsRow}>
-          <Pressable
-            style={[styles.actionButton, styles.actionButtonSmall]}
-            onPress={() => flingTo("left")}
-          >
-            <XMarkIcon size={24} color={theme.cancel[60]} />
-          </Pressable>
-
-          <Pressable
-            style={[styles.actionButton, styles.actionButtonLarge]}
-            onPress={() => flingTo("up")}
-          >
-            <StarIcon size={22} color={theme.textSecondary} />
-          </Pressable>
-
-          <Pressable
-            style={[styles.actionButton, styles.actionButtonSmall]}
-            onPress={() => flingTo("right")}
-          >
-            <HeartIcon size={24} color={theme.confirm[60]} />
-          </Pressable>
-        </Animated.View>
-      </Animated.View>
-    </PanGesture>
+      </PanGesture>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    position: "absolute",
+    // bottom: 0,
+    // paddingBottom: index * 10,
+    // paddingLeft: index * 5,
   },
   container: {
     flex: 1,
@@ -270,8 +289,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   box: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.9,
+    width: SCREEN_WIDTH * 0.9,
+    height: SCREEN_HEIGHT * 0.7,
     borderRadius: 32,
     overflow: "hidden",
     justifyContent: "flex-end",

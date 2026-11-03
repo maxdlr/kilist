@@ -7,13 +7,23 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
+import { ComponentType } from 'react';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import {
+  HomeIcon,
+  ListBulletIcon,
+  RectangleStackIcon,
+  ShoppingCartIcon,
+  UserIcon,
+} from 'react-native-heroicons/solid';
+import { SvgProps, NumberProp } from 'react-native-svg';
 
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function AppTabs() {
   return (
@@ -22,19 +32,19 @@ export default function AppTabs() {
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="index" href="/" asChild>
-            <TabButton>Home</TabButton>
+            <TabButton icon={HomeIcon}>Home</TabButton>
           </TabTrigger>
           <TabTrigger name="list" href="/list" asChild>
-            <TabButton>Liste</TabButton>
+            <TabButton icon={ListBulletIcon}>Liste</TabButton>
           </TabTrigger>
           <TabTrigger name="shop" href="/shop" asChild>
-            <TabButton>Shop</TabButton>
+            <TabButton icon={ShoppingCartIcon}>Shop</TabButton>
           </TabTrigger>
           <TabTrigger name="swipe" href="/swipe" asChild>
-            <TabButton>Swipe</TabButton>
+            <TabButton icon={RectangleStackIcon}>Swipe</TabButton>
           </TabTrigger>
           <TabTrigger name="account" href="/account" asChild>
-            <TabButton>Account</TabButton>
+            <TabButton icon={UserIcon}>Account</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>
@@ -42,12 +52,20 @@ export default function AppTabs() {
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+type TabButtonProps = TabTriggerSlotProps & {
+  icon: ComponentType<SvgProps & { size?: NumberProp }>;
+};
+
+export function TabButton({ children, isFocused, icon: Icon, ...props }: TabButtonProps) {
+  const theme = useTheme();
+  const iconColor = isFocused ? theme.text : theme.textSecondary;
+
   return (
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
         style={styles.tabButtonView}>
+        <Icon size={16} color={iconColor} />
         <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
           {children}
         </ThemedText>
@@ -113,6 +131,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
     paddingHorizontal: Spacing.three,
     borderRadius: Spacing.three,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   externalPressable: {
     flexDirection: 'row',

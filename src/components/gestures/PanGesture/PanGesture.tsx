@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/themed-view";
 import { ReactNode } from "react";
 import { LayoutChangeEvent, StyleProp, View, ViewStyle } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
@@ -9,6 +10,7 @@ const PanGesture = ({
   pan,
   onLayout,
   animatedStyles,
+  disabled = false,
 }: {
   children: ReactNode;
   styles: {
@@ -19,14 +21,19 @@ const PanGesture = ({
   pan: ReturnType<typeof usePanGesture>;
   onLayout?: (event: LayoutChangeEvent) => void;
   animatedStyles?: AnimatedStyle<ViewStyle>;
+  disabled?: boolean;
 }) => {
   return (
     <View style={styles.root}>
       <View onLayout={onLayout} style={styles.container}>
         <GestureDetector gesture={pan}>
-          <Animated.View style={[styles.box, animatedStyles]}>
-            {children}
-          </Animated.View>
+          {disabled ? (
+            <ThemedView style={[styles.box]}>{children}</ThemedView>
+          ) : (
+            <Animated.View style={[styles.box, animatedStyles]}>
+              {children}
+            </Animated.View>
+          )}
         </GestureDetector>
       </View>
     </View>

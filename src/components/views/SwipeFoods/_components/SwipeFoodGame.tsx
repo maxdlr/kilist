@@ -14,7 +14,7 @@ export interface FoodHistoryCreateType {
 
 const SwipeFoodGame = () => {
   const [isComplete, setIsComplete] = useState(false);
-  const { foods, isLoading, mutateFoods } = useSwipeFoods();
+  const { swipes, foods, isLoading, mutateFoods, foodsCount } = useSwipeFoods();
 
   const tap = useTapGesture({
     onActivate: () => {
@@ -54,7 +54,7 @@ const SwipeFoodGame = () => {
     );
   }
 
-  if (!foods || foods.length === 0) {
+  if (!swipes || swipes.length === 0) {
     return (
       <ThemedView
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -75,9 +75,10 @@ const SwipeFoodGame = () => {
         flex: 1,
         justifyContent: "flex-end",
         alignItems: "center",
+        paddingBottom: swipes.length * 30,
       }}
     >
-      <SwipeFoods foods={foods} onComplete={handleOnComplete} />
+      <SwipeFoods foods={swipes} onComplete={handleOnComplete} />
     </ThemedView>
   );
 };

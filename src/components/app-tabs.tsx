@@ -16,40 +16,40 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
-          renderingMode="template"
+          sf={{ default: "house", selected: "house.fill" }}
+          md="home"
         />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="list">
         <NativeTabs.Trigger.Label>Liste</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
-          renderingMode="template"
+          sf={{ default: "list.bullet", selected: "list.bullet" }}
+          md="list"
         />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="shop">
         <NativeTabs.Trigger.Label>Shop</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
-          renderingMode="template"
+          sf={{ default: "cart", selected: "cart.fill" }}
+          md="shopping_cart"
         />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="swipe">
         <NativeTabs.Trigger.Label>Swipe</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/explore.png")}
-          renderingMode="template"
+          sf={{ default: "square.stack", selected: "square.stack.fill" }}
+          md="layers"
         />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="account">
         <NativeTabs.Trigger.Label>Account</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
-          renderingMode="template"
+          sf={{ default: "person", selected: "person.fill" }}
+          md="person"
         />
       </NativeTabs.Trigger>
     </NativeTabs>
