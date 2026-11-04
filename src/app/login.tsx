@@ -1,4 +1,5 @@
 import KilButton from "@/components/elements/KilButton";
+import KilToggleButton from "@/components/elements/KilToggleButton";
 import FormInput from "@/components/elements/FormInput";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import { ThemedText } from "@/components/themed-text";
@@ -71,6 +72,15 @@ const LoginScreen = () => {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
+        <KilToggleButton
+          value={mode}
+          onChange={setMode}
+          options={[
+            { label: "Log in", value: "login" },
+            { label: "Sign up", value: "signup" },
+          ]}
+        />
+
         <ThemedText type="title">{isSignup ? "Sign up" : "Log in"}</ThemedText>
 
         <FormInput
@@ -107,26 +117,14 @@ const LoginScreen = () => {
         {isSignup && (
           <ThemedView style={styles.householdSection}>
             <ThemedText type="small">Household</ThemedText>
-            <ThemedView style={styles.householdToggle}>
-              <KilButton
-                label="Create new"
-                onTouch={() => setHouseholdChoice("create")}
-                style={{
-                  container: {
-                    opacity: householdChoice === "create" ? 1 : 0.5,
-                  },
-                }}
-              />
-              <KilButton
-                label="Join existing"
-                onTouch={() => setHouseholdChoice("join")}
-                style={{
-                  container: {
-                    opacity: householdChoice === "join" ? 1 : 0.5,
-                  },
-                }}
-              />
-            </ThemedView>
+            <KilToggleButton
+              value={householdChoice}
+              onChange={setHouseholdChoice}
+              options={[
+                { label: "Create new", value: "create" },
+                { label: "Join existing", value: "join" },
+              ]}
+            />
 
             {householdChoice === "create" ? (
               <FormInput
@@ -167,15 +165,6 @@ const LoginScreen = () => {
           label={isSignup ? "Sign up" : "Log in"}
           onTouch={handleSubmit}
         />
-
-        <ThemedText
-          type="link"
-          onPress={() => setMode(isSignup ? "login" : "signup")}
-        >
-          {isSignup
-            ? "Already have an account? Log in"
-            : "No account yet? Sign up"}
-        </ThemedText>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -196,10 +185,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.four,
   },
   householdSection: {
-    gap: Spacing.two,
-  },
-  householdToggle: {
-    flexDirection: "row",
     gap: Spacing.two,
   },
 });

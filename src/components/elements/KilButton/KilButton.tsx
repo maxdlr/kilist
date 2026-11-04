@@ -58,6 +58,11 @@ const KilButton = ({
 
 const styles = StyleSheet.create({
   container: {
+    // Adapt to the container automatically: full width in a column, and an
+    // equal share in a row. flexShrink lets side-by-side buttons compress to
+    // fit instead of overflowing, so call sites don't need to add flex sizing.
+    width: "100%",
+    flexShrink: 1,
     paddingVertical: Spacing.three,
     borderRadius: Spacing.six,
     backgroundColor: "#007AFF",

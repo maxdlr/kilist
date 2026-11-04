@@ -25,10 +25,21 @@ export interface ShopListType {
   boughtFoods: FoodType[];
 }
 
+export interface HouseholdMemberType {
+  id: number;
+  username: string;
+  email: string;
+  type: "user" | "admin";
+}
+
 export interface HouseholdType {
   id: number;
   name?: string;
   joinCode: string;
+}
+
+export interface HouseholdWithMembersType extends HouseholdType {
+  members: HouseholdMemberType[];
 }
 
 export interface UserType {
