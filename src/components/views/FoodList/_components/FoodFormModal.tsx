@@ -1,31 +1,26 @@
-import KilButton from "@/components/elements/KilButton";
+import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
+import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
-import { Modal, StyleSheet } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { StyleSheet, View } from "react-native";
 
-const FoodFormModal = ({
-  visible,
+type FoodFormData = { name: string; description?: string };
+
+const FoodForm = ({
   title,
-  initialName = "",
-  initialDescription = "",
+  initialName,
+  initialDescription,
   onSubmit,
   onClose,
 }: {
-  visible: boolean;
   title: string;
-  initialName?: string;
-  initialDescription?: string;
-  onSubmit: (data: { name: string; description?: string }) => Promise<boolean>;
+  initialName: string;
+  initialDescription: string;
+  onSubmit: (data: FoodFormData) => Promise<boolean>;
   onClose: () => void;
 }) => {
-  const theme = useTheme();
-  // Modal unmounts its children when visible is false, so these naturally
-  // reset to the latest initial values each time it reopens.
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
 
@@ -36,47 +31,54 @@ const FoodFormModal = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior="padding"
-        automaticOffset
-      >
-        <ThemedView style={[styles.card, { backgroundColor: theme.background }]}>
-          <ThemedText type="smallBold">{title}</ThemedText>
+    <>
+      <ThemedText type="smallBold">{title}</ThemedText>
 
-          <FormInput label="Name" value={name} onChangeText={setName} />
-          <FormInput
-            label="Description"
-            value={description}
-            onChangeText={setDescription}
-          />
+      <FormInput label="Name" value={name} onChangeText={setName} />
+      <FormInput
+        label="Description"
+        value={description}
+        onChangeText={setDescription}
+      />
 
-          <ThemedView style={styles.actions}>
-            <KilButton label="Cancel" onTouch={onClose} />
-            <KilButton label="Save" onTouch={handleSubmit} />
-          </ThemedView>
-        </ThemedView>
-      </KeyboardAvoidingView>
-    </Modal>
+      <View style={styles.actions}>
+        <KilButton label="Cancel" onTouch={onClose} />
+        <KilButton label="Save" onTouch={handleSubmit} />
+      </View>
+    </>
   );
 };
 
+const FoodFormModal = ({
+  visible,
+  title,
+  formKey,
+  initialName = "",
+  initialDescription = "",
+  onSubmit,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  formKey?: string | number;
+  initialName?: string;
+  initialDescription?: string;
+  onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onClose: () => void;
+}) => (
+  <BottomPanel visible={visible} onClose={onClose}>
+    <FoodForm
+      key={formKey}
+      title={title}
+      initialName={initialName}
+      initialDescription={initialDescription}
+      onSubmit={onSubmit}
+      onClose={onClose}
+    />
+  </BottomPanel>
+);
+
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: Spacing.four,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 400,
-    gap: Spacing.three,
-    padding: Spacing.four,
-    borderRadius: Spacing.three,
-  },
   actions: {
     flexDirection: "row",
     justifyContent: "flex-end",

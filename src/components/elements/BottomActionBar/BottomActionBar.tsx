@@ -1,38 +1,21 @@
 import { ThemedView } from "@/components/themed-view";
 import { Fonts, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
+import { Pressable, StyleSheet, TextInput } from "react-native";
 import { EllipsisVerticalIcon } from "react-native-heroicons/solid";
-
-export type BottomActionBarMenuAction = {
-  label: string;
-  onPress: () => void;
-  destructive?: boolean;
-};
 
 const BottomActionBar = ({
   searchValue,
   onSearchChange,
   searchPlaceholder = "Search",
-  menuActions,
+  onOpenMenu,
 }: {
   searchValue: string;
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
-  menuActions: BottomActionBarMenuAction[];
+  onOpenMenu: () => void;
 }) => {
   const theme = useTheme();
-
-  const openMenu = () => {
-    Alert.alert("", undefined, [
-      ...menuActions.map((action) => ({
-        text: action.label,
-        style: action.destructive ? ("destructive" as const) : undefined,
-        onPress: action.onPress,
-      })),
-      { text: "Cancel", style: "cancel" as const },
-    ]);
-  };
 
   return (
     <ThemedView
@@ -49,7 +32,12 @@ const BottomActionBar = ({
         style={[styles.input, { color: theme.text, fontFamily: Fonts.sans }]}
       />
 
-      <Pressable onPress={openMenu} style={styles.menuButton}>
+      <Pressable
+        onPress={onOpenMenu}
+        style={styles.menuButton}
+        accessibilityRole="button"
+        accessibilityLabel="Menu"
+      >
         <EllipsisVerticalIcon size={24} color={theme.text} />
       </Pressable>
     </ThemedView>

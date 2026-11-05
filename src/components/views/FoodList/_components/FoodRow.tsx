@@ -7,7 +7,6 @@ import { useTheme } from "@/hooks/use-theme";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import {
-  Alert,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -25,16 +24,14 @@ const FoodRow = ({
   isSelectMode = false,
   isSelected = false,
   onToggleSelect,
-  onEdit,
-  onDelete,
+  onOpenMenu,
 }: {
   food: FoodType;
   style?: StyleProp<ViewStyle>;
   isSelectMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (foodId: number) => void;
-  onEdit?: (food: FoodType) => void;
-  onDelete?: (food: FoodType) => void;
+  onOpenMenu?: (food: FoodType) => void;
 }) => {
   const { id, name, inStockScore, foodHistories, icon } = food;
   const theme = useTheme();
@@ -42,15 +39,7 @@ const FoodRow = ({
 
   const openMenu = () => {
     if (isSelectMode) return;
-    Alert.alert(name, undefined, [
-      { text: "Edit", onPress: () => onEdit?.(food) },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => onDelete?.(food),
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    onOpenMenu?.(food);
   };
 
   const longPress = useLongPressGesture({

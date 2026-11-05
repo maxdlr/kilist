@@ -1,35 +1,25 @@
+import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import KilToggleButton from "@/components/elements/KilToggleButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
 import { HouseholdChoice } from "@/providers/AuthProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
-import { Modal, StyleSheet } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated";
+import { StyleSheet, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
-const SwitchHouseholdModal = ({
-  visible,
+const SwitchHouseholdForm = ({
   onSubmit,
   onClose,
 }: {
-  visible: boolean;
   onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
   onClose: () => void;
 }) => {
-  const theme = useTheme();
   const { showToast } = useToast();
 
-  // Modal unmounts its children when hidden, so these reset on each reopen.
   const [choice, setChoice] = useState<"join" | "create">("join");
   const [joinCode, setJoinCode] = useState("");
   const [householdName, setHouseholdName] = useState("");
@@ -53,8 +43,7 @@ const SwitchHouseholdModal = ({
     if (success) onClose();
   };
 
-  // Each swappable block fades in/out on mount/unmount; a shared transition
-  // duration keeps the crossfade and the card's resize visually in sync.
+  // Each swappable block fades in/out on mount/unmount.
   const SWAP_DURATION = 200;
 
   const renderBody = () => {
@@ -117,59 +106,43 @@ const SwitchHouseholdModal = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior="padding"
-        automaticOffset
-      >
-        <Animated.View
-          layout={LinearTransition.duration(SWAP_DURATION)}
-          style={[styles.card, { backgroundColor: theme.background }]}
-        >
-          <ThemedText type="smallBold">Switch household</ThemedText>
+    <>
+      <ThemedText type="smallBold">Switch household</ThemedText>
 
-          <KilToggleButton
-            value={choice}
-            onChange={setChoice}
-            options={[
-              { label: "Join existing", value: "join" },
-              { label: "Create new", value: "create" },
-            ]}
-          />
+      <KilToggleButton
+        value={choice}
+        onChange={setChoice}
+        options={[
+          { label: "Join existing", value: "join" },
+          { label: "Create new", value: "create" },
+        ]}
+      />
 
-          {renderBody()}
+      {renderBody()}
 
-          <ThemedView style={styles.actions}>
-            <KilButton label="Cancel" onTouch={onClose} />
-            <KilButton label="Switch" onTouch={handleSubmit} />
-          </ThemedView>
-        </Animated.View>
-      </KeyboardAvoidingView>
-    </Modal>
+      <View style={styles.actions}>
+        <KilButton label="Cancel" onTouch={onClose} />
+        <KilButton label="Switch" onTouch={handleSubmit} />
+      </View>
+    </>
   );
 };
 
+const SwitchHouseholdModal = ({
+  visible,
+  onSubmit,
+  onClose,
+}: {
+  visible: boolean;
+  onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
+  onClose: () => void;
+}) => (
+  <BottomPanel visible={visible} onClose={onClose}>
+    <SwitchHouseholdForm onSubmit={onSubmit} onClose={onClose} />
+  </BottomPanel>
+);
+
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: Spacing.four,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 400,
-    gap: Spacing.three,
-    padding: Spacing.four,
-    borderRadius: Spacing.three,
-  },
   actions: {
     display: "flex",
     width: "100%",
