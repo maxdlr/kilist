@@ -52,6 +52,7 @@ const FormInput = ({
             {
               color: theme.text,
               backgroundColor: theme.backgroundElement,
+              borderColor: theme.text,
               fontFamily: Fonts.sans,
             },
             style,
@@ -89,9 +90,10 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   input: {
+    borderWidth: Spacing.one / 2,
     paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    borderRadius: Spacing.five,
     fontSize: 16,
   },
   passwordInput: {

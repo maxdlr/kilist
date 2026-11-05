@@ -1,7 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Pressable, StyleSheet, View } from "react-native";
+import AnimationService from "@/services/animation";
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+
+const SLIDE_DURATION = 200;
 
 export type KilToggleOption<T extends string> = {
   label: string;
@@ -30,15 +38,36 @@ const KilToggleButton = <T extends string>({
   };
 }) => {
   const theme = useTheme();
+  const segmentWidth = useSharedValue(0);
+  const selectedIndex = options.findIndex((option) => option.value === value);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    segmentWidth.value =
+      (event.nativeEvent.layout.width - 2 * Spacing.half) / options.length;
+  };
+
+  const highlightStyle = useAnimatedStyle(() => ({
+    width: segmentWidth.value,
+    transform: [
+      {
+        translateX: withTiming(selectedIndex * segmentWidth.value, {
+          duration: SLIDE_DURATION,
+          easing: AnimationService.config.easing,
+        }),
+      },
+    ],
+  }));
 
   return (
     <View
+      onLayout={handleLayout}
       style={[
         styles.track,
         { backgroundColor: theme.backgroundElement },
         style?.container,
       ]}
     >
+      <Animated.View style={[styles.highlight, highlightStyle]} />
       {options.map((option) => {
         const isSelected = option.value === value;
         return (
@@ -47,11 +76,7 @@ const KilToggleButton = <T extends string>({
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            style={[
-              styles.segment,
-              isSelected && styles.segmentSelected,
-              style?.segment,
-            ]}
+            style={[styles.segment, style?.segment]}
           >
             <ThemedText
               type="default"
@@ -87,7 +112,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   // Selected segment matches the app's primary button color (see KilButton).
-  segmentSelected: {
+  highlight: {
+    position: "absolute",
+    top: Spacing.half,
+    bottom: Spacing.half,
+    left: Spacing.half,
+    borderRadius: Spacing.six,
     backgroundColor: "#007AFF",
   },
   label: {
