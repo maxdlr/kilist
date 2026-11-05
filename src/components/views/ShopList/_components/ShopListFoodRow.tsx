@@ -78,11 +78,7 @@ const ShopListFoodRow = ({
           </ThemedText>
         </View>
 
-        <Pill
-          label={display.label}
-          color={display.color[60]}
-          style={{ color: display.color[90] }}
-        />
+        <Pill display={display} />
       </SwipeGesture>
     </ThemedView>
   );

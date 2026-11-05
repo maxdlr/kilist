@@ -6,12 +6,7 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
-import {
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import {
   GestureDetector,
   useLongPressGesture,
@@ -33,7 +28,7 @@ const FoodRow = ({
   onToggleSelect?: (foodId: number) => void;
   onOpenMenu?: (food: FoodType) => void;
 }) => {
-  const { id, name, inStockScore, foodHistories, icon } = food;
+  const { id, name, inStockScore, icon } = food;
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
 
@@ -99,7 +94,7 @@ const FoodRow = ({
               gap: Spacing.four,
             }}
           >
-            <Pill label={display.label} color={display.color[20]} />
+            <Pill label={display.label} display={display} />
           </ThemedView>
         </ThemedView>
       </Pressable>
@@ -132,8 +127,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
 
-  name: {
-  },
+  name: {},
 });
 
 export default FoodRow;

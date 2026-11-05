@@ -1,25 +1,29 @@
 import { ThemedText } from "@/components/themed-text";
+import { FoodTypeDisplay } from "@/utils/scoreUtils";
 import { StyleProp, StyleSheet, TextStyle } from "react-native";
 
 const Pill = ({
   label,
   color,
   style,
+  display,
 }: {
-  label: string;
+  label?: string;
   color?: string;
   style?: StyleProp<TextStyle>;
+  display?: FoodTypeDisplay;
 }) => {
   return (
     <ThemedText
       type="small"
       style={{
         ...styles.label,
-        backgroundColor: color ?? "transparent",
+        backgroundColor: display?.color[20] ?? color ?? "transparent",
+        color: display?.color[80] ?? color ?? "transparent",
         ...style,
       }}
     >
-      {label}
+      {display?.label ?? label}
     </ThemedText>
   );
 };
