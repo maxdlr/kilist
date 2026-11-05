@@ -2,7 +2,7 @@
   "expo": {
     "name": "kilist",
     "slug": "kilist",
-    "version": "1.0.0",
+    "version": "0.1.0-alpha.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kilist",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.kilist"
+      "package": "com.anonymous.kilist",
+      "versionCode": 2
     },
     "web": {
       "output": "static",

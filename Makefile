@@ -19,6 +19,23 @@ define EXEC
     $(DOCKER) exec -w / $(DB_CONTAINER_NAME) $(1)
 endef
 
+RELEASE_API_URL ?= https://kilist.maxdlr.com/api
+RELEASE_ABIS ?= arm64-v8a,armeabi-v7a
+RELEASE_DIR ?= $(HOME)/Desktop
+RELEASE_APK = android/app/build/outputs/apk/release/app-release.apk
+
+release: ## Build a release APK against the production API
+	$(eval VERSION := $(shell node -p "require('./app.json').expo.version"))
+	$(eval COMMIT := $(shell git rev-parse --short HEAD)$(shell git diff --quiet HEAD || echo -dirty))
+	echo "Building Kilist $(VERSION) ($(COMMIT)) for $(RELEASE_API_URL)"
+	CI=1 EXPO_NO_GIT_STATUS=1 npx expo prebuild -p android --no-install
+	cd android && EXPO_PUBLIC_API_URL=$(RELEASE_API_URL) NODE_ENV=production ./gradlew assembleRelease -PreactNativeArchitectures=$(RELEASE_ABIS) --console=plain
+	unzip -p $(RELEASE_APK) assets/index.android.bundle | grep -aq '$(RELEASE_API_URL)' || { echo "✘ APK does not contain $(RELEASE_API_URL)"; exit 1; }
+	! unzip -p $(RELEASE_APK) assets/index.android.bundle | grep -aq '10\.0\.2\.2' || { echo "✘ APK still points at the emulator"; exit 1; }
+	mkdir -p $(RELEASE_DIR)
+	cp $(RELEASE_APK) $(RELEASE_DIR)/kilist-$(VERSION)-$(COMMIT).apk
+	echo "✔ $(RELEASE_DIR)/kilist-$(VERSION)-$(COMMIT).apk"
+
 start-android: ## Start the android emulator
 	npx expo run:android
 
