@@ -1,7 +1,9 @@
+import FoodIcon from "@/components/elements/FoodIcon";
 import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import AnimationService from "@/services/animation";
 import { FoodBankItemType } from "@/types/model";
 import {
   Dimensions,
@@ -122,8 +124,15 @@ const OnboardingSwipeCard = ({
 
   const isTop = index === 0;
 
+  const deckStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: withTiming(index ? 1 - 0.1 * index : 1, AnimationService.config) },
+      { translateY: withTiming(index * 80, AnimationService.config) },
+    ],
+  }));
+
   return (
-    <Animated.View style={[styles.root, { zIndex: 100 - index }]}>
+    <Animated.View style={[styles.root, { zIndex: 100 - index }, deckStyle]}>
       <PanGesture
         disabled={!isTop}
         styles={{
@@ -140,6 +149,10 @@ const OnboardingSwipeCard = ({
         onLayout={handleLayout}
         animatedStyles={cardStyle}
       >
+        <Animated.View style={styles.iconContainer} pointerEvents="none">
+          <FoodIcon name={item.icon} />
+        </Animated.View>
+
         <Animated.View style={styles.badgeContainer}>
           <Animated.Text
             style={[
@@ -210,10 +223,20 @@ const styles = StyleSheet.create({
   },
   box: {
     width: SCREEN_WIDTH * 0.9,
-    height: SCREEN_HEIGHT * 0.6,
+    height: SCREEN_HEIGHT * 0.55,
     borderRadius: 32,
     overflow: "hidden",
     justifyContent: "flex-end",
+  },
+  iconContainer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: SCREEN_HEIGHT * 0.1,
   },
   badgeContainer: {
     position: "absolute",

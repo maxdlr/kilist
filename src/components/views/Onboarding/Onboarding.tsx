@@ -102,9 +102,7 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
           <View style={styles.deck}>
             {remaining
               .slice(0, 3)
-              .map((item, index) => ({ item, index }))
-              .reverse()
-              .map(({ item, index }) => (
+              .map((item, index) => (
                 <OnboardingSwipeCard
                   key={item.name}
                   item={item}
@@ -152,6 +150,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    paddingBottom: 90,
   },
 });
 

@@ -1,3 +1,4 @@
+import FoodIcon from "@/components/elements/FoodIcon";
 import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
@@ -13,10 +14,10 @@ import {
 } from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
 import {
+  ArchiveBoxIcon,
+  ArchiveBoxXMarkIcon,
   EllipsisVerticalIcon,
-  HeartIcon,
-  StarIcon,
-  XMarkIcon,
+  QuestionMarkCircleIcon,
 } from "react-native-heroicons/solid";
 import Animated, {
   clamp,
@@ -175,7 +176,6 @@ const SwipeFoodCard = ({ food, onSwipe, i }: SwipeFoodCardProps) => {
           },
           container: {
             ...styles.container,
-            // opacity: 0.4,
           },
           root: { flex: 1 },
         }}
@@ -189,6 +189,12 @@ const SwipeFoodCard = ({ food, onSwipe, i }: SwipeFoodCardProps) => {
             style={styles.foodImage}
             contentFit="cover"
           />
+        )}
+
+        {!food.imageUrl && (
+          <Animated.View style={styles.iconContainer} pointerEvents="none">
+            <FoodIcon name={food.icon} />
+          </Animated.View>
         )}
 
         <Animated.View style={styles.topBar}>
@@ -234,8 +240,11 @@ const SwipeFoodCard = ({ food, onSwipe, i }: SwipeFoodCardProps) => {
 
         <Animated.View style={styles.bottomSection}>
           <Animated.View style={styles.infoOverlay}>
-            <ThemedText type="subtitle" style={styles.foodName}>
-              {food.name} - {food.id}
+            <ThemedText
+              type="subtitle"
+              style={{ ...styles.foodName, color: foodDisplay.color[30] }}
+            >
+              {food.name}
             </ThemedText>
             {food.description && (
               <ThemedText
@@ -249,26 +258,47 @@ const SwipeFoodCard = ({ food, onSwipe, i }: SwipeFoodCardProps) => {
           </Animated.View>
 
           <Animated.View style={styles.actionsRow}>
-            <Pressable
-              style={[styles.actionButton, styles.actionButtonSmall]}
-              onPress={() => flingTo("left")}
-            >
-              <XMarkIcon size={24} color={theme.cancel[60]} />
-            </Pressable>
+            <Animated.View style={styles.actionItem}>
+              <Pressable
+                style={[styles.actionButton, styles.actionButtonSmall]}
+                onPress={() => flingTo("left")}
+                accessibilityRole="button"
+                accessibilityLabel="Out of stock"
+              >
+                <ArchiveBoxXMarkIcon size={24} color={theme.cancel[60]} />
+              </Pressable>
+              <ThemedText type="small" style={styles.actionLabel}>
+                Out
+              </ThemedText>
+            </Animated.View>
 
-            <Pressable
-              style={[styles.actionButton, styles.actionButtonLarge]}
-              onPress={() => flingTo("up")}
-            >
-              <StarIcon size={22} color={theme.textSecondary} />
-            </Pressable>
+            <Animated.View style={styles.actionItem}>
+              <Pressable
+                style={[styles.actionButton, styles.actionButtonLarge]}
+                onPress={() => flingTo("up")}
+                accessibilityRole="button"
+                accessibilityLabel="Not sure"
+              >
+                <QuestionMarkCircleIcon size={22} color={theme.textSecondary} />
+              </Pressable>
+              <ThemedText type="small" style={styles.actionLabel}>
+                Not sure
+              </ThemedText>
+            </Animated.View>
 
-            <Pressable
-              style={[styles.actionButton, styles.actionButtonSmall]}
-              onPress={() => flingTo("right")}
-            >
-              <HeartIcon size={24} color={theme.confirm[60]} />
-            </Pressable>
+            <Animated.View style={styles.actionItem}>
+              <Pressable
+                style={[styles.actionButton, styles.actionButtonSmall]}
+                onPress={() => flingTo("right")}
+                accessibilityRole="button"
+                accessibilityLabel="In stock"
+              >
+                <ArchiveBoxIcon size={24} color={theme.confirm[60]} />
+              </Pressable>
+              <ThemedText type="small" style={styles.actionLabel}>
+                In stock
+              </ThemedText>
+            </Animated.View>
           </Animated.View>
         </Animated.View>
       </PanGesture>
@@ -294,6 +324,16 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     overflow: "hidden",
     justifyContent: "flex-end",
+  },
+  iconContainer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 150,
   },
   foodImage: {
     position: "absolute",
@@ -348,6 +388,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.35)",
   },
   foodName: {
+    textAlign: "center",
     color: "#FFFFFF",
   },
   foodDescription: {
@@ -359,9 +400,17 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-    gap: Spacing.four,
+    alignItems: "flex-end",
+    gap: Spacing.two,
     backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  actionItem: {
+    width: 80,
+    alignItems: "center",
+    gap: Spacing.one,
+  },
+  actionLabel: {
+    color: "#FFFFFF",
   },
   actionButton: {
     borderRadius: 100,

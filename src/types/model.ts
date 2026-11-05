@@ -11,6 +11,7 @@ export interface FoodType {
   id: number;
   name: string;
   imageUrl?: string;
+  icon?: string | null;
   lists: ListType[] | number[];
   description?: string;
   inStockScore: number;
@@ -34,6 +35,7 @@ export interface HouseholdMemberType {
 export interface FoodBankItemType {
   name: string;
   description?: string;
+  icon?: string;
 }
 
 export interface HouseholdType {

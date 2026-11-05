@@ -1,3 +1,4 @@
+import FoodIcon from "@/components/elements/FoodIcon";
 import Pill from "@/components/elements/Pill";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -5,8 +6,17 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
-import { Alert, Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
-import { GestureDetector, useLongPressGesture } from "react-native-gesture-handler";
+import {
+  Alert,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from "react-native";
+import {
+  GestureDetector,
+  useLongPressGesture,
+} from "react-native-gesture-handler";
 import { scheduleOnRN } from "react-native-worklets";
 
 const FoodRow = ({
@@ -26,7 +36,7 @@ const FoodRow = ({
   onEdit?: (food: FoodType) => void;
   onDelete?: (food: FoodType) => void;
 }) => {
-  const { id, name, inStockScore, foodHistories } = food;
+  const { id, name, inStockScore, foodHistories, icon } = food;
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
 
@@ -60,7 +70,9 @@ const FoodRow = ({
           style={{
             ...styles.item,
 
-            backgroundColor: isSelected ? theme.backgroundSelected : display.color[50],
+            backgroundColor: isSelected
+              ? theme.backgroundSelected
+              : display.color[50],
 
             height: 70,
 
@@ -81,7 +93,11 @@ const FoodRow = ({
                 ]}
               />
             )}
-            <ThemedText type="default" style={styles.name}>
+            <FoodIcon name={icon} size={36} />
+            <ThemedText
+              type="default"
+              style={{ ...styles.name, color: display.color[90] }}
+            >
               {name}
             </ThemedText>
           </ThemedView>
@@ -94,7 +110,6 @@ const FoodRow = ({
               gap: Spacing.four,
             }}
           >
-            <ThemedText type="small">{foodHistories?.length} swipes</ThemedText>
             <Pill label={display.label} color={display.color[20]} />
           </ThemedView>
         </ThemedView>
@@ -118,6 +133,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.three,
+    flexShrink: 1,
   },
 
   checkbox: {

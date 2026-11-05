@@ -1,3 +1,4 @@
+import FoodIcon from "@/components/elements/FoodIcon";
 import Pill from "@/components/elements/Pill";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import { ThemedText } from "@/components/themed-text";
@@ -11,7 +12,7 @@ import {
   inStockScoreToDisplay,
 } from "@/utils/scoreUtils";
 import { useState } from "react";
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import ShopListFoodRowSwipeBg from "./ShopListFoodRowSwipeBg";
 
 const ShopListFoodRow = ({
@@ -28,7 +29,7 @@ const ShopListFoodRow = ({
   onOptions?: (foodId: number) => void;
 }) => {
   const [isSwipingRight, setIsSwipingRight] = useState<boolean>();
-  const { id, name, inStockScore } = food;
+  const { id, name, inStockScore, icon } = food;
   const { foods } = useShopList();
   const theme = useTheme();
   const display = inStockScoreToDisplay(inStockScore, theme);
@@ -59,20 +60,23 @@ const ShopListFoodRow = ({
           },
         }}
       >
-        <ThemedText
-          style={{
-            ...styles.name,
-            color: display.color[90],
-            fontSize: calculateValueFromInStockScore(
-              inStockScore,
-              foods,
-              20,
-              26,
-            ),
-          }}
-        >
-          {name}
-        </ThemedText>
+        <View style={styles.nameSection}>
+          <FoodIcon name={icon} size={32} />
+          <ThemedText
+            style={{
+              ...styles.name,
+              color: display.color[90],
+              fontSize: calculateValueFromInStockScore(
+                inStockScore,
+                foods,
+                20,
+                26,
+              ),
+            }}
+          >
+            {name}
+          </ThemedText>
+        </View>
 
         <Pill
           label={display.label}
@@ -108,6 +112,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+
+  nameSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+    flexShrink: 1,
   },
 
   name: {

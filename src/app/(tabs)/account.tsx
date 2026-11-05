@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   Share,
@@ -65,6 +66,14 @@ const AccountScreen = () => {
       });
     } catch {
       showToast("Couldn't open the share menu");
+    }
+  };
+
+  const handleOpenIcons8 = async () => {
+    try {
+      await Linking.openURL("https://icons8.com");
+    } catch {
+      showToast("Couldn't open the link");
     }
   };
 
@@ -142,6 +151,17 @@ const AccountScreen = () => {
           showChevron
         />
         <ActionRow label="Log out" onPress={handleLogout} />
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.heading}>
+          Credits
+        </ThemedText>
+        <ActionRow
+          label="Icons by Icons8"
+          onPress={handleOpenIcons8}
+          showChevron
+        />
       </View>
 
       {user.type !== "admin" && (
