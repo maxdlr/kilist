@@ -28,7 +28,6 @@ export interface ShopListType {
 export interface HouseholdMemberType {
   id: number;
   username: string;
-  email: string;
   type: "user" | "admin";
 }
 

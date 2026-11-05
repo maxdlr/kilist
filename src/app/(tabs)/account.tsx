@@ -1,6 +1,7 @@
-import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import AccountRow from "@/components/views/Account/_components/AccountRow";
+import Avatar from "@/components/views/Account/_components/Avatar";
+import InviteQrModal from "@/components/views/Account/_components/InviteQrModal";
 import SwitchHouseholdModal from "@/components/views/Account/_components/SwitchHouseholdModal";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
@@ -9,8 +10,15 @@ import useHousehold from "@/providers/HouseholdProvider";
 import useToast from "@/providers/ToastProvider";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
+import { QrCodeIcon, ShareIcon } from "react-native-heroicons/solid";
 
 const AccountScreen = () => {
   const { user, logout, deleteAccount } = useAuth();
@@ -18,6 +26,7 @@ const AccountScreen = () => {
   const { showToast } = useToast();
   const theme = useTheme();
   const [switchVisible, setSwitchVisible] = useState(false);
+  const [qrVisible, setQrVisible] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -49,58 +58,107 @@ const AccountScreen = () => {
   const householdName = household?.name ?? user.household.name;
   const members = household?.members ?? [];
 
+  const handleShareCode = async () => {
+    try {
+      await Share.share({
+        message: `Join my household on Kilist with this code: ${joinCode}`,
+      });
+    } catch {
+      showToast("Couldn't open the share menu");
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <ThemedText type="title">Account</ThemedText>
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={styles.container}
+    >
+      <View style={styles.profile}>
+        <Avatar name={user.username} size={56} />
+        <View style={styles.profileText}>
+          <ThemedText type="subtitle" numberOfLines={1}>
+            {user.username}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+            {user.email}
+          </ThemedText>
+        </View>
+      </View>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">{user.username}</ThemedText>
-        <ThemedText type="small">{user.email}</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">{householdName || "Household"}</ThemedText>
-        <ThemedText type="small">Code: {joinCode}</ThemedText>
-        <ThemedView style={styles.qrContainer}>
-          <QRCode
-            value={joinCode}
-            size={160}
-            color={theme.text}
-            backgroundColor={theme.background}
-          />
-        </ThemedView>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="smallBold">
-          Members{members.length ? ` (${members.length})` : ""}
+      <View style={styles.section}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.heading}>
+          Household
         </ThemedText>
-        {members.map((member) => (
-          <ThemedView key={member.id} style={styles.memberRow}>
-            <ThemedText>
-              {member.username}
-              {member.id === user.id ? " (you)" : ""}
-            </ThemedText>
-            <ThemedText type="small">{member.email}</ThemedText>
-          </ThemedView>
-        ))}
-      </ThemedView>
+        <ThemedText type="subtitle">{householdName || "Household"}</ThemedText>
 
-      <KilButton
-        label="Join or create another household"
-        onTouch={() => setSwitchVisible(true)}
-      />
+        <View style={styles.codeRow}>
+          <ThemedText type="small">Code: {joinCode}</ThemedText>
+          <View style={styles.codeActions}>
+            <Pressable
+              onPress={handleShareCode}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Share household code"
+            >
+              <ShareIcon size={22} color={theme.text} />
+            </Pressable>
+            <Pressable
+              onPress={() => setQrVisible(true)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Show household QR code"
+            >
+              <QrCodeIcon size={22} color={theme.text} />
+            </Pressable>
+          </View>
+        </View>
 
-      <KilButton
-        label="Run setup again"
-        onTouch={() => router.push("/onboarding")}
-      />
+        <View style={styles.members}>
+          {members.map((member) => (
+            <View key={member.id} style={styles.memberRow}>
+              <Avatar name={member.username} />
+              <ThemedText numberOfLines={1} style={styles.memberName}>
+                {member.username}
+                {member.id === user.id ? " (you)" : ""}
+              </ThemedText>
+            </View>
+          ))}
+        </View>
 
-      <KilButton label="Log out" onTouch={handleLogout} />
+        <AccountRow
+          label="Switch household"
+          onPress={() => setSwitchVisible(true)}
+          showChevron
+        />
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.heading}>
+          Account
+        </ThemedText>
+        <AccountRow
+          label="Add suggested foods"
+          onPress={() => router.push("/onboarding")}
+          showChevron
+        />
+        <AccountRow label="Log out" onPress={handleLogout} />
+      </View>
 
       {user.type !== "admin" && (
-        <KilButton label="Delete my account" onTouch={handleDeleteAccount} />
+        <View style={styles.danger}>
+          <AccountRow
+            label="Delete my account"
+            onPress={handleDeleteAccount}
+            destructive
+          />
+        </View>
       )}
+
+      <InviteQrModal
+        visible={qrVisible}
+        joinCode={joinCode}
+        onClose={() => setQrVisible(false)}
+      />
 
       <SwitchHouseholdModal
         visible={switchVisible}
@@ -121,20 +179,49 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     width: "100%",
     alignSelf: "center",
-    gap: Spacing.four,
+    gap: Spacing.five,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.six,
   },
-  section: {
-    gap: Spacing.one,
-  },
-  qrContainer: {
+  profile: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.three,
+    gap: Spacing.three,
+  },
+  profileText: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+  section: {
+    gap: Spacing.two,
+  },
+  heading: {
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  codeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  codeActions: {
+    flexDirection: "row",
+    gap: Spacing.four,
+  },
+  members: {
+    gap: Spacing.two,
+    paddingVertical: Spacing.two,
   },
   memberRow: {
-    gap: Spacing.half,
-    paddingVertical: Spacing.one,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+  },
+  memberName: {
+    flex: 1,
+  },
+  danger: {
+    marginTop: "auto",
   },
 });
 
