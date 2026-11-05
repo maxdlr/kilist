@@ -11,7 +11,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, StyleSheet } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import FoodFormModal from "./_components/FoodFormModal";
 import FoodRow from "./_components/FoodRow";
 
@@ -121,7 +121,6 @@ const FoodList = () => {
         data={foods}
         renderItem={renderItem}
         keyExtractor={(item) => String(item.id)}
-        itemLayoutAnimation={LinearTransition.duration(250)}
         ListEmptyComponent={emptyListComponent}
         onRefresh={mutateFood}
         refreshing={isFoodLoading}

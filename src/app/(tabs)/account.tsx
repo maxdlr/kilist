@@ -9,11 +9,11 @@ import useHousehold from "@/providers/HouseholdProvider";
 import useToast from "@/providers/ToastProvider";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Alert, ScrollView, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 const AccountScreen = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const { household, switchHousehold } = useHousehold();
   const { showToast } = useToast();
   const theme = useTheme();
@@ -22,6 +22,24 @@ const AccountScreen = () => {
   const handleLogout = async () => {
     await logout();
     router.replace("/login");
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete your account?",
+      "This can't be undone. If you're the last member of your household, its lists and foods are deleted too.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const success = await deleteAccount();
+            if (success) router.replace("/login");
+          },
+        },
+      ],
+    );
   };
 
   if (!user) return null;
@@ -79,6 +97,10 @@ const AccountScreen = () => {
       />
 
       <KilButton label="Log out" onTouch={handleLogout} />
+
+      {user.type !== "admin" && (
+        <KilButton label="Delete my account" onTouch={handleDeleteAccount} />
+      )}
 
       <SwitchHouseholdModal
         visible={switchVisible}

@@ -20,6 +20,7 @@ export type AuthContextType = {
   login: (username: string, password: string) => Promise<boolean>;
   signup: (payload: SignupPayload) => Promise<boolean>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
   mutateUser: () => void;
 };
 
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   signup: async () => false,
   logout: async () => {},
+  deleteAccount: async () => false,
   mutateUser: () => {},
 });
 
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { postData: postLogin } = useAxios("/login");
   const { postData: postSignup } = useAxios("/signup");
   const { postData: postLogout } = useAxios("/logout");
+  const { deleteData: deleteUser } = useAxios("/users/delete");
 
   const login = async (username: string, password: string) => {
     const res = await postLogin({ username, password });
@@ -73,17 +76,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  const logout = async () => {
-    await postLogout({});
+  const clearSession = async () => {
     for (const key of cache.keys()) {
       cache.delete(key);
     }
     await mutateUser(undefined);
   };
 
+  const logout = async () => {
+    await postLogout({});
+    await clearSession();
+  };
+
+  const deleteAccount = async () => {
+    const res = await deleteUser({ params: { id: user?.id } });
+    if (res.error) {
+      showToast(res.error.message || "An unexpected error occurred");
+      return false;
+    }
+    await clearSession();
+    return true;
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, signup, logout, mutateUser }}
+      value={{ user, isLoading, login, signup, logout, deleteAccount, mutateUser }}
     >
       {children}
     </AuthContext.Provider>

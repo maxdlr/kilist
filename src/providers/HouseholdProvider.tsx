@@ -3,7 +3,7 @@ import useAuth, { HouseholdChoice } from "@/providers/AuthProvider";
 import useToast from "@/providers/ToastProvider";
 import { HouseholdWithMembersType } from "@/types/model";
 import React, { createContext, ReactNode } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 export type HouseholdContextType = {
   household?: HouseholdWithMembersType;
@@ -22,6 +22,7 @@ const HouseholdContext = createContext<HouseholdContextType>({
 export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
   const { showToast } = useToast();
   const { mutateUser } = useAuth();
+  const { mutate: mutateCache } = useSWRConfig();
 
   const {
     data: household,
@@ -46,7 +47,18 @@ export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
     }
     // The user's household changed, so refresh both the household view and
     // the auth user (whose household relation is now stale).
-    await Promise.all([mutateHousehold(), mutateUser()]);
+    await Promise.all([
+      mutateHousehold(),
+      mutateUser(),
+      mutateCache(
+        (key) => {
+          const url = (key as { url?: string } | undefined)?.url;
+          return url !== "/me" && url !== "/households/me";
+        },
+        undefined,
+        { revalidate: true },
+      ),
+    ]);
     return true;
   };
 

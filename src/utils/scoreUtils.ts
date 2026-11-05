@@ -61,5 +61,5 @@ export const inStockScoreToDisplay = (
 
   const key: keyof typeof map = Number(closestKey) as keyof typeof map;
 
-  return map[Number(key)];
+  return map[key];
 };

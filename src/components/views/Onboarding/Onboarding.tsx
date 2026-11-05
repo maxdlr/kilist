@@ -22,7 +22,9 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
   const theme = useTheme();
   const { showToast } = useToast();
 
-  const { data: mainList } = useSWR<ListType>({ url: "lists/read?main=true" });
+  const { data: mainList, isLoading: isListLoading } = useSWR<ListType>({
+    url: "lists/read?main=true",
+  });
   const { data: bank, isLoading } = useSWR<FoodBankItemType[]>({
     url: "/food-bank/browse",
   });
@@ -43,7 +45,11 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
       showToast("Your list isn't ready yet, try again in a moment");
       return false;
     }
-    const res = await postCreateFood({ ...data, listId: mainList.id });
+    const res = await postCreateFood({
+      ...data,
+      listId: mainList.id,
+      fromOnboarding: true,
+    });
     if (res.error) {
       showToast(res.error.message || "Couldn't add that item");
       return false;
@@ -55,13 +61,24 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
     item: FoodBankItemType,
     direction: "left" | "right",
   ) => {
-    if (direction === "right") {
-      await addFood({ name: item.name, description: item.description });
-    }
     setSwipedNames((prev) => new Set(prev).add(item.name));
+
+    if (direction !== "right") return;
+
+    const added = await addFood({
+      name: item.name,
+      description: item.description,
+    });
+    if (!added) {
+      setSwipedNames((prev) => {
+        const next = new Set(prev);
+        next.delete(item.name);
+        return next;
+      });
+    }
   };
 
-  if (isLoading) {
+  if (isLoading || isListLoading) {
     return (
       <View style={styles.centered}>
         <LoadingAnim colorScale={theme.confirm} />

@@ -1,7 +1,12 @@
 import axios from "@/services/axios";
 import { KilistResponseError } from "@/types/api";
-import { FetchRequestInit } from "expo/fetch";
+import { isCancel, type AxiosRequestConfig } from "axios";
 import { useEffect, useRef } from "react";
+
+type RequestConfig = Omit<
+  AxiosRequestConfig,
+  "url" | "method" | "data" | "signal"
+>;
 
 interface RequestResult<TRes> {
   data: TRes | undefined;
@@ -14,20 +19,20 @@ interface RequestResult<TRes> {
  * Aborts in-flight requests on unmount.
  */
 const useAxios = (url: string) => {
-  const controllerRef = useRef<AbortController | null>(null);
+  const controllersRef = useRef(new Set<AbortController>());
 
   useEffect(() => {
-    return () => controllerRef.current?.abort();
+    const controllers = controllersRef.current;
+    return () => controllers.forEach((controller) => controller.abort());
   }, []);
 
   const request = async <TRes, TBody = unknown>(
     method: "get" | "post" | "put" | "patch" | "delete",
     data?: TBody,
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ): Promise<RequestResult<TRes>> => {
-    controllerRef.current?.abort();
     const controller = new AbortController();
-    controllerRef.current = controller;
+    controllersRef.current.add(controller);
 
     try {
       const response = await axios.request<TRes>({
@@ -40,43 +45,45 @@ const useAxios = (url: string) => {
 
       return { data: response.data, error: undefined, status: response.status };
     } catch (err: unknown) {
-      if (!!err && (err as any).statusText !== "ERR_CANCELED") {
-        const error: KilistResponseError = (err as any).response?.data ?? {
-          message: "An unexpected error occurred",
-        };
-
-        return {
-          data: undefined,
-          error,
-          status: (err as any).response?.status,
-        };
+      if (isCancel(err)) {
+        return { data: undefined, error: undefined, status: undefined };
       }
 
-      return { data: undefined, error: undefined, status: undefined };
+      const error: KilistResponseError = (err as any)?.response?.data ?? {
+        message: "An unexpected error occurred",
+      };
+
+      return {
+        data: undefined,
+        error,
+        status: (err as any)?.response?.status,
+      };
+    } finally {
+      controllersRef.current.delete(controller);
     }
   };
 
   const getData = <TRes>(
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ) => request<TRes>("get", undefined, config);
 
   const postData = <TRes, TBody = unknown>(
     data: TBody,
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ) => request<TRes, TBody>("post", data, config);
 
   const putData = <TRes, TBody = unknown>(
     data: TBody,
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ) => request<TRes, TBody>("put", data, config);
 
   const patchData = <TRes, TBody = unknown>(
     data: TBody,
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ) => request<TRes, TBody>("patch", data, config);
 
   const deleteData = <TRes>(
-    config?: Omit<FetchRequestInit, "url" | "method" | "data" | "signal">,
+    config?: RequestConfig,
   ) => request<TRes>("delete", undefined, config);
 
   return { getData, postData, putData, patchData, deleteData };

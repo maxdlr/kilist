@@ -28,7 +28,7 @@ const Dashboard = ({ dashboard }: { dashboard: DashboardType }) => {
         count: value,
       };
     })
-    .sort((a, b) => parseFloat(b.level) - parseFloat(a.level))
+    .sort((a, b) => b.level - a.level)
     .reverse();
 
   return (

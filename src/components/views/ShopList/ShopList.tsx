@@ -208,7 +208,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     position: "absolute",
     top: 0,
-    width: "100%",
+    right: 0,
+    width: "20%",
     paddingTop: Spacing.seven,
     padding: Spacing.three,
     backgroundColor: "transparent",
