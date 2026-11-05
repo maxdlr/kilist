@@ -100,7 +100,6 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
           </ThemedText>
 
           <View style={styles.deck}>
-            {/* Render only the top few cards, topmost last so it sits on top. */}
             {remaining
               .slice(0, 3)
               .map((item, index) => ({ item, index }))
@@ -115,7 +114,12 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
               ))}
           </View>
 
-          <KilButton label="Skip to adding my own" onTouch={() => setSwipedNames(new Set((bank ?? []).map((b) => b.name)))} />
+          <KilButton
+            label="Skip to adding my own"
+            onTouch={() =>
+              setSwipedNames(new Set((bank ?? []).map((b) => b.name)))
+            }
+          />
         </>
       ) : (
         <ManualAddForm onAdd={addFood} onFinish={onDone} />
@@ -131,6 +135,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     paddingVertical: Spacing.five,
+    paddingHorizontal: Spacing.five,
     gap: Spacing.three,
   },
   centered: {
