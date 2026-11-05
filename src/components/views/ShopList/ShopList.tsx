@@ -1,14 +1,15 @@
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
+import EmptyData from "@/components/elements/EmptyData";
 import KilButton from "@/components/elements/KilButton";
-import { ThemedText } from "@/components/themed-text";
+import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import useShopList from "@/providers/ShopListProvider";
 import { FoodType } from "@/types/model";
 import { inStockScoreToDisplay } from "@/utils/scoreUtils";
-import { router } from "expo-router";
-import { useEffect, useRef } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
 import Animated, {
@@ -40,9 +41,11 @@ const ShopList = () => {
   } = useShopList();
   const ref = useRef<View>(null);
 
-  useEffect(() => {
-    if (!shopListId) startNewShopList();
-  }, [shopListId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!shopListId) startNewShopList();
+    }, [shopListId]),
+  );
 
   const headerHeight = 110;
   const suggestionHeight = 158;
@@ -86,17 +89,24 @@ const ShopList = () => {
     mutateFood();
   };
 
+  const handleRefreshEmpty = async () => {
+    const id = await startNewShopList();
+    if (id === shopListId) await mutateFood();
+  };
+
   const handleStopShopList = async () => {
     await cancelShopList();
-    setShopListId(undefined);
     router.push("/");
+    setShopListId(undefined);
   };
+
+  if (isFoodLoading && foods === undefined) {
+    return <LoadingAnim centered />;
+  }
 
   if (!foods || foods.length === 0) {
     return (
-      <ThemedView>
-        <ThemedText>No foods available</ThemedText>
-      </ThemedView>
+      <EmptyData label="No foods available" onRefresh={handleRefreshEmpty} />
     );
   }
 
@@ -110,11 +120,7 @@ const ShopList = () => {
     </AnimatedListItem>
   );
 
-  const renderEmptyList = () => (
-    <ThemedView>
-      <ThemedText>No foods available</ThemedText>
-    </ThemedView>
-  );
+  const renderEmptyList = () => <EmptyData label="No foods available" />;
 
   // const handleScrollToTop = () => {
   //   if (ref.current) {

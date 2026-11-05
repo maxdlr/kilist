@@ -1,6 +1,8 @@
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import BottomActionBar from "@/components/elements/BottomActionBar";
+import EmptyData from "@/components/elements/EmptyData";
 import KilButton from "@/components/elements/KilButton";
+import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
@@ -82,11 +84,7 @@ const FoodList = () => {
   };
 
   if (isFoodLoading && foods === undefined) {
-    return (
-      <ThemedView>
-        <ThemedText>loading</ThemedText>
-      </ThemedView>
-    );
+    return <LoadingAnim centered />;
   }
 
   const renderItem = ({ item }: { item: FoodType }) => {
@@ -104,13 +102,13 @@ const FoodList = () => {
     );
   };
 
-  const emptyListComponent = () => {
-    return (
-      <ThemedView>
-        <ThemedText>No foods available</ThemedText>
-      </ThemedView>
-    );
-  };
+  const emptyListComponent = () => (
+    <EmptyData
+      label="No foods available"
+      onRefresh={mutateFood}
+      pullToRefresh={false}
+    />
+  );
 
   return (
     <KeyboardAvoidingView
@@ -125,6 +123,7 @@ const FoodList = () => {
         onRefresh={mutateFood}
         refreshing={isFoodLoading}
         contentContainerStyle={{
+          flexGrow: 1,
           paddingBottom: 80,
         }}
       />

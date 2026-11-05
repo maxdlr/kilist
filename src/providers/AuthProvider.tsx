@@ -1,7 +1,7 @@
 import useAxios from "@/hooks/useAxios";
 import useToast from "@/providers/ToastProvider";
 import { UserType } from "@/types/model";
-import React, { createContext, ReactNode } from "react";
+import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
 export type HouseholdChoice =
@@ -17,6 +17,7 @@ export type SignupPayload = {
 export type AuthContextType = {
   user?: UserType;
   isLoading: boolean;
+  needsOnboarding: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   signup: (payload: SignupPayload) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -27,6 +28,7 @@ export type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
   user: undefined,
   isLoading: true,
+  needsOnboarding: false,
   login: async () => false,
   signup: async () => false,
   logout: async () => {},
@@ -37,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { showToast } = useToast();
   const { cache } = useSWRConfig();
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   const {
     data: user,
@@ -72,11 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       showToast(res.error.message || "An unexpected error occurred");
       return false;
     }
+    setNeedsOnboarding(true);
     await mutateUser();
     return true;
   };
 
   const clearSession = async () => {
+    setNeedsOnboarding(false);
     for (const key of cache.keys()) {
       cache.delete(key);
     }
@@ -100,7 +105,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, signup, logout, deleteAccount, mutateUser }}
+      value={{
+        user,
+        isLoading,
+        needsOnboarding,
+        login,
+        signup,
+        logout,
+        deleteAccount,
+        mutateUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

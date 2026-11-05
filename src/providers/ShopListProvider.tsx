@@ -41,13 +41,14 @@ const ShopListContext = createContext<ShopListContextType>({
 export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   const { showToast } = useToast();
   const [shopListId, setShopListId] = useState<number | undefined>();
+  const [isStarting, setIsStarting] = useState(false);
   const [previousFoodId, setPreviousFoodId] = useState<number | undefined>();
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
   const [orderedBy, setOrderedBy] = useState<"score" | "name">("score");
 
   const {
     data,
-    isLoading: isFoodLoading,
+    isLoading,
     mutate: mutateFood,
   } = useSWR<ShopListType>(
     {
@@ -66,6 +67,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const [shopList, setShopList] = useState<ShopListType | undefined>(data);
+  const isFoodLoading = isStarting || isLoading || (!!data && !shopList);
 
   useEffect(() => {
     setShopList(data);
@@ -131,7 +133,9 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const startNewShopList = async () => {
+    setIsStarting(true);
     const res = await startShopList({});
+    setIsStarting(false);
     if (res.error) {
       showToast(res.error.message || "An unexpected error occurred");
     }

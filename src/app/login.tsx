@@ -50,7 +50,7 @@ const LoginScreen = () => {
         return;
       }
 
-      const success = await signup({
+      await signup({
         username,
         email,
         password,
@@ -58,7 +58,6 @@ const LoginScreen = () => {
           ? { householdChoice: "join", joinCode }
           : { householdChoice: "create", householdName: householdName || undefined }),
       });
-      if (success) router.replace("/onboarding");
       return;
     }
 

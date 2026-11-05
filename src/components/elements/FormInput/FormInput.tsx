@@ -1,16 +1,22 @@
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { useState } from "react";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  View,
+} from "react-native";
+import { EyeIcon, EyeSlashIcon } from "react-native-heroicons/solid";
 
 export type FormInputType = "text" | "password" | "email" | "number";
 
-const typeProps: Record<
-  FormInputType,
-  Partial<TextInputProps>
-> = {
+const typeProps: Record<FormInputType, Partial<TextInputProps>> = {
   text: {},
-  password: { secureTextEntry: true, autoCapitalize: "none" },
+  password: { autoCapitalize: "none", autoCorrect: false, spellCheck: false },
   email: {
     keyboardType: "email-address",
     autoCapitalize: "none",
@@ -30,20 +36,46 @@ const FormInput = ({
   style?: TextInputProps["style"];
 } & Omit<TextInputProps, "style" | "secureTextEntry" | "keyboardType">) => {
   const theme = useTheme();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const isPassword = type === "password";
+  const ToggleIcon = isPasswordVisible ? EyeSlashIcon : EyeIcon;
 
   return (
     <View style={styles.container}>
       {label && <ThemedText type="small">{label}</ThemedText>}
-      <TextInput
-        placeholderTextColor={theme.textSecondary}
-        style={[
-          styles.input,
-          { color: theme.text, backgroundColor: theme.backgroundElement },
-          style,
-        ]}
-        {...typeProps[type]}
-        {...rest}
-      />
+      <View>
+        <TextInput
+          placeholderTextColor={theme.textSecondary}
+          style={[
+            styles.input,
+            isPassword && styles.passwordInput,
+            { color: theme.text, backgroundColor: theme.backgroundElement },
+            style,
+          ]}
+          {...typeProps[type]}
+          {...(isPassword && {
+            secureTextEntry: !isPasswordVisible,
+            keyboardType:
+              isPasswordVisible && Platform.OS === "android"
+                ? "visible-password"
+                : "default",
+          })}
+          {...rest}
+        />
+        {isPassword && (
+          <Pressable
+            onPress={() => setIsPasswordVisible((visible) => !visible)}
+            style={styles.toggle}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isPasswordVisible ? "Hide password" : "Show password"
+            }
+          >
+            <ToggleIcon size={22} color={theme.textSecondary} />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 };
@@ -57,6 +89,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     borderRadius: Spacing.two,
     fontSize: 16,
+  },
+  passwordInput: {
+    paddingRight: Spacing.six,
+  },
+  toggle: {
+    position: "absolute",
+    right: Spacing.three,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
   },
 });
 
