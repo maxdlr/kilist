@@ -49,12 +49,14 @@ const FoodForm = ({
 
       <FormInput
         label={copy.name}
+        placeholder={skin.copy.placeholders.foodName}
         labelColor={skin.colors.accent}
         value={name}
         onChangeText={setName}
       />
       <FormInput
         label={copy.description}
+        placeholder={skin.copy.placeholders.foodDescription}
         labelColor={skin.colors.accent}
         value={description}
         onChangeText={setDescription}

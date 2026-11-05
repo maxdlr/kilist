@@ -1,6 +1,7 @@
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { useState } from "react";
 import {
   Platform,
@@ -44,13 +45,14 @@ const FormInput = ({
   const styles = useSkinStyles(createStyles);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const isPassword = type === "password";
-  const actionColors = skin.actions.secondary;
+  const attached = skin.actions.attached;
+  const radius = skin.shape.radius;
 
   const sideAction =
     action ??
     (isPassword
       ? {
-          label: isPasswordVisible ? "HIDE" : "SHOW",
+          label: caseFor(skin, isPasswordVisible ? "Hide" : "Show"),
           onPress: () => setIsPasswordVisible((visible) => !visible),
         }
       : undefined);
@@ -70,13 +72,16 @@ const FormInput = ({
             styles.input,
             {
               backgroundColor: skin.colors.paper,
-              borderRadius: skin.shape.radius,
+              borderColor: skin.colors.onPaper,
+              borderWidth: bordered
+                ? Math.max(skin.shape.fieldBorder, skin.shape.border + 1)
+                : skin.shape.fieldBorder,
+              borderBottomLeftRadius: radius,
+              borderTopLeftRadius: radius,
+              borderBottomRightRadius: sideAction ? 0 : radius,
+              borderTopRightRadius: sideAction ? 0 : radius,
               color: skin.colors.onPaper,
               fontFamily: skin.fonts.mono,
-            },
-            bordered && {
-              borderColor: skin.colors.onPaper,
-              borderWidth: skin.shape.border + 1,
             },
             style,
           ]}
@@ -96,9 +101,11 @@ const FormInput = ({
             style={[
               styles.action,
               {
-                backgroundColor: skin.colors.ground,
-                borderColor: actionColors.line,
+                backgroundColor: attached.fill,
+                borderColor: attached.line,
                 borderWidth: skin.shape.border,
+                borderBottomRightRadius: radius,
+                borderTopRightRadius: radius,
               },
             ]}
             accessibilityRole="button"
@@ -113,7 +120,7 @@ const FormInput = ({
             <ThemedText
               allowFontScaling={false}
               size={skin.type.label}
-              color={actionColors.ink}
+              color={attached.ink}
             >
               {sideAction.label}
             </ThemedText>

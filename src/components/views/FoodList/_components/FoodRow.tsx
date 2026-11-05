@@ -2,6 +2,7 @@ import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -57,7 +58,7 @@ const FoodRow = ({
       )}
       <FoodIcon name={icon} size={skin.size.icon.row} />
       <ThemedText numberOfLines={1} size={skin.type.lead} color={ink} style={styles.name}>
-        {name.toUpperCase()}
+        {caseFor(skin, name)}
       </ThemedText>
       <ThemedText size={skin.type.caption} color={ink}>
         {label}

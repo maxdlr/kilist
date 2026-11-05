@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/themed-text";
 import useAxios from "@/hooks/useAxios";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import useToast from "@/providers/ToastProvider";
 import { FoodBankItemType, ListType } from "@/types/model";
 import { useMemo, useRef, useState } from "react";
@@ -130,7 +131,7 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
               <View style={styles.body}>
                 <FoodIcon name={item.icon} size={skin.size.icon.card} />
                 <Title size={skin.type.display.lg} lines={1} color={ink}>
-                  {item.name.toUpperCase()}
+                  {caseFor(skin, item.name)}
                 </Title>
                 <Title size={skin.type.lead} lines={3} color={ink} header={false}>
                   {copy.taunts[sheetPosition % copy.taunts.length]!}

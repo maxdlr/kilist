@@ -142,6 +142,7 @@ const LoginScreen = () => {
 
           <FormInput
             label={copy.username}
+            placeholder={skin.copy.placeholders.username}
             labelColor={labelColor}
             autoCapitalize="none"
             value={username}
@@ -151,6 +152,7 @@ const LoginScreen = () => {
           {isSignup && (
             <FormInput
               label={copy.email}
+              placeholder={skin.copy.placeholders.email}
               labelColor={labelColor}
               type="email"
               value={email}
@@ -160,6 +162,7 @@ const LoginScreen = () => {
 
           <FormInput
             label={copy.password}
+            placeholder={skin.copy.placeholders.password}
             labelColor={labelColor}
             type="password"
             value={password}
@@ -169,6 +172,7 @@ const LoginScreen = () => {
           {isSignup && (
             <FormInput
               label={copy.confirm}
+              placeholder={skin.copy.placeholders.confirm}
               labelColor={labelColor}
               type="password"
               value={confirmPassword}
@@ -191,6 +195,7 @@ const LoginScreen = () => {
             <Animated.View key="create" {...swapAnimation}>
               <FormInput
                 label={copy.householdName}
+                placeholder={skin.copy.placeholders.householdName}
                 value={householdName}
                 onChangeText={setHouseholdName}
               />
@@ -201,6 +206,7 @@ const LoginScreen = () => {
             <Animated.View key="join" {...swapAnimation}>
               <FormInput
                 label={copy.householdCode}
+                placeholder={skin.copy.placeholders.householdCode}
                 value={joinCode}
                 onChangeText={setJoinCode}
                 autoCapitalize="characters"

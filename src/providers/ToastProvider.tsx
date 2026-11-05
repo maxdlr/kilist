@@ -1,6 +1,7 @@
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { setToastTrigger } from "@/services/toastBridge";
 import React, { createContext, ReactNode, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -77,7 +78,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             size={skin.type.lead}
             color={skin.colors.onAlert}
           >
-            {toast.message.toUpperCase()}
+            {caseFor(skin, toast.message)}
           </ThemedText>
         </Animated.View>
       )}

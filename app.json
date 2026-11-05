@@ -33,14 +33,15 @@
         {
           "fonts": [
             "./assets/fonts/Anton-Regular.ttf",
-            "./assets/fonts/SpaceMono-Regular.ttf"
+            "./assets/fonts/SpaceMono-Regular.ttf",
+            "./assets/fonts/MadimiOne-Regular.ttf"
           ]
         }
       ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#D7FF3E",
+          "backgroundColor": "#6A3FC8",
           "image": "./assets/images/splash-kilist.png",
           "imageWidth": 200
         }

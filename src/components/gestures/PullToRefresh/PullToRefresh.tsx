@@ -75,6 +75,7 @@ const PullToRefresh = ({
             lines={1}
             header={false}
             color={skin.colors.onAlert}
+            style={styles.bandTitle}
           >
             {isRefreshing ? skin.copy.empty.refreshing : skin.copy.empty.pull}
           </Title>
@@ -91,6 +92,9 @@ const createStyles = (s: Skin) =>
       overflow: "hidden",
     },
     flex: {
+      flex: 1,
+    },
+    bandTitle: {
       flex: 1,
     },
     band: {

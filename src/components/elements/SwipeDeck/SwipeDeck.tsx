@@ -146,14 +146,66 @@ const DeckSheet = ({
     opacity: clamp(interpolate(-y.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]), 0, 1),
   }));
 
-  const stampStyle = [
-    styles.stamp,
-    {
-      color: skin.colors.paper,
-      fontFamily: skin.fonts.display.family,
-      textShadowColor: skin.colors.onPaper,
-    },
-  ];
+  const isSticker = skin.game.stamp === "sticker";
+  const stickerFill: Record<SwipeDirection, string> = {
+    right: skin.colors.success,
+    left: skin.colors.alert,
+    up: skin.colors.paper,
+  };
+  const stickerTurn: Record<SwipeDirection, string> = {
+    right: "-12deg",
+    left: "12deg",
+    up: "0deg",
+  };
+  const opacityFor = { right: rightStamp, left: leftStamp, up: upStamp };
+
+  const renderStamp = (direction: SwipeDirection) => {
+    const label = stamps[direction];
+    if (!label) return null;
+
+    if (!isSticker) {
+      return (
+        <Animated.Text
+          key={direction}
+          allowFontScaling={false}
+          style={[
+            styles.stamp,
+            {
+              color: skin.colors.paper,
+              fontFamily: skin.fonts.display.family,
+              textShadowColor: skin.colors.onPaper,
+            },
+            opacityFor[direction],
+          ]}
+        >
+          {label}
+        </Animated.Text>
+      );
+    }
+
+    return (
+      <Animated.View
+        key={direction}
+        style={[styles.stickerWrap, opacityFor[direction]]}
+      >
+        <Animated.Text
+          allowFontScaling={false}
+          style={[
+            styles.sticker,
+            {
+              backgroundColor: stickerFill[direction],
+              borderColor: skin.colors.onPaper,
+              color: skin.colors.onPaper,
+              fontFamily: skin.fonts.display.family,
+              transform: [{ rotateZ: stickerTurn[direction] }],
+            },
+          ]}
+        >
+          {label}
+        </Animated.Text>
+      </Animated.View>
+    );
+  };
 
   return (
     <GestureDetector gesture={pan}>
@@ -161,21 +213,9 @@ const DeckSheet = ({
         style={[StyleSheet.absoluteFill, sheetStyle]}
       >
         {children}
-        {stamps.right && (
-          <Animated.Text allowFontScaling={false} style={[stampStyle, rightStamp]}>
-            {stamps.right}
-          </Animated.Text>
-        )}
-        {stamps.left && (
-          <Animated.Text allowFontScaling={false} style={[stampStyle, leftStamp]}>
-            {stamps.left}
-          </Animated.Text>
-        )}
-        {stamps.up && (
-          <Animated.Text allowFontScaling={false} style={[stampStyle, upStamp]}>
-            {stamps.up}
-          </Animated.Text>
-        )}
+        {renderStamp("right")}
+        {renderStamp("left")}
+        {renderStamp("up")}
       </Animated.View>
     </GestureDetector>
   );
@@ -246,6 +286,23 @@ const createStyles = (s: Skin) =>
       textShadowRadius: 1,
       top: "32%",
       transform: [{ rotateZ: "-8deg" }],
+    },
+    stickerWrap: {
+      alignItems: "center",
+      left: 0,
+      pointerEvents: "none",
+      position: "absolute",
+      right: 0,
+      top: "14%",
+    },
+    sticker: {
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      fontSize: s.type.display.stamp,
+      lineHeight: Math.round(s.type.display.stamp * s.fonts.display.lineHeight),
+      overflow: "hidden",
+      paddingHorizontal: s.spacing.stack,
+      paddingVertical: s.spacing.tight,
     },
   });
 

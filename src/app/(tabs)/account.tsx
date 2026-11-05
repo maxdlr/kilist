@@ -5,20 +5,22 @@ import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import InviteQrModal from "@/components/views/Account/_components/InviteQrModal";
-import SkinPickerModal from "@/components/views/Account/_components/SkinPickerModal";
+import PrizeCounterModal from "@/components/views/Account/_components/PrizeCounterModal";
 import SwitchHouseholdModal from "@/components/views/Account/_components/SwitchHouseholdModal";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useAuth from "@/providers/AuthProvider";
 import useHousehold from "@/providers/HouseholdProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import useTickets from "@/providers/TicketsProvider";
 import useToast from "@/providers/ToastProvider";
+import { caseFor } from "@/skins";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Linking, ScrollView, Share, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Panel = "switch" | "qr" | "delete" | "skin";
+type Panel = "switch" | "qr" | "delete" | "prizes";
 
 const AccountScreen = () => {
   const skin = useSkin();
@@ -28,6 +30,7 @@ const AccountScreen = () => {
   const { user, logout, deleteAccount } = useAuth();
   const { household, switchHousehold } = useHousehold();
   const { showToast } = useToast();
+  const { counter } = useTickets();
   const [openPanel, setOpenPanel] = useState<Panel | null>(null);
   const closePanel = useCallback(() => setOpenPanel(null), []);
 
@@ -85,7 +88,7 @@ const AccountScreen = () => {
       >
         <View style={[styles.hero, { paddingTop: insets.top + skin.spacing.top }]}>
           <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
-            {copy.hello(user.username.toUpperCase())}
+            {copy.hello(caseFor(skin, user.username))}
           </Title>
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
@@ -97,7 +100,7 @@ const AccountScreen = () => {
         >
           <ThemedText size={skin.type.label}>{copy.household}</ThemedText>
           <Title size={skin.type.headline} lines={1} header={false}>
-            {(householdName || copy.householdFallback).toUpperCase()}
+            {caseFor(skin, householdName || copy.householdFallback)}
           </Title>
           <View style={styles.codeRow}>
             <ThemedText mono size={skin.type.mono} style={styles.flex}>
@@ -123,7 +126,7 @@ const AccountScreen = () => {
           <View style={styles.members}>
             {members.map((member) => (
               <ThemedText key={member.id} numberOfLines={1} size={skin.type.lead}>
-                {member.username.toUpperCase() +
+                {caseFor(skin, member.username) +
                   (member.id === user.id ? copy.you : "")}
               </ThemedText>
             ))}
@@ -139,8 +142,8 @@ const AccountScreen = () => {
 
         <View style={{ backgroundColor: skin.colors.paper }}>
           <ActionRow
-            label={copy.skin(skin.name)}
-            onPress={() => setOpenPanel("skin")}
+            label={skin.copy.prizes.row(counter?.balance ?? 0)}
+            onPress={() => setOpenPanel("prizes")}
             showChevron
           />
           <ActionRow
@@ -176,7 +179,10 @@ const AccountScreen = () => {
         onClose={closePanel}
       />
 
-      <SkinPickerModal visible={openPanel === "skin"} onClose={closePanel} />
+      <PrizeCounterModal
+        visible={openPanel === "prizes"}
+        onClose={closePanel}
+      />
 
       <SwitchHouseholdModal
         visible={openPanel === "switch"}

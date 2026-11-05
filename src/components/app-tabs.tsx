@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
+import useAuth from "@/providers/AuthProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
@@ -12,12 +13,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const TABS: Record<string, { label: string; aria: string; struck?: boolean }> = {
-  index: { label: "HOME", aria: "Home" },
-  list: { label: "LIST", aria: "List", struck: true },
-  shop: { label: "SHOP", aria: "Shop" },
-  swipe: { label: "SWIPE", aria: "Swipe" },
-  account: { label: "ME", aria: "Account" },
+const TAB_ARIA: Record<string, string> = {
+  index: "Home",
+  list: "List",
+  shop: "Shop",
+  swipe: "Swipe",
+  account: "Account",
+  admin: "Admin",
 };
 
 type TabBarProps = Parameters<
@@ -26,6 +28,8 @@ type TabBarProps = Parameters<
 
 const SkinTabBar = ({ state, navigation }: TabBarProps) => {
   const skin = useSkin();
+  const { user } = useAuth();
+  const isAdmin = user?.type === "admin";
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
   const fullHeight = skin.size.tabBar + insets.bottom;
@@ -43,15 +47,17 @@ const SkinTabBar = ({ state, navigation }: TabBarProps) => {
       style={[styles.bar, { backgroundColor: skin.colors.ground }, animatedStyle]}
     >
       {state.routes.map((route, index) => {
-        const tab = TABS[route.name];
-        if (!tab) return null;
+        const name = route.name as keyof typeof skin.copy.tabs;
+        const label = skin.copy.tabs[name];
+        if (!label || (name === "admin" && !isAdmin)) return null;
+        const struck = name === "list" && skin.game.strikeListTab;
         const isCurrent = state.index === index;
 
         return (
           <Pressable
             key={route.key}
             accessibilityRole="tab"
-            accessibilityLabel={tab.aria}
+            accessibilityLabel={TAB_ARIA[name]}
             accessibilityState={{ selected: isCurrent }}
             onPress={() => {
               const event = navigation.emit({
@@ -73,9 +79,9 @@ const SkinTabBar = ({ state, navigation }: TabBarProps) => {
               allowFontScaling={false}
               size={skin.type.label}
               color={isCurrent ? skin.colors.onGround : skin.colors.muted}
-              style={tab.struck && styles.struck}
+              style={struck && styles.struck}
             >
-              {tab.label}
+              {label}
             </ThemedText>
           </Pressable>
         );
@@ -100,6 +106,7 @@ export default function AppTabs() {
       <Tabs.Screen name="shop" />
       <Tabs.Screen name="swipe" />
       <Tabs.Screen name="account" />
+      <Tabs.Screen name="admin" />
     </Tabs>
   );
 }

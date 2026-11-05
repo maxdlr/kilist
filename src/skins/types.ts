@@ -9,7 +9,8 @@ export type ActionKind =
   | "secondary"
   | "secondaryOnLight"
   | "danger"
-  | "ghost";
+  | "ghost"
+  | "attached";
 
 export interface SkinSpacing {
   hair: number;
@@ -35,6 +36,7 @@ export interface SkinSizes {
   swatch: number;
   scanner: number;
   qr: number;
+  panelList: number;
   icon: { action: number; row: number; card: number };
 }
 
@@ -57,12 +59,20 @@ export interface SkinDisplayFont {
   charWidth: (char: string) => number;
 }
 
+export type TextCase = "upper" | "none";
+
 export interface Skin {
   id: string;
   name: string;
   tagline: string;
   premium: boolean;
   statusBarOnGround: "light" | "dark";
+  textCase: TextCase;
+  game: {
+    card: "sheet" | "framed";
+    stamp: "shout" | "sticker";
+    strikeListTab: boolean;
+  };
   fonts: {
     display: SkinDisplayFont;
     mono: string;
@@ -93,6 +103,8 @@ export interface Skin {
     radius: number;
     pressedOpacity: number;
     stampShadow: number;
+    fieldBorder: number;
+    shadow: { offset: number; color: string };
   };
   spacing: SkinSpacing;
   size: SkinSizes;

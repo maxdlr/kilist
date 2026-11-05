@@ -16,6 +16,12 @@ const roast: Skin = {
   tagline: "THE APP HATES YOUR LISTS. LOUDLY.",
   premium: false,
   statusBarOnGround: "light",
+  textCase: "upper",
+  game: {
+    card: "sheet",
+    stamp: "shout",
+    strikeListTab: true,
+  },
   fonts: {
     display: {
       family: "Anton-Regular",
@@ -65,6 +71,7 @@ const roast: Skin = {
     secondaryOnLight: { fill: "transparent", ink, line: ink },
     danger: { fill: "transparent", ink: orange, line: orange },
     ghost: { fill: "transparent", ink: white, line: "transparent" },
+    attached: { fill: ink, ink: white, line: white },
   },
   shape: {
     border: 3,
@@ -73,6 +80,8 @@ const roast: Skin = {
     radius: 0,
     pressedOpacity: 0.7,
     stampShadow: 5,
+    fieldBorder: 0,
+    shadow: { offset: 0, color: ink },
   },
   spacing: {
     hair: 2,
@@ -97,6 +106,7 @@ const roast: Skin = {
     swatch: 22,
     scanner: 220,
     qr: 210,
+    panelList: 420,
     icon: { action: 36, row: 48, card: 150 },
   },
   type: {

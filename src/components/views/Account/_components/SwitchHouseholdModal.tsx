@@ -61,6 +61,7 @@ const SwitchHouseholdForm = ({
         <Animated.View key="create" {...swap}>
           <FormInput
             label={login.householdName}
+            placeholder={skin.copy.placeholders.householdName}
             labelColor={skin.colors.accent}
             value={householdName}
             onChangeText={setHouseholdName}
@@ -93,6 +94,7 @@ const SwitchHouseholdForm = ({
       <Animated.View key="join" {...swap}>
         <FormInput
           label={login.householdCode}
+          placeholder={skin.copy.placeholders.householdCode}
           labelColor={skin.colors.accent}
           value={joinCode}
           onChangeText={setJoinCode}

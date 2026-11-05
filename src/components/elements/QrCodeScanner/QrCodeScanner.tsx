@@ -3,6 +3,7 @@ import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
@@ -25,7 +26,7 @@ const QrCodeScanner = ({
         <ThemedText size={skin.type.caption} style={styles.notice}>
           Camera access is needed to scan a household code.
         </ThemedText>
-        <KilButton label="ALLOW CAMERA" onTouch={requestPermission} />
+        <KilButton label={caseFor(skin, "Allow camera")} onTouch={requestPermission} />
       </ThemedView>
     );
   }

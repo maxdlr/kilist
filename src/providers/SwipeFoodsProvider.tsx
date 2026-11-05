@@ -16,6 +16,12 @@ export type SwipeGameType = {
   playedToday: boolean;
 };
 
+export type SwipeReward = {
+  earned: number;
+  bonus: number;
+  balance: number | null;
+};
+
 export type SwipeFoodsContextType = {
   game?: SwipeGameType;
   isGameLoading: boolean;
@@ -29,7 +35,7 @@ export type SwipeFoodsContextType = {
   update: (payload: {
     foodId: number;
     isInStock: boolean | null;
-  }) => Promise<void>;
+  }) => Promise<SwipeReward | null>;
   completeSession: () => Promise<void>;
 };
 
@@ -43,7 +49,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   swipe: () => {},
   isLoading: false,
   mutateFoods: () => {},
-  update: async () => {},
+  update: async () => null,
   completeSession: async () => {},
 });
 
@@ -96,9 +102,14 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     isInStock: boolean | null;
   }) => {
     try {
-      await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
+      const res = await axios.put<SwipeReward>(
+        `foods/swipe/edit/${payload.foodId}`,
+        payload,
+      );
+      return res.data ?? null;
     } catch (err: any) {
       showToast(err?.response?.data?.message || "An unexpected error occurred");
+      return null;
     } finally {
       swipedIds.current.delete(payload.foodId);
     }

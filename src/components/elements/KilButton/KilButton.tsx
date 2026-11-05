@@ -48,8 +48,15 @@ const KilButton = ({
           borderWidth: skin.shape.border,
           height: height ?? skin.size.button.lg,
         },
+        skin.shape.shadow.offset > 0 &&
+          line !== "transparent" && {
+            boxShadow: `0 ${pressed ? 1 : skin.shape.shadow.offset}px 0 ${skin.shape.shadow.color}`,
+            transform: [
+              { translateY: pressed ? skin.shape.shadow.offset - 1 : 0 },
+            ],
+          },
         flex !== undefined && { flex },
-        pressed && styles.pressed,
+        pressed && skin.shape.shadow.offset === 0 && styles.pressed,
         style,
       ]}
     >

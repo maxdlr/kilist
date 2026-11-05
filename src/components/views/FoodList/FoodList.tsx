@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useFoodList from "@/providers/FoodListProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -103,7 +104,7 @@ const FoodList = () => {
     if (!editingFood) return;
     const food = editingFood;
     setEditingFood(null);
-    askRemove([food.id], copy.removeOne(food.name.toUpperCase()));
+    askRemove([food.id], copy.removeOne(caseFor(skin, food.name)));
   };
 
   const handleDeleteSelected = () => {
@@ -115,7 +116,7 @@ const FoodList = () => {
     return <LoadingAnim />;
   }
 
-  const query = search.trim().toUpperCase();
+  const query = caseFor(skin, search.trim());
   const hasFoods = Boolean(foods?.length);
   const isEmpty = !hasFoods && !query;
   const noResults = !hasFoods && Boolean(query);
@@ -136,7 +137,7 @@ const FoodList = () => {
       <FoodFormModal
         visible={editingFood !== null}
         formKey={editingFood?.id}
-        title={copy.editTitle(editingFood?.name.toUpperCase() ?? "")}
+        title={copy.editTitle(editingFood ? caseFor(skin, editingFood.name) : "")}
         initialName={editingFood?.name}
         initialDescription={editingFood?.description}
         onSubmit={async (data) => {
