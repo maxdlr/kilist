@@ -21,6 +21,7 @@ export type SwipeFoodsContextType = {
     foodId: number;
     isInStock: boolean | null;
   }) => Promise<void>;
+  completeSession: () => Promise<void>;
 };
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
@@ -31,6 +32,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   isLoading: false,
   mutateFoods: () => {},
   update: async () => {},
+  completeSession: async () => {},
 });
 
 export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
@@ -72,6 +74,14 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const completeSession = async () => {
+    try {
+      await axios.post("swipe-list/complete");
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || "An unexpected error occurred");
+    }
+  };
+
   const swipe = (foodId: number) => {
     setFoods((prevFoods) => prevFoods?.filter((food) => food.id !== foodId));
   };
@@ -90,6 +100,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         mutateFoods,
         update,
+        completeSession,
       }}
     >
       {children}

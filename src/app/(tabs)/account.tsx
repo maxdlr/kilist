@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import AccountRow from "@/components/views/Account/_components/AccountRow";
+import ActionRow from "@/components/elements/ActionRow";
 import Avatar from "@/components/views/Account/_components/Avatar";
 import InviteQrModal from "@/components/views/Account/_components/InviteQrModal";
 import SwitchHouseholdModal from "@/components/views/Account/_components/SwitchHouseholdModal";
@@ -125,7 +125,7 @@ const AccountScreen = () => {
           ))}
         </View>
 
-        <AccountRow
+        <ActionRow
           label="Switch household"
           onPress={() => setSwitchVisible(true)}
           showChevron
@@ -136,17 +136,17 @@ const AccountScreen = () => {
         <ThemedText type="small" themeColor="textSecondary" style={styles.heading}>
           Account
         </ThemedText>
-        <AccountRow
+        <ActionRow
           label="Add suggested foods"
           onPress={() => router.push("/onboarding")}
           showChevron
         />
-        <AccountRow label="Log out" onPress={handleLogout} />
+        <ActionRow label="Log out" onPress={handleLogout} />
       </View>
 
       {user.type !== "admin" && (
         <View style={styles.danger}>
-          <AccountRow
+          <ActionRow
             label="Delete my account"
             onPress={handleDeleteAccount}
             destructive

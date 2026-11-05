@@ -19,7 +19,8 @@ export interface FoodHistoryCreateType {
 
 const SwipeFoodGame = () => {
   const [isComplete, setIsComplete] = useState(false);
-  const { swipes, foods, isLoading, mutateFoods, foodsCount } = useSwipeFoods();
+  const { swipes, foods, isLoading, mutateFoods, foodsCount, completeSession } =
+    useSwipeFoods();
 
   // const tap = useTapGesture({
   //   onActivate: () => {
@@ -30,6 +31,7 @@ const SwipeFoodGame = () => {
 
   const handleOnComplete = async () => {
     setIsComplete(true);
+    await completeSession();
   };
 
   const handleStartAgain = () => {

@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { Pressable, StyleSheet } from "react-native";
 import { ChevronRightIcon } from "react-native-heroicons/solid";
 
-const AccountRow = ({
+const ActionRow = ({
   label,
   onPress,
   destructive = false,
@@ -47,4 +47,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccountRow;
+export default ActionRow;
