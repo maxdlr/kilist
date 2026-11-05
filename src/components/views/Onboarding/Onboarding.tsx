@@ -1,26 +1,36 @@
+import type { Skin } from "@/skins/types";
+import Dock from "@/components/elements/Dock/Dock";
+import FoodIcon from "@/components/elements/FoodIcon";
 import KilButton from "@/components/elements/KilButton";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
+import SwipeDeck, {
+  deckButtonColors,
+  SwipeDeckFling,
+  SwipeDirection,
+} from "@/components/elements/SwipeDeck/SwipeDeck";
+import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
 import useAxios from "@/hooks/useAxios";
+import useStatusBarStyle from "@/hooks/useStatusBarStyle";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { FoodBankItemType, ListType } from "@/types/model";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 import ManualAddForm from "./_components/ManualAddForm";
-import OnboardingSwipeCard from "./_components/OnboardingSwipeCard";
 
-/**
- * Post-signup onboarding: swipe through food-bank suggestions (right = add to
- * the main list, left = skip), then once the deck is empty, auto-advance to a
- * manual add form. Finishing hands off to the provided onDone callback.
- */
+const pad = (value: number) => String(value).padStart(2, "0");
+
 const Onboarding = ({ onDone }: { onDone: () => void }) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.onboarding;
+  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
+  const flingRef = useRef<SwipeDeckFling | null>(null);
+  const [intent, setIntent] = useState<SwipeDirection | null>(null);
 
   const { data: mainList, isLoading: isListLoading } = useSWR<ListType>({
     url: "lists/read?main=true",
@@ -31,13 +41,21 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
 
   const { postData: postCreateFood } = useAxios("foods/create");
 
-  // Track which bank items have been swiped away so the deck shrinks locally
-  // without refetching after every swipe.
   const [swipedNames, setSwipedNames] = useState<Set<string>>(new Set());
 
   const remaining = useMemo(
     () => (bank ?? []).filter((item) => !swipedNames.has(item.name)),
     [bank, swipedNames],
+  );
+
+  const sheets = skin.colors.sheets;
+  const total = bank?.length ?? 0;
+  const position = total - remaining.length;
+  useStatusBarStyle(
+    remaining.length > 0 &&
+      sheets[position % sheets.length]!.fill === skin.colors.ground
+      ? skin.statusBarOnGround
+      : "dark",
   );
 
   const addFood = async (data: { name: string; description?: string }) => {
@@ -59,7 +77,7 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
 
   const handleSwipe = async (
     item: FoodBankItemType,
-    direction: "left" | "right",
+    direction: SwipeDirection,
   ) => {
     setSwipedNames((prev) => new Set(prev).add(item.name));
 
@@ -79,79 +97,103 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
   };
 
   if (isLoading || isListLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingAnim colorScale={theme.confirm} />
-      </View>
-    );
+    return <LoadingAnim />;
   }
 
-  const inSwipePhase = remaining.length > 0;
+  if (remaining.length === 0) {
+    return <ManualAddForm onAdd={addFood} onFinish={onDone} />;
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      {inSwipePhase ? (
-        <>
-          <ThemedText type="subtitle" style={styles.heading}>
-            Stock your list
-          </ThemedText>
-          <ThemedText type="small" style={styles.heading}>
-            Swipe right to add, left to skip.
-          </ThemedText>
+    <View style={styles.flex}>
+      <SwipeDeck
+        items={remaining}
+        keyOf={(item) => item.name}
+        stamps={{ right: copy.stampAdd, left: copy.stampSkip }}
+        flingRef={flingRef}
+        onIntent={setIntent}
+        onSwipe={handleSwipe}
+        renderSheet={(item, depth) => {
+          const sheetPosition = position + depth;
+          const { fill, ink } = sheets[sheetPosition % sheets.length]!;
 
-          <View style={styles.deck}>
-            {remaining
-              .slice(0, 3)
-              .map((item, index) => (
-                <OnboardingSwipeCard
-                  key={item.name}
-                  item={item}
-                  index={index}
-                  onSwipe={handleSwipe}
-                />
-              ))}
-          </View>
+          return (
+            <View
+              style={[
+                styles.sheet,
+                { backgroundColor: fill, paddingTop: insets.top + skin.spacing.top },
+              ]}
+            >
+              <ThemedText size={skin.type.body} color={ink}>
+                {copy.meta(pad(sheetPosition + 1), pad(total))}
+              </ThemedText>
+              <View style={styles.body}>
+                <FoodIcon name={item.icon} size={skin.size.icon.card} />
+                <Title size={skin.type.display.lg} lines={1} color={ink}>
+                  {item.name.toUpperCase()}
+                </Title>
+                <Title size={skin.type.lead} lines={3} color={ink} header={false}>
+                  {copy.taunts[sheetPosition % copy.taunts.length]!}
+                </Title>
+              </View>
+            </View>
+          );
+        }}
+      />
 
+      <Dock>
+        <View style={styles.buttons}>
           <KilButton
-            label="Skip to adding my own"
-            onTouch={() =>
-              setSwipedNames(new Set((bank ?? []).map((b) => b.name)))
-            }
+            flex={1}
+            height={skin.size.button.lg}
+            label={copy.skip}
+            accessibilityLabel="Skip this food"
+            colors={deckButtonColors(skin, intent, "left")}
+            onTouch={() => flingRef.current?.("left")}
           />
-        </>
-      ) : (
-        <ManualAddForm onAdd={addFood} onFinish={onDone} />
-      )}
-    </ThemedView>
+          <KilButton
+            flex={1}
+            height={skin.size.button.lg}
+            label={copy.add}
+            accessibilityLabel="Add this food"
+            colors={deckButtonColors(skin, intent, "right")}
+            onTouch={() => flingRef.current?.("right")}
+          />
+        </View>
+        <KilButton
+          variant="ghost"
+          height={skin.size.button.xs}
+          fontSize={skin.type.label}
+          label={copy.skipAll}
+          onTouch={() =>
+            setSwipedNames(new Set((bank ?? []).map((b) => b.name)))
+          }
+        />
+      </Dock>
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    maxWidth: MaxContentWidth,
-    width: "100%",
-    alignSelf: "center",
-    paddingVertical: Spacing.five,
-    paddingHorizontal: Spacing.five,
-    gap: Spacing.three,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heading: {
-    textAlign: "center",
-    paddingHorizontal: Spacing.four,
-  },
-  deck: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingBottom: 90,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    flex: {
+      flex: 1,
+    },
+    sheet: {
+      flex: 1,
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    body: {
+      flex: 1,
+      gap: s.spacing.inline,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    buttons: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+  });
 
 export default Onboarding;

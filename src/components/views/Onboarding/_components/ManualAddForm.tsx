@@ -1,17 +1,15 @@
+import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import Sheet from "@/components/elements/Sheet/Sheet";
+import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
+import { useSkin } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
-/**
- * The second onboarding phase: once bank suggestions run out, let the user add
- * their own items one by one. "Save & add another" keeps the form open;
- * "Finish" saves anything still filled in, then ends onboarding.
- */
 const ManualAddForm = ({
   onAdd,
   onFinish,
@@ -19,6 +17,8 @@ const ManualAddForm = ({
   onAdd: (data: { name: string; description?: string }) => Promise<boolean>;
   onFinish: () => void;
 }) => {
+  const skin = useSkin();
+  const copy = skin.copy.onboarding;
   const { showToast } = useToast();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -28,7 +28,7 @@ const ManualAddForm = ({
 
   const saveCurrentItem = async () => {
     if (!name.trim()) {
-      showToast("Give the item a name");
+      showToast(skin.copy.errors.nameMissing);
       return false;
     }
     const success = await onAdd({
@@ -67,32 +67,64 @@ const ManualAddForm = ({
     });
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="subtitle">Add your own</ThemedText>
-      <ThemedText type="small">
-        Add any items you still need
-        {addedCount > 0 ? ` (${addedCount} added)` : ""}.
-      </ThemedText>
-
-      <FormInput label="Name" value={name} onChangeText={setName} />
-      <FormInput
-        label="Description (optional)"
-        value={description}
-        onChangeText={setDescription}
-      />
-
-      <KilButton label="Save & add another" onTouch={handleSaveAndAdd} />
-      <KilButton label="Finish" onTouch={handleFinish} />
-    </ThemedView>
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+      <Sheet
+        fill={skin.colors.paper}
+        style={styles.noSpread}
+        dock={
+          <Dock>
+            <ThemedText
+              accessibilityLiveRegion="polite"
+              size={skin.type.body}
+              color={skin.colors.onGround}
+              style={styles.saved}
+            >
+              {addedCount > 0 ? copy.saved(addedCount) : " "}
+            </ThemedText>
+            <FormInput
+              label={copy.name}
+              labelColor={skin.colors.onGround}
+              value={name}
+              onChangeText={setName}
+            />
+            <FormInput
+              label={copy.description}
+              labelColor={skin.colors.onGround}
+              value={description}
+              onChangeText={setDescription}
+            />
+            <KilButton label={copy.saveAnother} onTouch={handleSaveAndAdd} />
+            <KilButton
+              variant="secondary"
+              label={copy.finish}
+              onTouch={handleFinish}
+            />
+          </Dock>
+        }
+      >
+        <ScrollView contentContainerStyle={styles.form}>
+          <Title size={skin.type.display.md} lines={2}>
+            {copy.manualTitle}
+          </Title>
+        </ScrollView>
+      </Sheet>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
+  },
+  noSpread: {
+    justifyContent: "flex-start",
+  },
+  form: {
+    flexGrow: 1,
     justifyContent: "center",
-    gap: Spacing.three,
-    paddingHorizontal: Spacing.four,
+  },
+  saved: {
+    textAlign: "center",
   },
 });
 

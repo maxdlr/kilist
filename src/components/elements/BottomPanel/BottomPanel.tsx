@@ -1,6 +1,7 @@
+import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { useHideTabBar } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -32,7 +33,9 @@ const BottomPanel = ({
   dismissible?: boolean;
   children: ReactNode;
 }) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  useHideTabBar(visible);
   const height = useSharedValue(0);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
@@ -111,19 +114,23 @@ const BottomPanel = ({
       <AnimatedPressable
         onPress={dismissible ? onClose : undefined}
         accessibilityLabel={dismissible ? "Close" : undefined}
-        style={[styles.backdrop, backdropStyle]}
+        style={[
+          styles.backdrop,
+          { backgroundColor: skin.colors.scrim },
+          backdropStyle,
+        ]}
       />
       <Animated.View
         style={[
           styles.panel,
-          {
-            backgroundColor: theme.background,
-            borderColor: theme.backgroundSelected,
-          },
+          { backgroundColor: skin.colors.ground },
           animatedStyle,
         ]}
       >
-        <View onLayout={handleContentLayout} style={styles.content}>
+        <View
+          onLayout={handleContentLayout}
+          style={[styles.content, { borderTopColor: skin.colors.accent }]}
+        >
           {children}
         </View>
       </Animated.View>
@@ -131,32 +138,31 @@ const BottomPanel = ({
   );
 };
 
-const styles = StyleSheet.create({
-  root: {
-    zIndex: 10,
-  },
-  backdrop: {
-    position: "absolute",
-    bottom: "100%",
-    left: 0,
-    right: 0,
-    height: SCREEN_HEIGHT,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  panel: {
-    overflow: "hidden",
-    borderTopLeftRadius: Spacing.four,
-    borderTopRightRadius: Spacing.four,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  content: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    gap: Spacing.three,
-    padding: Spacing.four,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    root: {
+      zIndex: 10,
+    },
+    backdrop: {
+      position: "absolute",
+      bottom: "100%",
+      left: 0,
+      right: 0,
+      height: SCREEN_HEIGHT,
+    },
+    panel: {
+      overflow: "hidden",
+    },
+    content: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      borderTopWidth: s.shape.accentBorder,
+      gap: s.spacing.stack,
+      paddingHorizontal: s.spacing.gutter,
+      paddingVertical: s.spacing.section,
+    },
+  });
 
 export default BottomPanel;

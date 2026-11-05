@@ -1,26 +1,31 @@
+import Dock from "@/components/elements/Dock/Dock";
+import KilButton from "@/components/elements/KilButton";
+import Sheet from "@/components/elements/Sheet/Sheet";
+import Title from "@/components/elements/Title/Title";
+import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin } from "@/providers/SkinProvider";
+import { Href } from "expo-router";
 import { useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { ArrowDownIcon } from "react-native-heroicons/solid";
+import { ArrowPathIcon } from "react-native-heroicons/solid";
 
 const EmptyData = ({
-  label = "No data available",
+  label,
+  title,
+  line,
+  fill,
   onRefresh,
-  pullToRefresh = true,
+  action,
 }: {
   label?: string;
+  title?: string;
+  line?: string;
+  fill?: string;
   onRefresh?: () => unknown;
-  pullToRefresh?: boolean;
+  action?: { label: string; href: Href };
 }) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const copy = skin.copy.empty;
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = async () => {
@@ -34,65 +39,37 @@ const EmptyData = ({
   };
 
   const content = (
-    <View style={styles.container}>
-      <ThemedText themeColor="textSecondary" style={styles.label}>
-        {label}
-      </ThemedText>
-      {onRefresh && (
-        <Pressable
-          onPress={refresh}
-          disabled={isRefreshing}
-          style={[styles.hint, isRefreshing && styles.hintRefreshing]}
-          accessibilityRole="button"
-          accessibilityLabel="Refresh"
-        >
-          <ArrowDownIcon size={20} color={theme.textSecondary} />
-          <ThemedText type="small" themeColor="textSecondary">
-            Refresh
-          </ThemedText>
-        </Pressable>
-      )}
-    </View>
-  );
-
-  if (!onRefresh || !pullToRefresh) {
-    return content;
-  }
-
-  return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={refresh} />
+    <Sheet
+      fill={fill ?? skin.colors.paper}
+      dock={
+        (action || onRefresh) && (
+          <Dock>
+            {action ? (
+              <KilButton height={skin.size.button.xl} fontSize={skin.type.headline} {...action} />
+            ) : (
+              <KilButton
+                height={skin.size.button.xl}
+                fontSize={skin.type.headline}
+                label={isRefreshing ? copy.refreshing : copy.refresh}
+                onTouch={refresh}
+                icon={(color) => <ArrowPathIcon size={skin.size.icon.action} color={color} />}
+              />
+            )}
+          </Dock>
+        )
       }
     >
-      {content}
-    </ScrollView>
+      <ThemedText size={skin.type.body}>{label ?? copy.label}</ThemedText>
+      <Title size={skin.type.display.lg}>{title ?? copy.title}</Title>
+      <ThemedText size={skin.type.body}>{line ?? " "}</ThemedText>
+    </Sheet>
+  );
+
+  return onRefresh ? (
+    <PullToRefresh onRefresh={onRefresh}>{content}</PullToRefresh>
+  ) : (
+    content
   );
 };
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.four,
-    gap: Spacing.four,
-  },
-  label: {
-    textAlign: "center",
-  },
-  hint: {
-    alignItems: "center",
-    gap: Spacing.one,
-    padding: Spacing.two,
-  },
-  hintRefreshing: {
-    opacity: 0.5,
-  },
-});
 
 export default EmptyData;

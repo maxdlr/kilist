@@ -1,15 +1,18 @@
+import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import KilToggleButton from "@/components/elements/KilToggleButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
-import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import Title from "@/components/elements/Title/Title";
 import { HouseholdChoice } from "@/providers/AuthProvider";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+
+const SWAP_DURATION = 200;
 
 const SwitchHouseholdForm = ({
   onSubmit,
@@ -18,6 +21,10 @@ const SwitchHouseholdForm = ({
   onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
   onClose: () => void;
 }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.account;
+  const login = skin.copy.login;
   const { showToast } = useToast();
 
   const [choice, setChoice] = useState<"join" | "create">("join");
@@ -43,19 +50,18 @@ const SwitchHouseholdForm = ({
     if (success) onClose();
   };
 
-  // Each swappable block fades in/out on mount/unmount.
-  const SWAP_DURATION = 200;
+  const swap = {
+    entering: FadeIn.duration(SWAP_DURATION),
+    exiting: FadeOut.duration(SWAP_DURATION),
+  };
 
   const renderBody = () => {
     if (choice === "create") {
       return (
-        <Animated.View
-          key="create"
-          entering={FadeIn.duration(SWAP_DURATION)}
-          exiting={FadeOut.duration(SWAP_DURATION)}
-        >
+        <Animated.View key="create" {...swap}>
           <FormInput
-            label="Household name (optional)"
+            label={login.householdName}
+            labelColor={skin.colors.accent}
             value={householdName}
             onChangeText={setHouseholdName}
           />
@@ -65,64 +71,73 @@ const SwitchHouseholdForm = ({
 
     if (showScanner) {
       return (
-        <Animated.View
-          key="scanner"
-          entering={FadeIn.duration(SWAP_DURATION)}
-          exiting={FadeOut.duration(SWAP_DURATION)}
-          style={{ gap: Spacing.two }}
-        >
+        <Animated.View key="scanner" {...swap} style={styles.scanner}>
           <QrCodeScanner
             onScanned={(data) => {
               setJoinCode(data);
               setShowScanner(false);
             }}
           />
-          <ThemedText type="link" onPress={() => setShowScanner(false)}>
-            Enter code manually instead
-          </ThemedText>
+          <KilButton
+            variant="ghost"
+            height={skin.size.button.xs}
+            fontSize={skin.type.label}
+            label={login.typeCode}
+            onTouch={() => setShowScanner(false)}
+          />
         </Animated.View>
       );
     }
 
     return (
-      <Animated.View
-        key="join"
-        entering={FadeIn.duration(SWAP_DURATION)}
-        exiting={FadeOut.duration(SWAP_DURATION)}
-        style={{ gap: Spacing.two }}
-      >
+      <Animated.View key="join" {...swap}>
         <FormInput
-          label="Household code"
+          label={login.householdCode}
+          labelColor={skin.colors.accent}
           value={joinCode}
           onChangeText={setJoinCode}
           autoCapitalize="characters"
           maxLength={6}
+          action={{ label: login.scan, onPress: () => setShowScanner(true) }}
         />
-        <ThemedText type="link" onPress={() => setShowScanner(true)}>
-          Scan QR code instead
-        </ThemedText>
       </Animated.View>
     );
   };
 
   return (
     <>
-      <ThemedText type="smallBold">Switch household</ThemedText>
+      <Title size={skin.type.headline} lines={1} color={skin.colors.accent}>
+        {copy.switchTitle}
+      </Title>
 
       <KilToggleButton
         value={choice}
         onChange={setChoice}
+        onDark
         options={[
-          { label: "Join existing", value: "join" },
-          { label: "Create new", value: "create" },
+          { label: copy.joinExisting, value: "join" },
+          { label: copy.createNew, value: "create" },
         ]}
       />
 
       {renderBody()}
 
       <View style={styles.actions}>
-        <KilButton label="Cancel" onTouch={onClose} />
-        <KilButton label="Switch" onTouch={handleSubmit} />
+        <KilButton
+          flex={1}
+          height={skin.size.button.md}
+          fontSize={skin.type.lead}
+          variant="secondary"
+          label={skin.copy.common.cancel}
+          onTouch={onClose}
+        />
+        <KilButton
+          flex={1}
+          height={skin.size.button.md}
+          fontSize={skin.type.lead}
+          label={copy.switchAction}
+          onTouch={handleSubmit}
+        />
       </View>
     </>
   );
@@ -142,14 +157,15 @@ const SwitchHouseholdModal = ({
   </BottomPanel>
 );
 
-const styles = StyleSheet.create({
-  actions: {
-    display: "flex",
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: Spacing.two,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    actions: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+    scanner: {
+      gap: s.spacing.tight,
+    },
+  });
 
 export default SwitchHouseholdModal;

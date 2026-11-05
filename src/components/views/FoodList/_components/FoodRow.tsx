@@ -1,133 +1,91 @@
+import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
-import Pill from "@/components/elements/Pill";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
-import { inStockScoreToDisplay } from "@/utils/scoreUtils";
-import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
-import {
-  GestureDetector,
-  useLongPressGesture,
-} from "react-native-gesture-handler";
-import { scheduleOnRN } from "react-native-worklets";
+import { levelOf } from "@/utils/scoreUtils";
+import { Pressable, StyleSheet, View } from "react-native";
 
 const FoodRow = ({
   food,
-  style,
   isSelectMode = false,
   isSelected = false,
   onToggleSelect,
-  onOpenMenu,
+  onEdit,
 }: {
   food: FoodType;
-  style?: StyleProp<ViewStyle>;
   isSelectMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (foodId: number) => void;
-  onOpenMenu?: (food: FoodType) => void;
+  onEdit?: (food: FoodType) => void;
 }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
   const { id, name, inStockScore, icon } = food;
-  const theme = useTheme();
-  const display = inStockScoreToDisplay(inStockScore, theme);
-
-  const openMenu = () => {
-    if (isSelectMode) return;
-    onOpenMenu?.(food);
-  };
-
-  const longPress = useLongPressGesture({
-    onActivate: () => {
-      scheduleOnRN(openMenu);
-    },
-  });
-
-  const handlePress = () => {
-    if (isSelectMode) onToggleSelect?.(id);
-  };
+  const level = levelOf(inStockScore);
+  const label = skin.copy.levels[level];
+  const ink = skin.colors.onLevel;
 
   return (
-    <GestureDetector gesture={longPress}>
-      <Pressable onPress={handlePress}>
-        <ThemedView
-          style={{
-            ...styles.item,
-
-            backgroundColor: isSelected
-              ? theme.backgroundSelected
-              : display.color[50],
-
-            height: 70,
-
-            borderBottomColor: display.color[60],
-
-            ...style,
-          }}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={isSelectMode ? { selected: isSelected } : undefined}
+      accessibilityLabel={`${name}, ${label}`}
+      onPress={() => (isSelectMode ? onToggleSelect?.(id) : onEdit?.(food))}
+      style={[
+        styles.row,
+        {
+          backgroundColor: skin.colors.levels[level],
+          borderBottomColor: skin.colors.ground,
+        },
+      ]}
+    >
+      {isSelectMode && (
+        <View
+          style={[
+            styles.check,
+            { borderColor: ink, borderWidth: skin.shape.border + 1 },
+            isSelected && { backgroundColor: skin.actions.primary.fill },
+          ]}
         >
-          <ThemedView style={styles.nameSection}>
-            {isSelectMode && (
-              <ThemedView
-                style={[
-                  styles.checkbox,
-                  {
-                    borderColor: theme.textSecondary,
-                    backgroundColor: isSelected ? theme.text : "transparent",
-                  },
-                ]}
-              />
-            )}
-            <FoodIcon name={icon} size={36} />
-            <ThemedText
-              type="default"
-              style={{ ...styles.name, color: display.color[90] }}
-            >
-              {name}
+          {isSelected && (
+            <ThemedText size={skin.type.caption} color={skin.actions.primary.ink}>
+              X
             </ThemedText>
-          </ThemedView>
-
-          <ThemedView
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: Spacing.four,
-            }}
-          >
-            <Pill label={display.label} display={display} />
-          </ThemedView>
-        </ThemedView>
-      </Pressable>
-    </GestureDetector>
+          )}
+        </View>
+      )}
+      <FoodIcon name={icon} size={skin.size.icon.row} />
+      <ThemedText numberOfLines={1} size={skin.type.lead} color={ink} style={styles.name}>
+        {name.toUpperCase()}
+      </ThemedText>
+      <ThemedText size={skin.type.caption} color={ink}>
+        {label}
+      </ThemedText>
+    </Pressable>
   );
 };
 
-const styles = StyleSheet.create({
-  item: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.four,
-    borderBottomWidth: 2,
-  },
-
-  nameSection: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.three,
-    flexShrink: 1,
-  },
-
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-  },
-
-  name: {},
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    row: {
+      alignItems: "center",
+      borderBottomWidth: s.shape.divider,
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      height: s.size.row.list,
+      paddingLeft: s.spacing.inline,
+      paddingRight: s.spacing.gutter,
+    },
+    check: {
+      alignItems: "center",
+      height: s.size.check,
+      justifyContent: "center",
+      width: s.size.check,
+    },
+    name: {
+      flex: 1,
+    },
+  });
 
 export default FoodRow;

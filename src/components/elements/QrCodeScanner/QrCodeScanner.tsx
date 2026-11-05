@@ -1,7 +1,8 @@
+import type { Skin } from "@/skins/types";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
@@ -11,6 +12,8 @@ const QrCodeScanner = ({
 }: {
   onScanned: (data: string) => void;
 }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
@@ -19,10 +22,10 @@ const QrCodeScanner = ({
   if (!permission.granted) {
     return (
       <ThemedView style={styles.permission}>
-        <ThemedText type="small">
+        <ThemedText size={skin.type.caption} style={styles.notice}>
           Camera access is needed to scan a household code.
         </ThemedText>
-        <KilButton label="Allow camera" onTouch={requestPermission} />
+        <KilButton label="ALLOW CAMERA" onTouch={requestPermission} />
       </ThemedView>
     );
   }
@@ -40,17 +43,22 @@ const QrCodeScanner = ({
   );
 };
 
-const styles = StyleSheet.create({
-  camera: {
-    width: "100%",
-    height: 220,
-    borderRadius: Spacing.two,
-    overflow: "hidden",
-  },
-  permission: {
-    gap: Spacing.two,
-    alignItems: "center",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    camera: {
+      width: "100%",
+      height: s.size.scanner,
+      borderRadius: s.shape.radius,
+      overflow: "hidden",
+    },
+    notice: {
+      backgroundColor: s.colors.paper,
+      padding: s.spacing.small,
+    },
+    permission: {
+      gap: s.spacing.small,
+      alignItems: "center",
+    },
+  });
 
 export default QrCodeScanner;

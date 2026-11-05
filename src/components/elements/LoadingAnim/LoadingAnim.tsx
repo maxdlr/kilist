@@ -1,56 +1,52 @@
-import { useTheme } from "@/hooks/use-theme";
-import { ColorScale } from "@/utils/colorUtils";
+import type { Skin } from "@/skins/types";
+import Title from "@/components/elements/Title/Title";
+import { ThemedText } from "@/components/themed-text";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated from "react-native-reanimated";
 
-const LoadingAnim = ({
-  colorScale,
-  centered = false,
-}: {
-  colorScale?: ColorScale;
-  centered?: boolean;
-}) => {
-  const theme = useTheme();
-  const colors = colorScale ?? theme.confirm;
+const STEP_DURATION = 420;
 
-  const load = {
-    from: {
-      transform: [{ rotateZ: "0deg" }],
-    },
-    to: {
-      transform: [{ rotateZ: "360deg" }],
-    },
-  };
+const LoadingAnim = () => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const [step, setStep] = useState(0);
 
-  const spinner = (
-    <Animated.View
-      style={{
-        animationName: load,
-        borderColor: colors[80],
-        borderTopColor: colors[50],
-        ...styles.spinner,
-      }}
-    />
+  useEffect(() => {
+    const timer = setInterval(() => setStep((s) => s + 1), STEP_DURATION);
+    return () => clearInterval(timer);
+  }, []);
+
+  const { fill, ink } = skin.colors.sheets[step % skin.colors.sheets.length]!;
+  const { label, title, line } = skin.copy.loading;
+
+  return (
+    <View
+      accessibilityRole="progressbar"
+      accessibilityLabel="Loading"
+      style={[styles.sheet, { backgroundColor: fill }]}
+    >
+      <ThemedText size={skin.type.body} color={ink}>
+        {label}
+      </ThemedText>
+      <Title size={skin.type.display.xl} lines={2} color={ink} header={false}>
+        {title}
+      </Title>
+      <ThemedText size={skin.type.body} color={ink}>
+        {line}
+      </ThemedText>
+    </View>
   );
-
-  return centered ? <View style={styles.centered}>{spinner}</View> : spinner;
 };
 
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  spinner: {
-    animationDuration: "1s",
-    animationIterationCount: "infinite",
-    animationTimingFunction: "linear",
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    sheet: {
+      flex: 1,
+      justifyContent: "space-between",
+      paddingHorizontal: s.spacing.gutter,
+      paddingVertical: s.spacing.page,
+    },
+  });
 
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderRadius: 12,
-  },
-});
 export default LoadingAnim;

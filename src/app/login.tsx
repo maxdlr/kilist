@@ -1,37 +1,46 @@
+import type { Skin } from "@/skins/types";
+import Dock from "@/components/elements/Dock/Dock";
+import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import KilToggleButton from "@/components/elements/KilToggleButton";
-import FormInput from "@/components/elements/FormInput";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
-import { ThemedText } from "@/components/themed-text";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
+import Title from "@/components/elements/Title/Title";
+import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useAuth from "@/providers/AuthProvider";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import AnimationService from "@/services/animation";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated, {
   FadeIn,
   FadeOut,
-  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
-import { ThemedView } from "@/components/themed-view";
-import { useTheme } from "@/hooks/use-theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
 
 const SWAP_DURATION = 200;
+const WIPE_DURATION = 170;
 const { easing } = AnimationService.config;
-const moveAnimation = LinearTransition.duration(SWAP_DURATION).easing(easing);
 const swapAnimation = {
   entering: FadeIn.duration(SWAP_DURATION).easing(easing),
   exiting: FadeOut.duration(SWAP_DURATION).easing(easing),
-  layout: moveAnimation,
 };
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const STRONG_PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
 const LoginScreen = () => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.login;
+  const insets = useSafeAreaInsets();
   const { login, signup } = useAuth();
   const { showToast } = useToast();
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -47,9 +56,26 @@ const LoginScreen = () => {
   const [householdName, setHouseholdName] = useState("");
   const [showScanner, setShowScanner] = useState(false);
 
-  const theme = useTheme();
-
   const isSignup = mode === "signup";
+  useStatusBarStyle(isSignup ? "dark" : skin.statusBarOnGround);
+
+  const wipe = useSharedValue(-SCREEN_WIDTH);
+  const wipeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: wipe.value }],
+  }));
+
+  const switchMode = (next: "login" | "signup") => {
+    wipe.set(
+      withTiming(0, { duration: WIPE_DURATION, easing }, () => {
+        scheduleOnRN(setMode, next);
+        wipe.set(
+          withTiming(SCREEN_WIDTH, { duration: WIPE_DURATION, easing }, () => {
+            wipe.set(-SCREEN_WIDTH);
+          }),
+        );
+      }),
+    );
+  };
 
   const handleSubmit = async () => {
     if (isSignup) {
@@ -86,166 +112,177 @@ const LoginScreen = () => {
     if (success) router.replace("/");
   };
 
+  const labelColor = isSignup ? skin.colors.onPaper : skin.colors.accent;
+
   return (
     <KeyboardAvoidingView style={styles.flex} behavior="padding">
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
+      <View
+        style={[
+          styles.flex,
+          {
+            backgroundColor: isSignup ? skin.colors.alert : skin.colors.ground,
+          },
+        ]}
       >
-        <KilToggleButton
-          value={mode}
-          onChange={setMode}
-          options={[
-            { label: "Log in", value: "login" },
-            { label: "Sign up", value: "signup" },
+        <ScrollView
+          contentContainerStyle={[
+            styles.form,
+            { paddingTop: insets.top + skin.spacing.top },
           ]}
-        />
+          keyboardShouldPersistTaps="handled"
+        >
+          <Title
+            size={isSignup ? 76 : 124}
+            lines={isSignup ? 1 : 2}
+            color={isSignup ? skin.colors.onAlert : skin.colors.accent}
+            style={styles.title}
+          >
+            {isSignup ? copy.signupTitle : copy.loginTitle}
+          </Title>
 
-        <Animated.View layout={moveAnimation} style={styles.title}>
-          <Animated.View key={mode} {...swapAnimation}>
-            <ThemedText type="title" style={{ height: 60 }}>
-              {isSignup ? "Sign up" : "Log in"}
-            </ThemedText>
-          </Animated.View>
-        </Animated.View>
-
-        <Animated.View layout={moveAnimation}>
           <FormInput
-            placeholder="Username"
+            label={copy.username}
+            labelColor={labelColor}
+            autoCapitalize="none"
             value={username}
             onChangeText={setUsername}
           />
-        </Animated.View>
 
-        {isSignup && (
-          <Animated.View {...swapAnimation}>
+          {isSignup && (
             <FormInput
-              placeholder="Email"
+              label={copy.email}
+              labelColor={labelColor}
               type="email"
               value={email}
               onChangeText={setEmail}
             />
-          </Animated.View>
-        )}
+          )}
 
-        <Animated.View layout={moveAnimation}>
           <FormInput
-            placeholder="Password"
+            label={copy.password}
+            labelColor={labelColor}
             type="password"
             value={password}
             onChangeText={setPassword}
           />
-        </Animated.View>
 
-        {isSignup && (
-          <Animated.View {...swapAnimation}>
+          {isSignup && (
             <FormInput
-              placeholder="Confirm password"
+              label={copy.confirm}
+              labelColor={labelColor}
               type="password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {isSignup && (
-          <Animated.View {...swapAnimation} style={styles.householdSection}>
-            <ThemedView
-              style={{
-                backgroundColor: theme.text,
-                width: "100%",
-                height: 1,
-                marginBottom: Spacing.four,
-              }}
-            />
-
-            <ThemedText type="small">Household</ThemedText>
+          {isSignup && (
             <KilToggleButton
               value={householdChoice}
               onChange={setHouseholdChoice}
               options={[
-                { label: "Create new", value: "create" },
-                { label: "Join existing", value: "join" },
+                { label: copy.createHousehold, value: "create" },
+                { label: copy.joinHousehold, value: "join" },
               ]}
             />
+          )}
 
-            {householdChoice === "create" ? (
-              <Animated.View key="create" {...swapAnimation}>
-                <FormInput
-                  placeholder="Household name (optional)"
-                  value={householdName}
-                  onChangeText={setHouseholdName}
-                />
-              </Animated.View>
-            ) : showScanner ? (
-              <Animated.View
-                key="scanner"
-                {...swapAnimation}
-                style={{ gap: Spacing.two }}
-              >
-                <QrCodeScanner
-                  onScanned={(data) => {
-                    setJoinCode(data);
-                    setShowScanner(false);
-                  }}
-                />
-                <ThemedText type="link" onPress={() => setShowScanner(false)}>
-                  Enter code manually instead
-                </ThemedText>
-              </Animated.View>
-            ) : (
-              <Animated.View
-                key="join"
-                {...swapAnimation}
-                style={{ gap: Spacing.two }}
-              >
-                <FormInput
-                  label="Household code"
-                  value={joinCode}
-                  onChangeText={setJoinCode}
-                  autoCapitalize="characters"
-                  maxLength={6}
-                />
-                <ThemedText type="link" onPress={() => setShowScanner(true)}>
-                  Scan QR code instead
-                </ThemedText>
-              </Animated.View>
-            )}
-          </Animated.View>
-        )}
+          {isSignup && householdChoice === "create" && (
+            <Animated.View key="create" {...swapAnimation}>
+              <FormInput
+                label={copy.householdName}
+                value={householdName}
+                onChangeText={setHouseholdName}
+              />
+            </Animated.View>
+          )}
 
-        <Animated.View layout={moveAnimation}>
+          {isSignup && householdChoice === "join" && !showScanner && (
+            <Animated.View key="join" {...swapAnimation}>
+              <FormInput
+                label={copy.householdCode}
+                value={joinCode}
+                onChangeText={setJoinCode}
+                autoCapitalize="characters"
+                maxLength={6}
+                action={{
+                  label: copy.scan,
+                  onPress: () => setShowScanner(true),
+                }}
+              />
+            </Animated.View>
+          )}
+
+          {isSignup && householdChoice === "join" && showScanner && (
+            <Animated.View key="scanner" {...swapAnimation} style={styles.scanner}>
+              <QrCodeScanner
+                onScanned={(data) => {
+                  setJoinCode(data);
+                  setShowScanner(false);
+                }}
+              />
+              <KilButton
+                height={skin.size.button.sm}
+                fontSize={skin.type.label}
+                label={copy.typeCode}
+                variant="secondaryOnLight"
+                onTouch={() => setShowScanner(false)}
+              />
+            </Animated.View>
+          )}
+        </ScrollView>
+
+        <Dock style={styles.dock}>
           <KilButton
-            label={isSignup ? "Sign up" : "Log in"}
+            height={isSignup ? 68 : 84}
+            fontSize={isSignup ? 34 : 42}
+            label={isSignup ? copy.signupAction : copy.loginAction}
             onTouch={handleSubmit}
           />
-        </Animated.View>
-      </ScrollView>
+          <KilButton
+            variant="ghost"
+            height={skin.size.button.xs}
+            fontSize={skin.type.label}
+            label={isSignup ? copy.toLogin : copy.toSignup}
+            onTouch={() => switchMode(isSignup ? "login" : "signup")}
+          />
+        </Dock>
+
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: skin.colors.paper },
+            wipeStyle,
+          ]}
+        />
+      </View>
     </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    maxWidth: MaxContentWidth,
-    width: "100%",
-    alignSelf: "center",
-    justifyContent: "center",
-    gap: Spacing.three,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.four,
-  },
-  title: {
-    height: 60,
-  },
-  householdSection: {
-    paddingVertical: Spacing.four,
-    gap: Spacing.two,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    flex: {
+      flex: 1,
+    },
+    form: {
+      flexGrow: 1,
+      gap: s.spacing.inline,
+      justifyContent: "flex-end",
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    title: {
+      marginBottom: "auto",
+    },
+    scanner: {
+      gap: s.spacing.inline,
+    },
+    dock: {
+      gap: s.spacing.hair,
+      paddingBottom: s.spacing.section,
+    },
+  });
 
 export default LoginScreen;

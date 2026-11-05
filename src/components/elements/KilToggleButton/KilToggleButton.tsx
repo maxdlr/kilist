@@ -1,6 +1,6 @@
+import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import { Pressable, StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
@@ -16,34 +16,28 @@ export type KilToggleOption<T extends string> = {
   value: T;
 };
 
-/**
- * A segmented toggle for choosing one option among a small set of mutually
- * exclusive choices. Unlike KilButton, this renders a single connected track
- * where the selected segment is highlighted - the proper control for
- * "either/or" choices such as join-vs-create.
- */
 const KilToggleButton = <T extends string>({
   options,
   value,
   onChange,
-  style,
+  onDark = false,
 }: {
   options: KilToggleOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  style?: {
-    container?: any;
-    segment?: any;
-    label?: any;
-  };
+  onDark?: boolean;
 }) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const { fill, ink } = skin.actions.primary;
+  const idleInk = onDark ? skin.colors.onGround : skin.colors.onPaper;
   const segmentWidth = useSharedValue(0);
   const selectedIndex = options.findIndex((option) => option.value === value);
+  const border = skin.shape.border;
 
   const handleLayout = (event: LayoutChangeEvent) => {
     segmentWidth.value =
-      (event.nativeEvent.layout.width - 2 * Spacing.half) / options.length;
+      (event.nativeEvent.layout.width - 2 * border) / options.length;
   };
 
   const highlightStyle = useAnimatedStyle(() => ({
@@ -63,11 +57,16 @@ const KilToggleButton = <T extends string>({
       onLayout={handleLayout}
       style={[
         styles.track,
-        { backgroundColor: theme.backgroundElement },
-        style?.container,
+        {
+          borderColor: idleInk,
+          borderRadius: skin.shape.radius,
+          borderWidth: border,
+        },
       ]}
     >
-      <Animated.View style={[styles.highlight, highlightStyle]} />
+      <Animated.View
+        style={[styles.highlight, { backgroundColor: fill }, highlightStyle]}
+      />
       {options.map((option) => {
         const isSelected = option.value === value;
         return (
@@ -76,17 +75,13 @@ const KilToggleButton = <T extends string>({
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            style={[styles.segment, style?.segment]}
+            style={styles.segment}
           >
             <ThemedText
-              type="default"
+              allowFontScaling={false}
               numberOfLines={1}
-              themeColor={isSelected ? undefined : "textSecondary"}
-              style={[
-                styles.label,
-                isSelected && styles.labelSelected,
-                style?.label,
-              ]}
+              size={skin.type.label}
+              color={isSelected ? ink : idleInk}
             >
               {option.label}
             </ThemedText>
@@ -97,35 +92,24 @@ const KilToggleButton = <T extends string>({
   );
 };
 
-const styles = StyleSheet.create({
-  track: {
-    flexDirection: "row",
-    borderRadius: Spacing.six,
-    padding: Spacing.half,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.six,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  // Selected segment matches the app's primary button color (see KilButton).
-  highlight: {
-    position: "absolute",
-    top: Spacing.half,
-    bottom: Spacing.half,
-    left: Spacing.half,
-    borderRadius: Spacing.six,
-    backgroundColor: "#007AFF",
-  },
-  label: {
-    textAlign: "center",
-  },
-  labelSelected: {
-    color: "#FFFFFF",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    track: {
+      flexDirection: "row",
+      height: s.size.toggle,
+      overflow: "hidden",
+    },
+    segment: {
+      alignItems: "center",
+      flex: 1,
+      justifyContent: "center",
+    },
+    highlight: {
+      bottom: 0,
+      left: 0,
+      position: "absolute",
+      top: 0,
+    },
+  });
 
 export default KilToggleButton;

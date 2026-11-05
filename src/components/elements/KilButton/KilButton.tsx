@@ -1,79 +1,89 @@
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
-import { Href, Link } from "expo-router";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import type { ActionColors, ActionKind, Skin } from "@/skins/types";
+import { Href, router } from "expo-router";
 import { ReactNode } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 
 const KilButton = ({
   label,
   onTouch,
   href,
+  variant = "primary",
+  height,
+  fontSize,
+  flex,
+  icon,
+  accessibilityLabel,
+  colors,
   style,
-  Icon,
 }: {
-  label?: string;
+  label: string;
   onTouch?: () => void;
   href?: Href;
-  style?: {
-    container?: any;
-    label?: any;
-  };
-  Icon?: ReactNode;
+  variant?: ActionKind;
+  height?: number;
+  fontSize?: number;
+  flex?: number;
+  icon?: (color: string) => ReactNode;
+  accessibilityLabel?: string;
+  colors?: ActionColors;
+  style?: StyleProp<ViewStyle>;
 }) => {
-  const content = (
-    <ThemedText
-      style={{ ...styles.content, ...(style?.label ? style.label : {}) }}
-      type="default"
-      numberOfLines={1}
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const { fill, ink, line } = colors ?? skin.actions[variant];
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      onPress={onTouch ?? (href ? () => router.navigate(href) : undefined)}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor: fill,
+          borderColor: line,
+          borderRadius: skin.shape.radius,
+          borderWidth: skin.shape.border,
+          height: height ?? skin.size.button.lg,
+        },
+        flex !== undefined && { flex },
+        pressed && styles.pressed,
+        style,
+      ]}
     >
-      {Icon}
-      {label}
-    </ThemedText>
+      {icon?.(ink)}
+      <ThemedText
+        adjustsFontSizeToFit
+        allowFontScaling={false}
+        minimumFontScale={0.5}
+        numberOfLines={1}
+        size={fontSize ?? skin.type.title}
+        color={ink}
+        style={styles.label}
+      >
+        {label}
+      </ThemedText>
+    </Pressable>
   );
-
-  if (onTouch) {
-    return (
-      <Pressable
-        onPress={onTouch}
-        style={{ ...styles.container, ...(style?.container || {}) }}
-      >
-        {content}
-      </Pressable>
-    );
-  }
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        style={{ ...styles.container, ...(style?.container || {}) }}
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return <>{content}</>;
 };
 
-const styles = StyleSheet.create({
-  container: {
-    // Adapt to the container automatically: full width in a column, and an
-    // equal share in a row. flexShrink lets side-by-side buttons compress to
-    // fit instead of overflowing, so call sites don't need to add flex sizing.
-    width: "100%",
-    flexShrink: 1,
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.six,
-    backgroundColor: "#007AFF",
-    color: "#FFFFFF",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-  },
-  content: {
-    color: "#FFFFFF",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    button: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      justifyContent: "center",
+      paddingHorizontal: s.spacing.small,
+    },
+    pressed: {
+      opacity: s.shape.pressedOpacity,
+    },
+    label: {
+      includeFontPadding: false,
+    },
+  });
+
 export default KilButton;

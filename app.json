@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kilist",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.anonymous.kilist"
@@ -32,14 +32,15 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/MadimiOne-Regular.ttf"
+            "./assets/fonts/Anton-Regular.ttf",
+            "./assets/fonts/SpaceMono-Regular.ttf"
           ]
         }
       ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#D7FF3E",
           "image": "./assets/images/splash-kilist.png",
           "imageWidth": 200
         }

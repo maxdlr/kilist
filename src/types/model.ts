@@ -54,5 +54,6 @@ export interface UserType {
   email: string;
   description?: string;
   type: "user" | "admin";
+  skin?: string;
   household: HouseholdType;
 }

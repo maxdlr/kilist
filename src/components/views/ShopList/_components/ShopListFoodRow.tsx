@@ -1,126 +1,114 @@
+import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
-import Pill from "@/components/elements/Pill";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
-import useShopList from "@/providers/ShopListProvider";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
-import {
-  calculateValueFromInStockScore,
-  inStockScoreToDisplay,
-} from "@/utils/scoreUtils";
+import { levelOf } from "@/utils/scoreUtils";
 import { useState } from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import ShopListFoodRowSwipeBg from "./ShopListFoodRowSwipeBg";
+import { StyleSheet, View } from "react-native";
 
 const ShopListFoodRow = ({
   food,
-  style,
   onBuy,
   onDismiss,
-  onOptions,
 }: {
   food: FoodType;
-  style?: StyleProp<ViewStyle>;
   onBuy: (foodId: number) => void;
   onDismiss?: (foodId: number) => void;
-  onOptions?: (foodId: number) => void;
 }) => {
-  const [isSwipingRight, setIsSwipingRight] = useState<boolean>();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.shop;
+  const [isBuying, setIsBuying] = useState(true);
   const { id, name, inStockScore, icon } = food;
-  const { foods } = useShopList();
-  const theme = useTheme();
-  const display = inStockScoreToDisplay(inStockScore, theme);
+  const level = levelOf(inStockScore);
 
   return (
-    <ThemedView style={styles.container}>
-      <ShopListFoodRowSwipeBg buying={isSwipingRight} />
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isBuying
+            ? skin.actions.primary.fill
+            : skin.colors.ground,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.behind,
+          { justifyContent: isBuying ? "flex-start" : "flex-end" },
+        ]}
+      >
+        <ThemedText
+          size={skin.type.headline}
+          color={isBuying ? skin.actions.primary.ink : skin.colors.danger}
+        >
+          {isBuying ? copy.bought : copy.later}
+        </ThemedText>
+      </View>
 
       <SwipeGesture
         onSwipeRight={() => onBuy(id)}
         onSwipeLeft={() => onDismiss?.(id)}
-        onLongPress={() => onOptions?.(id)}
-        onSwipingRight={() => setIsSwipingRight(true)}
-        onSwipingLeft={() => setIsSwipingRight(false)}
+        onSwipingRight={() => setIsBuying(true)}
+        onSwipingLeft={() => setIsBuying(false)}
+        swipeThreshold={100}
         styles={{
-          box: {
-            paddingVertical: calculateValueFromInStockScore(
-              inStockScore,
-              foods,
-              Spacing.two,
-              Spacing.six,
-            ),
-            borderBottomColor: display.color[80],
-            backgroundColor: display.color[50],
-            borderBottomWidth: 1,
-            ...styles.item,
-            ...style,
-          },
+          box: [
+            styles.row,
+            {
+              backgroundColor: skin.colors.levels[level],
+              borderBottomColor: skin.colors.ground,
+            },
+          ],
         }}
       >
-        <View style={styles.nameSection}>
-          <FoodIcon name={icon} size={32} />
-          <ThemedText
-            style={{
-              ...styles.name,
-              color: display.color[90],
-              fontSize: calculateValueFromInStockScore(
-                inStockScore,
-                foods,
-                20,
-                26,
-              ),
-            }}
-          >
-            {name}
-          </ThemedText>
-        </View>
-
-        <Pill display={display} />
+        <FoodIcon name={icon} size={skin.size.icon.row} />
+        <ThemedText
+          numberOfLines={1}
+          size={skin.type.title}
+          color={skin.colors.onLevel}
+          style={styles.name}
+        >
+          {name.toUpperCase()}
+        </ThemedText>
+        <ThemedText size={skin.type.caption} color={skin.colors.onLevel}>
+          {skin.copy.levels[level]}
+        </ThemedText>
       </SwipeGesture>
-    </ThemedView>
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-  },
-
-  background: {
-    position: "absolute",
-    inset: 0,
-    justifyContent: "center",
-  },
-
-  item: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.four,
-  },
-
-  loading: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  nameSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.two,
-    flexShrink: 1,
-  },
-
-  name: {
-    fontSize: 26,
-    height: 26,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    container: {
+      height: s.size.row.shop,
+    },
+    behind: {
+      alignItems: "center",
+      bottom: 0,
+      flexDirection: "row",
+      left: 0,
+      paddingHorizontal: s.spacing.gutter,
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
+    row: {
+      alignItems: "center",
+      borderBottomWidth: s.shape.divider,
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      height: s.size.row.shop,
+      paddingLeft: s.spacing.inline,
+      paddingRight: s.spacing.gutter,
+    },
+    name: {
+      flex: 1,
+    },
+  });
 
 export default ShopListFoodRow;

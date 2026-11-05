@@ -1,8 +1,10 @@
+import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
-import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import Title from "@/components/elements/Title/Title";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -13,37 +15,77 @@ const FoodForm = ({
   initialName,
   initialDescription,
   onSubmit,
+  onRemove,
   onClose,
 }: {
   title: string;
   initialName: string;
   initialDescription: string;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onRemove?: () => void;
   onClose: () => void;
 }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.list;
+  const { showToast } = useToast();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
 
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      showToast(skin.copy.errors.nameMissing);
+      return;
+    }
     const success = await onSubmit({ name: name.trim(), description });
     if (success) onClose();
   };
 
   return (
     <>
-      <ThemedText type="smallBold">{title}</ThemedText>
+      <Title size={skin.type.headline} lines={2} color={skin.colors.accent}>
+        {title}
+      </Title>
 
-      <FormInput label="Name" value={name} onChangeText={setName} />
       <FormInput
-        label="Description"
+        label={copy.name}
+        labelColor={skin.colors.accent}
+        value={name}
+        onChangeText={setName}
+      />
+      <FormInput
+        label={copy.description}
+        labelColor={skin.colors.accent}
         value={description}
         onChangeText={setDescription}
       />
 
+      {onRemove && (
+        <KilButton
+          height={skin.size.button.sm}
+          fontSize={skin.type.body}
+          variant="danger"
+          label={copy.removeIt}
+          onTouch={onRemove}
+        />
+      )}
+
       <View style={styles.actions}>
-        <KilButton label="Cancel" onTouch={onClose} />
-        <KilButton label="Save" onTouch={handleSubmit} />
+        <KilButton
+          flex={1}
+          height={skin.size.button.md}
+          fontSize={skin.type.lead}
+          variant="secondary"
+          label={skin.copy.common.cancel}
+          onTouch={onClose}
+        />
+        <KilButton
+          flex={1}
+          height={skin.size.button.md}
+          fontSize={skin.type.lead}
+          label={skin.copy.common.save}
+          onTouch={handleSubmit}
+        />
       </View>
     </>
   );
@@ -56,6 +98,7 @@ const FoodFormModal = ({
   initialName = "",
   initialDescription = "",
   onSubmit,
+  onRemove,
   onClose,
 }: {
   visible: boolean;
@@ -64,6 +107,7 @@ const FoodFormModal = ({
   initialName?: string;
   initialDescription?: string;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onRemove?: () => void;
   onClose: () => void;
 }) => (
   <BottomPanel visible={visible} onClose={onClose}>
@@ -73,17 +117,18 @@ const FoodFormModal = ({
       initialName={initialName}
       initialDescription={initialDescription}
       onSubmit={onSubmit}
+      onRemove={onRemove}
       onClose={onClose}
     />
   </BottomPanel>
 );
 
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: Spacing.two,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    actions: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+  });
 
 export default FoodFormModal;

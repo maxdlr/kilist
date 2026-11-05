@@ -1,28 +1,37 @@
-import ActionPanel, { ActionPanelRequest } from "@/components/elements/ActionPanel";
+import type { Skin } from "@/skins/types";
+import ActionPanel, {
+  ActionPanelRequest,
+} from "@/components/elements/ActionPanel";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
-import BottomActionBar from "@/components/elements/BottomActionBar";
-import EmptyData from "@/components/elements/EmptyData";
+import Dock from "@/components/elements/Dock/Dock";
+import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
+import Sheet from "@/components/elements/Sheet/Sheet";
+import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useFoodList from "@/providers/FoodListProvider";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FoodFormModal from "./_components/FoodFormModal";
 import FoodRow from "./_components/FoodRow";
 
 const FoodList = () => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.list;
+  const insets = useSafeAreaInsets();
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isAddVisible, setIsAddVisible] = useState(false);
+  const [addInitialName, setAddInitialName] = useState("");
   const [editingFood, setEditingFood] = useState<FoodType | null>(null);
   const [actionRequest, setActionRequest] = useState<ActionPanelRequest | null>(
     null,
@@ -38,6 +47,10 @@ const FoodList = () => {
     editFood,
     removeFoodsFromList,
   } = useFoodList();
+
+  useStatusBarStyle(
+    foods?.length || search.trim() ? skin.statusBarOnGround : "dark",
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -59,67 +72,26 @@ const FoodList = () => {
   };
 
   const closeActionPanel = useCallback(() => setActionRequest(null), []);
-  const closeAddModal = useCallback(() => setIsAddModalVisible(false), []);
-  const closeEditModal = useCallback(() => setEditingFood(null), []);
+  const closeAdd = useCallback(() => setIsAddVisible(false), []);
+  const closeEdit = useCallback(() => setEditingFood(null), []);
 
-  const handleEdit = (food: FoodType) => {
-    setIsAddModalVisible(false);
-    setEditingFood(food);
+  const openAdd = (initialName = "") => {
+    setEditingFood(null);
+    setAddInitialName(initialName);
+    setIsAddVisible(true);
   };
 
-  const handleDeleteOne = (food: FoodType) => {
+  const askRemove = (ids: number[], title: string) => {
     setActionRequest({
-      title: "Remove from list",
-      message: `Remove "${food.name}" from this list?`,
+      title,
+      message: copy.removeLine,
+      cancelLabel: skin.copy.common.keep,
       actions: [
         {
-          label: "Remove",
-          destructive: true,
-          onPress: () => removeFoodsFromList([food.id]),
-        },
-      ],
-    });
-  };
-
-  const handleOpenRowMenu = (food: FoodType) => {
-    setActionRequest({
-      title: food.name,
-      actions: [
-        { label: "Edit", onPress: () => handleEdit(food) },
-        {
-          label: "Delete",
-          destructive: true,
-          onPress: () => handleDeleteOne(food),
-        },
-      ],
-    });
-  };
-
-  const handleOpenListMenu = () => {
-    setActionRequest({
-      actions: [
-        {
-          label: "Add item",
-          onPress: () => {
-            setEditingFood(null);
-            setIsAddModalVisible(true);
-          },
-        },
-        { label: "Select items", onPress: () => setIsSelectMode(true) },
-      ],
-    });
-  };
-
-  const handleDeleteSelected = () => {
-    setActionRequest({
-      title: "Remove from list",
-      message: `Remove ${selectedIds.length} item${selectedIds.length > 1 ? "s" : ""} from this list?`,
-      actions: [
-        {
-          label: "Remove",
+          label: skin.copy.common.remove,
           destructive: true,
           onPress: async () => {
-            await removeFoodsFromList(selectedIds);
+            await removeFoodsFromList(ids);
             exitSelectMode();
           },
         },
@@ -127,130 +99,214 @@ const FoodList = () => {
     });
   };
 
-  if (isFoodLoading && foods === undefined) {
-    return <LoadingAnim centered />;
-  }
-
-  const renderItem = ({ item }: { item: FoodType }) => {
-    return (
-      <AnimatedListItem key={item.id}>
-        <FoodRow
-          food={item}
-          isSelectMode={isSelectMode}
-          isSelected={selectedIds.includes(item.id)}
-          onToggleSelect={toggleSelect}
-          onOpenMenu={handleOpenRowMenu}
-        />
-      </AnimatedListItem>
-    );
+  const handleRemoveEditing = () => {
+    if (!editingFood) return;
+    const food = editingFood;
+    setEditingFood(null);
+    askRemove([food.id], copy.removeOne(food.name.toUpperCase()));
   };
 
-  const emptyListComponent = () => (
-    <EmptyData
-      label="No foods available"
-      onRefresh={mutateFood}
-      pullToRefresh={false}
-    />
-  );
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) return;
+    askRemove(selectedIds, copy.removeMany(selectedIds.length));
+  };
 
-  return (
-    <KeyboardAvoidingView
-      style={[styles.listContainer, { backgroundColor: theme.background }]}
-      behavior="height"
-    >
-      <View style={styles.content}>
-        <Animated.FlatList
-          data={foods}
-          renderItem={renderItem}
-          keyExtractor={(item) => String(item.id)}
-          ListEmptyComponent={emptyListComponent}
-          onRefresh={mutateFood}
-          refreshing={isFoodLoading}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: 80,
-          }}
-        />
+  if (isFoodLoading && foods === undefined) {
+    return <LoadingAnim />;
+  }
 
-        {isSelectMode ? (
-          <ThemedView
-            style={[
-              styles.selectBar,
-              {
-                backgroundColor: theme.backgroundElement,
-                bottom: Spacing.three,
-              },
-            ]}
-          >
-            <ThemedText type="small">{selectedIds.length} selected</ThemedText>
-            <ThemedView style={styles.selectBarActions}>
-              <KilButton label="Cancel" onTouch={exitSelectMode} />
-              <KilButton
-                label="Delete"
-                onTouch={handleDeleteSelected}
-                style={{ container: { backgroundColor: theme.cancel[50] } }}
-              />
-            </ThemedView>
-          </ThemedView>
-        ) : (
-          <BottomActionBar
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Search inventory"
-            onOpenMenu={handleOpenListMenu}
-          />
-        )}
+  const query = search.trim().toUpperCase();
+  const hasFoods = Boolean(foods?.length);
+  const isEmpty = !hasFoods && !query;
+  const noResults = !hasFoods && Boolean(query);
 
-      </View>
-
+  const panels = (
+    <>
       <ActionPanel request={actionRequest} onClose={closeActionPanel} />
 
       <FoodFormModal
-        visible={isAddModalVisible}
-        title="Add item"
+        visible={isAddVisible}
+        formKey={`add-${addInitialName}`}
+        title={copy.addTitle}
+        initialName={addInitialName}
         onSubmit={createFood}
-        onClose={closeAddModal}
+        onClose={closeAdd}
       />
 
       <FoodFormModal
         visible={editingFood !== null}
         formKey={editingFood?.id}
-        title="Edit item"
+        title={copy.editTitle(editingFood?.name.toUpperCase() ?? "")}
         initialName={editingFood?.name}
         initialDescription={editingFood?.description}
         onSubmit={async (data) => {
           if (!editingFood) return false;
           return editFood(editingFood.id, data);
         }}
-        onClose={closeEditModal}
+        onRemove={handleRemoveEditing}
+        onClose={closeEdit}
       />
+    </>
+  );
+
+  if (isEmpty) {
+    return (
+      <KeyboardAvoidingView style={styles.flex} behavior="height">
+        <Sheet
+          fill={skin.colors.accent}
+          dock={
+            <Dock>
+              <KilButton
+                fontSize={skin.type.title}
+                label={copy.addSuggested}
+                href="/onboarding"
+              />
+              <KilButton
+                variant="secondary"
+                height={skin.size.button.md}
+                fontSize={skin.type.lead}
+                label={copy.addOwn}
+                onTouch={() => openAdd()}
+              />
+            </Dock>
+          }
+        >
+          <ThemedText size={skin.type.body}>{copy.emptyLabel}</ThemedText>
+          <Title size={skin.type.display.lg}>{copy.emptyTitle}</Title>
+          <ThemedText size={skin.type.body}> </ThemedText>
+        </Sheet>
+        {panels}
+      </KeyboardAvoidingView>
+    );
+  }
+
+  const renderItem = ({ item }: { item: FoodType }) => (
+    <AnimatedListItem key={item.id}>
+      <FoodRow
+        food={item}
+        isSelectMode={isSelectMode}
+        isSelected={selectedIds.includes(item.id)}
+        onToggleSelect={toggleSelect}
+        onEdit={setEditingFood}
+      />
+    </AnimatedListItem>
+  );
+
+  const searchField = (
+    <FormInput
+      accessibilityLabel="Search your foods"
+      placeholder={copy.search}
+      value={search}
+      onChangeText={setSearch}
+    />
+  );
+
+  return (
+    <KeyboardAvoidingView style={styles.flex} behavior="height">
+      <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
+        <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
+          <Title size={skin.type.display.sm} lines={1} color={skin.colors.onGround}>
+            {copy.title}
+          </Title>
+        </View>
+
+        {noResults ? (
+          <View
+            style={[styles.noResults, { backgroundColor: skin.colors.alert }]}
+          >
+            <Title size={skin.type.display.md} lines={4} color={skin.colors.onAlert}>
+              {copy.noResults(query)}
+            </Title>
+          </View>
+        ) : (
+          <Animated.FlatList
+            style={styles.flex}
+            data={foods}
+            renderItem={renderItem}
+            keyExtractor={(item) => String(item.id)}
+            onRefresh={mutateFood}
+            refreshing={isFoodLoading}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+
+        {isSelectMode ? (
+          <Dock row>
+            <KilButton
+              flex={1}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant="secondary"
+              label={skin.copy.common.cancel}
+              onTouch={exitSelectMode}
+            />
+            <KilButton
+              flex={1}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant="danger"
+              label={copy.deleteSelected(selectedIds.length)}
+              onTouch={handleDeleteSelected}
+            />
+          </Dock>
+        ) : (
+          <Dock>
+            {searchField}
+            {noResults ? (
+              <KilButton
+                height={skin.size.button.md}
+                label={copy.addQuery}
+                onTouch={() => openAdd(search.trim())}
+              />
+            ) : (
+              <View style={styles.actions}>
+                <KilButton
+                  flex={1}
+                  height={skin.size.button.md}
+                  fontSize={skin.type.lead}
+                  variant="secondary"
+                  label={copy.select}
+                  onTouch={() => setIsSelectMode(true)}
+                />
+                <KilButton
+                  flex={1}
+                  height={skin.size.button.md}
+                  fontSize={skin.type.lead}
+                  label={copy.add}
+                  onTouch={() => openAdd()}
+                />
+              </View>
+            )}
+          </Dock>
+        )}
+      </View>
+
+      {panels}
     </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  listContainer: {
-    flex: 1,
-    paddingTop: Spacing.six,
-  },
-  content: {
-    flex: 1,
-  },
-  selectBar: {
-    position: "absolute",
-    left: Spacing.three,
-    right: Spacing.three,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: Spacing.five,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-  },
-  selectBarActions: {
-    flexDirection: "row",
-    gap: Spacing.two,
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    flex: {
+      flex: 1,
+    },
+    root: {
+      flex: 1,
+    },
+    header: {
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    noResults: {
+      flex: 1,
+      justifyContent: "center",
+      padding: s.spacing.gutter,
+    },
+    actions: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+  });
 
 export default FoodList;

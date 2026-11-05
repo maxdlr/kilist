@@ -6,11 +6,20 @@ import React, {
   ReactNode,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
+export type SwipeGameType = {
+  level: number;
+  playedToday: boolean;
+};
+
 export type SwipeFoodsContextType = {
+  game?: SwipeGameType;
+  isGameLoading: boolean;
+  mutateGame: () => void;
   foods?: FoodType[];
   swipes?: FoodType[];
   foodsCount: number;
@@ -25,6 +34,9 @@ export type SwipeFoodsContextType = {
 };
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
+  game: undefined,
+  isGameLoading: false,
+  mutateGame: () => {},
   foods: undefined,
   swipes: undefined,
   foodsCount: 0,
@@ -59,9 +71,25 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     } as SWRConfiguration,
   );
 
-  const [foods, setFoods] = useState<FoodType[] | undefined>(data);
+  const tzOffset = useMemo(() => new Date().getTimezoneOffset(), []);
 
-  useEffect(() => setFoods(data), [data]);
+  const {
+    data: game,
+    isLoading: isGameLoading,
+    mutate: mutateGame,
+  } = useSWR<SwipeGameType>({
+    url: "swipe-list/game",
+    params: { tzOffset },
+  });
+
+  const [foods, setFoods] = useState<FoodType[] | undefined>(data);
+  const swipedIds = useRef(new Set<number>());
+
+  useEffect(
+    () =>
+      setFoods(data?.filter((food) => !swipedIds.current.has(food.id))),
+    [data],
+  );
 
   const update = async (payload: {
     foodId: number;
@@ -71,18 +99,24 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
       await axios.put(`foods/swipe/edit/${payload.foodId}`, payload);
     } catch (err: any) {
       showToast(err?.response?.data?.message || "An unexpected error occurred");
+    } finally {
+      swipedIds.current.delete(payload.foodId);
     }
   };
 
   const completeSession = async () => {
     try {
-      await axios.post("swipe-list/complete");
+      const res = await axios.post<SwipeGameType>("swipe-list/complete", {
+        tzOffset,
+      });
+      await mutateGame(res.data, { revalidate: false });
     } catch (err: any) {
       showToast(err?.response?.data?.message || "An unexpected error occurred");
     }
   };
 
   const swipe = (foodId: number) => {
+    swipedIds.current.add(foodId);
     setFoods((prevFoods) => prevFoods?.filter((food) => food.id !== foodId));
   };
 
@@ -93,6 +127,9 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SwipeFoodsContext.Provider
       value={{
+        game,
+        isGameLoading,
+        mutateGame,
         foods,
         swipes,
         foodsCount,

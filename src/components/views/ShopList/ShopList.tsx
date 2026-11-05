@@ -1,29 +1,28 @@
+import type { Skin } from "@/skins/types";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
+import Dock from "@/components/elements/Dock/Dock";
 import EmptyData from "@/components/elements/EmptyData";
 import KilButton from "@/components/elements/KilButton";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import Sheet from "@/components/elements/Sheet/Sheet";
+import Title from "@/components/elements/Title/Title";
+import { ThemedText } from "@/components/themed-text";
+import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useShopList from "@/providers/ShopListProvider";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
-import { inStockScoreToDisplay } from "@/utils/scoreUtils";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
-import { ArrowsUpDownIcon, XMarkIcon } from "react-native-heroicons/solid";
-import Animated, {
-  LinearTransition,
-  SlideOutDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import { useCallback, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
-import ShopListFoodSuggestion from "./_components/ShopListFoodSuggestion";
 
 const ShopList = () => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.shop;
+  const insets = useSafeAreaInsets();
   const {
     foods,
     isFoodLoading,
@@ -39,7 +38,10 @@ const ShopList = () => {
     reverseOrderFood,
     orderedBy,
   } = useShopList();
-  const ref = useRef<View>(null);
+  const [handled, setHandled] = useState(0);
+  const [bought, setBought] = useState(0);
+
+  useStatusBarStyle(foods?.length ? skin.statusBarOnGround : "dark");
 
   useFocusEffect(
     useCallback(() => {
@@ -47,46 +49,15 @@ const ShopList = () => {
     }, [shopListId]),
   );
 
-  const headerHeight = 110;
-  const suggestionHeight = 158;
-  const suggestionBottom = useSharedValue<number>(0);
-  const listHeight = useSharedValue<number>(10);
-  const { height: winHeight } = Dimensions.get("window");
-
-  const suggestionAnimStyle = useAnimatedStyle(() => ({
-    bottom: withTiming(suggestionBottom.value),
-  }));
-
-  const listAnimStyle = useAnimatedStyle(() => ({
-    height: withTiming(listHeight.value),
-  }));
-
-  const suggestionFood = foods?.find((f) => f.id === suggestedFoodIds[0]);
-  const suggestionDisplay = inStockScoreToDisplay(
-    suggestionFood?.inStockScore,
-    theme,
-  );
-
-  useEffect(() => {
-    if (suggestionFood) {
-      suggestionBottom.value = 0;
-      listHeight.value = winHeight - suggestionHeight - headerHeight;
-    } else {
-      suggestionBottom.value = -suggestionHeight;
-      listHeight.value = winHeight - headerHeight;
-    }
-  }, [suggestionFood, winHeight]);
-
-  const handleBuyFood = (foodId: number) => {
+  const handleBuy = (foodId: number) => {
+    setHandled((count) => count + 1);
+    setBought((count) => count + 1);
     buyFood(foodId);
   };
 
-  const handleDismissFood = (foodId: number) => {
+  const handleSnooze = (foodId: number) => {
+    setHandled((count) => count + 1);
     snoozeFood(foodId);
-  };
-
-  const handleRefresh = () => {
-    mutateFood();
   };
 
   const handleRefreshEmpty = async () => {
@@ -94,153 +65,163 @@ const ShopList = () => {
     if (id === shopListId) await mutateFood();
   };
 
-  const handleStopShopList = async () => {
+  const handleStop = async () => {
     await cancelShopList();
-    router.push("/");
+    router.navigate("/");
     setShopListId(undefined);
+    setHandled(0);
+    setBought(0);
   };
 
   if (isFoodLoading && foods === undefined) {
-    return <LoadingAnim centered />;
+    return <LoadingAnim />;
   }
 
   if (!foods || foods.length === 0) {
+    if (handled > 0) {
+      return (
+        <Sheet
+          fill={skin.colors.accent}
+          dock={
+            <Dock>
+              <KilButton
+                height={skin.size.button.xl}
+                fontSize={skin.type.headline}
+                label={copy.doneAction}
+                onTouch={handleStop}
+              />
+            </Dock>
+          }
+        >
+          <ThemedText size={skin.type.body}>{copy.doneLabel(bought)}</ThemedText>
+          <Title size={skin.type.display.lg}>{copy.doneTitle}</Title>
+          <ThemedText size={skin.type.lead}>{copy.doneLine}</ThemedText>
+        </Sheet>
+      );
+    }
+
     return (
-      <EmptyData label="No foods available" onRefresh={handleRefreshEmpty} />
+      <EmptyData
+        label={copy.emptyLabel}
+        title={copy.emptyTitle}
+        line={copy.emptyLine}
+        onRefresh={handleRefreshEmpty}
+      />
     );
   }
 
+  const suggestion = foods.find((food) => food.id === suggestedFoodIds[0]);
+  const rows = foods.filter((food) => food.id !== suggestion?.id);
+
   const renderItem = ({ item }: { item: FoodType }) => (
     <AnimatedListItem key={item.id}>
-      <ShopListFoodRow
-        food={item}
-        onBuy={handleBuyFood}
-        onDismiss={handleDismissFood}
-      />
+      <ShopListFoodRow food={item} onBuy={handleBuy} onDismiss={handleSnooze} />
     </AnimatedListItem>
   );
 
-  const renderEmptyList = () => <EmptyData label="No foods available" />;
-
-  // const handleScrollToTop = () => {
-  //   if (ref.current) {
-  //     ref.current.scrollTop = 0;
-  //   }
-  // };
-
   return (
-    <ThemedView
-      style={{
-        height: "100%",
-        backgroundColor: suggestionDisplay.color[5],
-        ...styles.container,
-      }}
-    >
-      <ThemedView style={styles.buttonContainer}>
-        <KilButton
-          onTouch={handleStopShopList}
-          style={{
-            container: { ...styles.button, backgroundColor: theme.cancel[50] },
-          }}
-          Icon={<XMarkIcon size={30} color={theme.cancel[10]} />}
-        />
+    <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
+      <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
+        <Title size={skin.type.display.sm} lines={1} color={skin.colors.accent}>
+          {copy.toGo(foods.length)}
+        </Title>
+      </View>
 
-        <KilButton
-          onTouch={reverseOrderFood}
-          style={{
-            container: {
-              ...styles.button,
-              backgroundColor: theme.background,
-            },
-          }}
-          Icon={<ArrowsUpDownIcon size={30} color={theme.text} />}
-        />
+      <Animated.FlatList
+        style={styles.flex}
+        data={rows}
+        renderItem={renderItem}
+        keyExtractor={(item) => String(item.id)}
+        itemLayoutAnimation={LinearTransition.duration(250)}
+        inverted
+        onRefresh={mutateFood}
+        refreshing={isFoodLoading}
+      />
 
-        <KilButton
-          onTouch={() => orderFoodBy(orderedBy === "score" ? "name" : "score")}
-          style={{
-            container: {
-              ...styles.button,
-              backgroundColor: theme.background,
-            },
-            label: { color: theme.textSecondary },
-          }}
-          label={orderedBy === "score" ? "AZ" : "09"}
-          // Icon={<ArrowsUpDownIcon size={30} color={theme.cancel[10]} />}
-        />
-      </ThemedView>
-
-      <Animated.View style={[styles.listContainer, listAnimStyle]}>
-        <Animated.FlatList
-          // onViewableItemsChanged={handleScrollToTop}
-          data={foods}
-          renderItem={renderItem}
-          keyExtractor={(item) => String(item.id)}
-          itemLayoutAnimation={LinearTransition.duration(250)}
-          inverted
-          // maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
-          ListEmptyComponent={renderEmptyList}
-          onRefresh={handleRefresh}
-          refreshing={isFoodLoading}
-          // onViewableItemsChanged
-        />
-      </Animated.View>
-
-      {suggestionFood && (
-        <Animated.View
-          exiting={SlideOutDown}
-          style={[
-            styles.suggestionContainer,
-            { height: suggestionHeight },
-            suggestionAnimStyle,
-          ]}
-        >
-          <ShopListFoodSuggestion
-            ref={ref}
-            food={suggestionFood}
-            onBuy={buyFood}
+      {suggestion && (
+        <View>
+          <ThemedText size={skin.type.caption} color={skin.colors.onGround} style={styles.label}>
+            {copy.suggestion}
+          </ThemedText>
+          <ShopListFoodRow
+            key={suggestion.id}
+            food={suggestion}
+            onBuy={handleBuy}
+            onDismiss={handleSnooze}
           />
-        </Animated.View>
+        </View>
       )}
-    </ThemedView>
+
+      <Dock>
+        <View style={styles.hints}>
+          <ThemedText size={skin.type.label} color={skin.colors.onGround}>
+            {copy.hintLater}
+          </ThemedText>
+          <ThemedText size={skin.type.label} color={skin.colors.onGround}>
+            {copy.hintBought}
+          </ThemedText>
+        </View>
+        <View style={styles.controls}>
+          <KilButton
+            flex={1}
+            height={skin.size.button.sm}
+            fontSize={skin.type.body}
+            variant="danger"
+            label={copy.stop}
+            accessibilityLabel="Stop shopping"
+            onTouch={handleStop}
+          />
+          <KilButton
+            flex={1}
+            height={skin.size.button.sm}
+            fontSize={skin.type.body}
+            variant="secondary"
+            label={copy.flip}
+            accessibilityLabel="Reverse the order"
+            onTouch={reverseOrderFood}
+          />
+          <KilButton
+            flex={1}
+            height={skin.size.button.sm}
+            fontSize={skin.type.body}
+            variant="secondary"
+            label={orderedBy === "score" ? copy.byName : copy.byScore}
+            accessibilityLabel={
+              orderedBy === "score" ? "Sort by name" : "Sort by score"
+            }
+            onTouch={() => orderFoodBy(orderedBy === "score" ? "name" : "score")}
+          />
+        </View>
+      </Dock>
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-  },
-
-  buttonContainer: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: "20%",
-    paddingTop: Spacing.seven,
-    padding: Spacing.three,
-    backgroundColor: "transparent",
-    zIndex: 100,
-    gap: 20,
-  },
-  button: {
-    aspectRatio: 1,
-    alignSelf: "flex-end",
-  },
-
-  listContainer: {
-    // paddingTop: Spacing.six,
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-  },
-
-  suggestionContainer: {
-    position: "absolute",
-    width: "100%",
-    // bottom: 0,
-    paddingBottom: Spacing.four,
-    // height: "20%",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+    },
+    flex: {
+      flex: 1,
+    },
+    header: {
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    label: {
+      paddingHorizontal: s.spacing.gutter,
+      paddingVertical: s.spacing.tight,
+    },
+    hints: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingHorizontal: s.spacing.small,
+    },
+    controls: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+  });
 
 export default ShopList;

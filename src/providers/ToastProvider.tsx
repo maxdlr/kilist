@@ -1,6 +1,6 @@
+import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { setToastTrigger } from "@/services/toastBridge";
 import React, { createContext, ReactNode, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -8,6 +8,7 @@ import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 
 const DISPLAY_DURATION = 2500;
 const ANIM_DURATION = 250;
+const HIDDEN_OFFSET = 400;
 
 export type ToastType = "error" | "success" | "info";
 
@@ -22,11 +23,12 @@ const ToastContext = createContext<ToastContextType>({
 });
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
   const [toast, setToast] = useState<Toast | null>(null);
   const queueRef = useRef<Toast[]>([]);
   const nextIdRef = useRef(0);
-  const translateY = useSharedValue(-100);
+  const translateY = useSharedValue(-HIDDEN_OFFSET);
 
   const processQueue = () => {
     const next = queueRef.current.shift();
@@ -39,7 +41,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     translateY.value = withTiming(0, { duration: ANIM_DURATION });
 
     setTimeout(() => {
-      translateY.value = withTiming(-100, { duration: ANIM_DURATION }, () => {});
+      translateY.value = withTiming(-HIDDEN_OFFSET, { duration: ANIM_DURATION }, () => {});
       setTimeout(processQueue, ANIM_DURATION);
     }, DISPLAY_DURATION);
   };
@@ -54,9 +56,9 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]);
 
   const backgroundByType: Record<ToastType, string> = {
-    error: theme.cancel[60],
-    success: theme.confirm[60],
-    info: theme.backgroundElement,
+    error: skin.colors.alert,
+    success: skin.colors.success,
+    info: skin.colors.paper,
   };
 
   return (
@@ -70,8 +72,12 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             { transform: [{ translateY }] },
           ]}
         >
-          <ThemedText type="small" style={styles.text}>
-            {toast.message}
+          <ThemedText
+            accessibilityRole="alert"
+            size={skin.type.lead}
+            color={skin.colors.onAlert}
+          >
+            {toast.message.toUpperCase()}
           </ThemedText>
         </Animated.View>
       )}
@@ -89,19 +95,16 @@ const useToast = () => {
 
 export default useToast;
 
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingTop: 50,
-    paddingBottom: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  text: {
-    textAlign: "center",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    container: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      paddingTop: s.spacing.page,
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+      zIndex: 1000,
+    },
+  });

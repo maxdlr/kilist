@@ -1,6 +1,6 @@
+import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
-import { Fonts, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useState } from "react";
 import {
   Platform,
@@ -10,7 +10,6 @@ import {
   TextInputProps,
   View,
 } from "react-native";
-import { EyeIcon, EyeSlashIcon } from "react-native-heroicons/solid";
 
 export type FormInputType = "text" | "password" | "email" | "number";
 
@@ -27,33 +26,57 @@ const typeProps: Record<FormInputType, Partial<TextInputProps>> = {
 
 const FormInput = ({
   label,
+  labelColor,
+  bordered = false,
   type = "text",
+  action,
   style,
   ...rest
 }: {
   label?: string;
+  labelColor?: string;
+  bordered?: boolean;
   type?: FormInputType;
+  action?: { label: string; onPress: () => void };
   style?: TextInputProps["style"];
 } & Omit<TextInputProps, "style" | "secureTextEntry" | "keyboardType">) => {
-  const theme = useTheme();
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const isPassword = type === "password";
-  const ToggleIcon = isPasswordVisible ? EyeSlashIcon : EyeIcon;
+  const actionColors = skin.actions.secondary;
+
+  const sideAction =
+    action ??
+    (isPassword
+      ? {
+          label: isPasswordVisible ? "HIDE" : "SHOW",
+          onPress: () => setIsPasswordVisible((visible) => !visible),
+        }
+      : undefined);
 
   return (
     <View style={styles.container}>
-      {label && <ThemedText type="small">{label}</ThemedText>}
-      <View>
+      {label && (
+        <ThemedText allowFontScaling={true} size={skin.type.label} color={labelColor}>
+          {label}
+        </ThemedText>
+      )}
+      <View style={styles.row}>
         <TextInput
-          placeholderTextColor={theme.textSecondary}
+          accessibilityLabel={label ?? rest.placeholder}
+          placeholderTextColor={skin.colors.placeholder}
           style={[
             styles.input,
-            isPassword && styles.passwordInput,
             {
-              color: theme.text,
-              backgroundColor: theme.backgroundElement,
-              borderColor: theme.text,
-              fontFamily: Fonts.sans,
+              backgroundColor: skin.colors.paper,
+              borderRadius: skin.shape.radius,
+              color: skin.colors.onPaper,
+              fontFamily: skin.fonts.mono,
+            },
+            bordered && {
+              borderColor: skin.colors.onPaper,
+              borderWidth: skin.shape.border + 1,
             },
             style,
           ]}
@@ -67,17 +90,33 @@ const FormInput = ({
           })}
           {...rest}
         />
-        {isPassword && (
+        {sideAction && (
           <Pressable
-            onPress={() => setIsPasswordVisible((visible) => !visible)}
-            style={styles.toggle}
-            hitSlop={8}
+            onPress={sideAction.onPress}
+            style={[
+              styles.action,
+              {
+                backgroundColor: skin.colors.ground,
+                borderColor: actionColors.line,
+                borderWidth: skin.shape.border,
+              },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={
-              isPasswordVisible ? "Hide password" : "Show password"
+              isPassword
+                ? isPasswordVisible
+                  ? "Hide password"
+                  : "Show password"
+                : sideAction.label
             }
           >
-            <ToggleIcon size={22} color={theme.textSecondary} />
+            <ThemedText
+              allowFontScaling={false}
+              size={skin.type.label}
+              color={actionColors.ink}
+            >
+              {sideAction.label}
+            </ThemedText>
           </Pressable>
         )}
       </View>
@@ -85,27 +124,27 @@ const FormInput = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: Spacing.one,
-  },
-  input: {
-    borderWidth: Spacing.one / 2,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
-    borderRadius: Spacing.five,
-    fontSize: 16,
-  },
-  passwordInput: {
-    paddingRight: Spacing.six,
-  },
-  toggle: {
-    position: "absolute",
-    right: Spacing.three,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-  },
-});
+const createStyles = (s: Skin) =>
+  StyleSheet.create({
+    container: {
+      gap: s.spacing.hair,
+    },
+    row: {
+      flexDirection: "row",
+    },
+    input: {
+      flex: 1,
+      fontSize: s.type.mono,
+      height: s.size.input,
+      minWidth: 0,
+      paddingHorizontal: s.spacing.inline,
+    },
+    action: {
+      alignItems: "center",
+      height: s.size.input,
+      justifyContent: "center",
+      paddingHorizontal: s.spacing.inline,
+    },
+  });
 
 export default FormInput;

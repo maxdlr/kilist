@@ -1,17 +1,17 @@
 import EmptyData from "@/components/elements/EmptyData";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
-import { ThemedView } from "@/components/themed-view";
 import Dashboard from "@/components/views/Dashboard/Dashboard";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { DashboardType } from "@/components/views/Dashboard/interfaces";
+import { useSkin } from "@/providers/SkinProvider";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { StyleSheet } from "react-native";
 import useSWR from "swr";
 
-const ListsScreen = () => {
-  const theme = useTheme();
-  const { data, isLoading, mutate } = useSWR({ url: "/dashboard" });
+const HomeScreen = () => {
+  const skin = useSkin();
+  const { data, isLoading, mutate } = useSWR<DashboardType>({
+    url: "/dashboard",
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -19,28 +19,17 @@ const ListsScreen = () => {
     }, [mutate]),
   );
 
+  if (data) return <Dashboard dashboard={data} onRefresh={mutate} />;
+  if (isLoading) return <LoadingAnim />;
+
   return (
-    <ThemedView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
-      {data ? (
-        <Dashboard dashboard={data} onRefresh={mutate} />
-      ) : isLoading ? (
-        <LoadingAnim centered />
-      ) : (
-        <EmptyData label="Couldn't load your dashboard" onRefresh={mutate} />
-      )}
-    </ThemedView>
+    <EmptyData
+      label={skin.copy.errors.dashboardLabel}
+      title={skin.copy.errors.title}
+      fill={skin.colors.alert}
+      onRefresh={mutate}
+    />
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-    paddingVertical: Spacing.six,
-    paddingHorizontal: Spacing.two,
-  },
-});
-
-export default ListsScreen;
+export default HomeScreen;

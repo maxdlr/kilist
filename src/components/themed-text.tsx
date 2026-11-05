@@ -1,81 +1,35 @@
-import { Platform, StyleSheet, Text, type TextProps } from "react-native";
-
-import { Fonts } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { useSkin } from "@/providers/SkinProvider";
+import { Text, type TextProps } from "react-native";
 
 export type ThemedTextProps = TextProps & {
-  type?:
-    | "default"
-    | "title"
-    | "small"
-    | "smallBold"
-    | "subtitle"
-    | "link"
-    | "linkPrimary"
-    | "code";
-  themeColor?: "text" | "textSecondary";
+  size?: number;
+  color?: string;
+  mono?: boolean;
 };
 
 export function ThemedText({
   style,
-  type = "default",
-  themeColor,
+  size,
+  color,
+  mono = false,
   ...rest
 }: ThemedTextProps) {
-  const theme = useTheme();
+  const skin = useSkin();
 
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? "text"], fontFamily: Fonts.sans },
-        type === "default" && styles.default,
-        type === "title" && styles.title,
-        type === "small" && styles.small,
-        type === "smallBold" && styles.smallBold,
-        type === "subtitle" && styles.subtitle,
-        type === "link" && styles.link,
-        type === "linkPrimary" && styles.linkPrimary,
-        type === "code" && styles.code,
+        {
+          color: color ?? skin.colors.onPaper,
+          fontFamily: mono ? skin.fonts.mono : skin.fonts.display.family,
+          fontSize: size ?? skin.type.body,
+          lineHeight: Math.round(
+            (size ?? skin.type.body) * (mono ? 1.45 : 1.3),
+          ),
+        },
         style,
       ]}
       {...rest}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  default: {
-    fontSize: 20,
-    lineHeight: 24,
-  },
-  title: {
-    fontSize: 48,
-    lineHeight: 52,
-  },
-  subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 14,
-  },
-  linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: "#3c87f7",
-  },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
-  },
-});
