@@ -73,6 +73,11 @@ const AccountScreen = () => {
         onTouch={() => setSwitchVisible(true)}
       />
 
+      <KilButton
+        label="Run setup again"
+        onTouch={() => router.push("/onboarding")}
+      />
+
       <KilButton label="Log out" onTouch={handleLogout} />
 
       <SwitchHouseholdModal

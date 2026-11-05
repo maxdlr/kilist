@@ -32,6 +32,11 @@ export interface HouseholdMemberType {
   type: "user" | "admin";
 }
 
+export interface FoodBankItemType {
+  name: string;
+  description?: string;
+}
+
 export interface HouseholdType {
   id: number;
   name?: string;
