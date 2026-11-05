@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import { Fonts, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
 import {
@@ -49,7 +49,11 @@ const FormInput = ({
           style={[
             styles.input,
             isPassword && styles.passwordInput,
-            { color: theme.text, backgroundColor: theme.backgroundElement },
+            {
+              color: theme.text,
+              backgroundColor: theme.backgroundElement,
+              fontFamily: Fonts.sans,
+            },
             style,
           ]}
           {...typeProps[type]}

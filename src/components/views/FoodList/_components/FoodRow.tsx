@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontWeight: "bold",
   },
 });
 

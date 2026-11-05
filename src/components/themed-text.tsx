@@ -27,7 +27,7 @@ export function ThemedText({
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? "text"] },
+        { color: theme[themeColor ?? "text"], fontFamily: Fonts.sans },
         type === "default" && styles.default,
         type === "title" && styles.title,
         type === "small" && styles.small,
@@ -47,27 +47,22 @@ const styles = StyleSheet.create({
   small: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 500,
   },
   smallBold: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 700,
   },
   default: {
     fontSize: 20,
     lineHeight: 24,
-    fontWeight: 500,
   },
   title: {
     fontSize: 48,
-    fontWeight: 600,
     lineHeight: 52,
   },
   subtitle: {
     fontSize: 32,
     lineHeight: 44,
-    fontWeight: 600,
   },
   link: {
     lineHeight: 30,

@@ -1,7 +1,7 @@
 import FoodIcon from "@/components/elements/FoodIcon";
 import PanGesture from "@/components/gestures/PanGesture";
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import { Fonts, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import AnimationService from "@/services/animation";
 import { FoodBankItemType } from "@/types/model";
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: Fonts.sans,
   },
   addBadge: {
     left: 24,

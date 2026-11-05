@@ -56,7 +56,10 @@ const LoginScreen = () => {
         password,
         ...(householdChoice === "join"
           ? { householdChoice: "join", joinCode }
-          : { householdChoice: "create", householdName: householdName || undefined }),
+          : {
+              householdChoice: "create",
+              householdName: householdName || undefined,
+            }),
       });
       return;
     }
@@ -80,7 +83,9 @@ const LoginScreen = () => {
           ]}
         />
 
-        <ThemedText type="title">{isSignup ? "Sign up" : "Log in"}</ThemedText>
+        <ThemedText type="title" style={{ height: 60 }}>
+          {isSignup ? "Sign up" : "Log in"}
+        </ThemedText>
 
         <FormInput
           label="Username"

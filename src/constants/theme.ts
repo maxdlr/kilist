@@ -51,8 +51,7 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: "system-ui",
+    sans: "MadimiOne-Regular",
     /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: "ui-serif",
     /** iOS `UIFontDescriptorSystemDesignRounded` */
@@ -61,7 +60,7 @@ export const Fonts = Platform.select({
     mono: "ui-monospace",
   },
   default: {
-    sans: "normal",
+    sans: "MadimiOne-Regular",
     serif: "serif",
     rounded: "normal",
     mono: "monospace",

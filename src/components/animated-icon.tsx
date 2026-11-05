@@ -1,3 +1,4 @@
+import { ThemedText } from '@/components/themed-text';
 import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState } from 'react';
@@ -33,7 +34,7 @@ export function AnimatedSplashOverlay() {
     },
   });
 
-  const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+  const logo = <ThemedText style={styles.splashLogo}>Kilist</ThemedText>;
 
   return animate ? (
     <Animated.View
@@ -44,7 +45,7 @@ export function AnimatedSplashOverlay() {
         }
       })}
       style={styles.splashOverlay}>
-      {image}
+      {logo}
     </Animated.View>
   ) : (
     <View
@@ -54,7 +55,7 @@ export function AnimatedSplashOverlay() {
         });
       }}
       style={styles.splashOverlay}>
-      {image}
+      {logo}
     </View>
   );
 }
@@ -137,6 +138,11 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     position: 'absolute',
+  },
+  splashLogo: {
+    color: '#FFFFFF',
+    fontSize: 55,
+    lineHeight: 72,
   },
   splashOverlay: {
     ...StyleSheet.absoluteFill,

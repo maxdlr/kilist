@@ -24,7 +24,6 @@ const useGroceryListStyles = () => {
       borderRadius: Spacing.four,
     },
     rowTitle: {
-      fontWeight: "bold",
       fontSize: 24,
       // color: "red",
     },

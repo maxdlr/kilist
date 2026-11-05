@@ -1,5 +1,5 @@
 import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
+import { Fonts, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
 import { EllipsisVerticalIcon } from "react-native-heroicons/solid";
@@ -46,7 +46,7 @@ const BottomActionBar = ({
         onChangeText={onSearchChange}
         placeholder={searchPlaceholder}
         placeholderTextColor={theme.textSecondary}
-        style={[styles.input, { color: theme.text }]}
+        style={[styles.input, { color: theme.text, fontFamily: Fonts.sans }]}
       />
 
       <Pressable onPress={openMenu} style={styles.menuButton}>
