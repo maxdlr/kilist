@@ -56,10 +56,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setToastTrigger(showToast);
   }, [toast]);
 
-  const backgroundByType: Record<ToastType, string> = {
-    error: skin.colors.alert,
-    success: skin.colors.success,
-    info: skin.colors.paper,
+  const lookByType: Record<ToastType, { fill: string; ink: string }> = {
+    error: { fill: skin.colors.alert, ink: skin.colors.onAlert },
+    success: skin.colors.toast ?? { fill: skin.colors.success, ink: skin.colors.onAlert },
+    info: skin.colors.toast ?? { fill: skin.colors.paper, ink: skin.colors.onPaper },
   };
 
   return (
@@ -69,14 +69,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         <Animated.View
           style={[
             styles.container,
-            { backgroundColor: backgroundByType[toast.type] },
+            { backgroundColor: lookByType[toast.type].fill },
             { transform: [{ translateY }] },
           ]}
         >
           <ThemedText
             accessibilityRole="alert"
             size={skin.type.lead}
-            color={skin.colors.onAlert}
+            color={lookByType[toast.type].ink}
           >
             {caseFor(skin, toast.message)}
           </ThemedText>

@@ -14,6 +14,7 @@ export type Look = {
   skin: Skin;
   state: LookState;
   missing: number;
+  wearableAnyway: boolean;
 };
 
 const ORDER: LookState[] = ["current", "owned", "unlockable", "locked"];
@@ -33,12 +34,18 @@ const useLooks = () => {
       const state: LookState =
         look.id === skin.id
           ? "current"
-          : prize.owned || prize.wearable || prize.price === 0
+          : prize.owned || prize.price === 0
             ? "owned"
             : balance >= prize.price
               ? "unlockable"
               : "locked";
-      return { prize, skin: look, state, missing: Math.max(0, prize.price - balance) };
+      return {
+        prize,
+        skin: look,
+        state,
+        missing: Math.max(0, prize.price - balance),
+        wearableAnyway: prize.wearable && (state === "unlockable" || state === "locked"),
+      };
     })
     .sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state));
 

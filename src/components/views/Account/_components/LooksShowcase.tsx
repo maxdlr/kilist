@@ -113,6 +113,15 @@ const LookCard = ({ look, width, looks }: { look: Look; width: number; looks: Re
         {look.state === "owned" && (
           <KilButton {...button} label={busy ? "…" : copy.wear} onTouch={() => looks.wear(look)} />
         )}
+        {look.wearableAnyway && (
+          <KilButton
+            {...button}
+            variant="attached"
+            label={busy ? "…" : copy.wear}
+            accessibilityLabel={`${copy.wear} ${look.skin.name} without unlocking it`}
+            onTouch={() => looks.wear(look)}
+          />
+        )}
         {look.state === "unlockable" && (
           <KilButton {...button} label={busy ? "…" : copy.redeem(look.prize.price)} onTouch={() => looks.unlock(look)} />
         )}
