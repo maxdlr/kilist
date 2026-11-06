@@ -62,7 +62,7 @@ const SwitchHouseholdForm = ({
           <FormInput
             label={login.householdName}
             placeholder={skin.copy.placeholders.householdName}
-            labelColor={skin.colors.accent}
+            labelColor={skin.panel.ink}
             value={householdName}
             onChangeText={setHouseholdName}
           />
@@ -95,7 +95,7 @@ const SwitchHouseholdForm = ({
         <FormInput
           label={login.householdCode}
           placeholder={skin.copy.placeholders.householdCode}
-          labelColor={skin.colors.accent}
+          labelColor={skin.panel.ink}
           value={joinCode}
           onChangeText={setJoinCode}
           autoCapitalize="characters"
@@ -108,14 +108,14 @@ const SwitchHouseholdForm = ({
 
   return (
     <>
-      <Title size={skin.type.headline} lines={1} color={skin.colors.accent}>
+      <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
         {copy.switchTitle}
       </Title>
 
       <KilToggleButton
         value={choice}
         onChange={setChoice}
-        onDark
+        onDark={skin.panel.fill === skin.colors.ground}
         options={[
           { label: copy.joinExisting, value: "join" },
           { label: copy.createNew, value: "create" },
@@ -129,7 +129,7 @@ const SwitchHouseholdForm = ({
           flex={1}
           height={skin.size.button.md}
           fontSize={skin.type.lead}
-          variant="secondary"
+          variant={skin.panel.secondary}
           label={skin.copy.common.cancel}
           onTouch={onClose}
         />

@@ -21,7 +21,7 @@ const InviteQrModal = ({
 
   return (
     <BottomPanel visible={visible} onClose={onClose} dismissible>
-      <Title size={skin.type.headline} lines={2} color={skin.colors.accent}>
+      <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {skin.copy.account.qrTitle}
       </Title>
       <View style={[styles.qr, { backgroundColor: skin.colors.paper }]}>
@@ -32,7 +32,7 @@ const InviteQrModal = ({
           backgroundColor={skin.colors.paper}
         />
       </View>
-      <ThemedText mono size={skin.type.mono} color={skin.colors.onGround} style={styles.code}>
+      <ThemedText mono size={skin.type.mono} color={skin.panel.ink} style={styles.code}>
         {joinCode}
       </ThemedText>
       <KilButton

@@ -123,13 +123,24 @@ const BottomPanel = ({
       <Animated.View
         style={[
           styles.panel,
-          { backgroundColor: skin.colors.ground },
+          {
+            backgroundColor: skin.panel.fill,
+            borderTopLeftRadius: skin.panel.radius,
+            borderTopRightRadius: skin.panel.radius,
+          },
           animatedStyle,
         ]}
       >
         <View
           onLayout={handleContentLayout}
-          style={[styles.content, { borderTopColor: skin.colors.accent }]}
+          style={[
+            styles.content,
+            {
+              borderColor: skin.panel.line,
+              borderTopLeftRadius: skin.panel.radius,
+              borderTopRightRadius: skin.panel.radius,
+            },
+          ]}
         >
           {children}
         </View>
@@ -159,6 +170,8 @@ const createStyles = (s: Skin) =>
       left: 0,
       right: 0,
       borderTopWidth: s.shape.accentBorder,
+      borderLeftWidth: s.panel.radius > 0 ? s.shape.border : 0,
+      borderRightWidth: s.panel.radius > 0 ? s.shape.border : 0,
       gap: s.spacing.stack,
       paddingHorizontal: s.spacing.gutter,
       paddingVertical: s.spacing.section,

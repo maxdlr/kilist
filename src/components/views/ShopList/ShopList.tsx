@@ -8,11 +8,9 @@ import Sheet from "@/components/elements/Sheet/Sheet";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
-import useShopList from "@/providers/ShopListProvider";
+import useShopRun from "@/hooks/screens/useShopRun";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,52 +24,21 @@ const ShopList = () => {
   const {
     foods,
     isFoodLoading,
-    suggestedFoodIds,
-    buyFood,
-    snoozeFood,
     mutateFood,
-    shopListId,
-    startNewShopList,
-    cancelShopList,
-    setShopListId,
     orderFoodBy,
     reverseOrderFood,
     orderedBy,
-  } = useShopList();
-  const [handled, setHandled] = useState(0);
-  const [bought, setBought] = useState(0);
+    buy: handleBuy,
+    snooze: handleSnooze,
+    stop: handleStop,
+    refreshEmpty: handleRefreshEmpty,
+    bought,
+    handled,
+    suggestion,
+    rows,
+  } = useShopRun();
 
   useStatusBarStyle(foods?.length ? skin.statusBarOnGround : "dark");
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!shopListId) startNewShopList();
-    }, [shopListId]),
-  );
-
-  const handleBuy = (foodId: number) => {
-    setHandled((count) => count + 1);
-    setBought((count) => count + 1);
-    buyFood(foodId);
-  };
-
-  const handleSnooze = (foodId: number) => {
-    setHandled((count) => count + 1);
-    snoozeFood(foodId);
-  };
-
-  const handleRefreshEmpty = async () => {
-    const id = await startNewShopList();
-    if (id === shopListId) await mutateFood();
-  };
-
-  const handleStop = async () => {
-    await cancelShopList();
-    router.navigate("/");
-    setShopListId(undefined);
-    setHandled(0);
-    setBought(0);
-  };
 
   if (isFoodLoading && foods === undefined) {
     return <LoadingAnim />;
@@ -109,9 +76,6 @@ const ShopList = () => {
       />
     );
   }
-
-  const suggestion = foods.find((food) => food.id === suggestedFoodIds[0]);
-  const rows = foods.filter((food) => food.id !== suggestion?.id);
 
   const renderItem = ({ item }: { item: FoodType }) => (
     <AnimatedListItem key={item.id}>

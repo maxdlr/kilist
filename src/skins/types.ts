@@ -69,7 +69,6 @@ export interface Skin {
   statusBarOnGround: "light" | "dark";
   textCase: TextCase;
   game: {
-    card: "sheet" | "framed";
     stamp: "shout" | "sticker";
     strikeListTab: boolean;
   };
@@ -96,6 +95,14 @@ export interface Skin {
     sheets: { fill: string; ink: string }[];
   };
   actions: Record<ActionKind, ActionColors>;
+  panel: {
+    fill: string;
+    ink: string;
+    title: string;
+    line: string;
+    radius: number;
+    secondary: ActionKind;
+  };
   shape: {
     border: number;
     divider: number;

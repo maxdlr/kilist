@@ -230,7 +230,9 @@ const SwipeDeck = <T,>({
   flingRef,
   onIntent,
   onSwipe,
+  background,
 }: {
+  background?: string;
   items: T[];
   keyOf: (item: T) => string | number;
   renderSheet: (item: T, depth: number) => ReactNode;
@@ -244,7 +246,7 @@ const SwipeDeck = <T,>({
   const styles = useSkinStyles(createStyles);
 
   return (
-    <View style={[styles.deck, { backgroundColor: skin.colors.ground }]}>
+    <View style={[styles.deck, { backgroundColor: background ?? skin.colors.ground }]}>
       {items
         .slice(0, 2)
         .map((item, depth) => (

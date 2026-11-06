@@ -59,7 +59,7 @@ const PrizeRow = ({
           <KilButton
             height={skin.size.button.sm}
             fontSize={skin.type.lead}
-            variant="secondary"
+            variant={skin.panel.secondary}
             label={copy.missing(prize.price - balance)}
             onTouch={() => undefined}
           />
@@ -77,7 +77,7 @@ const PrizeRow = ({
             flex={1}
             height={skin.size.button.sm}
             fontSize={skin.type.label}
-            variant="secondary"
+            variant={skin.panel.secondary}
             label={copy.missing(prize.price - balance)}
             onTouch={() => undefined}
           />
@@ -93,7 +93,7 @@ const PrizeRow = ({
       style={[
         styles.row,
         {
-          borderColor: isCurrent ? skin.actions.primary.fill : skin.colors.raised,
+          borderColor: isCurrent ? skin.panel.line : skin.colors.muted,
           borderRadius: skin.shape.radius,
           borderWidth: skin.shape.border,
         },
@@ -106,10 +106,10 @@ const PrizeRow = ({
             <View key={index} style={[styles.swatch, { backgroundColor: color }]} />
           ))}
       </View>
-      <ThemedText size={skin.type.lead} color={skin.colors.onGround}>
+      <ThemedText size={skin.type.lead} color={skin.panel.ink}>
         {look.name}
       </ThemedText>
-      <ThemedText size={skin.type.caption} color={skin.colors.muted}>
+      <ThemedText size={skin.type.caption} color={skin.panel.ink}>
         {status}
       </ThemedText>
       {action()}
@@ -148,10 +148,10 @@ const PrizeCounterModal = ({
 
   return (
     <BottomPanel visible={visible} onClose={onClose} dismissible>
-      <Title size={skin.type.headline} lines={1} color={skin.colors.accent}>
+      <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
         {copy.title}
       </Title>
-      <ThemedText size={skin.type.body} color={skin.colors.onGround}>
+      <ThemedText size={skin.type.body} color={skin.panel.ink}>
         {copy.balance(balance)}
       </ThemedText>
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
@@ -168,7 +168,7 @@ const PrizeCounterModal = ({
       <KilButton
         height={skin.size.button.md}
         fontSize={skin.type.lead}
-        variant="secondary"
+        variant={skin.panel.secondary}
         label={skin.copy.common.close}
         onTouch={onClose}
       />

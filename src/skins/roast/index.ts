@@ -18,7 +18,6 @@ const roast: Skin = {
   statusBarOnGround: "light",
   textCase: "upper",
   game: {
-    card: "sheet",
     stamp: "shout",
     strikeListTab: true,
   },
@@ -72,6 +71,14 @@ const roast: Skin = {
     danger: { fill: "transparent", ink: orange, line: orange },
     ghost: { fill: "transparent", ink: white, line: "transparent" },
     attached: { fill: ink, ink: white, line: white },
+  },
+  panel: {
+    fill: ink,
+    ink: white,
+    title: acid,
+    line: acid,
+    radius: 0,
+    secondary: "secondary",
   },
   shape: {
     border: 3,

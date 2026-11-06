@@ -10,6 +10,26 @@ const yellow = "#FFD84D";
 const white = "#FFFFFF";
 const coral = "#FF8E8E";
 const mint = "#7CF29A";
+const pale = "#E3EEFB";
+
+export const arcadePalette = {
+  navy,
+  purple,
+  yellow,
+  white,
+  coral,
+  mint,
+  pale,
+  deepNavy: "#1E4C86",
+  softNavy: "#BFD2F0",
+  dash: "#4D6C99",
+  plank: "#FFC9AE",
+  lilac: "#D9CCF5",
+  shutter: "#B9A6E8",
+  dimInk: "#5B6B85",
+  grip: "#C9D4E5",
+  plankShadow: "rgba(11,46,89,0.55)",
+};
 
 const arcade: Skin = {
   id: "arcade",
@@ -19,7 +39,6 @@ const arcade: Skin = {
   statusBarOnGround: "light",
   textCase: "none",
   game: {
-    card: "framed",
     stamp: "sticker",
     strikeListTab: false,
   },
@@ -73,6 +92,14 @@ const arcade: Skin = {
     danger: { fill: "transparent", ink: coral, line: coral },
     ghost: { fill: "transparent", ink: white, line: "transparent" },
     attached: { fill: "#E3EEFB", ink: navy, line: navy },
+  },
+  panel: {
+    fill: white,
+    ink: navy,
+    title: navy,
+    line: navy,
+    radius: 30,
+    secondary: "secondaryOnLight",
   },
   shape: {
     border: 3,

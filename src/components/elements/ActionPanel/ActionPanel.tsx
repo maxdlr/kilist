@@ -37,20 +37,20 @@ const ActionPanel = ({
         <Title
           size={skin.type.display.sm}
           lines={2}
-          color={isDestructive ? skin.colors.danger : skin.colors.accent}
+          color={isDestructive && skin.panel.radius === 0 ? skin.colors.danger : skin.panel.title}
         >
           {shown.title}
         </Title>
       )}
       {shown?.message && (
-        <ThemedText color={skin.colors.onGround}>{shown.message}</ThemedText>
+        <ThemedText color={skin.panel.ink}>{shown.message}</ThemedText>
       )}
       <View style={styles.actions}>
         <KilButton
           flex={1}
           height={skin.size.button.md}
           fontSize={skin.type.lead}
-          variant="secondary"
+          variant={skin.panel.secondary}
           label={shown?.cancelLabel ?? skin.copy.common.cancel}
           onTouch={onClose}
         />

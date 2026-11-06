@@ -1,7 +1,4 @@
 import type { Skin } from "@/skins/types";
-import ActionPanel, {
-  ActionPanelRequest,
-} from "@/components/elements/ActionPanel";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
@@ -11,17 +8,14 @@ import Sheet from "@/components/elements/Sheet/Sheet";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
-import useFoodList from "@/providers/FoodListProvider";
+import useFoodShelf from "@/hooks/screens/useFoodShelf";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import FoodFormModal from "./_components/FoodFormModal";
+import FoodPanels from "./_components/FoodPanels";
 import FoodRow from "./_components/FoodRow";
 
 const FoodList = () => {
@@ -29,126 +23,32 @@ const FoodList = () => {
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.list;
   const insets = useSafeAreaInsets();
-  const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isAddVisible, setIsAddVisible] = useState(false);
-  const [addInitialName, setAddInitialName] = useState("");
-  const [editingFood, setEditingFood] = useState<FoodType | null>(null);
-  const [actionRequest, setActionRequest] = useState<ActionPanelRequest | null>(
-    null,
-  );
-
+  const shelf = useFoodShelf();
   const {
     foods,
     isFoodLoading,
     mutateFood,
     search,
     setSearch,
-    createFood,
-    editFood,
-    removeFoodsFromList,
-  } = useFoodList();
+    isSelectMode,
+    selectedIds,
+    toggleSelect,
+    exitSelectMode,
+    openAdd,
+    query,
+    isEmpty,
+    noResults,
+  } = shelf;
 
   useStatusBarStyle(
     foods?.length || search.trim() ? skin.statusBarOnGround : "dark",
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      mutateFood();
-    }, [mutateFood]),
-  );
-
-  const toggleSelect = (foodId: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(foodId)
-        ? prev.filter((id) => id !== foodId)
-        : [...prev, foodId],
-    );
-  };
-
-  const exitSelectMode = () => {
-    setIsSelectMode(false);
-    setSelectedIds([]);
-  };
-
-  const closeActionPanel = useCallback(() => setActionRequest(null), []);
-  const closeAdd = useCallback(() => setIsAddVisible(false), []);
-  const closeEdit = useCallback(() => setEditingFood(null), []);
-
-  const openAdd = (initialName = "") => {
-    setEditingFood(null);
-    setAddInitialName(initialName);
-    setIsAddVisible(true);
-  };
-
-  const askRemove = (ids: number[], title: string) => {
-    setActionRequest({
-      title,
-      message: copy.removeLine,
-      cancelLabel: skin.copy.common.keep,
-      actions: [
-        {
-          label: skin.copy.common.remove,
-          destructive: true,
-          onPress: async () => {
-            await removeFoodsFromList(ids);
-            exitSelectMode();
-          },
-        },
-      ],
-    });
-  };
-
-  const handleRemoveEditing = () => {
-    if (!editingFood) return;
-    const food = editingFood;
-    setEditingFood(null);
-    askRemove([food.id], copy.removeOne(caseFor(skin, food.name)));
-  };
-
-  const handleDeleteSelected = () => {
-    if (selectedIds.length === 0) return;
-    askRemove(selectedIds, copy.removeMany(selectedIds.length));
-  };
-
-  if (isFoodLoading && foods === undefined) {
+  if (shelf.isLoading) {
     return <LoadingAnim />;
   }
 
-  const query = caseFor(skin, search.trim());
-  const hasFoods = Boolean(foods?.length);
-  const isEmpty = !hasFoods && !query;
-  const noResults = !hasFoods && Boolean(query);
-
-  const panels = (
-    <>
-      <ActionPanel request={actionRequest} onClose={closeActionPanel} />
-
-      <FoodFormModal
-        visible={isAddVisible}
-        formKey={`add-${addInitialName}`}
-        title={copy.addTitle}
-        initialName={addInitialName}
-        onSubmit={createFood}
-        onClose={closeAdd}
-      />
-
-      <FoodFormModal
-        visible={editingFood !== null}
-        formKey={editingFood?.id}
-        title={copy.editTitle(editingFood ? caseFor(skin, editingFood.name) : "")}
-        initialName={editingFood?.name}
-        initialDescription={editingFood?.description}
-        onSubmit={async (data) => {
-          if (!editingFood) return false;
-          return editFood(editingFood.id, data);
-        }}
-        onRemove={handleRemoveEditing}
-        onClose={closeEdit}
-      />
-    </>
-  );
+  const panels = <FoodPanels shelf={shelf} />;
 
   if (isEmpty) {
     return (
@@ -188,7 +88,7 @@ const FoodList = () => {
         isSelectMode={isSelectMode}
         isSelected={selectedIds.includes(item.id)}
         onToggleSelect={toggleSelect}
-        onEdit={setEditingFood}
+        onEdit={shelf.openEdit}
       />
     </AnimatedListItem>
   );
@@ -247,7 +147,7 @@ const FoodList = () => {
               fontSize={skin.type.lead}
               variant="danger"
               label={copy.deleteSelected(selectedIds.length)}
-              onTouch={handleDeleteSelected}
+              onTouch={shelf.removeSelected}
             />
           </Dock>
         ) : (
@@ -267,7 +167,7 @@ const FoodList = () => {
                   fontSize={skin.type.lead}
                   variant="secondary"
                   label={copy.select}
-                  onTouch={() => setIsSelectMode(true)}
+                  onTouch={shelf.startSelect}
                 />
                 <KilButton
                   flex={1}

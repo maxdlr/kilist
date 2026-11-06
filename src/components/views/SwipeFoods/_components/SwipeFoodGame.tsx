@@ -6,32 +6,22 @@ import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import Sheet from "@/components/elements/Sheet/Sheet";
 import SwipeDeck, {
   deckButtonColors,
-  SwipeDeckFling,
-  SwipeDirection,
 } from "@/components/elements/SwipeDeck/SwipeDeck";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
+import useSwipeGame from "@/hooks/screens/useSwipeGame";
 import useTickets from "@/providers/TicketsProvider";
 import { caseFor, findSkin } from "@/skins";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { Image } from "expo-image";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const IN_STOCK: Record<SwipeDirection, boolean | null> = {
-  right: true,
-  left: false,
-  up: null,
-};
-const SWIPE_TICKETS = 10;
-const BONUS_VISIBLE_MS = 700;
 
 const pad = (value: number) => String(value).padStart(2, "0");
 const padTickets = (value: number) => String(value).padStart(4, "0");
@@ -150,137 +140,6 @@ const FoodSheet = ({
   );
 };
 
-const FoodTicket = ({
-  food,
-  position,
-  total,
-}: {
-  food: FoodType;
-  position: number;
-  total: number;
-}) => {
-  const skin = useSkin();
-  const styles = useSkinStyles(createStyles);
-  const level = levelOf(food.inStockScore);
-  const tint = skin.colors.levels[level];
-  const ink = skin.colors.onPaper;
-  const { offset, color } = skin.shape.shadow;
-  const notch = {
-    backgroundColor: skin.colors.ground,
-    borderColor: ink,
-    borderWidth: skin.shape.border,
-  };
-
-  return (
-    <View style={styles.ticketSlot}>
-      <View
-        style={[
-          styles.ticket,
-          {
-            backgroundColor: tint,
-            borderColor: ink,
-            borderRadius: skin.shape.radius * 1.4,
-            borderWidth: skin.shape.border,
-          },
-          offset > 0 && { boxShadow: `0 ${offset + 3}px 0 ${color}` },
-        ]}
-      >
-        <View style={styles.ticketTop}>
-          <ThemedText size={skin.type.caption} color={ink}>
-            {`${position + 1}/${total}`}
-          </ThemedText>
-          <ThemedText size={skin.type.caption} color={ink}>
-            {skin.copy.tickets.cardTag(SWIPE_TICKETS)}
-          </ThemedText>
-        </View>
-        <FoodHero food={food} />
-        <View
-          style={[
-            styles.ticketStub,
-            {
-              backgroundColor: skin.colors.paper,
-              borderTopColor: ink,
-              borderTopWidth: skin.shape.border,
-            },
-          ]}
-        >
-          <Title
-            size={skin.type.display.sm}
-            lines={1}
-            color={ink}
-            style={styles.flex}
-          >
-            {caseFor(skin, food.name)}
-          </Title>
-          <View
-            style={[
-              styles.chip,
-              {
-                backgroundColor: tint,
-                borderColor: ink,
-                borderWidth: skin.shape.border - 1,
-              },
-            ]}
-          >
-            <ThemedText size={skin.type.caption} color={ink}>
-              {skin.copy.levels[level]}
-            </ThemedText>
-          </View>
-        </View>
-        <View style={[styles.notch, styles.notchLeft, notch]} />
-        <View style={[styles.notch, styles.notchRight, notch]} />
-      </View>
-    </View>
-  );
-};
-
-const TicketHud = ({
-  tickets,
-  position,
-  total,
-}: {
-  tickets: number;
-  position: number;
-  total: number;
-}) => {
-  const skin = useSkin();
-  const styles = useSkinStyles(createStyles);
-  const insets = useSafeAreaInsets();
-  const ink = skin.colors.paper;
-
-  return (
-    <View style={[styles.hudWrap, { paddingTop: insets.top + skin.spacing.top }]}>
-      <View
-        style={[
-          styles.hud,
-          {
-            backgroundColor: skin.colors.onPaper,
-            borderColor: skin.colors.onPaper,
-            borderRadius: skin.shape.radius,
-            borderWidth: skin.shape.border,
-          },
-        ]}
-      >
-        <View style={styles.flex}>
-          <ThemedText size={skin.type.caption} color={skin.colors.muted}>
-            {skin.copy.tickets.counter}
-          </ThemedText>
-          <ThemedText
-            accessibilityLiveRegion="polite"
-            size={skin.type.headline}
-            color={ink}
-          >
-            {padTickets(tickets)}
-          </ThemedText>
-        </View>
-        <ThemedText size={skin.type.label} color={ink}>
-          {`${Math.min(position + 1, total)}/${total}`}
-        </ThemedText>
-      </View>
-    </View>
-  );
-};
-
 const CashOut = ({
   earned,
   bonus,
@@ -379,90 +238,15 @@ const SwipeFoodGame = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.swipe;
-  const tickets = useTickets();
-  const {
-    foods,
-    game,
-    isLoading,
-    isGameLoading,
-    mutateFoods,
-    mutateGame,
-    swipe,
-    update,
-    completeSession,
-  } = useSwipeFoods();
+  const game = useSwipeGame();
+  const { screen, position, total, intent } = game;
 
-  const [screen, setScreen] = useState<"idle" | "play" | "done">("idle");
-  const [swiped, setSwiped] = useState(0);
-  const [outFoods, setOutFoods] = useState<FoodType[]>([]);
-  const [intent, setIntent] = useState<SwipeDirection | null>(null);
-  const [earned, setEarned] = useState(0);
-  const [bonus, setBonus] = useState(0);
-  const [bonusPop, setBonusPop] = useState(0);
-  const flingRef = useRef<SwipeDeckFling | null>(null);
-  const pendingUpdates = useRef<Promise<SwipeReward | null>[]>([]);
-  const bonusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      mutateGame();
-      mutateFoods();
-      return () => {
-        setScreen((current) => (current === "done" ? "idle" : current));
-      };
-    }, [mutateFoods, mutateGame]),
-  );
-
-  const isFramed = skin.game.card === "framed";
-  const position = swiped;
-  const total = swiped + (foods?.length ?? 0);
   useStatusBarStyle(
     screen === "done" ||
-      (screen === "play" &&
-        (isFramed || sheetAt(skin, position).fill === skin.colors.ground))
+      (screen === "play" && sheetAt(skin, position).fill === skin.colors.ground)
       ? skin.statusBarOnGround
       : "dark",
   );
-
-  const begin = () => {
-    setSwiped(0);
-    setOutFoods([]);
-    setEarned(0);
-    setBonus(0);
-    pendingUpdates.current = [];
-    setScreen("play");
-  };
-
-  const collect = (reward: SwipeReward | null) => {
-    if (!reward) return reward;
-    setEarned((total) => total + reward.earned);
-    setBonus((total) => total + reward.bonus);
-    if (reward.balance !== null) tickets.setBalance(reward.balance);
-    if (reward.bonus > 0) {
-      setBonusPop(reward.bonus);
-      if (bonusTimer.current) clearTimeout(bonusTimer.current);
-      bonusTimer.current = setTimeout(() => setBonusPop(0), BONUS_VISIBLE_MS);
-    }
-    return reward;
-  };
-
-  const handleSwipe = (food: FoodType, direction: SwipeDirection) => {
-    const isLast = foods?.length === 1;
-
-    setSwiped((count) => count + 1);
-    if (direction === "left") setOutFoods((out) => [...out, food]);
-    swipe(food.id);
-    pendingUpdates.current.push(
-      update({ foodId: food.id, isInStock: IN_STOCK[direction] }).then(collect),
-    );
-
-    if (isLast) {
-      setScreen("done");
-      Promise.allSettled(pendingUpdates.current)
-        .then(completeSession)
-        .then(tickets.refresh);
-    }
-  };
 
   if (screen === "done") {
     return (
@@ -480,7 +264,7 @@ const SwipeFoodGame = () => {
               height={skin.size.button.xs}
               fontSize={skin.type.label}
               label={copy.overAgain}
-              onTouch={() => setScreen("idle")}
+              onTouch={game.reset}
             />
           </Dock>
         }
@@ -490,7 +274,7 @@ const SwipeFoodGame = () => {
             {copy.overTitle}
           </Title>
           <Title size={skin.type.display.xl} lines={1} color={skin.colors.onGround} header={false}>
-            {skin.copy.tickets.cashOut(earned)}
+            {skin.copy.tickets.cashOut(game.earned)}
           </Title>
           {Boolean(copy.overDignity || copy.overScore) && (
             <View style={styles.scoreRow}>
@@ -502,11 +286,11 @@ const SwipeFoodGame = () => {
               </ThemedText>
             </View>
           )}
-          <CashOut earned={earned} bonus={bonus} swipes={swiped} />
+          <CashOut earned={game.earned} bonus={game.bonus} swipes={position} />
           <Title size={skin.type.title} lines={2} color={skin.colors.onGround} header={false}>
-            {outFoods.length ? copy.overWelcome : copy.overNothing}
+            {game.outFoods.length ? copy.overWelcome : copy.overNothing}
           </Title>
-          {outFoods.map((food) => (
+          {game.outFoods.map((food) => (
             <View key={food.id} style={styles.outFood}>
               <Title
                 size={skin.type.headline}
@@ -521,26 +305,21 @@ const SwipeFoodGame = () => {
             </View>
           ))}
           <ThemedText size={skin.type.body} color={skin.colors.onGround}>
-            {copy.overNext((game?.level ?? 1) + 1)}
+            {copy.overNext(game.level + 1)}
           </ThemedText>
         </ScrollView>
       </Sheet>
     );
   }
 
-  if ((isLoading && !foods) || (isGameLoading && !game)) {
-    return <LoadingAnim />;
-  }
+  if (screen === "loading") return <LoadingAnim />;
 
-  if (screen === "play" && foods?.length) {
+  if (screen === "play") {
     return (
       <View style={[styles.flex, { backgroundColor: skin.colors.ground }]}>
-        {isFramed && (
-          <TicketHud tickets={earned} position={position} total={total} />
-        )}
         <View style={styles.flex}>
           <SwipeDeck
-            items={foods}
+            items={game.foods}
             keyOf={(food) => food.id}
             allowUp
             stamps={{
@@ -548,27 +327,19 @@ const SwipeFoodGame = () => {
               left: copy.stampOut,
               up: copy.stampUnsure,
             }}
-            flingRef={flingRef}
-            onIntent={setIntent}
-            onSwipe={handleSwipe}
-            renderSheet={(food, depth) =>
-              isFramed ? (
-                <FoodTicket
-                  food={food}
-                  position={position + depth}
-                  total={total}
-                />
-              ) : (
-                <FoodSheet
-                  food={food}
-                  position={position + depth}
-                  total={total}
-                  tickets={earned}
-                />
-              )
-            }
+            flingRef={game.flingRef}
+            onIntent={game.setIntent}
+            onSwipe={game.handleSwipe}
+            renderSheet={(food, depth) => (
+              <FoodSheet
+                food={food}
+                position={position + depth}
+                total={total}
+                tickets={game.earned}
+              />
+            )}
           />
-          {bonusPop > 0 && (
+          {game.bonusPop > 0 && (
             <View pointerEvents="none" style={styles.bonusWrap}>
               <View
                 style={[
@@ -586,7 +357,7 @@ const SwipeFoodGame = () => {
                   size={skin.type.title}
                   color={skin.colors.onPaper}
                 >
-                  {skin.copy.tickets.bonus(bonusPop)}
+                  {skin.copy.tickets.bonus(game.bonusPop)}
                 </ThemedText>
               </View>
             </View>
@@ -599,7 +370,7 @@ const SwipeFoodGame = () => {
             label={copy.out}
             accessibilityLabel="Out of stock"
             colors={deckButtonColors(skin, intent, "left")}
-            onTouch={() => flingRef.current?.("left")}
+            onTouch={() => game.fling("left")}
           />
           <KilButton
             flex={1}
@@ -607,7 +378,7 @@ const SwipeFoodGame = () => {
             label={copy.unsure}
             accessibilityLabel="Not sure"
             colors={deckButtonColors(skin, intent, "up", true)}
-            onTouch={() => flingRef.current?.("up")}
+            onTouch={() => game.fling("up")}
           />
           <KilButton
             flex={1.2}
@@ -615,14 +386,14 @@ const SwipeFoodGame = () => {
             label={copy.inStock}
             accessibilityLabel="In stock"
             colors={deckButtonColors(skin, intent, "right")}
-            onTouch={() => flingRef.current?.("right")}
+            onTouch={() => game.fling("right")}
           />
         </Dock>
       </View>
     );
   }
 
-  if (game?.playedToday) {
+  if (screen === "closed") {
     return (
       <Sheet
         fill={skin.colors.alert}
@@ -638,7 +409,7 @@ const SwipeFoodGame = () => {
         }
       >
         <ThemedText size={skin.type.body}>
-          {copy.tomorrowLabel((game?.level ?? 1) + 1)}
+          {copy.tomorrowLabel(game.level + 1)}
         </ThemedText>
         <Title size={skin.type.display.lg}>{copy.tomorrowTitle}</Title>
         <ThemedText size={skin.type.lead}>{copy.tomorrowLine}</ThemedText>
@@ -646,19 +417,17 @@ const SwipeFoodGame = () => {
     );
   }
 
-  if (!foods?.length) {
+  if (screen === "empty") {
     return (
       <EmptyData
         label={copy.emptyLabel}
         title={copy.emptyTitle}
         line={copy.emptyLine}
         fill={skin.colors.accent}
-        onRefresh={() => mutateFoods()}
+        onRefresh={game.refreshFoods}
       />
     );
   }
-
-  const balance = tickets.counter?.balance;
 
   return (
     <Sheet
@@ -669,23 +438,21 @@ const SwipeFoodGame = () => {
             height={skin.size.button.xl}
             fontSize={skin.type.headline}
             label={copy.start}
-            onTouch={begin}
+            onTouch={game.begin}
           />
         </Dock>
       }
     >
       <View style={styles.metaRow}>
-        <ThemedText size={skin.type.body}>
-          {copy.startLabel(game?.level ?? 1)}
-        </ThemedText>
-        {balance !== undefined && (
+        <ThemedText size={skin.type.body}>{copy.startLabel(game.level)}</ThemedText>
+        {game.balance !== undefined && (
           <ThemedText size={skin.type.body}>
-            {skin.copy.tickets.balance(balance)}
+            {skin.copy.tickets.balance(game.balance)}
           </ThemedText>
         )}
       </View>
       <Title size={skin.type.display.lg}>{copy.startTitle}</Title>
-      <ThemedText size={skin.type.lead}>{copy.startLine(foods.length)}</ThemedText>
+      <ThemedText size={skin.type.lead}>{copy.startLine(game.foods.length)}</ThemedText>
     </Sheet>
   );
 };
@@ -720,57 +487,6 @@ const createStyles = (s: Skin) =>
       flex: 1,
       justifyContent: "center",
       minHeight: 0,
-      paddingVertical: s.spacing.small,
-    },
-    ticketSlot: {
-      flex: 1,
-      paddingBottom: s.spacing.section,
-      paddingHorizontal: s.spacing.section,
-      paddingTop: s.spacing.small,
-    },
-    ticket: {
-      flex: 1,
-      overflow: "hidden",
-    },
-    ticketTop: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      paddingHorizontal: s.spacing.section,
-      paddingTop: s.spacing.stack,
-    },
-    ticketStub: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      paddingHorizontal: s.spacing.section,
-      paddingVertical: s.spacing.stack,
-    },
-    chip: {
-      borderRadius: s.shape.radius,
-      paddingHorizontal: s.spacing.inline,
-      paddingVertical: s.spacing.tight,
-    },
-    notch: {
-      borderRadius: s.size.check,
-      height: s.size.check * 1.4,
-      position: "absolute",
-      top: "62%",
-      width: s.size.check * 1.4,
-    },
-    notchLeft: {
-      left: -s.size.check * 0.8,
-    },
-    notchRight: {
-      right: -s.size.check * 0.8,
-    },
-    hudWrap: {
-      paddingHorizontal: s.spacing.gutter,
-    },
-    hud: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      paddingHorizontal: s.spacing.stack,
       paddingVertical: s.spacing.small,
     },
     bonusWrap: {

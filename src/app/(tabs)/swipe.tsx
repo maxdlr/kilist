@@ -1,10 +1,10 @@
-import SwipeFoodGame from "@/components/views/SwipeFoods/_components/SwipeFoodGame";
 import { SwipeFoodsProvider } from "@/providers/SwipeFoodsProvider";
+import { SkinScreen } from "@/skins/screens";
 
 const SwipeScreen = () => {
   return (
     <SwipeFoodsProvider>
-      <SwipeFoodGame />
+      <SkinScreen slot="Play" />
     </SwipeFoodsProvider>
   );
 };

@@ -43,21 +43,21 @@ const FoodForm = ({
 
   return (
     <>
-      <Title size={skin.type.headline} lines={2} color={skin.colors.accent}>
+      <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {title}
       </Title>
 
       <FormInput
         label={copy.name}
         placeholder={skin.copy.placeholders.foodName}
-        labelColor={skin.colors.accent}
+        labelColor={skin.panel.ink}
         value={name}
         onChangeText={setName}
       />
       <FormInput
         label={copy.description}
         placeholder={skin.copy.placeholders.foodDescription}
-        labelColor={skin.colors.accent}
+        labelColor={skin.panel.ink}
         value={description}
         onChangeText={setDescription}
       />
@@ -77,7 +77,7 @@ const FoodForm = ({
           flex={1}
           height={skin.size.button.md}
           fontSize={skin.type.lead}
-          variant="secondary"
+          variant={skin.panel.secondary}
           label={skin.copy.common.cancel}
           onTouch={onClose}
         />

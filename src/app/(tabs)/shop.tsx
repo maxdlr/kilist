@@ -1,12 +1,12 @@
-import ShopList from "@/components/views/ShopList";
 import { ShopListProvider } from "@/providers/ShopListProvider";
+import { SkinScreen } from "@/skins/screens";
 
-const ShopListView = () => {
+const ShopScreen = () => {
   return (
     <ShopListProvider>
-      <ShopList />
+      <SkinScreen slot="Shop" />
     </ShopListProvider>
   );
 };
 
-export default ShopListView;
+export default ShopScreen;
