@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Linking, Share } from "react-native";
 
-export type AccountPanel = "switch" | "qr" | "delete" | "prizes";
+export type AccountPanel = "switch" | "qr" | "delete" | "credits";
 
 const useAccount = () => {
   const skin = useSkin();
@@ -52,7 +52,7 @@ const useAccount = () => {
     }
   };
 
-  const openCredits = async () => {
+  const openIconsSite = async () => {
     try {
       await Linking.openURL("https://icons8.com");
     } catch {
@@ -79,9 +79,10 @@ const useAccount = () => {
     deleteRequest,
     logOut,
     shareCode,
-    openCredits,
+    openCredits: () => setOpenPanel("credits"),
+    openIconsSite,
     switchTo,
-    suggestFoods: () => router.push("/onboarding"),
+    replayOnboarding: () => router.push("/onboarding?intro=1"),
   };
 };
 

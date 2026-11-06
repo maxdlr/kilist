@@ -20,11 +20,12 @@ import { useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
+import Intro from "./_components/Intro";
 import ManualAddForm from "./_components/ManualAddForm";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
-const Onboarding = ({ onDone }: { onDone: () => void }) => {
+const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boolean }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.onboarding;
@@ -32,6 +33,7 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
   const { showToast } = useToast();
   const flingRef = useRef<SwipeDeckFling | null>(null);
   const [intent, setIntent] = useState<SwipeDirection | null>(null);
+  const [showIntro, setShowIntro] = useState(intro);
 
   const { data: mainList, isLoading: isListLoading } = useSWR<ListType>({
     url: "lists/read?main=true",
@@ -96,6 +98,10 @@ const Onboarding = ({ onDone }: { onDone: () => void }) => {
       });
     }
   };
+
+  if (showIntro) {
+    return <Intro onDone={() => setShowIntro(false)} />;
+  }
 
   if (isLoading || isListLoading) {
     return <LoadingAnim />;

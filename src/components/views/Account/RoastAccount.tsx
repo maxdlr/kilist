@@ -11,6 +11,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AccountPanels from "./_components/AccountPanels";
+import LooksShowcase from "./_components/LooksShowcase";
 
 const RoastAccount = () => {
   const skin = useSkin();
@@ -36,6 +37,10 @@ const RoastAccount = () => {
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
           </ThemedText>
+        </View>
+
+        <View style={styles.looks}>
+          <LooksShowcase />
         </View>
 
         <View
@@ -85,16 +90,10 @@ const RoastAccount = () => {
 
         <View style={{ backgroundColor: skin.colors.paper }}>
           <ActionRow
-            label={skin.copy.prizes.row(account.balance)}
-            onPress={() => setOpenPanel("prizes")}
-            showChevron
-          />
-          <ActionRow
             label={copy.suggested}
-            onPress={account.suggestFoods}
+            onPress={account.replayOnboarding}
             showChevron
           />
-          <ActionRow label={copy.logout} onPress={account.logOut} />
           <ActionRow
             label={copy.credits}
             onPress={account.openCredits}
@@ -102,13 +101,21 @@ const RoastAccount = () => {
           />
         </View>
 
-        {!account.isAdmin && (
-          <ActionRow
-            label={copy.delete}
-            onPress={() => setOpenPanel("delete")}
-            destructive
-          />
-        )}
+        <View style={styles.dangerHead}>
+          <ThemedText size={skin.type.label} color={skin.colors.onGround}>
+            {copy.dangerTitle}
+          </ThemedText>
+        </View>
+        <View style={{ backgroundColor: skin.colors.paper, paddingBottom: skin.spacing.section }}>
+          <ActionRow label={copy.logout} onPress={account.logOut} />
+          {!account.isAdmin && (
+            <ActionRow
+              label={copy.delete}
+              onPress={() => setOpenPanel("delete")}
+              destructive
+            />
+          )}
+        </View>
       </ScrollView>
 
       <AccountPanels account={account} />
@@ -139,6 +146,15 @@ const createStyles = (s: Skin) =>
     },
     chip: {
       paddingHorizontal: s.spacing.dock,
+    },
+    looks: {
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    dangerHead: {
+      paddingBottom: s.spacing.small,
+      paddingHorizontal: s.spacing.gutter,
+      paddingTop: s.spacing.page,
     },
     members: {
       gap: s.spacing.hair,

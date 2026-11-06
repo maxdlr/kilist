@@ -1,5 +1,6 @@
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
+import SwipeGesture from "@/components/gestures/SwipeGesture";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useShopRun from "@/hooks/screens/useShopRun";
@@ -54,18 +55,21 @@ const Cell = ({
   stamped,
   bonus,
   onStamp,
+  onLater,
 }: {
   food: FoodType;
   stamped: boolean;
   bonus: boolean;
   onStamp: () => void;
+  onLater: () => void;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const level = levelOf(food.inStockScore);
   const [size, setSize] = useState(0);
+  const [stamping, setStamping] = useState(true);
 
-  return (
+  const cell = (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ checked: stamped, disabled: stamped }}
@@ -91,6 +95,75 @@ const Cell = ({
       </ThemedText>
       <Stamp on={stamped} />
     </Pressable>
+  );
+
+  if (stamped) return cell;
+
+  return (
+    <View
+      accessibilityActions={[{ name: "later", label: T.nextTime }]}
+      onAccessibilityAction={(event) => event.nativeEvent.actionName === "later" && onLater()}
+      style={[styles.swipeSlot, { backgroundColor: stamping ? P.navy : P.lilac }]}
+    >
+      <View style={[styles.behind, { justifyContent: stamping ? "flex-start" : "flex-end" }]}>
+        <ThemedText size={skin.type.caption - 2} color={stamping ? P.white : P.navy}>
+          {stamping ? T.bought : T.nextTime}
+        </ThemedText>
+      </View>
+      <SwipeGesture
+        onSwipeRight={onStamp}
+        onSwipeLeft={onLater}
+        onSwipingRight={() => setStamping(true)}
+        onSwipingLeft={() => setStamping(false)}
+        swipeThreshold={48}
+        styles={{ box: styles.swipeBox }}
+      >
+        {cell}
+      </SwipeGesture>
+    </View>
+  );
+};
+
+const NextStop = ({ food, onStamp, onLater }: { food: FoodType; onStamp: () => void; onLater: () => void }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const [stamping, setStamping] = useState(true);
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${T.nextStop}: ${food.name}`}
+      accessibilityActions={[
+        { name: "activate", label: T.bought },
+        { name: "later", label: T.nextTime },
+      ]}
+      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onStamp())}
+      style={[styles.nextSlot, { backgroundColor: stamping ? P.navy : P.lilac }]}
+    >
+      <View style={[styles.behind, { justifyContent: stamping ? "flex-start" : "flex-end" }]}>
+        <ThemedText size={skin.type.caption} color={stamping ? P.white : P.navy}>
+          {stamping ? T.bought : T.nextTime}
+        </ThemedText>
+      </View>
+      <SwipeGesture
+        onSwipeRight={onStamp}
+        onSwipeLeft={onLater}
+        onSwipingRight={() => setStamping(true)}
+        onSwipingLeft={() => setStamping(false)}
+        swipeThreshold={100}
+        styles={{ box: styles.nextBox }}
+      >
+        <FoodPicture food={food} size={skin.size.icon.row} />
+        <View style={styles.flex}>
+          <ThemedText size={skin.type.caption - 3} color={P.dimInk}>
+            {T.nextStop}
+          </ThemedText>
+          <ThemedText numberOfLines={1} size={skin.type.body} color={P.navy}>
+            {food.name}
+          </ThemedText>
+        </View>
+      </SwipeGesture>
+    </View>
   );
 };
 
@@ -122,7 +195,6 @@ const ArcadeShop = () => {
   const run = useShopRun();
   const [card, setCard] = useState<FoodType[]>([]);
   const [stamped, setStamped] = useState<number[]>([]);
-  const [bonusId, setBonusId] = useState<number | undefined>();
 
   const remaining = run.foods ?? [];
   const live = new Set(remaining.map((food) => food.id));
@@ -134,7 +206,6 @@ const ArcadeShop = () => {
   if (needsDeal) {
     const regulars = run.rows.slice(0, run.suggestion ? CARD_CELLS - 1 : CARD_CELLS);
     setCard(run.suggestion ? [...regulars, run.suggestion] : regulars);
-    setBonusId(run.suggestion?.id);
     setStamped([]);
   }
 
@@ -205,6 +276,8 @@ const ArcadeShop = () => {
   }
 
   const left = remaining.length;
+  const nextId = run.suggestion?.id;
+  const offCard = run.suggestion && !onCard.some((food) => food.id === nextId) ? run.suggestion : null;
   const stamp = (food: FoodType) => {
     setStamped((ids) => [...ids, food.id]);
     run.buy(food.id);
@@ -271,6 +344,10 @@ const ArcadeShop = () => {
         </View>
       </View>
 
+      {offCard && (
+        <NextStop food={offCard} onStamp={() => run.buy(offCard.id)} onLater={() => run.snooze(offCard.id)} />
+      )}
+
       <ArcadeCard lift={2} style={styles.board}>
         <View style={styles.header}>
           {HEADER.map((letter) => (
@@ -288,8 +365,9 @@ const ArcadeShop = () => {
                 <Cell
                   food={food}
                   stamped={stamped.includes(food.id)}
-                  bonus={food.id === bonusId}
+                  bonus={food.id === nextId}
                   onStamp={() => stamp(food)}
+                  onLater={() => run.snooze(food.id)}
                 />
               ) : (
                 <FreeCell />
@@ -306,6 +384,39 @@ const createStyles = (s: Skin) => {
   const gap = s.spacing.small + 2;
 
   return StyleSheet.create({
+    swipeSlot: {
+      borderRadius: s.spacing.section - 2,
+      flex: 1,
+      overflow: "hidden",
+    },
+    behind: {
+      alignItems: "center",
+      bottom: 0,
+      flexDirection: "row",
+      left: 0,
+      paddingHorizontal: s.spacing.small,
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
+    swipeBox: {
+      flex: 1,
+    },
+    nextSlot: {
+      borderRadius: s.shape.radius,
+      overflow: "hidden",
+    },
+    nextBox: {
+      alignItems: "center",
+      backgroundColor: P.white,
+      borderColor: P.navy,
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      paddingHorizontal: s.spacing.inline,
+      paddingVertical: s.spacing.small,
+    },
     flex: {
       flex: 1,
       minWidth: 0,

@@ -1,7 +1,7 @@
 import ActionPanel from "@/components/elements/ActionPanel";
 import type { Account } from "@/hooks/screens/useAccount";
 import InviteQrModal from "./InviteQrModal";
-import PrizeCounterModal from "./PrizeCounterModal";
+import CreditsModal from "./CreditsModal";
 import SwitchHouseholdModal from "./SwitchHouseholdModal";
 
 const AccountPanels = ({ account }: { account: Account }) => {
@@ -18,7 +18,7 @@ const AccountPanels = ({ account }: { account: Account }) => {
         joinCode={account.joinCode}
         onClose={closePanel}
       />
-      <PrizeCounterModal visible={openPanel === "prizes"} onClose={closePanel} />
+      <CreditsModal visible={openPanel === "credits"} onClose={closePanel} onOpenIcons={account.openIconsSite} />
       <SwitchHouseholdModal
         visible={openPanel === "switch"}
         onClose={closePanel}

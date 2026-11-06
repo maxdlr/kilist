@@ -14,7 +14,7 @@ const roast: Skin = {
   id: "roast",
   name: "ROAST",
   tagline: "THE APP HATES YOUR LISTS. LOUDLY.",
-  premium: false,
+  premium: true,
   statusBarOnGround: "light",
   textCase: "upper",
   game: {

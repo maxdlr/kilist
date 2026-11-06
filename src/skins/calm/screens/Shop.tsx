@@ -5,6 +5,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
+import SwipeGesture from "@/components/gestures/SwipeGesture";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
@@ -22,6 +23,47 @@ const Circle = ({ done }: { done: boolean }) => {
         </Svg>
       )}
       {!done && <View style={{ width: skin.spacing.hair }} />}
+    </View>
+  );
+};
+
+const SwipeRow = ({ food, onBuy, onLater }: { food: FoodType; onBuy: () => void; onLater: () => void }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const [buying, setBuying] = useState(true);
+  const level = levelOf(food.inStockScore);
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}`}
+      accessibilityHint="Swipe right when it's in the basket, left to keep it for next time"
+      accessibilityActions={[
+        { name: "activate", label: "In the basket" },
+        { name: "later", label: "Next time" },
+      ]}
+      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onBuy())}
+      style={[styles.slot, { backgroundColor: buying ? C.ink : C.tint }]}
+    >
+      <View style={[styles.behind, { justifyContent: buying ? "flex-start" : "flex-end" }]}>
+        <CText weight="medium" size={skin.type.label + 1} color={buying ? C.ground : C.soft}>
+          {buying ? "In the basket" : "Later"}
+        </CText>
+      </View>
+      <SwipeGesture
+        onSwipeRight={onBuy}
+        onSwipeLeft={onLater}
+        onSwipingRight={() => setBuying(true)}
+        onSwipingLeft={() => setBuying(false)}
+        swipeThreshold={100}
+        styles={{ box: styles.swipeBox }}
+      >
+        <View style={styles.rowMain}>
+          <Circle done={false} />
+          <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>{food.name}</CText>
+          <Dot color={skin.colors.levels[level]} />
+        </View>
+      </SwipeGesture>
     </View>
   );
 };
@@ -92,31 +134,20 @@ const CalmShop = () => {
         </View>
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
-        {remaining.map((food) => {
-          const level = levelOf(food.inStockScore);
-          return (
-            <View key={food.id} style={styles.row}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}. Tap when it's in the basket`}
-                onPress={() => tick(food)}
-                style={styles.rowMain}
-              >
-                <Circle done={false} />
-                <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>{food.name}</CText>
-                <Dot color={skin.colors.levels[level]} />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`${food.name}: next time`}
-                onPress={() => postpone(food)}
-                style={styles.later}
-              >
-                <CText size={skin.type.label} color={C.soft}>Later</CText>
-              </Pressable>
-            </View>
-          );
-        })}
+        {remaining.length > 0 && (
+          <CText size={skin.type.label} color={C.soft} style={styles.hint}>
+            {"Swipe right when it's in the basket, left for next time."}
+          </CText>
+        )}
+        {run.suggestion && (
+          <View style={styles.next}>
+            <CText size={skin.type.caption} color={C.soft}>Usually next</CText>
+            <SwipeRow food={run.suggestion} onBuy={() => tick(run.suggestion!)} onLater={() => postpone(run.suggestion!)} />
+          </View>
+        )}
+        {run.rows.map((food) => (
+          <SwipeRow key={food.id} food={food} onBuy={() => tick(food)} onLater={() => postpone(food)} />
+        ))}
         {basket.length > 0 && (
           <>
             <CText size={skin.type.label} color={C.soft} style={styles.basketLabel}>In the basket</CText>
@@ -153,7 +184,11 @@ const createStyles = (s: Skin) =>
       minHeight: s.size.row.shop,
     },
     rowMain: { alignItems: "center", flex: 1, flexDirection: "row", gap: s.spacing.dock - 2, minHeight: s.size.row.shop },
-    later: { justifyContent: "center", minHeight: s.size.button.xs, paddingLeft: s.spacing.small },
+    hint: { paddingBottom: s.spacing.small },
+    next: { gap: s.spacing.tight, paddingBottom: s.spacing.inline },
+    slot: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, overflow: "hidden" },
+    behind: { alignItems: "center", bottom: 0, flexDirection: "row", left: 0, paddingHorizontal: s.spacing.stack, position: "absolute", right: 0, top: 0 },
+    swipeBox: { backgroundColor: C.ground },
     circle: {
       alignItems: "center",
       borderRadius: s.size.check,

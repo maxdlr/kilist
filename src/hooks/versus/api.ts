@@ -104,16 +104,6 @@ export type ShopRecords = {
   runsByMember: Record<number, number>;
 };
 
-export type ShopTip = {
-  userId: number;
-  username: string;
-  isSelf: boolean;
-  food: FoodType;
-  afterFoodId: number;
-  count: number;
-  of: number;
-};
-
 export type HouseVotes = {
   members: Member[];
   votes: Record<number, Record<number, { answer: RaceAnswer; at: string }>>;
@@ -144,9 +134,6 @@ export const postAnswer = async (
   raceId: number,
   payload: { foodId: number; answer: RaceAnswer; ms: number },
 ) => (await axios.post<AnswerResult>(`/versus/race/${raceId}/answer`, payload)).data;
-
-export const fetchShopTip = async (shopListId: number, after: number) =>
-  (await axios.get<ShopTip | null>(`/versus/shop/${shopListId}/tip`, { params: { after } })).data;
 
 export const verdictOf = (answers: RaceAnswer[]): Verdict | null => {
   const out = answers.filter((answer) => answer === "out").length;

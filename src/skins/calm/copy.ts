@@ -169,6 +169,17 @@ const calmCopy: RoastCopy = {
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,
     removeLine: "It won't be checked or added to the list anymore.",
   },
+  intro: {
+    steps: [
+      { title: "A list that keeps itself.", line: "Kilist remembers what you buy." },
+      { title: "Answer a few foods now and then.", line: "Have it, need it, or not sure." },
+      { title: "The list stays up to date.", line: "Open it when you shop. That's all." },
+      { title: "Points, quietly.", line: "Each answer earns points toward other looks." },
+    ],
+    next: "Next",
+    start: "Choose my foods",
+    skip: "Skip",
+  },
   account: {
     hello: (name: string) => name,
     household: "Household",
@@ -177,9 +188,14 @@ const calmCopy: RoastCopy = {
     qr: "QR",
     you: " (you)",
     switch: "Switch household",
-    suggested: "Add common foods",
+    suggested: "See the introduction again",
     logout: "Log out",
-    credits: "Icons by Icons8",
+    credits: "Credits",
+    creditsTitle: "Credits",
+    creditsIcons: "Icons",
+    creditsFonts: "Fonts",
+    creditsLicense: "Fonts used under the SIL Open Font License.",
+    dangerTitle: "Leave",
     delete: "Delete my account",
     deleteTitle: "Delete your account?",
     deleteLine:
@@ -231,6 +247,12 @@ const calmCopy: RoastCopy = {
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked.`,
     failed: "Couldn't do that",
+    sectionTitle: "Looks",
+    sectionLine: (count: number) => `${count} points. Every food you check adds 10.`,
+    locked: (count: number) => `Locked · ${count} points to go`,
+    buy: (price: string) => `Buy · ${price}`,
+    storeSoon: "Buying isn't available yet.",
+    earnHint: "Check foods to earn points.",
   },
 };
 

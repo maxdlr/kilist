@@ -1,8 +1,9 @@
 import Onboarding from "@/components/views/Onboarding";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 const OnboardingScreen = () => {
-  return <Onboarding onDone={() => router.replace("/")} />;
+  const { intro } = useLocalSearchParams<{ intro?: string }>();
+  return <Onboarding intro={intro === "1"} onDone={() => router.replace("/")} />;
 };
 
 export default OnboardingScreen;

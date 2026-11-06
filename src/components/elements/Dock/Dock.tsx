@@ -2,6 +2,8 @@ import type { Skin } from "@/skins/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { ReactNode } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTabBarVisibility } from "@/providers/TabBarProvider";
 
 const Dock = ({
   children,
@@ -14,6 +16,8 @@ const Dock = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const insets = useSafeAreaInsets();
+  const { insideTabs } = useTabBarVisibility();
 
   return (
     <View
@@ -22,6 +26,10 @@ const Dock = ({
         { backgroundColor: skin.colors.ground },
         row && styles.row,
         style,
+        !insideTabs && {
+          paddingBottom:
+            (StyleSheet.flatten(style)?.paddingBottom as number | undefined ?? skin.spacing.dock) + insets.bottom,
+        },
       ]}
     >
       {children}

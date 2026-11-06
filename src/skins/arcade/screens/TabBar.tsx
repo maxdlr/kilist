@@ -43,7 +43,7 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
   const isAdmin = user?.type === "admin";
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
-  const raise = skin.spacing.section;
+  const raise = skin.spacing.section + skin.spacing.small + skin.shape.shadow.offset;
   const fullHeight = skin.size.tabBar + insets.bottom + raise;
   const height = useSharedValue(fullHeight);
 
@@ -170,6 +170,7 @@ const createStyles = (s: Skin) =>
       borderWidth: s.shape.border,
       height: s.size.button.lg,
       justifyContent: "center",
+      marginBottom: s.shape.shadow.offset,
       marginTop: -s.spacing.section + s.spacing.hair,
       width: s.size.button.lg,
     },

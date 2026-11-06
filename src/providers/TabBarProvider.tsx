@@ -8,11 +8,13 @@ import React, {
 } from "react";
 
 type TabBarContextType = {
+  insideTabs: boolean;
   isHidden: boolean;
   hide: () => () => void;
 };
 
 const TabBarContext = createContext<TabBarContextType>({
+  insideTabs: false,
   isHidden: false,
   hide: () => () => {},
 });
@@ -26,7 +28,7 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ isHidden: hideCount > 0, hide }),
+    () => ({ insideTabs: true, isHidden: hideCount > 0, hide }),
     [hideCount, hide],
   );
 

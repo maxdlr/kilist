@@ -42,7 +42,6 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   const { showToast } = useToast();
   const [shopListId, setShopListId] = useState<number | undefined>();
   const [isStarting, setIsStarting] = useState(false);
-  const [previousFoodId, setPreviousFoodId] = useState<number | undefined>();
   const [suggestedFoodIds, setSuggestedFoodIds] = useState<number[]>([]);
   const [orderedBy, setOrderedBy] = useState<"score" | "name">("score");
 
@@ -106,15 +105,13 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
 
   const buyFood = async (foodId: number) => {
     const res = await editFood({
-      foodId: foodId,
-      previousFoodId,
+      foodId,
       action: "buy",
     });
     if (res.error) {
       showToast(res.error.message || "An unexpected error occurred");
       return;
     }
-    setPreviousFoodId(foodId);
     setSuggestedFoodIds((res.data as number[]) || []);
     mutateFood();
   };
@@ -133,6 +130,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const startNewShopList = async () => {
+    setSuggestedFoodIds([]);
     setIsStarting(true);
     const res = await startShopList({});
     setIsStarting(false);
@@ -147,6 +145,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const cancelShopList = async () => {
+    setSuggestedFoodIds([]);
     const res = await endShopList({});
     if (res.error) {
       showToast(res.error.message || "An unexpected error occurred");

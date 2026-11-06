@@ -14,7 +14,7 @@ const AuthGate = () => {
   const pathname = usePathname();
 
   if (user && pathname === LOGIN_ROUTE) {
-    return <Redirect href={needsOnboarding ? "/onboarding" : "/"} />;
+    return <Redirect href={needsOnboarding ? "/onboarding?intro=1" : "/"} />;
   }
 
   return null;

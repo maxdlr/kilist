@@ -87,6 +87,7 @@ export interface Skin {
     paper: string;
     onPaper: string;
     fieldLine?: string;
+    signup?: { fill: string; ink: string };
     placeholder: string;
     scrim: string;
     danger: string;

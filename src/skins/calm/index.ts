@@ -60,6 +60,7 @@ const calm: Skin = {
     paper: white,
     onPaper: ink,
     fieldLine: "#D6D1C6",
+    signup: { fill: ground, ink },
     placeholder: "#8B887F",
     scrim: "rgba(35,34,31,0.32)",
     danger: rust,

@@ -177,6 +177,17 @@ const arcadeCopy: RoastCopy = {
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,
     removeLine: "It leaves your foods and won't come up in games anymore.",
   },
+  intro: {
+    steps: [
+      { title: "Kilist keeps your grocery list.", line: "You play, it remembers." },
+      { title: "Play 10 foods a day.", line: "Swipe: got it, or buy it. Ten seconds." },
+      { title: "Your list fills itself.", line: "Whatever runs low shows up when you shop." },
+      { title: "Win tickets!", line: "Every swipe prints tickets. Trade them for new skins." },
+    ],
+    next: "Next",
+    start: "Pick my foods",
+    skip: "Skip",
+  },
   account: {
     hello: (name: string) => `Hi, ${name}!`,
     household: "Your household",
@@ -185,9 +196,14 @@ const arcadeCopy: RoastCopy = {
     qr: "QR",
     you: " (you)",
     switch: "Switch household",
-    suggested: "Add suggested foods",
+    suggested: "Replay the intro",
     logout: "Log out",
-    credits: "Icons by Icons8",
+    credits: "Credits",
+    creditsTitle: "Credits",
+    creditsIcons: "Icons",
+    creditsFonts: "Fonts",
+    creditsLicense: "Fonts used under the SIL Open Font License.",
+    dangerTitle: "Game over zone",
     delete: "Delete my account",
     deleteTitle: "Delete your account?",
     deleteLine:
@@ -238,6 +254,12 @@ const arcadeCopy: RoastCopy = {
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked!`,
     failed: "Couldn't do that",
+    sectionTitle: "Prize shelf",
+    sectionLine: (count: number) => `${count} tickets. Every swipe prints more.`,
+    locked: (count: number) => `Locked · ${count} to go`,
+    buy: (price: string) => `Buy · ${price}`,
+    storeSoon: "The shop opens soon. Keep playing!",
+    earnHint: "Play today's 10 to win more tickets!",
   },
 };
 

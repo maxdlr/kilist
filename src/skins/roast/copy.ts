@@ -188,6 +188,17 @@ const roastCopy = {
       count === 1 ? "REMOVE THIS FOOD?" : `REMOVE ${count} FOODS?`,
     removeLine: "IT LEAVES YOUR FOODS. THE APP STOPS ASKING ABOUT IT.",
   },
+  intro: {
+    steps: [
+      { title: "KILIST REMEMBERS YOUR FOOD.", line: "BECAUSE YOU DON'T." },
+      { title: "SWIPE 10 FOODS A DAY.", line: "GOT IT OR BUY IT. TEN SECONDS. EVEN YOU CAN DO THAT." },
+      { title: "THE LIST WRITES ITSELF.", line: "WHAT YOU NEED SHOWS UP. NO TYPING." },
+      { title: "SWIPES PRINT TICKETS.", line: "TICKETS UNLOCK SKINS. LOOK BETTER THAN YOUR FRIDGE." },
+    ],
+    next: "NEXT",
+    start: "FINE. PICK MY FOODS.",
+    skip: "SKIP",
+  },
   account: {
     hello: (name: string) => `OH. IT'S YOU, ${name}.`,
     household: "THE PEOPLE YOU FEED",
@@ -196,9 +207,14 @@ const roastCopy = {
     qr: "QR",
     you: " (YOU, SADLY)",
     switch: "SWITCH HOUSEHOLD",
-    suggested: "ADD SUGGESTED FOODS",
+    suggested: "EXPLAIN IT AGAIN. SLOWLY.",
     logout: "LOG OUT. COWARD.",
-    credits: "ICONS BY ICONS8",
+    credits: "CREDITS",
+    creditsTitle: "CREDIT WHERE IT'S DUE.",
+    creditsIcons: "ICONS",
+    creditsFonts: "FONTS",
+    creditsLicense: "FONTS USED UNDER THE SIL OPEN FONT LICENSE.",
+    dangerTitle: "THE EXIT.",
     delete: "DELETE MY ACCOUNT",
     deleteTitle: "DELETE YOUR ACCOUNT?",
     deleteLine:
@@ -249,6 +265,12 @@ const roastCopy = {
     premium: "PREMIUM",
     redeemed: (name: string) => `${name} IS YOURS.`,
     failed: "COULDN'T DO THAT. NOT MY FAULT.",
+    sectionTitle: "SKINS. THE GOOD STUFF.",
+    sectionLine: (count: number) => `${count} TICKETS. EVERY SWIPE PRINTS MORE.`,
+    locked: (count: number) => `LOCKED · ${count} TO GO`,
+    buy: (price: string) => `BUY IT · ${price}`,
+    storeSoon: "THE STORE ISN'T OPEN YET. SWIPE INSTEAD.",
+    earnHint: "PLAY TODAY'S 10. TICKETS DON'T PRINT THEMSELVES.",
   },
 };
 

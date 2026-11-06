@@ -2,6 +2,7 @@ import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
+import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
@@ -134,6 +135,8 @@ const ArcadeAccount = () => {
             </View>
           </View>
 
+          <LooksShowcase titleColor={P.white} inset={skin.spacing.section} />
+
           <ArcadeCard lift={1} style={styles.team}>
             <ThemedText size={skin.type.caption - 2} color={P.dimInk}>
               {T.team}
@@ -177,15 +180,16 @@ const ArcadeAccount = () => {
           </ArcadeCard>
 
           <View style={styles.menu}>
-            <MenuRow
-              label={T.prizeCounter}
-              detail={T.ticketsCount(account.balance)}
-              onPress={() => setOpenPanel("prizes")}
-            />
             <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />
-            <MenuRow label={copy.suggested} onPress={account.suggestFoods} />
-            <MenuRow label={copy.logout} detail=" " onPress={account.logOut} />
+            <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={copy.credits} onPress={account.openCredits} />
+          </View>
+
+          <View style={[styles.menu, styles.danger]}>
+            <ThemedText size={skin.type.caption} color={P.white}>
+              {copy.dangerTitle}
+            </ThemedText>
+            <MenuRow label={copy.logout} detail=" " onPress={account.logOut} />
             {!account.isAdmin && (
               <KilButton
                 variant="danger"
@@ -290,6 +294,9 @@ const createStyles = (s: Skin) =>
     },
     delete: {
       marginTop: s.spacing.tight + 2,
+    },
+    danger: {
+      marginTop: s.spacing.section,
     },
   });
 

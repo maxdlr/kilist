@@ -112,6 +112,7 @@ const LoginScreen = () => {
     if (success) router.replace("/");
   };
 
+  const signupSheet = skin.colors.signup ?? { fill: skin.colors.alert, ink: skin.colors.onAlert };
   const labelColor = isSignup ? skin.colors.onPaper : skin.colors.accent;
 
   return (
@@ -120,7 +121,7 @@ const LoginScreen = () => {
         style={[
           styles.flex,
           {
-            backgroundColor: isSignup ? skin.colors.alert : skin.colors.ground,
+            backgroundColor: isSignup ? signupSheet.fill : skin.colors.ground,
           },
         ]}
       >
@@ -134,7 +135,7 @@ const LoginScreen = () => {
           <Title
             size={isSignup ? 76 : 124}
             lines={isSignup ? 1 : 2}
-            color={isSignup ? skin.colors.onAlert : skin.colors.accent}
+            color={isSignup ? signupSheet.ink : skin.colors.accent}
             style={styles.title}
           >
             {isSignup ? copy.signupTitle : copy.loginTitle}

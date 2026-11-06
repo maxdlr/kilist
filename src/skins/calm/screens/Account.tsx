@@ -1,4 +1,5 @@
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
+import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -73,6 +74,8 @@ const CalmAccount = () => {
             </View>
           </Group>
 
+          <LooksShowcase titleColor={C.ink} lineColor={C.soft} />
+
           <Group label={copy.household}>
             <View style={styles.row}>
               <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
@@ -86,17 +89,16 @@ const CalmAccount = () => {
           </Group>
 
           <Group label="App">
-            <Row label="Appearance" detail={`${skin.name} · ${account.balance} points`} onPress={() => setOpenPanel("prizes")} />
-            <Row label={copy.suggested} onPress={account.suggestFoods} />
+            <Row label={copy.suggested} onPress={account.replayOnboarding} />
             <Row label={copy.credits} onPress={account.openCredits} />
           </Group>
 
-          <View>
+          <Group label={copy.dangerTitle}>
             <Row label={copy.logout} chevron={false} onPress={account.logOut} />
             {!account.isAdmin && (
               <Row label={copy.delete} color={C.danger} chevron={false} onPress={() => setOpenPanel("delete")} />
             )}
-          </View>
+          </Group>
         </ScrollView>
       </Screen>
       <AccountPanels account={account} />

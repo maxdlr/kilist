@@ -1,4 +1,5 @@
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
+import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { mmss, seconds, useVersusMe } from "@/hooks/versus/api";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -83,6 +84,8 @@ const VersusAccount = () => {
             )}
           </View>
 
+          <LooksShowcase titleColor={P.white} lineColor={P.soft} />
+
           {solo ? (
             <Card dashed line={P.you}>
               <View style={styles.cardHead}>
@@ -155,13 +158,18 @@ const VersusAccount = () => {
           </Card>
 
           <Card style={styles.menu}>
-            <MenuRow first label="Prize counter" detail={`${account.balance} tickets ›`} onPress={() => setOpenPanel("prizes")} />
-            <MenuRow label={solo ? "Join someone's house" : copy.switch} onPress={() => setOpenPanel("switch")} />
-            <MenuRow label={copy.suggested} onPress={account.suggestFoods} />
-            <MenuRow label={copy.logout} detail=" " onPress={account.logOut} />
+            <MenuRow first label={solo ? "Join someone's house" : copy.switch} onPress={() => setOpenPanel("switch")} />
+            <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={copy.credits} onPress={account.openCredits} />
           </Card>
-          {!account.isAdmin && <VButton variant="danger" label={copy.delete} onPress={() => setOpenPanel("delete")} />}
+
+          <View style={styles.danger}>
+            <VText size={skin.type.caption} color={P.muted}>{copy.dangerTitle}</VText>
+            <Card style={styles.menu}>
+              <MenuRow first label={copy.logout} detail=" " onPress={account.logOut} />
+            </Card>
+            {!account.isAdmin && <VButton variant="danger" label={copy.delete} onPress={() => setOpenPanel("delete")} />}
+          </View>
         </ScrollView>
       </Screen>
       <AccountPanels account={account} />
@@ -193,6 +201,7 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.inline + 2,
       paddingVertical: s.spacing.inline,
     },
+    danger: { gap: s.spacing.small, marginTop: s.spacing.section },
     menu: { gap: 0, overflow: "hidden", padding: 0 },
     menuRow: {
       alignItems: "center",

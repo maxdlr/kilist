@@ -1,7 +1,7 @@
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import useShopRun from "@/hooks/screens/useShopRun";
-import { fetchShopTip, mmss, ShopTip, useShopRecords } from "@/hooks/versus/api";
+import { mmss, useShopRecords } from "@/hooks/versus/api";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { versusPalette as P } from "..";
-import { Avatar, Card, Kicker, Screen, VButton, VText } from "./parts";
+import { Card, Kicker, Screen, VButton, VText } from "./parts";
 import { VersusEmpty, VersusLoading } from "./States";
 
 const CLOCK_MS = 250;
@@ -92,37 +92,6 @@ const SwipeRow = ({
   );
 };
 
-const TipBubble = ({ tip, onSkip, onTake }: { tip: ShopTip; onSkip: () => void; onTake: () => void }) => {
-  const skin = useSkin();
-  const styles = useSkinStyles(createStyles);
-  return (
-    <View accessibilityLiveRegion="polite" style={styles.tip}>
-      <Avatar name={tip.username} color={tip.isSelf ? P.you : P.mates[0]!} size={skin.size.button.xs} ghost={tip.isSelf} />
-      <View style={styles.bubble}>
-        <View style={styles.bubbleTop}>
-          <FoodPicture food={tip.food} size={skin.size.icon.row - 4} />
-          <VText size={skin.type.label} color={P.ink} style={styles.flex}>
-            {tip.isSelf
-              ? `Last times you got this, you grabbed ${tip.food.name.toLowerCase()} too.`
-              : `${tip.food.name}? ${tip.username} usually grabs it with this.`}
-          </VText>
-        </View>
-        <VText size={skin.type.caption - 1} color={P.cardInk}>
-          {`${tip.isSelf ? "From your own shops" : `${tip.username}'s shops`}: ${tip.count} of the last ${tip.of}.`}
-        </VText>
-        <View style={styles.bubbleActions}>
-          <Pressable accessibilityRole="button" onPress={onSkip} style={[styles.bubbleButton, styles.bubbleSkip]}>
-            <VText face="bold" size={skin.type.label} color={P.ink}>Not today</VText>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={onTake} style={[styles.bubbleButton, { backgroundColor: P.action }]}>
-            <VText face="bold" size={skin.type.label} color={P.ink}>Got it too</VText>
-          </Pressable>
-        </View>
-      </View>
-    </View>
-  );
-};
-
 const VersusShop = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -131,12 +100,10 @@ const VersusShop = () => {
   const { data: records, mutate: refreshRecords } = useShopRecords();
   const [bought, setBought] = useState<FoodType[]>([]);
   const [elapsed, setElapsed] = useState(0);
-  const [tip, setTip] = useState<ShopTip | null>(null);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ ms: number; items: number; left: number } | null>(null);
   const startedAt = useRef<number | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const seenTips = useRef(new Set<number>());
 
   const listId = run.shopListId;
   const remaining = run.foods ?? [];
@@ -162,14 +129,6 @@ const VersusShop = () => {
   const buy = async (food: FoodType) => {
     setBought((list) => [...list, food]);
     await run.buy(food.id);
-    if (!listId || seenTips.current.has(food.id)) return;
-    seenTips.current.add(food.id);
-    try {
-      const next = await fetchShopTip(listId, food.id);
-      if (next && !bought.some((entry) => entry.id === next.food.id)) setTip(next);
-    } catch {
-      setTip(null);
-    }
   };
 
   const skipForNow = async (food: FoodType) => {
@@ -190,9 +149,7 @@ const VersusShop = () => {
     setResult(null);
     setBought([]);
     setLater([]);
-    setTip(null);
     startedAt.current = null;
-    seenTips.current.clear();
     router.navigate("/");
   };
 
@@ -289,24 +246,19 @@ const VersusShop = () => {
         <VText size={skin.type.caption} color={P.muted}>Bought →</VText>
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
-        {remaining.map((food) => (
+        {run.suggestion && (
+          <View style={styles.next}>
+            <VText size={skin.type.caption} color={P.muted}>Usually next in the store</VText>
+            <SwipeRow food={run.suggestion} onBuy={() => buy(run.suggestion!)} onLater={() => skipForNow(run.suggestion!)} />
+          </View>
+        )}
+        {run.rows.map((food) => (
           <SwipeRow key={food.id} food={food} onBuy={() => buy(food)} onLater={() => skipForNow(food)} />
         ))}
         {bought.map((food) => (
           <Row key={`bought-${food.id}`} food={food} done onPress={() => undefined} />
         ))}
       </ScrollView>
-      {tip && (
-        <TipBubble
-          tip={tip}
-          onSkip={() => setTip(null)}
-          onTake={() => {
-            const food = tip.food;
-            setTip(null);
-            buy(food);
-          }}
-        />
-      )}
     </Screen>
   );
 };
@@ -346,7 +298,7 @@ const createStyles = (s: Skin) =>
       justifyContent: "center",
       width: s.size.check + 4,
     },
-    tip: { alignItems: "flex-end", flexDirection: "row", gap: s.spacing.inline, paddingBottom: s.spacing.inline, paddingHorizontal: s.spacing.gutter },
+    next: { gap: s.spacing.tight + 2, paddingBottom: s.spacing.small },
     bubble: {
       backgroundColor: P.white,
       borderBottomLeftRadius: s.spacing.tight,

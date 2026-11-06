@@ -1,4 +1,4 @@
-const PREMIUM_FOR_EVERYONE = true;
+const PREMIUM_FOR_EVERYONE = false;
 
 const usePremium = () => ({ isPremium: PREMIUM_FOR_EVERYONE });
 

@@ -177,6 +177,17 @@ const versusCopy: RoastCopy = {
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,
     removeLine: "It leaves the race for everyone in the house. Its votes go too.",
   },
+  intro: {
+    steps: [
+      { title: "Kilist keeps the house stocked.", line: "Everyone answers. The list stays right." },
+      { title: "Race 10 foods a day.", line: "Have it or buy it. Fastest in the house wins." },
+      { title: "The house votes.", line: "Most answers decide what goes on the list." },
+      { title: "Earn tickets.", line: "Races and shops earn tickets. Tickets unlock skins." },
+    ],
+    next: "Next",
+    start: "Pick our foods",
+    skip: "Skip",
+  },
   account: {
     hello: (name: string) => `Hi, ${name}!`,
     household: "Your house",
@@ -185,9 +196,14 @@ const versusCopy: RoastCopy = {
     qr: "QR",
     you: " (you)",
     switch: "Switch house",
-    suggested: "Add suggested foods",
+    suggested: "Replay the intro",
     logout: "Log out",
-    credits: "Icons by Icons8",
+    credits: "Credits",
+    creditsTitle: "Credits",
+    creditsIcons: "Icons",
+    creditsFonts: "Fonts",
+    creditsLicense: "Fonts used under the SIL Open Font License.",
+    dangerTitle: "Leave the ring",
     delete: "Delete my account",
     deleteTitle: "Delete your account?",
     deleteLine:
@@ -238,6 +254,12 @@ const versusCopy: RoastCopy = {
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked!`,
     failed: "Couldn't do that",
+    sectionTitle: "Skins",
+    sectionLine: (count: number) => `${count} tickets. Every answer in a race earns more.`,
+    locked: (count: number) => `Locked · ${count} to go`,
+    buy: (price: string) => `Buy · ${price}`,
+    storeSoon: "The store isn't open yet. Race for it instead.",
+    earnHint: "Run today's race to earn tickets.",
   },
 };
 
