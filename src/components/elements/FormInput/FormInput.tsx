@@ -72,7 +72,7 @@ const FormInput = ({
             styles.input,
             {
               backgroundColor: skin.colors.paper,
-              borderColor: skin.colors.onPaper,
+              borderColor: skin.colors.fieldLine ?? skin.colors.onPaper,
               borderWidth: bordered
                 ? Math.max(skin.shape.fieldBorder, skin.shape.border + 1)
                 : skin.shape.fieldBorder,

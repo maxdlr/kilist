@@ -2,6 +2,7 @@ import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { useSkin } from "@/providers/SkinProvider";
 import { createElement, type ComponentType } from "react";
 import arcadeScreens from "./arcade/screens";
+import calmScreens from "./calm/screens";
 import roastScreens from "./roast/screens";
 import versusScreens from "./versus/screens";
 
@@ -18,6 +19,7 @@ const SKIN_SCREENS: Record<string, SkinScreens> = {
   roast: roastScreens,
   arcade: arcadeScreens,
   versus: versusScreens,
+  calm: calmScreens,
 };
 
 type ScreenSlot = Exclude<keyof SkinScreens, "TabBar">;

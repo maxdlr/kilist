@@ -1,11 +1,12 @@
 import arcade from "./arcade";
+import calm from "./calm";
 import roast from "./roast";
 import versus from "./versus";
 import type { Skin } from "./types";
 
 export const DEFAULT_SKIN_ID = "arcade";
 
-export const SKINS: Skin[] = [roast, arcade, versus];
+export const SKINS: Skin[] = [roast, arcade, versus, calm];
 
 export const findSkin = (id?: string | null): Skin =>
   SKINS.find((skin) => skin.id === id) ??
