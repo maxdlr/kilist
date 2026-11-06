@@ -21,7 +21,9 @@ export function ThemedText({
       style={[
         {
           color: color ?? skin.colors.onPaper,
-          fontFamily: mono ? skin.fonts.mono : skin.fonts.display.family,
+          fontFamily: mono
+            ? skin.fonts.mono
+            : (skin.fonts.body?.regular ?? skin.fonts.display.family),
           fontSize: size ?? skin.type.body,
           lineHeight: Math.round(
             (size ?? skin.type.body) * (mono ? 1.45 : 1.3),

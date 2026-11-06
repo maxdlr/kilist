@@ -34,7 +34,12 @@
           "fonts": [
             "./assets/fonts/Anton-Regular.ttf",
             "./assets/fonts/SpaceMono-Regular.ttf",
-            "./assets/fonts/MadimiOne-Regular.ttf"
+            "./assets/fonts/MadimiOne-Regular.ttf",
+            "./assets/fonts/Bungee-Regular.ttf",
+            "./assets/fonts/PressStart2P-Regular.ttf",
+            "./assets/fonts/SpaceGrotesk-Regular.ttf",
+            "./assets/fonts/SpaceGrotesk-Medium.ttf",
+            "./assets/fonts/SpaceGrotesk-Bold.ttf"
           ]
         }
       ],

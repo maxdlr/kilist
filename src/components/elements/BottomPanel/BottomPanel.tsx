@@ -12,15 +12,22 @@ import {
   View,
   type LayoutChangeEvent,
 } from "react-native";
+import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { height: SCREEN_HEIGHT } = Dimensions.get("screen");
+const DRAG_START = 12;
+const DISMISS_DISTANCE = 120;
+const DISMISS_SHARE = 0.3;
+const DISMISS_VELOCITY = 900;
+const SETTLE = { duration: 180 };
 
 const BottomPanel = ({
   visible,
@@ -36,9 +43,12 @@ const BottomPanel = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   useHideTabBar(visible);
+  const insets = useSafeAreaInsets();
   const height = useSharedValue(0);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
+  const drag = useSharedValue(0);
+  const closing = useSharedValue(false);
   const latest = useRef({ visible, onClose });
   const [isRendered, setIsRendered] = useState(visible);
 
@@ -63,6 +73,8 @@ const BottomPanel = ({
     backdropOpacity.set(withTiming(visible ? 1 : 0, AnimationService.config));
 
     if (visible) {
+      drag.set(0);
+      closing.set(false);
       const measured = contentHeight.get();
       if (measured > 0) {
         height.set(withTiming(measured, AnimationService.config));
@@ -78,7 +90,30 @@ const BottomPanel = ({
         }
       }),
     );
-  }, [visible, height, contentHeight, backdropOpacity]);
+  }, [visible, height, contentHeight, backdropOpacity, drag, closing]);
+
+  const requestClose = useCallback(() => latest.current.onClose(), []);
+
+  const pan = usePanGesture({
+    enabled: visible,
+    activeOffsetY: [-1000, DRAG_START],
+    failOffsetX: [-24, 24],
+    onUpdate: (event) => {
+      drag.set(Math.max(0, event.translationY));
+    },
+    onDeactivate: (event) => {
+      const limit = Math.min(DISMISS_DISTANCE, contentHeight.value * DISMISS_SHARE);
+      if (event.translationY > limit || event.velocityY > DISMISS_VELOCITY) {
+        closing.set(true);
+        scheduleOnRN(requestClose);
+        return;
+      }
+      drag.set(withTiming(0, SETTLE));
+    },
+    onFinalize: () => {
+      if (!closing.value && drag.value > 0) drag.set(withTiming(0, SETTLE));
+    },
+  });
 
   useEffect(() => {
     if (!visible) return;
@@ -102,9 +137,14 @@ const BottomPanel = ({
     }
   };
 
-  const animatedStyle = useAnimatedStyle(() => ({ height: height.value }));
+  const animatedStyle = useAnimatedStyle(() => ({
+    height: height.value,
+    transform: [{ translateY: drag.value }],
+  }));
   const backdropStyle = useAnimatedStyle(() => ({
-    opacity: backdropOpacity.value,
+    opacity:
+      backdropOpacity.value *
+      (1 - Math.min(1, drag.value / Math.max(1, contentHeight.value))),
   }));
 
   if (!isRendered) return null;
@@ -120,31 +160,39 @@ const BottomPanel = ({
           backdropStyle,
         ]}
       />
-      <Animated.View
-        style={[
-          styles.panel,
-          {
-            backgroundColor: skin.panel.fill,
-            borderTopLeftRadius: skin.panel.radius,
-            borderTopRightRadius: skin.panel.radius,
-          },
-          animatedStyle,
-        ]}
-      >
-        <View
-          onLayout={handleContentLayout}
+      <GestureDetector gesture={pan}>
+        <Animated.View
           style={[
-            styles.content,
+            styles.panel,
             {
-              borderColor: skin.panel.line,
+              backgroundColor: skin.panel.fill,
               borderTopLeftRadius: skin.panel.radius,
               borderTopRightRadius: skin.panel.radius,
             },
+            animatedStyle,
           ]}
         >
-          {children}
-        </View>
-      </Animated.View>
+          <View
+            onLayout={handleContentLayout}
+            style={[
+              styles.content,
+              { paddingBottom: skin.spacing.section + insets.bottom },
+              {
+                borderColor: skin.panel.line,
+                borderTopLeftRadius: skin.panel.radius,
+                borderTopRightRadius: skin.panel.radius,
+              },
+            ]}
+          >
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.grip, { backgroundColor: skin.panel.ink }]}
+            />
+            {children}
+          </View>
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 };
@@ -175,6 +223,15 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.stack,
       paddingHorizontal: s.spacing.gutter,
       paddingVertical: s.spacing.section,
+    },
+    grip: {
+      alignSelf: "center",
+      borderRadius: s.spacing.tight,
+      height: s.spacing.tight + 1,
+      marginBottom: -s.spacing.small,
+      marginTop: -s.spacing.small,
+      opacity: 0.3,
+      width: s.spacing.page,
     },
   });
 

@@ -170,7 +170,7 @@ const createStyles = (s: Skin) =>
       borderWidth: s.shape.border,
       height: s.size.button.lg,
       justifyContent: "center",
-      marginTop: -s.spacing.section - s.spacing.small,
+      marginTop: -s.spacing.section + s.spacing.hair,
       width: s.size.button.lg,
     },
   });

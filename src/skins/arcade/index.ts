@@ -126,7 +126,7 @@ const arcade: Skin = {
   size: {
     button: { xs: 44, sm: 52, md: 60, lg: 68, xl: 76 },
     row: { list: 62, shop: 72, stripe: 58 },
-    tabBar: 66,
+    tabBar: 82,
     input: 52,
     toggle: 50,
     check: 28,

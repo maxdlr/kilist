@@ -3,6 +3,7 @@ import { useSkin } from "@/providers/SkinProvider";
 import { createElement, type ComponentType } from "react";
 import arcadeScreens from "./arcade/screens";
 import roastScreens from "./roast/screens";
+import versusScreens from "./versus/screens";
 
 export type SkinScreens = {
   Home: ComponentType;
@@ -16,6 +17,7 @@ export type SkinScreens = {
 const SKIN_SCREENS: Record<string, SkinScreens> = {
   roast: roastScreens,
   arcade: arcadeScreens,
+  versus: versusScreens,
 };
 
 type ScreenSlot = Exclude<keyof SkinScreens, "TabBar">;
