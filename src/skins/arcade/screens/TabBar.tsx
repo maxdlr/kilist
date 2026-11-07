@@ -1,3 +1,4 @@
+import { A } from "@/admin/ui";
 import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { ThemedText } from "@/components/themed-text";
@@ -53,6 +54,7 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
 
   const animatedStyle = useAnimatedStyle(() => ({ height: height.value }));
 
+  const onAdmin = state.routes[state.index]?.name === "admin";
   const routes = ORDER.map((name) =>
     state.routes.find((route) => route.name === name),
   ).filter((route) => route !== undefined);
@@ -60,7 +62,7 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
   return (
     <Animated.View
       accessibilityRole="tablist"
-      style={[styles.wrap, animatedStyle]}
+      style={[styles.wrap, onAdmin && { backgroundColor: A.ground }, animatedStyle]}
     >
       <View style={[styles.bar, { paddingBottom: insets.bottom, marginTop: raise }]}>
         {routes.map((route) => {

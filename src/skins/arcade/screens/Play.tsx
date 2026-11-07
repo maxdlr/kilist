@@ -117,6 +117,7 @@ const Booth = ({ game }: { game: SwipeGame }) => {
 
   return (
     <Ground
+      scroll
       dock={
         <KilButton
           height={skin.size.button.xl - skin.spacing.tight}
@@ -412,6 +413,7 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
 
   return (
     <Ground
+      scroll
       dock={
         <>
           <KilButton
@@ -485,6 +487,7 @@ const Closed = ({ game }: { game: SwipeGame }) => {
 
   return (
     <Ground
+      scroll
       dock={
         <>
           <KilButton
@@ -597,10 +600,9 @@ const createStyles = (s: Skin) => {
       gap: s.spacing.small,
     },
     shelf: {
-      flex: 1,
+      flexGrow: 1,
       gap: s.spacing.inline,
       justifyContent: "center",
-      minHeight: 0,
     },
     prize: {
       alignItems: "center",

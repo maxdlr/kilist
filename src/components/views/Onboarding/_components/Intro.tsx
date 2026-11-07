@@ -5,8 +5,10 @@ import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
-import { useRef, useState } from "react";
+import AnimationService from "@/services/animation";
+import { useEffect, useRef, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Intro = ({ onDone }: { onDone: () => void }) => {
@@ -20,6 +22,17 @@ const Intro = ({ onDone }: { onDone: () => void }) => {
   const last = copy.steps.length - 1;
   const sheets = skin.colors.sheets;
   const sheet = sheets[step % sheets.length]!;
+  const skipShown = useSharedValue(1);
+
+  useEffect(() => {
+    skipShown.set(withTiming(step < last ? 1 : 0, AnimationService.config));
+  }, [step, last, skipShown]);
+
+  const skipStyle = useAnimatedStyle(() => ({
+    height: skin.size.button.xs * skipShown.value,
+    marginTop: -skin.spacing.inline * (1 - skipShown.value),
+    opacity: skipShown.value,
+  }));
 
   useStatusBarStyle(sheet.fill === skin.colors.ground ? skin.statusBarOnGround : "dark");
 
@@ -86,7 +99,12 @@ const Intro = ({ onDone }: { onDone: () => void }) => {
           ))}
         </View>
         <KilButton height={skin.size.button.lg} label={step >= last ? copy.start : copy.next} onTouch={next} />
-        {step < last && (
+        <Animated.View
+          style={[styles.skip, skipStyle]}
+          pointerEvents={step < last ? "auto" : "none"}
+          accessibilityElementsHidden={step >= last}
+          importantForAccessibility={step < last ? "auto" : "no-hide-descendants"}
+        >
           <KilButton
             variant="ghost"
             height={skin.size.button.xs}
@@ -94,7 +112,7 @@ const Intro = ({ onDone }: { onDone: () => void }) => {
             label={copy.skip}
             onTouch={onDone}
           />
-        )}
+        </Animated.View>
       </Dock>
     </View>
   );
@@ -105,6 +123,7 @@ const createStyles = (s: Skin) =>
     flex: { flex: 1 },
     page: { paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
     body: { flex: 1, gap: s.spacing.inline, justifyContent: "center" },
+    skip: { overflow: "hidden" },
     dots: { alignSelf: "center", flexDirection: "row", gap: s.spacing.small - 2, paddingBottom: s.spacing.small },
     dot: { borderRadius: s.spacing.tight, height: s.spacing.small },
   });

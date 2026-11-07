@@ -115,12 +115,13 @@ const FoodSheet = ({
       </View>
 
       <View style={styles.metaRow}>
-        <ThemedText size={skin.type.body} color={ink}>
+        <ThemedText size={skin.type.body} color={ink} style={styles.metaMain}>
           {`${pad(position + 1)}/${pad(total)} / ${skin.copy.levels[levelOf(food.inStockScore)]}`}
         </ThemedText>
         <ThemedText
           size={skin.type.body}
           color={ink}
+          style={styles.metaSide}
           accessibilityLabel={`${skin.copy.tickets.counter} ${tickets}`}
         >
           {`${skin.copy.tickets.counter} ${padTickets(tickets)}`}
@@ -445,9 +446,9 @@ const SwipeFoodGame = () => {
       }
     >
       <View style={styles.metaRow}>
-        <ThemedText size={skin.type.body}>{copy.startLabel(game.level)}</ThemedText>
+        <ThemedText size={skin.type.body} style={styles.metaMain}>{copy.startLabel(game.level)}</ThemedText>
         {game.balance !== undefined && (
-          <ThemedText size={skin.type.body}>
+          <ThemedText size={skin.type.body} style={styles.metaSide}>
             {skin.copy.tickets.balance(game.balance)}
           </ThemedText>
         )}
@@ -479,9 +480,18 @@ const createStyles = (s: Skin) =>
       height: s.size.meter,
     },
     metaRow: {
+      alignItems: "flex-start",
       flexDirection: "row",
       gap: s.spacing.inline,
       justifyContent: "space-between",
+    },
+    metaMain: {
+      flex: 1,
+      minWidth: 0,
+    },
+    metaSide: {
+      flexShrink: 0,
+      textAlign: "right",
     },
     hero: {
       alignItems: "center",

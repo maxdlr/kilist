@@ -29,4 +29,11 @@ module.exports = defineConfig([
       ],
     },
   },
+  {
+    files: ["src/admin/**", "src/app/admin/**", "src/app/(tabs)/admin.tsx"],
+    rules: {
+      "react/jsx-no-literals": "off",
+      "no-restricted-syntax": "off",
+    },
+  },
 ]);

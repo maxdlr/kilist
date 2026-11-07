@@ -1,3 +1,4 @@
+import { A } from "@/admin/ui";
 import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import useAuth from "@/providers/AuthProvider";
@@ -43,12 +44,13 @@ const VersusTabBar = ({ state, navigation }: TabBarProps) => {
   }, [isHidden, fullHeight, height]);
 
   const animatedStyle = useAnimatedStyle(() => ({ height: height.value }));
+  const onAdmin = state.routes[state.index]?.name === "admin";
   const routes = ORDER.map((name) => state.routes.find((route) => route.name === name)).filter(
     (route) => route !== undefined,
   );
 
   return (
-    <Animated.View accessibilityRole="tablist" style={[styles.wrap, animatedStyle]}>
+    <Animated.View accessibilityRole="tablist" style={[styles.wrap, onAdmin && { backgroundColor: A.ground }, animatedStyle]}>
       <View style={[styles.bar, { paddingBottom: insets.bottom + skin.spacing.small }]}>
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;

@@ -20,7 +20,7 @@ const useAccount = () => {
   const { showToast } = useToast();
   const { counter } = useTickets();
   const [openPanel, setOpenPanel] = useState<AccountPanel | null>(null);
-  const { lang } = useLanguage();
+  const { lang, choice } = useLanguage();
   const closePanel = useCallback(() => setOpenPanel(null), []);
 
   const joinCode = household?.joinCode ?? user?.household.joinCode ?? "";
@@ -85,7 +85,7 @@ const useAccount = () => {
     shareCode,
     openCredits: () => setOpenPanel("credits"),
     openLanguage: () => setOpenPanel("language"),
-    languageName: LANGUAGE_NAMES[lang],
+    languageName: choice ? LANGUAGE_NAMES[choice] : common.languageAuto(LANGUAGE_NAMES[lang]),
     openIconsSite,
     switchTo,
     replayOnboarding: () => router.push("/onboarding?intro=1"),
