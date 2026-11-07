@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/themed-text";
@@ -24,9 +25,9 @@ const QrCodeScanner = ({
     return (
       <ThemedView style={styles.permission}>
         <ThemedText size={skin.type.caption} style={styles.notice}>
-          Camera access is needed to scan a household code.
+          {common.cameraNeeded}
         </ThemedText>
-        <KilButton label={caseFor(skin, "Allow camera")} onTouch={requestPermission} />
+        <KilButton label={caseFor(skin, common.allowCamera)} onTouch={requestPermission} />
       </ThemedView>
     );
   }

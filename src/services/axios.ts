@@ -1,3 +1,4 @@
+import { getLang } from "@/i18n";
 import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
@@ -50,7 +51,10 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => config,
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    config.headers.set("Accept-Language", getLang());
+    return config;
+  },
   (error: unknown) => Promise.reject(error),
 );
 

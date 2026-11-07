@@ -1,3 +1,5 @@
+import common from "@/i18n/common";
+import V from "../text";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
@@ -79,7 +81,7 @@ const VersusAccount = () => {
             {!solo && (
               <View style={styles.record}>
                 <VText face="pixel" size={(skin.type.caption - 1)}>{`${wins}–${losses}`}</VText>
-                <VText size={skin.type.caption - 1} color={P.muted}>all races</VText>
+                <VText size={skin.type.caption - 1} color={P.muted}>{V.account.allRaces}</VText>
               </View>
             )}
           </View>
@@ -90,19 +92,19 @@ const VersusAccount = () => {
             <Card dashed line={P.you}>
               <View style={styles.cardHead}>
                 <Avatar name={user.username} color={P.you} size={skin.size.button.xs - 8} ghost />
-                <VText face="bold" size={skin.type.lead} style={styles.flex}>You vs your best</VText>
+                <VText face="bold" size={skin.type.lead} style={styles.flex}>{V.youVsBest}</VText>
               </View>
               <View style={styles.stats}>
-                <Stat value={seconds(personal?.bestRaceMs)} label="best race" />
-                <Stat value={mmss(personal?.bestShopMs)} label="best shop" />
-                <Stat value={String(personal?.newBests ?? 0)} label="new bests (30 days)" />
+                <Stat value={seconds(personal?.bestRaceMs)} label={V.account.bestRace} />
+                <Stat value={mmss(personal?.bestShopMs)} label={V.account.bestShop} />
+                <Stat value={String(personal?.newBests ?? 0)} label={V.account.newBests} />
               </View>
               {recent.length > 1 && (
                 <View style={styles.chartWrap}>
-                  <VText size={skin.type.caption} color={P.muted}>{`Race time, last ${recent.length} races`}</VText>
+                  <VText size={skin.type.caption} color={P.muted}>{V.account.raceTimes(recent.length)}</VText>
                   <View
                     accessible
-                    accessibilityLabel={`Race times from ${seconds(recent[0]!.totalMs)} to ${seconds(recent[recent.length - 1]!.totalMs)}`}
+                    accessibilityLabel={V.account.raceTimesAria(seconds(recent[0]!.totalMs), seconds(recent[recent.length - 1]!.totalMs))}
                     style={styles.chart}
                   >
                     {bars.map((entry) => (
@@ -117,7 +119,7 @@ const VersusAccount = () => {
             </Card>
           ) : (
             <View style={styles.section}>
-              <VText face="bold" size={skin.type.lead}>Head to head</VText>
+              <VText face="bold" size={skin.type.lead}>{V.account.headToHead}</VText>
               {(stats?.headToHead ?? []).map((rival) => {
                 const color = memberColor(memberList, user.id, rival.userId);
                 return (
@@ -125,14 +127,14 @@ const VersusAccount = () => {
                     <View style={styles.cardHead}>
                       <Avatar name={rival.username} color={color} size={skin.size.button.xs - 8} />
                       <VText face="bold" size={skin.type.lead} style={styles.flex} numberOfLines={1}>
-                        {`You vs ${rival.username}`}
+                        {V.account.youVs(rival.username)}
                       </VText>
                       <VText face="display" size={skin.type.title}>{`${rival.wins}–${rival.losses}`}</VText>
                     </View>
                     <View style={styles.stats}>
-                      <Stat value={String(rival.clashes)} label="clashes" />
-                      <Stat value={`${rival.rightInClashes} of ${rival.clashes}`} label="you were right" />
-                      <Stat value={rival.shopRecord === null ? "–" : rival.shopRecord === "you" ? "You" : rival.username} label="shop record" />
+                      <Stat value={String(rival.clashes)} label={V.account.clashes} />
+                      <Stat value={V.account.of(rival.rightInClashes, rival.clashes)} label={V.account.youWereRight} />
+                      <Stat value={rival.shopRecord === null ? "–" : rival.shopRecord === "you" ? V.you : rival.username} label={V.account.shopRecord} />
                     </View>
                   </Card>
                 );
@@ -143,23 +145,24 @@ const VersusAccount = () => {
           <Card>
             <VText size={skin.type.caption} color={P.muted}>{copy.household}</VText>
             <VText face="bold" size={skin.type.title - 2}>
-              {`${account.householdName || copy.householdFallback}${solo ? " · 1 player" : ""}`}
+              {`${account.householdName || copy.householdFallback}${solo ? V.account.onePlayer : ""}`}
             </VText>
             {solo && (
-              <VText size={skin.type.label} color={P.soft}>{"Invite someone and they'll start by chasing your bests."}</VText>
+              <VText size={skin.type.label} color={P.soft}>{V.account.inviteLine}</VText>
             )}
             <View style={styles.codeRow}>
               <View style={styles.code}>
                 <VText face="pixel" size={(skin.type.caption - 1)}>{account.joinCode}</VText>
               </View>
-              <VButton label={copy.share} accessibilityLabel="Share challenge code" onPress={account.shareCode} />
-              <VButton label={copy.qr} accessibilityLabel="Show challenge QR code" onPress={() => setOpenPanel("qr")} />
+              <VButton label={copy.share} accessibilityLabel={V.account.shareAria} onPress={account.shareCode} />
+              <VButton label={copy.qr} accessibilityLabel={V.account.qrAria} onPress={() => setOpenPanel("qr")} />
             </View>
           </Card>
 
           <Card style={styles.menu}>
-            <MenuRow first label={solo ? "Join someone's house" : copy.switch} onPress={() => setOpenPanel("switch")} />
+            <MenuRow first label={solo ? V.account.joinHouse : copy.switch} onPress={() => setOpenPanel("switch")} />
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
+            <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
             <MenuRow label={copy.credits} onPress={account.openCredits} />
           </Card>
 

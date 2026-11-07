@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
 import useAuth, { HouseholdChoice } from "@/providers/AuthProvider";
 import useToast from "@/providers/ToastProvider";
@@ -32,7 +33,7 @@ export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
     { url: "/households/me" },
     {
       onError: (err) =>
-        showToast(err?.message || "An unexpected error occurred"),
+        showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
     },
   );
@@ -42,7 +43,7 @@ export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
   const switchHousehold = async (choice: HouseholdChoice) => {
     const res = await postSwitch(choice);
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
       return false;
     }
     // The user's household changed, so refresh both the household view and

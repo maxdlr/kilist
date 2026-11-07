@@ -10,6 +10,7 @@ import fetcher, { onError } from "@/services/fetcher";
 import AuthGate from "@/components/AuthGate";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 
@@ -54,9 +55,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <SWRConfig value={{ fetcher, onError }}>
+          <LanguageProvider>
           <SkinProvider>
             <SkinnedApp />
           </SkinProvider>
+          </LanguageProvider>
         </SWRConfig>
       </KeyboardProvider>
     </GestureHandlerRootView>

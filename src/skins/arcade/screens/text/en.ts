@@ -1,4 +1,4 @@
-export const arcadeText = {
+const en = {
   booth: "Ticket booth",
   shelfTitle: "On the prize shelf",
   appSkin: "App skin",
@@ -68,4 +68,20 @@ export const arcadeText = {
   pullLever: "Pull the lever",
   letGo: "Let go to refresh",
   homeTubes: "Stock levels",
+  loading: "Loading",
+  shareTeamAria: "Share team code",
+  qrTeamAria: "Show team QR code",
+  boughtLower: "bought",
+  notBought: "not bought yet",
+  stopAria: "Stop shopping",
+  boughtLeftAria: (bought: number, left: number) => `${bought} bought, ${left} left`,
+  position: (at: number, total: number) => `${at} of ${total}`,
+  ariaOut: "Out of stock",
+  ariaUnsure: "Not sure",
+  ariaIn: "In stock",
+  balanceAria: (count: number) => `Your balance: ${count} tickets`,
 };
+
+export type ArcadeText = typeof en;
+
+export default en;

@@ -1,3 +1,4 @@
+import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import FormInput from "@/components/elements/FormInput";
 import FoodPanels from "@/components/views/FoodList/_components/FoodPanels";
@@ -43,13 +44,13 @@ const FoodRow = ({
   const styles = useSkinStyles(createStyles);
   const level = levelOf(food.inStockScore);
   const clash = isClash(votes);
-  const voteText = votes.map((vote) => `${vote.username}: ${vote.answer ? WORD[vote.answer] : "no vote"}`).join(", ");
+  const voteText = votes.map((vote) => V.said(vote.username, vote.answer ? WORD[vote.answer] : V.foods.noVoteLower)).join(", ");
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={selecting ? { selected } : undefined}
-      accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? ", votes clash" : ""}. ${voteText}`}
+      accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.foods.clashAria : ""}. ${voteText}`}
       onPress={onPress}
       style={[styles.row, { borderColor: selected ? P.you : "transparent" }]}
     >
@@ -70,7 +71,7 @@ const FoodRow = ({
           <VText face="bold" size={skin.type.lead - 1} numberOfLines={1} style={styles.shrink}>
             {food.name}
           </VText>
-          {clash && <Chip label="Clash" fill={P.clash} />}
+          {clash && <Chip label={V.foods.clash} fill={P.clash} />}
         </View>
         <Chip label={skin.copy.levels[level]} fill={skin.colors.levels[level]} />
       </View>
@@ -114,7 +115,7 @@ const VersusFoods = () => {
   const votesFor = (food: FoodType): Vote[] =>
     members.map((member) => ({
       userId: member.id,
-      username: member.id === user?.id ? "You" : member.username,
+      username: member.id === user?.id ? V.you : member.username,
       answer: house?.votes[food.id]?.[member.id]?.answer ?? null,
     }));
 
@@ -122,11 +123,11 @@ const VersusFoods = () => {
     <VButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
   );
   const actions = isSelectMode
-    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(`Remove ${selectedIds.length}`, shelf.removeSelected, "buy")]
+    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.list.deleteSelected(selectedIds.length), shelf.removeSelected, "buy")]
     : noResults
-      ? [half("Clear search", () => shelf.setSearch(""), "secondary"), half(`Add “${query}”`, () => shelf.openAdd(shelf.search.trim()))]
+      ? [half(V.foods.clearSearch, () => shelf.setSearch(""), "secondary"), half(V.foods.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty
-        ? [half(skin.copy.list.addOwn, () => shelf.openAdd(), "secondary"), half("Suggested foods", () => router.push("/onboarding"))]
+        ? [half(skin.copy.list.addOwn, () => shelf.openAdd(), "secondary"), half(V.foods.suggested, () => router.push("/onboarding"))]
         : [half(skin.copy.list.select, shelf.startSelect, "secondary"), half(skin.copy.list.add, () => shelf.openAdd())];
 
   return (
@@ -150,10 +151,10 @@ const VersusFoods = () => {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View>
-              <Kicker>Every vote counts</Kicker>
+              <Kicker>{V.foods.kicker}</Kicker>
               <VText face="display" size={skin.type.headline}>{skin.copy.list.title}</VText>
             </View>
-            <VText size={skin.type.label} color={P.muted}>{`${foods?.length ?? 0} foods`}</VText>
+            <VText size={skin.type.label} color={P.muted}>{V.foodsCount(foods?.length ?? 0)}</VText>
           </View>
           {!isEmpty && !noResults && members.length > 1 && (
             <View style={styles.legend}>
@@ -165,7 +166,7 @@ const VersusFoods = () => {
               ))}
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: P.line }]} />
-                <VText size={skin.type.caption - 1} color={P.soft}>No vote</VText>
+                <VText size={skin.type.caption - 1} color={P.soft}>{V.foods.noVote}</VText>
               </View>
             </View>
           )}
@@ -173,13 +174,13 @@ const VersusFoods = () => {
 
         {noResults ? (
           <View style={styles.message}>
-            <VText face="display" size={skin.type.title}>{`No “${query}” in the house`}</VText>
-            <VText size={skin.type.body} color={P.soft}>{"Add it and it joins tomorrow's race."}</VText>
+            <VText face="display" size={skin.type.title}>{V.foods.noResults(query)}</VText>
+            <VText size={skin.type.body} color={P.soft}>{V.foods.noResultsLine}</VText>
           </View>
         ) : isEmpty ? (
           <View style={styles.message}>
             <VText face="display" size={skin.type.title}>{skin.copy.list.emptyTitle}</VText>
-            <VText size={skin.type.body} color={P.soft}>No foods means no race. Pick a few suggested ones to start.</VText>
+            <VText size={skin.type.body} color={P.soft}>{V.foods.emptyLine}</VText>
           </View>
         ) : (
           <FlatList

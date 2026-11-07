@@ -1,3 +1,4 @@
+import T from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useSwipeGame, { SwipeGame } from "@/hooks/screens/useSwipeGame";
@@ -13,16 +14,16 @@ import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
-const INTENT_LABEL: Record<SwipeDirection, { text: string; color: string }> = {
-  left: { text: "Need it", color: C.needIt },
-  up: { text: "Not sure", color: C.soft },
-  right: { text: "Have it", color: C.haveIt },
+const INTENT_COLOR: Record<SwipeDirection, string> = {
+  left: C.needIt,
+  up: C.soft,
+  right: C.haveIt,
 };
 
 const CheckCard = ({ food, intent }: { food: FoodType; intent: SwipeDirection | null }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const hint = intent ? INTENT_LABEL[intent] : null;
+  const hint = intent ? { text: T.intent[intent], color: INTENT_COLOR[intent] } : null;
 
   return (
     <View style={styles.cardSlot}>
@@ -40,7 +41,7 @@ const CheckCard = ({ food, intent }: { food: FoodType; intent: SwipeDirection | 
             {food.name}
           </CText>
           <CText size={skin.type.body - 1} color={C.soft} style={styles.center}>
-            Do you still have some?
+            {T.play.question}
           </CText>
         </View>
       </View>
@@ -84,9 +85,9 @@ const Checking = ({ game }: { game: SwipeGame }) => {
       <View style={styles.header}>
         <View style={styles.between}>
           <Pressable accessibilityRole="button" onPress={() => router.navigate("/")} style={styles.close}>
-            <CText size={skin.type.label + 1} color={C.soft}>Close</CText>
+            <CText size={skin.type.label + 1} color={C.soft}>{T.close}</CText>
           </Pressable>
-          <CText size={skin.type.label} color={C.soft}>{`${Math.min(game.position + 1, game.total)} of ${game.total}`}</CText>
+          <CText size={skin.type.label} color={C.soft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
         </View>
         <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: total, now: game.position }} style={styles.track}>
           <View style={[styles.fill, { width: `${(game.position / total) * 100}%` }]} />
@@ -106,11 +107,11 @@ const Checking = ({ game }: { game: SwipeGame }) => {
         />
       </View>
       <View style={[styles.pads, { paddingBottom: skin.spacing.stack }]}>
-        {pad("left", copy.out, "Out of stock")}
-        <Pressable accessibilityRole="button" accessibilityLabel="Not sure" onPress={() => game.fling("up")} style={styles.unsure}>
+        {pad("left", copy.out, T.play.ariaOut)}
+        <Pressable accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={styles.unsure}>
           <CText size={skin.type.label} color={game.intent === "up" ? C.ink : C.soft}>{copy.unsure}</CText>
         </Pressable>
-        {pad("right", copy.inStock, "In stock")}
+        {pad("right", copy.inStock, T.play.ariaIn)}
       </View>
     </View>
   );
@@ -129,18 +130,18 @@ const Done = ({ game }: { game: SwipeGame }) => {
     <Screen
       dock={
         <>
-          <CButton label="Open the list" href="/shop" />
-          <CButton variant="text" label="Close" onPress={close} />
+          <CButton label={T.openList} href="/shop" />
+          <CButton variant="text" label={T.close} onPress={close} />
         </>
       }
     >
       <ScrollView contentContainerStyle={styles.doneContent}>
         <View style={styles.doneHead}>
-          <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">Done.</CText>
+          <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{T.done}</CText>
           <CText size={skin.type.body} color={C.soft}>
             {added.length
-              ? `${added.length} ${added.length === 1 ? "food" : "foods"} added to your list.`
-              : "Nothing new to buy. The list is up to date."}
+              ? T.play.added(added.length)
+              : T.play.nothingNew}
           </CText>
         </View>
         {added.length > 0 && (
@@ -154,9 +155,9 @@ const Done = ({ game }: { game: SwipeGame }) => {
           </View>
         )}
         <View style={styles.points}>
-          <CText size={skin.type.label} color={C.soft} style={styles.flex}>Points toward other looks</CText>
+          <CText size={skin.type.label} color={C.soft} style={styles.flex}>{T.play.points}</CText>
           <CText weight="medium" size={skin.type.label + 1}>
-            {game.balance !== undefined ? `+${game.earned} · ${game.balance} in total` : `+${game.earned}`}
+            {game.balance !== undefined ? T.play.pointsTotal(game.earned, game.balance) : `+${game.earned}`}
           </CText>
         </View>
       </ScrollView>
@@ -192,7 +193,7 @@ const CalmPlay = () => {
         <CalmMessage
           title={copy.emptyTitle}
           line={copy.emptyLine}
-          dock={<CButton variant="text" label="Browse foods" href="/list" />}
+          dock={<CButton variant="text" label={T.browseFoods} href="/list" />}
         />
       );
     default:

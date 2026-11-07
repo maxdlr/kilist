@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { TabBarProps } from "./types";
 import { ThemedText } from "@/components/themed-text";
 import useAuth from "@/providers/AuthProvider";
@@ -13,14 +14,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export const TAB_ARIA: Record<string, string> = {
-  index: "Home",
-  list: "List",
-  shop: "Shop",
-  swipe: "Swipe",
-  account: "Account",
-  admin: "Admin",
-};
+export const tabAria = (name: string) =>
+  common.tabs[name as keyof typeof common.tabs] ?? name;
 
 const RoastTabBar = ({ state, navigation }: TabBarProps) => {
   const skin = useSkin();
@@ -53,7 +48,7 @@ const RoastTabBar = ({ state, navigation }: TabBarProps) => {
           <Pressable
             key={route.key}
             accessibilityRole="tab"
-            accessibilityLabel={TAB_ARIA[name]}
+            accessibilityLabel={tabAria(name)}
             accessibilityState={{ selected: isCurrent }}
             onPress={() => {
               const event = navigation.emit({
@@ -76,6 +71,7 @@ const RoastTabBar = ({ state, navigation }: TabBarProps) => {
               size={skin.type.label}
               color={isCurrent ? skin.colors.onGround : skin.colors.muted}
               style={struck && styles.struck}
+              numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}
             >
               {label}
             </ThemedText>

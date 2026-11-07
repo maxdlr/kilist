@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
@@ -80,7 +81,7 @@ const LoginScreen = () => {
   const handleSubmit = async () => {
     if (isSignup) {
       if (password !== confirmPassword) {
-        showToast("Passwords do not match");
+        showToast(common.passwordsDiffer);
         return;
       }
       if (!STRONG_PASSWORD_REGEX.test(password)) {
@@ -90,7 +91,7 @@ const LoginScreen = () => {
         return;
       }
       if (householdChoice === "join" && !joinCode) {
-        showToast("Enter a household code to join");
+        showToast(common.householdCodeMissing);
         return;
       }
 

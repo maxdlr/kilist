@@ -1,3 +1,4 @@
+import { arcadeText as T } from "./text";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -58,7 +59,7 @@ export const TicketChip = ({ count }: { count: number }) => {
   return (
     <View
       accessible
-      accessibilityLabel={`Your balance: ${count} tickets`}
+      accessibilityLabel={T.balanceAria(count)}
       style={[styles.chip, { boxShadow: shadowOf(skin, -1) }]}
     >
       <TicketIcon size={skin.size.check - skin.spacing.tight} />

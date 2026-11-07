@@ -47,7 +47,7 @@ export const ArcadeLoading = () => {
           K
         </ThemedText>
       </Animated.View>
-      <View accessibilityRole="progressbar" accessibilityLabel="Loading">
+      <View accessibilityRole="progressbar" accessibilityLabel={T.loading}>
         <Title size={skin.type.title} lines={1} color={P.white} textStyle={styles.centerText}>
           {T.insertingCoin}
         </Title>

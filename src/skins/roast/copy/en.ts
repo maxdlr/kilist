@@ -1,4 +1,5 @@
 const roastCopy = {
+  tagline: "THE APP HATES YOUR LISTS. LOUDLY.",
   levels: {
     1: "NEEDED",
     2: "SHOULD BUY",

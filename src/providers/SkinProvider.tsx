@@ -1,5 +1,6 @@
 import { DEFAULT_SKIN_ID, findSkin, Skin } from "@/skins";
 import axios from "@/services/axios";
+import { useLanguage } from "./LanguageProvider";
 import { UserType } from "@/types/model";
 import React, {
   createContext,
@@ -26,8 +27,9 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
     { onError: () => {}, shouldRetryOnError: false, revalidateOnFocus: false },
   );
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const { lang } = useLanguage();
 
-  const skin = findSkin(pendingId ?? user?.skin);
+  const skin = findSkin(pendingId ?? user?.skin, lang);
 
   const setSkin = useCallback(
     async (id: string) => {

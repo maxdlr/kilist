@@ -1,4 +1,4 @@
-import { TAB_ARIA } from "@/components/elements/TabBar/RoastTabBar";
+import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { ThemedText } from "@/components/themed-text";
 import useAuth from "@/providers/AuthProvider";
@@ -86,7 +86,7 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
             <Pressable
               key={route.key}
               accessibilityRole="tab"
-              accessibilityLabel={TAB_ARIA[name]}
+              accessibilityLabel={tabAria(name)}
               accessibilityState={{ selected: isCurrent }}
               onPress={press}
               style={styles.tab}
@@ -118,6 +118,7 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
                 allowFontScaling={false}
                 size={skin.type.caption - 2}
                 color={isCurrent ? P.navy : P.dimInk}
+                numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}
               >
                 {label}
               </ThemedText>

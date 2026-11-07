@@ -55,5 +55,6 @@ export interface UserType {
   description?: string;
   type: "user" | "admin";
   skin?: string;
+  language?: string | null;
   household: HouseholdType;
 }

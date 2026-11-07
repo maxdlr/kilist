@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import Dock from "@/components/elements/Dock/Dock";
 import FoodIcon from "@/components/elements/FoodIcon";
@@ -63,7 +64,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
 
   const addFood = async (data: { name: string; description?: string }) => {
     if (!mainList?.id) {
-      showToast("Your list isn't ready yet, try again in a moment");
+      showToast(common.listNotReady);
       return false;
     }
     const res = await postCreateFood({
@@ -72,7 +73,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
       fromOnboarding: true,
     });
     if (res.error) {
-      showToast(res.error.message || "Couldn't add that item");
+      showToast(res.error.message || common.addFailed);
       return false;
     }
     return true;
@@ -154,7 +155,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
             flex={1}
             height={skin.size.button.lg}
             label={copy.skip}
-            accessibilityLabel="Skip this food"
+            accessibilityLabel={common.skipFood}
             colors={deckButtonColors(skin, intent, "left")}
             onTouch={() => flingRef.current?.("left")}
           />
@@ -162,7 +163,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
             flex={1}
             height={skin.size.button.lg}
             label={copy.add}
-            accessibilityLabel="Add this food"
+            accessibilityLabel={common.addFood}
             colors={deckButtonColors(skin, intent, "right")}
             onTouch={() => flingRef.current?.("right")}
           />

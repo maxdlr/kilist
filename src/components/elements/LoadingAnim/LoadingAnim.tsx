@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
@@ -23,7 +24,7 @@ const LoadingAnim = () => {
   return (
     <View
       accessibilityRole="progressbar"
-      accessibilityLabel="Loading"
+      accessibilityLabel={common.loading}
       style={[styles.sheet, { backgroundColor: fill }]}
     >
       <ThemedText size={skin.type.body} color={ink}>

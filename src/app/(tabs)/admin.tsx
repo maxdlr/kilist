@@ -3,6 +3,7 @@ import ActionPanel, {
 } from "@/components/elements/ActionPanel";
 import Dock from "@/components/elements/Dock/Dock";
 import EmptyData from "@/components/elements/EmptyData";
+import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import Title from "@/components/elements/Title/Title";
@@ -16,6 +17,7 @@ import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 
@@ -26,10 +28,15 @@ type JobRun = {
   ranAt: string;
 };
 
+type JobField =
+  | { name: string; label: string; kind: "choice"; options: { value: string; label: string }[] }
+  | { name: string; label: string; kind: "email" };
+
 type AdminJob = {
   id: string;
   title: string;
   description: string;
+  fields: JobField[];
   lastRun: JobRun | null;
 };
 
@@ -52,6 +59,7 @@ const AdminScreen = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [confirm, setConfirm] = useState<ActionPanelRequest | null>(null);
+  const [inputs, setInputs] = useState<Record<string, Record<string, string>>>({});
 
   const { data: jobs, isLoading, mutate } = useSWR<AdminJob[]>(
     isAdmin ? { url: "/admin/jobs" } : null,
@@ -76,12 +84,17 @@ const AdminScreen = () => {
   }
 
   const selected = jobs?.find((job) => job.id === selectedId);
+  const inputOf = (job: AdminJob) => inputs[job.id] ?? {};
+  const setField = (job: AdminJob, name: string, value: string) =>
+    setInputs((all) => ({ ...all, [job.id]: { ...all[job.id], [name]: value } }));
+  const ready = !!selected && (selected.fields ?? []).every((field) => (inputOf(selected)[field.name] ?? "").trim());
 
   const run = async (job: AdminJob, dryRun: boolean) => {
     setIsBusy(true);
     try {
       const res = await axios.post<JobRun>(`/admin/jobs/${job.id}/run`, {
         dryRun,
+        input: inputOf(job),
       });
       await mutate();
       return res.data;
@@ -120,9 +133,10 @@ const AdminScreen = () => {
   };
 
   return (
-    <View style={[styles.flex, { backgroundColor: skin.colors.ground }]}>
+    <KeyboardAvoidingView behavior="padding" style={[styles.flex, { backgroundColor: skin.colors.ground }]}>
       <ScrollView
         style={styles.flex}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.content,
           { paddingTop: insets.top + skin.spacing.top },
@@ -177,6 +191,41 @@ const AdminScreen = () => {
                     )
                   : copy.never}
               </ThemedText>
+              {isSelected &&
+                (job.fields ?? []).map((field) =>
+                  field.kind === "choice" ? (
+                    <View key={field.name} style={styles.field}>
+                      <ThemedText size={skin.type.caption} color={skin.colors.onPaper}>
+                        {field.label}
+                      </ThemedText>
+                      <View accessibilityRole="radiogroup" style={styles.choices}>
+                        {field.options.map((option) => {
+                          const picked = inputOf(job)[field.name] === option.value;
+                          return (
+                            <KilButton
+                              key={option.value}
+                              height={skin.size.button.xs}
+                              fontSize={skin.type.label}
+                              variant={picked ? "primary" : skin.panel.secondary}
+                              label={option.label}
+                              onTouch={() => setField(job, field.name, option.value)}
+                            />
+                          );
+                        })}
+                      </View>
+                    </View>
+                  ) : (
+                    <FormInput
+                      key={field.name}
+                      type="email"
+                      bordered
+                      label={field.label}
+                      labelColor={skin.colors.onPaper}
+                      value={inputOf(job)[field.name] ?? ""}
+                      onChangeText={(value) => setField(job, field.name, value)}
+                    />
+                  ),
+                )}
             </Pressable>
           );
         })}
@@ -191,14 +240,14 @@ const AdminScreen = () => {
               fontSize={skin.type.lead}
               variant="secondary"
               label={copy.dryRun}
-              onTouch={isBusy ? undefined : dryRun}
+              onTouch={isBusy || !ready ? undefined : dryRun}
             />
             <KilButton
               flex={1}
               height={skin.size.button.md}
               fontSize={skin.type.lead}
               label={copy.run}
-              onTouch={isBusy ? undefined : runForReal}
+              onTouch={isBusy || !ready ? undefined : runForReal}
             />
           </>
         ) : (
@@ -214,7 +263,7 @@ const AdminScreen = () => {
       </Dock>
 
       <ActionPanel request={confirm} onClose={closeConfirm} />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -231,6 +280,14 @@ const createStyles = (s: Skin) =>
     job: {
       gap: s.spacing.small,
       padding: s.spacing.dock,
+    },
+    field: {
+      gap: s.spacing.tight,
+    },
+    choices: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: s.spacing.small,
     },
   });
 

@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
@@ -154,7 +155,7 @@ const ArcadeAccount = () => {
                 height={skin.size.button.xs + 4}
                 fontSize={skin.type.label}
                 label={copy.share}
-                accessibilityLabel="Share team code"
+                accessibilityLabel={T.shareTeamAria}
                 style={styles.chip}
                 onTouch={account.shareCode}
               />
@@ -162,7 +163,7 @@ const ArcadeAccount = () => {
                 height={skin.size.button.xs + 4}
                 fontSize={skin.type.label}
                 label={copy.qr}
-                accessibilityLabel="Show team QR code"
+                accessibilityLabel={T.qrTeamAria}
                 style={styles.chip}
                 onTouch={() => setOpenPanel("qr")}
               />
@@ -182,6 +183,7 @@ const ArcadeAccount = () => {
           <View style={styles.menu}>
             <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
+            <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
             <MenuRow label={copy.credits} onPress={account.openCredits} />
           </View>
 

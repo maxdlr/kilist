@@ -1,4 +1,5 @@
-import type { RoastCopy } from "./roast/copy";
+import type { Lang } from "@/i18n";
+import type { RoastCopy } from "./roast/copy/en";
 
 export type SkinCopy = RoastCopy;
 
@@ -123,3 +124,7 @@ export interface Skin {
   type: SkinType;
   copy: SkinCopy;
 }
+
+export type SkinSource = Omit<Skin, "copy" | "tagline"> & {
+  copies: Record<Lang, SkinCopy>;
+};

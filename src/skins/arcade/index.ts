@@ -1,4 +1,4 @@
-import type { Skin } from "../types";
+import type { SkinSource } from "../types";
 import arcadeCopy from "./copy";
 
 const NARROW = new Set([..."iljtfrI1.,:;'!|()[]-"]);
@@ -31,10 +31,9 @@ export const arcadePalette = {
   plankShadow: "rgba(11,46,89,0.55)",
 };
 
-const arcade: Skin = {
+const arcade: SkinSource = {
   id: "arcade",
-  name: "Prize counter",
-  tagline: "Every swipe prints tickets.",
+  name: "Arcade",
   premium: false,
   statusBarOnGround: "light",
   textCase: "none",
@@ -147,7 +146,7 @@ const arcade: Skin = {
     headline: 34,
     display: { sm: 34, md: 44, lg: 52, xl: 96, stamp: 30 },
   },
-  copy: arcadeCopy,
+  copies: arcadeCopy,
 };
 
 export default arcade;

@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
@@ -35,7 +36,7 @@ const SwitchHouseholdForm = ({
   const handleSubmit = async () => {
     if (choice === "join") {
       if (!joinCode) {
-        showToast("Enter a household code to join");
+        showToast(common.householdCodeMissing);
         return;
       }
       const success = await onSubmit({ householdChoice: "join", joinCode });

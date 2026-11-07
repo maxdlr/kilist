@@ -1,3 +1,4 @@
+import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import useShopRun from "@/hooks/screens/useShopRun";
@@ -8,7 +9,7 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { versusPalette as P } from "..";
 import { Card, Kicker, Screen, VButton, VText } from "./parts";
@@ -16,16 +17,13 @@ import { VersusEmpty, VersusLoading } from "./States";
 
 const CLOCK_MS = 250;
 
-const Row = ({ food, done, onPress }: { food: FoodType; done: boolean; onPress: () => void }) => {
+const Row = ({ food, done }: { food: FoodType; done: boolean }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ checked: done, disabled: done }}
-      accessibilityLabel={`${food.name}, ${done ? "bought" : "not bought yet"}`}
-      disabled={done}
-      onPress={onPress}
+    <View
+      accessible
+      accessibilityLabel={`${food.name}, ${done ? V.shop.boughtLower : V.shop.notBought}`}
       style={[styles.row, { backgroundColor: done ? P.panel : P.white }]}
     >
       <View style={{ opacity: done ? 0.45 : 1 }}>
@@ -40,14 +38,14 @@ const Row = ({ food, done, onPress }: { food: FoodType; done: boolean; onPress: 
       >
         {food.name}
       </VText>
-      <View style={[styles.check, { backgroundColor: done ? P.you : "transparent", borderColor: done ? P.you : "#C9C4E6" }]}>
-        {done && (
+      {done && (
+        <View style={[styles.check, { backgroundColor: P.you, borderColor: P.you }]}>
           <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
             <Path d="M5 12l4 4 10-10" stroke={P.ink} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
-        )}
-      </View>
-    </Pressable>
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -67,15 +65,15 @@ const SwipeRow = ({
   return (
     <View
       accessibilityActions={[
-        { name: "activate", label: "Bought" },
-        { name: "later", label: "Next time" },
+        { name: "activate", label: V.shop.bought },
+        { name: "later", label: V.shop.nextTime },
       ]}
       onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onBuy())}
       style={[styles.swipeSlot, { backgroundColor: buying ? P.agree : P.panelHigh }]}
     >
       <View style={[styles.behind, { justifyContent: buying ? "flex-start" : "flex-end" }]}>
         <VText face="display" size={skin.type.title} color={buying ? P.ink : P.soft}>
-          {buying ? "Bought" : "Next time"}
+          {buying ? V.shop.bought : V.shop.nextTime}
         </VText>
       </View>
       <SwipeGesture
@@ -86,7 +84,7 @@ const SwipeRow = ({
         swipeThreshold={100}
         styles={{ box: styles.swipeBox }}
       >
-        <Row food={food} done={false} onPress={onBuy} />
+        <Row food={food} done={false} />
       </SwipeGesture>
     </View>
   );
@@ -124,7 +122,7 @@ const VersusShop = () => {
   const ghostDone = ghost.filter((split) => split <= elapsed).length;
   const recordAtHere = bought.length ? ghost[Math.min(bought.length, ghost.length) - 1] ?? null : null;
   const gap = recordAtHere === null ? null : elapsed - recordAtHere;
-  const recordName = record ? (record.userId === user?.id ? "your record" : record.username) : null;
+  const recordName = record ? (record.userId === user?.id ? V.shop.yourRecord : record.username) : null;
 
   const buy = async (food: FoodType) => {
     setBought((list) => [...list, food]);
@@ -156,33 +154,33 @@ const VersusShop = () => {
   if (result) {
     const beat = !record || result.ms < record.ms;
     return (
-      <Screen dock={<VButton big label="Back home" onPress={leave} />}>
+      <Screen dock={<VButton big label={V.shop.backHome} onPress={leave} />}>
         <View style={styles.centered}>
-          <Kicker>Shopping race</Kicker>
+          <Kicker>{V.shop.kicker}</Kicker>
           <VText face="display" size={skin.type.display.lg} color={beat ? P.you : P.mates[0]} style={styles.centerText}>
-            {beat ? "New record!" : `${record?.username ?? "Record"} holds it`}
+            {beat ? V.shop.newRecord : V.shop.holdsIt(record?.username)}
           </VText>
           <VText size={skin.type.body} color={P.soft} style={styles.centerText}>
-            {record ? `${mmss(Math.abs(record.ms - result.ms))} ${beat ? "faster than" : "off"} ${recordName}` : "First run on the board"}
+            {record ? V.shop.gap(mmss(Math.abs(record.ms - result.ms)), beat, recordName ?? "") : V.shop.firstRun}
           </VText>
         </View>
         <Card>
           <View style={styles.between}>
-            <VText size={skin.type.label} color={P.soft}>Your time</VText>
+            <VText size={skin.type.label} color={P.soft}>{V.play.yourTime}</VText>
             <VText face="bold" size={skin.type.label}>{mmss(result.ms)}</VText>
           </View>
           {record && (
             <View style={styles.between}>
-              <VText size={skin.type.label} color={P.soft}>{`House record · ${record.username}`}</VText>
+              <VText size={skin.type.label} color={P.soft}>{V.shop.houseRecord(record.username)}</VText>
               <VText size={skin.type.label}>{mmss(record.ms)}</VText>
             </View>
           )}
           <View style={styles.between}>
-            <VText size={skin.type.label} color={P.soft}>Bought</VText>
+            <VText size={skin.type.label} color={P.soft}>{V.shop.bought}</VText>
             <VText size={skin.type.label}>{String(result.items)}</VText>
           </View>
           <View style={styles.between}>
-            <VText size={skin.type.label} color={P.soft}>Left for next time</VText>
+            <VText size={skin.type.label} color={P.soft}>{V.shop.leftForNext}</VText>
             <VText size={skin.type.label}>{String(result.left)}</VText>
           </View>
         </Card>
@@ -195,10 +193,10 @@ const VersusShop = () => {
   if (run.isEmpty && bought.length === 0 && later.length === 0) {
     return (
       <VersusEmpty
-        kicker="Shopping race"
-        title="Nothing to buy"
-        line="The house votes say you're stocked. New votes land with tomorrow's race."
-        action={{ label: "Race today's 10", onPress: () => router.navigate("/swipe") }}
+        kicker={V.shop.kicker}
+        title={V.shop.emptyTitle}
+        line={V.shop.emptyLine}
+        action={{ label: V.home.raceToday, onPress: () => router.navigate("/swipe") }}
       />
     );
   }
@@ -210,8 +208,8 @@ const VersusShop = () => {
       padded={false}
       dock={
         <View style={styles.actions}>
-          <VButton flex={1} variant="secondary" label="Stop" accessibilityLabel="Stop shopping" onPress={run.stop} />
-          <VButton flex={1.6} label={allDone ? "Stop the clock" : `Finish · ${remaining.length} left`} onPress={finish} />
+          <VButton flex={1} variant="secondary" label={V.shop.stop} accessibilityLabel={V.shop.stopAria} onPress={run.stop} />
+          <VButton flex={1.6} label={allDone ? V.shop.stopClock : V.shop.finish(remaining.length)} onPress={finish} />
         </View>
       }
     >
@@ -219,11 +217,11 @@ const VersusShop = () => {
         <View style={styles.between}>
           <VText face="pixel" size={skin.type.title - 2} color={P.you}>{mmss(elapsed)}</VText>
           <VText face="bold" size={skin.type.label} color={gap !== null && gap <= 0 ? P.agree : P.muted}>
-            {!record ? "Set the house record" : gap === null ? `Record ${mmss(record.ms)}` : gap <= 0 ? `${mmss(-gap)} ahead of ${recordName}` : `${mmss(gap)} behind ${recordName}`}
+            {!record ? V.shop.setRecord : gap === null ? V.shop.record(mmss(record.ms)) : gap <= 0 ? V.play.ahead(mmss(-gap), recordName ?? "") : V.play.behind(mmss(gap), recordName ?? "")}
           </VText>
         </View>
         <View style={styles.lane}>
-          <VText face="bold" size={skin.type.caption} color={P.you} style={styles.laneLabel}>You</VText>
+          <VText face="bold" size={skin.type.caption} color={P.you} style={styles.laneLabel}>{V.you}</VText>
           <View style={styles.track}>
             <View style={[styles.trackFill, { backgroundColor: P.you, width: `${total ? (bought.length / total) * 100 : 0}%` }]} />
           </View>
@@ -232,7 +230,7 @@ const VersusShop = () => {
         {record && (
           <View style={styles.lane}>
             <VText face="bold" size={skin.type.caption} color={P.mates[0]} style={styles.laneLabel} numberOfLines={1}>
-              {record.userId === user?.id ? "Best" : record.username}
+              {record.userId === user?.id ? V.play.best : record.username}
             </VText>
             <View style={styles.track}>
               <View style={[styles.trackFill, { backgroundColor: P.mates[0], opacity: 0.5, width: `${record.items ? (Math.min(ghostDone, record.items) / record.items) * 100 : 0}%` }]} />
@@ -242,13 +240,13 @@ const VersusShop = () => {
         )}
       </View>
       <View style={styles.hints}>
-        <VText size={skin.type.caption} color={P.muted}>← Next time</VText>
-        <VText size={skin.type.caption} color={P.muted}>Bought →</VText>
+        <VText size={skin.type.caption} color={P.muted}>{`← ${V.shop.nextTime}`}</VText>
+        <VText size={skin.type.caption} color={P.muted}>{`${V.shop.bought} →`}</VText>
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
         {run.suggestion && (
           <View style={styles.next}>
-            <VText size={skin.type.caption} color={P.muted}>Usually next in the store</VText>
+            <VText size={skin.type.caption} color={P.muted}>{V.shop.usuallyNext}</VText>
             <SwipeRow food={run.suggestion} onBuy={() => buy(run.suggestion!)} onLater={() => skipForNow(run.suggestion!)} />
           </View>
         )}
@@ -256,7 +254,7 @@ const VersusShop = () => {
           <SwipeRow key={food.id} food={food} onBuy={() => buy(food)} onLater={() => skipForNow(food)} />
         ))}
         {bought.map((food) => (
-          <Row key={`bought-${food.id}`} food={food} done onPress={() => undefined} />
+          <Row key={`bought-${food.id}`} food={food} done />
         ))}
       </ScrollView>
     </Screen>

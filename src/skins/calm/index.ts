@@ -1,4 +1,4 @@
-import type { Skin } from "../types";
+import type { SkinSource } from "../types";
 import calmCopy from "./copy";
 
 const NARROW = new Set([..."iljtfrI1.,:;'!|()[]-"]);
@@ -25,10 +25,9 @@ export const calmPalette = {
   needIt: rust,
 };
 
-const calm: Skin = {
+const calm: SkinSource = {
   id: "calm",
   name: "Calm",
-  tagline: "Quiet, no games.",
   premium: false,
   statusBarOnGround: "dark",
   textCase: "none",
@@ -145,7 +144,7 @@ const calm: Skin = {
     headline: 28,
     display: { sm: 28, md: 32, lg: 32, xl: 40, stamp: 16 },
   },
-  copy: calmCopy,
+  copies: calmCopy,
 };
 
 export default calm;

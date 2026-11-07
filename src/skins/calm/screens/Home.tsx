@@ -1,3 +1,4 @@
+import T from "../text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType, ListType } from "@/types/model";
@@ -11,13 +12,6 @@ import { CButton, CText, Dot, Screen, useCheckPending } from "./parts";
 import { CalmError, CalmLoading } from "./States";
 
 const PREVIEW = 6;
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-const today = () => {
-  const now = new Date();
-  return `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-};
 
 const CalmHome = () => {
   const skin = useSkin();
@@ -53,9 +47,9 @@ const CalmHome = () => {
       padded={false}
       dock={
         <>
-          {pending && <CButton label={`Check ${toCheck} ${toCheck === 1 ? "food" : "foods"}`} href="/swipe" />}
-          {needed.length > 0 && <CButton variant={pending ? "secondary" : "primary"} label="Open the list" href="/shop" />}
-          {allSet && <CButton variant="text" label="Browse foods" href="/list" />}
+          {pending && <CButton label={T.home.check(toCheck)} href="/swipe" />}
+          {needed.length > 0 && <CButton variant={pending ? "secondary" : "primary"} label={T.openList} href="/shop" />}
+          {allSet && <CButton variant="text" label={T.browseFoods} href="/list" />}
         </>
       }
     >
@@ -64,29 +58,29 @@ const CalmHome = () => {
         refreshControl={<RefreshControl refreshing={false} onRefresh={refresh} tintColor={C.soft} />}
       >
         <View style={styles.head}>
-          <CText size={skin.type.label} color={C.soft}>{today()}</CText>
+          <CText size={skin.type.label} color={C.soft}>{T.date(new Date())}</CText>
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
             {skin.copy.home.headline(needed.length)}
           </CText>
           {allSet && (
             <CText size={skin.type.body} color={C.soft}>
-              Nothing to check and nothing to buy. Kilist will ask when something might be running low.
+              {T.home.allSetLine}
             </CText>
           )}
         </View>
 
         {pending && (
           <View style={styles.card}>
-            <CText weight="medium" size={skin.type.body}>{`${toCheck} ${toCheck === 1 ? "food" : "foods"} to check`}</CText>
+            <CText weight="medium" size={skin.type.body}>{T.home.toCheck(toCheck)}</CText>
             <CText size={skin.type.label + 1} color={C.soft}>
-              About half a minute. It keeps the list right, and each answer earns points toward other looks.
+              {T.home.checkLine}
             </CText>
           </View>
         )}
 
         {needed.length > 0 && (
           <View>
-            <CText size={skin.type.label} color={C.soft} style={styles.sectionLabel}>On the list</CText>
+            <CText size={skin.type.label} color={C.soft} style={styles.sectionLabel}>{T.home.onTheList}</CText>
             {needed.slice(0, PREVIEW).map((food) => {
               const level = levelOf(food.inStockScore);
               return (
@@ -98,7 +92,7 @@ const CalmHome = () => {
               );
             })}
             {more > 0 && (
-              <CText size={skin.type.label} color={C.soft} style={styles.more}>{`and ${more} more`}</CText>
+              <CText size={skin.type.label} color={C.soft} style={styles.more}>{T.home.more(more)}</CText>
             )}
           </View>
         )}

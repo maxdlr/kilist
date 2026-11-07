@@ -10,7 +10,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -70,12 +70,9 @@ const Cell = ({
   const [stamping, setStamping] = useState(true);
 
   const cell = (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ checked: stamped, disabled: stamped }}
-      accessibilityLabel={`${food.name}, ${stamped ? "bought" : "not bought yet"}`}
-      disabled={stamped}
-      onPress={onStamp}
+    <View
+      accessible
+      accessibilityLabel={`${food.name}, ${stamped ? T.boughtLower : T.notBought}`}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
         setSize(Math.min(width, height));
@@ -94,15 +91,18 @@ const Cell = ({
         {bonus ? T.bonusPick : skin.copy.levels[level]}
       </ThemedText>
       <Stamp on={stamped} />
-    </Pressable>
+    </View>
   );
 
   if (stamped) return cell;
 
   return (
     <View
-      accessibilityActions={[{ name: "later", label: T.nextTime }]}
-      onAccessibilityAction={(event) => event.nativeEvent.actionName === "later" && onLater()}
+      accessibilityActions={[
+        { name: "activate", label: T.bought },
+        { name: "later", label: T.nextTime },
+      ]}
+      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onStamp())}
       style={[styles.swipeSlot, { backgroundColor: stamping ? P.navy : P.lilac }]}
     >
       <View style={[styles.behind, { justifyContent: stamping ? "flex-start" : "flex-end" }]}>
@@ -310,7 +310,7 @@ const ArcadeShop = () => {
               fontSize={skin.type.body}
               variant="secondary"
               label={skin.copy.shop.stop}
-              accessibilityLabel="Stop shopping"
+              accessibilityLabel={T.stopAria}
               onTouch={run.stop}
             />
             <KilButton
@@ -335,7 +335,7 @@ const ArcadeShop = () => {
         </View>
         <View
           accessible
-          accessibilityLabel={`${run.bought} bought, ${left} left`}
+          accessibilityLabel={T.boughtLeftAria(run.bought, left)}
           style={[styles.progress, { boxShadow: shadowOf(skin, -1) }]}
         >
           <ThemedText size={skin.type.label} color={P.navy}>

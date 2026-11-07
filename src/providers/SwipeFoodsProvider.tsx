@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import axios from "@/services/axios";
 import useToast from "@/providers/ToastProvider";
 import { FoodType } from "@/types/model";
@@ -67,7 +68,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     {
       onSuccess: () => {},
       onError: (err) =>
-        showToast(err?.message || "An unexpected error occurred"),
+        showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -108,7 +109,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
       );
       return res.data ?? null;
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "An unexpected error occurred");
+      showToast(err?.response?.data?.message || common.unexpected);
       return null;
     } finally {
       swipedIds.current.delete(payload.foodId);
@@ -122,7 +123,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
       });
       await mutateGame(res.data, { revalidate: false });
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "An unexpected error occurred");
+      showToast(err?.response?.data?.message || common.unexpected);
     }
   };
 

@@ -1,3 +1,4 @@
+import T from "../text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
@@ -23,11 +24,11 @@ export const CalmLoading = () => {
 
   return (
     <Screen>
-      <View accessibilityRole="progressbar" accessibilityLabel="Loading" style={styles.center}>
+      <View accessibilityRole="progressbar" accessibilityLabel={T.loading} style={styles.center}>
         <View style={styles.track}>
           <Animated.View style={[styles.slider, slider]} />
         </View>
-        <CText size={skin.type.label} color={C.soft}>Loading</CText>
+        <CText size={skin.type.label} color={C.soft}>{T.loading}</CText>
       </View>
     </Screen>
   );
@@ -48,10 +49,10 @@ export const CalmError = ({ onRetry }: { onRetry: () => unknown }) => {
   };
 
   return (
-    <Screen dock={<CButton label={busy ? "Trying…" : "Try again"} onPress={retry} />}>
+    <Screen dock={<CButton label={busy ? T.trying : T.tryAgain} onPress={retry} />}>
       <View style={styles.middle}>
-        <CText weight="medium" size={skin.type.headline}>{"Couldn't connect."}</CText>
-        <CText size={skin.type.body} color={C.soft}>Check your connection and try again. Nothing was lost.</CText>
+        <CText weight="medium" size={skin.type.headline}>{T.errorTitle}</CText>
+        <CText size={skin.type.body} color={C.soft}>{T.errorLine}</CText>
       </View>
     </Screen>
   );

@@ -1,6 +1,7 @@
-import type { RoastCopy } from "../roast/copy";
+import type { RoastCopy } from "../../roast/copy/en";
 
 const arcadeCopy: RoastCopy = {
+  tagline: "Every swipe prints tickets.",
   levels: {
     1: "Needed",
     2: "Should buy",

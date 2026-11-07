@@ -1,4 +1,4 @@
-import type { Skin } from "../types";
+import type { SkinSource } from "../types";
 import roastCopy from "./copy";
 
 const NARROW = new Set([..."IJ1.,:;'!|()[]-"]);
@@ -10,10 +10,9 @@ const orange = "#FF4D1F";
 const white = "#FFFFFF";
 const blue = "#2F5BFF";
 
-const roast: Skin = {
+const roast: SkinSource = {
   id: "roast",
   name: "ROAST",
-  tagline: "THE APP HATES YOUR LISTS. LOUDLY.",
   premium: true,
   statusBarOnGround: "light",
   textCase: "upper",
@@ -126,7 +125,7 @@ const roast: Skin = {
     headline: 42,
     display: { sm: 56, md: 80, lg: 100, xl: 140, stamp: 130 },
   },
-  copy: roastCopy,
+  copies: roastCopy,
 };
 
 export default roast;

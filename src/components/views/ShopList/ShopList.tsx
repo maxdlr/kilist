@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
 import Dock from "@/components/elements/Dock/Dock";
@@ -132,7 +133,7 @@ const ShopList = () => {
             fontSize={skin.type.body}
             variant="danger"
             label={copy.stop}
-            accessibilityLabel="Stop shopping"
+            accessibilityLabel={common.stopShopping}
             onTouch={handleStop}
           />
           <KilButton
@@ -141,7 +142,7 @@ const ShopList = () => {
             fontSize={skin.type.body}
             variant="secondary"
             label={copy.flip}
-            accessibilityLabel="Reverse the order"
+            accessibilityLabel={common.reverseOrder}
             onTouch={reverseOrderFood}
           />
           <KilButton
@@ -151,7 +152,7 @@ const ShopList = () => {
             variant="secondary"
             label={orderedBy === "score" ? copy.byName : copy.byScore}
             accessibilityLabel={
-              orderedBy === "score" ? "Sort by name" : "Sort by score"
+              orderedBy === "score" ? common.sortByName : common.sortByScore
             }
             onTouch={() => orderFoodBy(orderedBy === "score" ? "name" : "score")}
           />

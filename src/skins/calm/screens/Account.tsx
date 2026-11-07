@@ -1,3 +1,5 @@
+import common from "@/i18n/common";
+import T from "../text";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
@@ -65,9 +67,9 @@ const CalmAccount = () => {
     <KeyboardAvoidingView style={styles.flex} behavior="height">
       <Screen padded={false}>
         <ScrollView contentContainerStyle={styles.scroll}>
-          <CText weight="medium" size={skin.type.headline} accessibilityRole="header">Settings</CText>
+          <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
 
-          <Group label="Account">
+          <Group label={T.settings.account}>
             <View style={styles.row}>
               <CText size={skin.type.body}>{user.username}</CText>
               <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
@@ -80,16 +82,17 @@ const CalmAccount = () => {
             <View style={styles.row}>
               <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
               <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
-                {others.length ? `with ${others.map((member) => member.username).join(", ")}` : "Just you"}
+                {others.length ? T.settings.with(others.map((member) => member.username)) : T.settings.justYou}
               </CText>
             </View>
-            <Row label="Invite someone" detail={account.joinCode} onPress={() => setOpenPanel("qr")} />
-            <Row label="Share the code" onPress={account.shareCode} />
+            <Row label={T.settings.invite} detail={account.joinCode} onPress={() => setOpenPanel("qr")} />
+            <Row label={T.settings.share} onPress={account.shareCode} />
             <Row label={copy.switch} onPress={() => setOpenPanel("switch")} />
           </Group>
 
-          <Group label="App">
+          <Group label={T.settings.app}>
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
+            <Row label={common.language} detail={account.languageName} onPress={account.openLanguage} />
             <Row label={copy.credits} onPress={account.openCredits} />
           </Group>
 

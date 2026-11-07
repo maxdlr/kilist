@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import axios from "@/services/axios";
 import { KilistResponseError } from "@/types/api";
 import { isCancel, type AxiosRequestConfig } from "axios";
@@ -50,7 +51,7 @@ const useAxios = (url: string) => {
       }
 
       const error: KilistResponseError = (err as any)?.response?.data ?? {
-        message: "An unexpected error occurred",
+        message: common.unexpected,
       };
 
       return {

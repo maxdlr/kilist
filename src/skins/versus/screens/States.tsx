@@ -1,3 +1,4 @@
+import V from "../text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
@@ -27,10 +28,10 @@ export const VersusLoading = () => {
 
   return (
     <Screen>
-      <View accessibilityRole="progressbar" accessibilityLabel="Loading" style={styles.center}>
+      <View accessibilityRole="progressbar" accessibilityLabel={V.states.loading} style={styles.center}>
         <View style={styles.row}>
           <Animated.View style={left}>
-            <Avatar name="You" color={P.you} size={skin.size.button.lg} />
+            <Avatar name={V.you} color={P.you} size={skin.size.button.lg} />
           </Animated.View>
           <VText face="display" size={skin.type.headline}>
             VS
@@ -40,10 +41,10 @@ export const VersusLoading = () => {
           </Animated.View>
         </View>
         <VText face="pixel" size={(skin.type.caption - 1)}>
-          WARMING UP…
+          {V.states.warmingUp}
         </VText>
         <VText size={skin.type.label} color={P.muted}>
-          Fetching the house scores
+          {V.states.fetching}
         </VText>
       </View>
     </Screen>
@@ -65,16 +66,16 @@ export const VersusError = ({ onRetry }: { onRetry: () => unknown }) => {
   };
 
   return (
-    <Screen dock={<VButton big label={busy ? "Hold on" : "Try again"} onPress={retry} />}>
+    <Screen dock={<VButton big label={busy ? V.states.holdOn : V.states.tryAgain} onPress={retry} />}>
       <View style={styles.middle}>
         <VText face="pixel" size={(skin.type.caption - 1) - 2} color={P.clash}>
-          CONNECTION LOST
+          {V.states.lost}
         </VText>
         <VText face="display" size={skin.type.display.md}>
-          {"Your rivals can't see you"}
+          {V.states.errorTitle}
         </VText>
         <VText size={skin.type.body} color={P.soft}>
-          {"We couldn't reach the server. Pull down or try again in a moment."}
+          {V.states.errorLine}
         </VText>
       </View>
     </Screen>

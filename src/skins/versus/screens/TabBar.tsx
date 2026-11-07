@@ -1,4 +1,4 @@
-import { TAB_ARIA } from "@/components/elements/TabBar/RoastTabBar";
+import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -63,7 +63,7 @@ const VersusTabBar = ({ state, navigation }: TabBarProps) => {
             <Pressable
               key={route.key}
               accessibilityRole="tab"
-              accessibilityLabel={TAB_ARIA[name]}
+              accessibilityLabel={tabAria(name)}
               accessibilityState={{ selected: isCurrent }}
               onPress={() => {
                 const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
@@ -80,7 +80,7 @@ const VersusTabBar = ({ state, navigation }: TabBarProps) => {
               ) : (
                 Icon && <Icon size={skin.size.icon.action} color={ink} strokeWidth={2} />
               )}
-              <VText face={isCurrent ? "bold" : "medium"} size={skin.type.caption - 1} color={ink}>
+              <VText face={isCurrent ? "bold" : "medium"} size={skin.type.caption - 1} color={ink} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                 {label}
               </VText>
               <View style={[styles.bar3, { backgroundColor: isCurrent && !isRace ? P.you : "transparent" }]} />

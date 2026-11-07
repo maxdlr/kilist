@@ -1,4 +1,4 @@
-import type { Skin } from "../types";
+import type { SkinSource } from "../types";
 import versusCopy from "./copy";
 
 const NARROW = new Set([..."IJ1.,:;'!|()[]-"]);
@@ -37,10 +37,9 @@ export const versusPalette = {
   scrim: "rgba(10,8,25,0.72)",
 };
 
-const versus: Skin = {
+const versus: SkinSource = {
   id: "versus",
   name: "Versus",
-  tagline: "Same foods. Fastest wins.",
   premium: true,
   statusBarOnGround: "light",
   textCase: "none",
@@ -158,7 +157,7 @@ const versus: Skin = {
     headline: 26,
     display: { sm: 26, md: 34, lg: 44, xl: 56, stamp: 24 },
   },
-  copy: versusCopy,
+  copies: versusCopy,
 };
 
 export default versus;

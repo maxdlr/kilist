@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import axios from "@/services/axios";
 import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
@@ -56,7 +57,7 @@ export const FoodListProvider = ({
     },
     {
       onSuccess: () => {},
-      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
+      onError: (err) => showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateIfStale: true,
       revalidateOnReconnect: true,
@@ -73,7 +74,7 @@ export const FoodListProvider = ({
   );
 
   const handleError = (message?: string) => {
-    showToast(message || "An unexpected error occurred");
+    showToast(message || common.unexpected);
   };
 
   const createFood = async (data: { name: string; description?: string }) => {

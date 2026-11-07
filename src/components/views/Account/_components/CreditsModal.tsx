@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import ActionRow from "@/components/elements/ActionRow";
 import BottomPanel from "@/components/elements/BottomPanel";
 import KilButton from "@/components/elements/KilButton";
@@ -31,7 +32,7 @@ const CreditsModal = ({
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>
           {copy.creditsIcons}
         </ThemedText>
-        <ActionRow label="Icons8 · icons8.com" onPress={onOpenIcons} showChevron />
+        <ActionRow label={common.creditsIcons} onPress={onOpenIcons} showChevron />
       </View>
       <View style={styles.group}>
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>

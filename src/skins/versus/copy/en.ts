@@ -1,6 +1,7 @@
-import type { RoastCopy } from "../roast/copy";
+import type { RoastCopy } from "../../roast/copy/en";
 
 const versusCopy: RoastCopy = {
+  tagline: "Same foods. Fastest wins.",
   levels: {
     1: "Needed",
     2: "Should buy",

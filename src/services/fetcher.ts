@@ -1,10 +1,11 @@
+import common from "@/i18n/common";
 import type { AxiosError } from "axios";
 import axios from "@/services/axios";
 import { notifyToast } from "@/services/toastBridge";
 import { KilistApiError } from "@/types/api";
 
 export const onError = (err: KilistApiError) => {
-  notifyToast(err?.message || "An unexpected error occurred");
+  notifyToast(err?.message || common.unexpected);
 };
 
 const fetcher = async ({
@@ -29,7 +30,7 @@ const fetcher = async ({
     // all) — always throw a well-formed Error so SWR settles correctly
     // instead of hanging on a nullish/malformed thrown value.
     const kissError = new Error(
-      responseData?.message || axiosError?.message || "Request failed",
+      responseData?.message || axiosError?.message || common.unexpected,
     ) as KilistApiError;
     kissError.status = responseData?.status ?? axiosError?.response?.status ?? 0;
 

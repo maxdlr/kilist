@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
 import useToast from "@/providers/ToastProvider";
 import { FoodType, ShopListType } from "@/types/model";
@@ -55,7 +56,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: (err) => showToast(err?.message || "An unexpected error occurred"),
+      onError: (err) => showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -109,7 +110,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
       action: "buy",
     });
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
       return;
     }
     setSuggestedFoodIds((res.data as number[]) || []);
@@ -122,7 +123,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
       action: "snooze",
     });
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
       return;
     }
     setSuggestedFoodIds((res.data as number[]) || []);
@@ -135,7 +136,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     const res = await startShopList({});
     setIsStarting(false);
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
     }
     if (!res.data) {
       return null;
@@ -148,7 +149,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     setSuggestedFoodIds([]);
     const res = await endShopList({});
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
     }
     return res.data as ShopListType;
   };

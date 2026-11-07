@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -52,7 +53,7 @@ const FormInput = ({
     action ??
     (isPassword
       ? {
-          label: caseFor(skin, isPasswordVisible ? "Hide" : "Show"),
+          label: caseFor(skin, isPasswordVisible ? common.hide : common.show),
           onPress: () => setIsPasswordVisible((visible) => !visible),
         }
       : undefined);
@@ -112,8 +113,8 @@ const FormInput = ({
             accessibilityLabel={
               isPassword
                 ? isPasswordVisible
-                  ? "Hide password"
-                  : "Show password"
+                  ? common.hidePassword
+                  : common.showPassword
                 : sideAction.label
             }
           >

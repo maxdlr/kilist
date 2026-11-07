@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
 import useToast from "@/providers/ToastProvider";
 import { UserType } from "@/types/model";
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (username: string, password: string) => {
     const res = await postLogin({ username, password });
     if (res.error) {
-      showToast(res.error.message || "Email ou mot de passe incorrect");
+      showToast(res.error.message || common.unexpected);
       return false;
     }
     await mutateUser();
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (payload: SignupPayload) => {
     const res = await postSignup(payload);
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
       return false;
     }
     setNeedsOnboarding(true);
@@ -96,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const deleteAccount = async () => {
     const res = await deleteUser({ params: { id: user?.id } });
     if (res.error) {
-      showToast(res.error.message || "An unexpected error occurred");
+      showToast(res.error.message || common.unexpected);
       return false;
     }
     await clearSession();

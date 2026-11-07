@@ -11,6 +11,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
 const RELEASE_AT = 110;
@@ -25,6 +26,7 @@ const PullToRefresh = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const insets = useSafeAreaInsets();
   const pull = useSharedValue(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -55,7 +57,10 @@ const PullToRefresh = ({
     },
   });
 
-  const bandStyle = useAnimatedStyle(() => ({ height: pull.value }));
+  const bandStyle = useAnimatedStyle(() => ({
+    height: pull.value,
+    opacity: pull.value > 1 ? 1 : 0,
+  }));
   const contentStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: pull.value }],
   }));
@@ -67,7 +72,7 @@ const PullToRefresh = ({
           {children}
         </Animated.View>
         <Animated.View
-          style={[styles.band, { backgroundColor: skin.colors.alert }, bandStyle]}
+          style={[styles.band, { backgroundColor: skin.colors.alert, top: insets.top }, bandStyle]}
         >
           <ArrowDownIcon size={skin.size.icon.action} color={skin.colors.onAlert} />
           <Title
@@ -107,7 +112,6 @@ const createStyles = (s: Skin) =>
       paddingBottom: s.spacing.small,
       position: "absolute",
       right: 0,
-      top: 0,
     },
   });
 

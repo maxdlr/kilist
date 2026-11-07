@@ -1,3 +1,4 @@
+import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import { clock, seconds } from "@/hooks/versus/api";
@@ -24,8 +25,8 @@ const FoodCard = ({ food, position, total }: { food: FoodType; position: number;
     <View style={styles.cardSlot}>
       <View style={[styles.foodCard, { boxShadow: `0 6px 0 ${P.cardShadow}` }]}>
         <View style={styles.between}>
-          <VText size={skin.type.caption} color={P.cardInk}>{`${position + 1} of ${total}`}</VText>
-          <VText size={skin.type.caption} color={P.cardInk}>+10 tickets</VText>
+          <VText size={skin.type.caption} color={P.cardInk}>{V.play.position(position + 1, total)}</VText>
+          <VText size={skin.type.caption} color={P.cardInk}>{V.play.cardTickets}</VText>
         </View>
         <View
           style={styles.hero}
@@ -78,15 +79,15 @@ const RevealCard = ({ game }: { game: RaceGame }) => {
       <View accessibilityLiveRegion="polite" style={[styles.reveal, { borderColor: color }]}>
         <View style={styles.between}>
           <VText face="display" size={skin.type.title - 2} color={color}>
-            {same ? "Same as last time" : "Changed your mind"}
+            {same ? V.play.same : V.play.changed}
           </VText>
         </View>
         <View style={styles.chips}>
-          <Chip label={`Today: ${WORD[reveal.mine]}`} fill={P.you} />
+          <Chip label={V.play.today(WORD[reveal.mine])} fill={P.you} />
           <Chip label={`${previous.day}: ${WORD[previous.answer]}`} fill={P.you} dashed />
         </View>
         <VText size={skin.type.caption} color={P.soft}>
-          {same ? "Steady. Nothing moved on this one." : "Stock moved since then. Your new call replaces the old one."}
+          {same ? V.play.steady : V.play.moved}
         </VText>
       </View>
     );
@@ -101,14 +102,14 @@ const RevealCard = ({ game }: { game: RaceGame }) => {
     <View accessibilityLiveRegion="polite" style={[styles.reveal, { borderColor: color }]}>
       <View style={styles.between}>
         <VText face="display" size={skin.type.headline} color={color}>
-          {agree ? "Agreed" : "Clash!"}
+          {agree ? V.play.agreed : V.play.clash}
         </VText>
         <VText face="pixel" size={(skin.type.caption - 1) - 4} color={P.muted}>
           {reveal.food.name.toUpperCase()}
         </VText>
       </View>
       <View style={styles.chips}>
-        <Chip label={`You: ${WORD[reveal.mine]}`} fill={P.you} />
+        <Chip label={V.said(V.you, WORD[reveal.mine])} fill={P.you} />
         {reveal.mates.map((mate) => (
           <Chip key={mate.userId} label={`${mate.username}: ${WORD[mate.answer]}`} fill={memberColor(members, user?.id, mate.userId)} />
         ))}
@@ -116,8 +117,8 @@ const RevealCard = ({ game }: { game: RaceGame }) => {
       {verdict && (
         <VText size={skin.type.caption} color={P.soft}>
           {verdict.result === "tied"
-            ? "Tied for now. The next vote breaks it."
-            : `House verdict so far: ${verdict.result === "needed" ? "needed" : "in stock"}.`}
+            ? V.play.tiedSoFar
+            : V.play.verdictSoFar(verdict.result === "needed")}
         </VText>
       )}
     </View>
@@ -132,15 +133,15 @@ const Arena = ({ game }: { game: RaceGame }) => {
   const total = Math.max(1, game.total);
   const targetAtHere = game.targetAt(game.position);
   const delta = targetAtHere === null ? null : game.elapsed - targetAtHere;
-  const rivalName = target?.kind === "best" ? "your best" : target?.username;
+  const rivalName = target?.kind === "best" ? V.play.yourBestLower : target?.username;
   const deltaLabel =
     !target || game.position === 0 || delta === null
       ? target
-        ? `${target.kind === "best" ? "Best" : target.username}: ${seconds(target.totalMs)}`
-        : "Setting the pace"
+        ? `${target.kind === "best" ? V.play.best : target.username}: ${seconds(target.totalMs)}`
+        : V.play.settingPace
       : delta <= 0
-        ? `${seconds(-delta)} ahead of ${rivalName}`
-        : `${seconds(delta)} behind ${rivalName}`;
+        ? V.play.ahead(seconds(-delta), rivalName ?? "")
+        : V.play.behind(seconds(delta), rivalName ?? "");
   const pad = (direction: SwipeDirection, label: string, aria: string) => {
     const active = game.intent === direction;
     const primary = direction !== "up";
@@ -162,9 +163,9 @@ const Arena = ({ game }: { game: RaceGame }) => {
       padded={false}
       dock={
         <View style={styles.pads}>
-          {pad("left", copy.out, "Out of stock")}
-          {pad("up", copy.unsure, "Not sure")}
-          {pad("right", copy.inStock, "In stock")}
+          {pad("left", copy.out, V.play.ariaOut)}
+          {pad("up", copy.unsure, V.play.ariaUnsure)}
+          {pad("right", copy.inStock, V.play.ariaIn)}
         </View>
       }
     >
@@ -175,10 +176,10 @@ const Arena = ({ game }: { game: RaceGame }) => {
             {deltaLabel}
           </VText>
         </View>
-        <Lane label="You" color={P.you} progress={game.position / total} />
+        <Lane label={V.you} color={P.you} progress={game.position / total} />
         {target && (
           <Lane
-            label={target.kind === "best" ? "Best" : target.username}
+            label={target.kind === "best" ? V.play.best : target.username}
             color={target.kind === "best" ? P.you : P.mates[0]!}
             progress={game.ghostDone / total}
             ghost={target.kind === "best"}
@@ -215,43 +216,43 @@ const Start = ({ game }: { game: RaceGame }) => {
   const first = !game.isSolo && !target;
 
   return (
-    <Screen dock={<VButton big label={game.isSolo ? "Race your best" : first ? "Set the pace" : `Take ${target?.username} on`} onPress={game.begin} />}>
+    <Screen dock={<VButton big label={game.isSolo ? V.home.raceBest : first ? V.play.setPace : V.play.takeOn(target?.username ?? "")} onPress={game.begin} />}>
       <View style={styles.between}>
-        <Kicker>{`${game.isSolo ? "Solo race" : "Today's race"} · Day ${race.level}`}</Kicker>
-        {game.balance !== undefined && <VText face="bold" size={skin.type.label}>{`${game.balance} tickets`}</VText>}
+        <Kicker>{`${game.isSolo ? V.play.soloRace : V.play.todaysRace} · ${V.day(race.level)}`}</Kicker>
+        {game.balance !== undefined && <VText face="bold" size={skin.type.label}>{V.tickets(game.balance)}</VText>}
       </View>
       <View style={styles.versus}>
         <Card line={P.you} style={styles.fighter}>
-          <Avatar name="You" color={P.you} size={skin.size.button.xl} />
-          <VText face="bold" size={skin.type.lead}>{game.isSolo ? "You today" : "You"}</VText>
-          <VText size={skin.type.caption} color={P.muted}>Not played yet</VText>
+          <Avatar name={V.you} color={P.you} size={skin.size.button.xl} />
+          <VText face="bold" size={skin.type.lead}>{game.isSolo ? V.play.youToday : V.you}</VText>
+          <VText size={skin.type.caption} color={P.muted}>{V.play.notPlayed}</VText>
         </Card>
         <VText face="display" size={skin.type.display.sm}>VS</VText>
         <Card line={game.isSolo ? P.you : first ? P.line : P.mates[0]} dashed={game.isSolo} style={styles.fighter}>
           <Avatar
-            name={game.isSolo ? "You" : first ? "?" : target?.username ?? "?"}
+            name={game.isSolo ? V.you : first ? "?" : target?.username ?? "?"}
             color={game.isSolo ? P.you : first ? P.panelHigh : P.mates[0]!}
             size={skin.size.button.xl}
             ghost={game.isSolo}
           />
           <VText face="bold" size={skin.type.lead} numberOfLines={1}>
-            {game.isSolo ? "Your best" : first ? "Your rivals" : target?.username}
+            {game.isSolo ? V.play.yourBest : first ? V.play.yourRivals : target?.username}
           </VText>
           <VText size={skin.type.caption} color={P.muted}>
-            {game.isSolo ? (target ? seconds(target.totalMs) : "No best yet") : first ? "Not played yet" : `Played · ${seconds(target?.totalMs)}`}
+            {game.isSolo ? (target ? seconds(target.totalMs) : V.play.noBest) : first ? V.play.notPlayed : V.play.played(seconds(target?.totalMs))}
           </VText>
         </Card>
       </View>
       <Card>
         <VText face="bold" size={skin.type.lead}>
-          {game.isSolo ? "Beat your ghost." : first ? "You're first today. Set the pace." : skin.copy.swipe.startTitle}
+          {game.isSolo ? V.play.beatGhost : first ? V.play.firstToday : skin.copy.swipe.startTitle}
         </VText>
         <VText size={skin.type.label} color={P.soft}>
           {game.isSolo
-            ? "Your best run plays alongside you. After each swipe you'll see what you said last time."
+            ? V.play.soloIntro
             : first
-              ? "Your housemates will race your time. Your answers open the vote on each food."
-              : "You'll see their pace as you go, and their answer after each of yours. Where you disagree, the house votes decide."}
+              ? V.play.firstIntro
+              : V.play.raceIntro}
         </VText>
       </Card>
       <View style={styles.lineup}>
@@ -273,7 +274,7 @@ const Results = ({ game }: { game: RaceGame }) => {
   const mine = game.myRun?.totalMs ?? game.elapsed;
   const target = game.target;
   const win = !target || mine <= target.totalMs;
-  const rival = target?.kind === "best" ? "your best" : target?.username;
+  const rival = target?.kind === "best" ? V.play.yourBestLower : target?.username;
   const toBuy = (game.myRun?.answers ?? []).filter((answer) => answer.answer === "out").length;
 
   return (
@@ -281,29 +282,29 @@ const Results = ({ game }: { game: RaceGame }) => {
       padded={false}
       dock={
         <>
-          <VButton big label={`Go shopping · ${toBuy}`} href="/shop" />
-          <VButton variant="ghost" label="Done for today" onPress={game.reset} />
+          <VButton big label={V.play.goShoppingCount(toBuy)} href="/shop" />
+          <VButton variant="ghost" label={V.play.doneToday} onPress={game.reset} />
         </>
       }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.centered}>
-          <Kicker>{game.isSolo ? "Solo race" : "Swipe race"}</Kicker>
+          <Kicker>{game.isSolo ? V.play.soloRace : V.play.swipeRace}</Kicker>
           <VText face="display" size={skin.type.display.lg} color={win ? P.you : P.mates[0]} style={styles.centerText}>
-            {game.isSolo ? (win ? "New best" : "Best stands") : !target ? "Pace set" : win ? "You win" : `${target.username} wins`}
+            {game.isSolo ? (win ? V.play.newBest : V.play.bestStands) : !target ? V.play.paceSet : win ? V.play.youWin : V.play.wins(target.username)}
           </VText>
           <VText size={skin.type.body} color={P.soft} style={styles.centerText}>
-            {target ? `${seconds(Math.abs(target.totalMs - mine))} ${win ? "faster than" : "off"} ${rival} · +${game.earned} tickets` : `${seconds(mine)} · +${game.earned} tickets`}
+            {target ? V.play.gap(seconds(Math.abs(target.totalMs - mine)), win, rival ?? "", game.earned) : V.play.time(seconds(mine), game.earned)}
           </VText>
         </View>
         <Card>
           <View style={styles.between}>
-            <VText size={skin.type.label} color={P.soft}>Your time</VText>
+            <VText size={skin.type.label} color={P.soft}>{V.play.yourTime}</VText>
             <VText face="bold" size={skin.type.label}>{seconds(mine)}</VText>
           </View>
           {target && (
             <View style={styles.between}>
-              <VText size={skin.type.label} color={P.soft}>{target.kind === "best" ? "Your best" : target.username}</VText>
+              <VText size={skin.type.label} color={P.soft}>{target.kind === "best" ? V.play.yourBest : target.username}</VText>
               <VText size={skin.type.label}>{seconds(target.totalMs)}</VText>
             </View>
           )}
@@ -311,14 +312,14 @@ const Results = ({ game }: { game: RaceGame }) => {
         {game.isSolo ? (
           game.changes.length > 0 && (
             <View style={styles.section}>
-              <VText face="bold" size={skin.type.lead}>Changed your mind</VText>
+              <VText face="bold" size={skin.type.lead}>{V.play.changed}</VText>
               {game.changes.map((change) => (
                 <Card key={change.food.id} style={styles.clashRow}>
                   <FoodPicture food={change.food} size={skin.size.icon.row} />
                   <View style={styles.flex}>
                     <VText face="bold" size={skin.type.body}>{change.food.name}</VText>
                     <VText size={skin.type.caption} color={P.soft}>
-                      {`${change.previous!.day}: ${WORD[change.previous!.answer].toLowerCase()}. Today: ${WORD[change.mine!].toLowerCase()}.`}
+                      {V.play.changeLine(change.previous!.day, WORD[change.previous!.answer].toLowerCase(), WORD[change.mine!].toLowerCase())}
                     </VText>
                   </View>
                 </Card>
@@ -329,8 +330,8 @@ const Results = ({ game }: { game: RaceGame }) => {
           game.clashes.length > 0 && (
             <View style={styles.section}>
               <View style={styles.between}>
-                <VText face="bold" size={skin.type.lead}>Where you clashed</VText>
-                <VText size={skin.type.caption} color={P.muted}>the house decides</VText>
+                <VText face="bold" size={skin.type.lead}>{V.play.whereClashed}</VText>
+                <VText size={skin.type.caption} color={P.muted}>{V.play.houseDecides}</VText>
               </View>
               {game.clashes.map((clash) => (
                 <Card key={clash.food.id} style={styles.clashRow}>
@@ -345,17 +346,17 @@ const Results = ({ game }: { game: RaceGame }) => {
                           color={clash.verdict.result === "needed" ? P.buy : clash.verdict.result === "stocked" ? P.agree : P.tie}
                         >
                           {clash.verdict.result === "tied"
-                            ? "Tied"
-                            : `${clash.verdict.result === "needed" ? "Needed" : "In stock"} · ${Math.max(clash.verdict.out, clash.verdict.in)}–${Math.min(clash.verdict.out, clash.verdict.in)}`}
+                            ? V.play.tied
+                            : `${clash.verdict.result === "needed" ? V.play.needed : V.play.inStock} · ${Math.max(clash.verdict.out, clash.verdict.in)}–${Math.min(clash.verdict.out, clash.verdict.in)}`}
                         </VText>
                       )}
                     </View>
                     <View style={styles.chips}>
-                      <Chip label={`You: ${WORD[clash.mine]}`} fill={P.you} />
+                      <Chip label={V.said(V.you, WORD[clash.mine])} fill={P.you} />
                       {clash.votes.map((vote) => (
                         <Chip
                           key={vote.run.userId}
-                          label={`${vote.run.username}: ${WORD[vote.answer]}`}
+                          label={V.said(vote.run.username, WORD[vote.answer])}
                           fill={memberColor(members, user?.id, vote.run.userId)}
                         />
                       ))}
@@ -382,10 +383,10 @@ const Closed = ({ game }: { game: RaceGame }) => {
   const waiting = rows.filter((row) => !row.run);
 
   return (
-    <Screen dock={<VButton big label="Go shopping" href="/shop" />}>
+    <Screen dock={<VButton big label={V.play.goShopping} href="/shop" />}>
       <View>
-        <Kicker>{`Today's race · Day ${race.level}`}</Kicker>
-        <VText face="display" size={skin.type.display.sm}>You played today</VText>
+        <Kicker>{`${V.play.todaysRace} · ${V.day(race.level)}`}</Kicker>
+        <VText face="display" size={skin.type.display.sm}>{V.play.playedToday}</VText>
       </View>
       <Card style={styles.table}>
         {rows.map(({ member, run }, index) => (
@@ -393,21 +394,21 @@ const Closed = ({ game }: { game: RaceGame }) => {
             <VText face="pixel" size={(skin.type.caption - 1) - 2} color={P.muted}>{run ? String(index + 1) : "–"}</VText>
             <Avatar name={member.username} color={memberColor(race.members, user?.id, member.id)} size={skin.size.button.xs - 8} dim={!run} />
             <VText face="bold" size={skin.type.lead} style={styles.flex} numberOfLines={1}>
-              {member.id === user?.id ? "You" : member.username}
+              {member.id === user?.id ? V.you : member.username}
             </VText>
             <VText face="pixel" size={(skin.type.caption - 1) - 2} color={run ? P.white : P.muted}>
-              {run ? seconds(run.totalMs).toUpperCase() : "NOT YET"}
+              {run ? seconds(run.totalMs).toUpperCase() : V.home.notYet}
             </VText>
           </View>
         ))}
       </Card>
       {waiting.length > 0 && (
         <VText size={skin.type.label} color={P.soft}>
-          {`${waiting.map((row) => row.member.username).join(" and ")} ${waiting.length > 1 ? "haven't" : "hasn't"} played. Your time is the one to beat.`}
+          {V.play.waiting(waiting.map((row) => row.member.username))}
         </VText>
       )}
       <VText size={skin.type.label} color={P.soft}>
-        Next race opens tomorrow. Your answers are already counted in the house list.
+        {V.play.nextRace}
       </VText>
     </Screen>
   );
@@ -428,10 +429,10 @@ const VersusPlay = () => {
     case "empty":
       return (
         <VersusEmpty
-          kicker="Today's race"
-          title="Nothing to race"
-          line="Every food was checked in the last day. Come back tomorrow, or add some foods."
-          action={{ label: "Check the house foods", onPress: () => router.navigate("/list") }}
+          kicker={V.play.todaysRace}
+          title={V.play.nothingTitle}
+          line={V.play.nothingLine}
+          action={{ label: V.home.checkFoods, onPress: () => router.navigate("/list") }}
         />
       );
     default:

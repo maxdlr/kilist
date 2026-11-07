@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import Dock from "@/components/elements/Dock/Dock";
 import EmptyData from "@/components/elements/EmptyData";
 import FoodIcon from "@/components/elements/FoodIcon";
@@ -368,7 +369,7 @@ const SwipeFoodGame = () => {
             flex={1.2}
             fontSize={skin.type.lead}
             label={copy.out}
-            accessibilityLabel="Out of stock"
+            accessibilityLabel={common.ariaOut}
             colors={deckButtonColors(skin, intent, "left")}
             onTouch={() => game.fling("left")}
           />
@@ -376,7 +377,7 @@ const SwipeFoodGame = () => {
             flex={1}
             fontSize={skin.type.body}
             label={copy.unsure}
-            accessibilityLabel="Not sure"
+            accessibilityLabel={common.ariaUnsure}
             colors={deckButtonColors(skin, intent, "up", true)}
             onTouch={() => game.fling("up")}
           />
@@ -384,7 +385,7 @@ const SwipeFoodGame = () => {
             flex={1.2}
             fontSize={skin.type.lead}
             label={copy.inStock}
-            accessibilityLabel="In stock"
+            accessibilityLabel={common.ariaIn}
             colors={deckButtonColors(skin, intent, "right")}
             onTouch={() => game.fling("right")}
           />

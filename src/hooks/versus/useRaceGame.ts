@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useAuth from "@/providers/AuthProvider";
 import useTickets from "@/providers/TicketsProvider";
@@ -116,7 +117,7 @@ const useRaceGame = () => {
         delete next[food.id];
         return next;
       });
-      showToast(error?.response?.data?.message || "Couldn't save that answer");
+      showToast(error?.response?.data?.message || common.answerNotSaved);
     }
   };
 

@@ -1,3 +1,4 @@
+import V from "../text";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import useHomeData from "@/hooks/screens/useHomeData";
 import { mmss, seconds, Standings, useStandings, useVersusMe } from "@/hooks/versus/api";
@@ -60,7 +61,7 @@ const PeriodToggle = ({ period, onPick }: { period: "week" | "season"; onPick: (
             style={[styles.toggleItem, on && { backgroundColor: P.white }]}
           >
             <VText face="bold" size={skin.type.caption} color={on ? P.ink : P.soft}>
-              {value === "week" ? "Week" : "Season"}
+              {value === "week" ? V.home.week : V.home.season}
             </VText>
           </Pressable>
         );
@@ -92,7 +93,7 @@ const HouseHome = ({
       <Card>
         <View style={styles.between}>
           <VText face="bold" size={skin.type.lead}>
-            {myToday?.played ? "Today: you played" : "Today's race"}
+            {myToday?.played ? V.home.todayPlayed : V.home.todayRace}
           </VText>
           <VText size={skin.type.caption} color={P.muted}>{standings.day}</VText>
         </View>
@@ -104,10 +105,10 @@ const HouseHome = ({
               <View key={row.userId} style={[styles.player, mine && !row.played && { borderColor: P.action }]}>
                 <Avatar name={row.username} color={color} size={skin.size.button.xs - 4} dim={!row.played && !mine} />
                 <VText face="bold" size={skin.type.label} numberOfLines={1}>
-                  {mine ? "You" : row.username}
+                  {mine ? V.you : row.username}
                 </VText>
                 <VText face="pixel" size={(skin.type.caption - 1) - 4} color={row.played ? P.white : mine ? P.action : P.muted}>
-                  {row.played ? seconds(row.totalMs).toUpperCase() : mine ? "TO PLAY" : "NOT YET"}
+                  {row.played ? seconds(row.totalMs).toUpperCase() : mine ? V.home.toPlay : V.home.notYet}
                 </VText>
               </View>
             );
@@ -117,15 +118,15 @@ const HouseHome = ({
 
       <View style={styles.section}>
         <View style={styles.between}>
-          <VText face="bold" size={skin.type.lead}>Standings</VText>
+          <VText face="bold" size={skin.type.lead}>{V.home.standings}</VText>
           <PeriodToggle period={period} onPick={onPick} />
         </View>
         <Card style={styles.table}>
           <View style={[styles.tableRow, styles.tableHead]}>
-            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cellName}>Player</VText>
-            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>Wins</VText>
-            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>Race</VText>
-            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>Right</VText>
+            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cellName}>{V.home.player}</VText>
+            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>{V.home.wins}</VText>
+            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>{V.home.race}</VText>
+            <VText size={skin.type.caption - 1} color={P.muted} style={styles.cell}>{V.home.right}</VText>
           </View>
           {standings.members.map((row, index) => (
             <View
@@ -138,7 +139,7 @@ const HouseHome = ({
                 </VText>
                 <Avatar name={row.username} color={memberColor(members, myId, row.userId)} size={skin.size.check} />
                 <VText face="bold" size={skin.type.label} numberOfLines={1} style={styles.flex}>
-                  {row.userId === myId ? "You" : row.username}
+                  {row.userId === myId ? V.you : row.username}
                 </VText>
               </View>
               <VText size={skin.type.label} style={styles.cell}>{String(row.wins)}</VText>
@@ -148,18 +149,18 @@ const HouseHome = ({
           ))}
         </Card>
         <VText size={skin.type.caption - 1} color={P.muted}>
-          Race = average race time. Right = calls that matched the house verdict.
+          {V.home.legend}
         </VText>
       </View>
 
       {clash && (
         <Card>
-          <VText face="bold" size={skin.type.label}>Last clash</VText>
+          <VText face="bold" size={skin.type.label}>{V.home.lastClash}</VText>
           <View style={styles.chips}>
             {clash.votes.map((vote) => (
               <View key={vote.userId} style={[styles.vote, { backgroundColor: memberColor(members, myId, vote.userId) }]}>
                 <VText face="bold" size={skin.type.caption - 1} color={P.ink}>
-                  {`${vote.userId === myId ? "You" : vote.username}: ${WORD[vote.answer]}`}
+                  {`${vote.userId === myId ? V.you : vote.username}: ${WORD[vote.answer]}`}
                 </VText>
               </View>
             ))}
@@ -167,15 +168,15 @@ const HouseHome = ({
           {clash.verdict && (
             <VText size={skin.type.caption} color={P.soft}>
               {clash.verdict.result === "tied"
-                ? "Tied. Asked again next race."
-                : `House verdict: ${clash.verdict.result === "needed" ? "needed" : "in stock"} (${Math.max(clash.verdict.out, clash.verdict.in)}–${Math.min(clash.verdict.out, clash.verdict.in)})`}
+                ? V.home.tied
+                : V.home.verdict(clash.verdict.result === "needed", Math.max(clash.verdict.out, clash.verdict.in), Math.min(clash.verdict.out, clash.verdict.in))}
             </VText>
           )}
         </Card>
       )}
       {rival && !rival.played && myToday?.played && (
         <VText size={skin.type.caption} color={P.muted}>
-          {`${rival.username} hasn't played yet. Your ${seconds(myToday.totalMs)} is the time to beat.`}
+          {V.home.waiting(rival.username, seconds(myToday.totalMs))}
         </VText>
       )}
     </>
@@ -188,10 +189,10 @@ const SoloHome = () => {
   const { data: me } = useVersusMe();
   const personal = me?.personal;
   const stats = [
-    { value: seconds(personal?.bestRaceMs), label: "Best swipe race" },
-    { value: mmss(personal?.bestShopMs), label: "Best shopping run" },
-    { value: `${personal?.streak ?? 0} ${personal?.streak === 1 ? "day" : "days"}`, label: "Current streak" },
-    { value: personal?.changedMindPct === null || personal?.changedMindPct === undefined ? "–" : `${personal.changedMindPct}%`, label: "Changed your mind" },
+    { value: seconds(personal?.bestRaceMs), label: V.home.bestRace },
+    { value: mmss(personal?.bestShopMs), label: V.home.bestShop },
+    { value: V.home.days(personal?.streak ?? 0), label: V.home.streak },
+    { value: personal?.changedMindPct === null || personal?.changedMindPct === undefined ? "–" : `${personal.changedMindPct}%`, label: V.home.changedMind },
   ];
 
   return (
@@ -199,21 +200,21 @@ const SoloHome = () => {
       <Card>
         <View style={styles.soloRow}>
           <View style={styles.ghostPair}>
-            <Avatar name="You" color={P.you} size={skin.size.button.sm} />
+            <Avatar name={V.you} color={P.you} size={skin.size.button.sm} />
             <View style={styles.ghostShift}>
-              <Avatar name="You" color={P.you} size={skin.size.button.sm} ghost />
+              <Avatar name={V.you} color={P.you} size={skin.size.button.sm} ghost />
             </View>
           </View>
           <View style={styles.flex}>
-            <VText face="bold" size={skin.type.lead}>You vs your best</VText>
+            <VText face="bold" size={skin.type.lead}>{V.youVsBest}</VText>
             <VText size={skin.type.caption} color={P.muted}>
-              {personal?.bestRaceMs ? `Time to beat: ${seconds(personal.bestRaceMs)}` : "Play once to set your best"}
+              {personal?.bestRaceMs ? V.home.timeToBeat(seconds(personal.bestRaceMs)) : V.home.playOnce}
             </VText>
           </View>
         </View>
       </Card>
       <View style={styles.section}>
-        <VText face="bold" size={skin.type.lead}>Personal bests</VText>
+        <VText face="bold" size={skin.type.lead}>{V.home.personalBests}</VText>
         <View style={styles.grid}>
           {stats.map((stat) => (
             <Card key={stat.label} style={styles.gridCell}>
@@ -225,9 +226,9 @@ const SoloHome = () => {
       </View>
       <Card dashed line={P.line} style={styles.invite}>
         <VText size={skin.type.caption} color={P.soft} style={styles.flex}>
-          Live with someone? Invite them and your best becomes their time to beat.
+          {V.home.inviteLine}
         </VText>
-        <VButton variant="ghost" label="Invite" href="/account" />
+        <VButton variant="ghost" label={V.home.invite} href="/account" />
       </Card>
     </>
   );
@@ -261,10 +262,10 @@ const VersusHome = () => {
         padded={false}
         dock={
           <>
-            <VButton big label={solo ? "Race your best" : "Race today's 10"} href="/swipe" />
+            <VButton big label={solo ? V.home.raceBest : V.home.raceToday} href="/swipe" />
             <VButton
               variant="secondary"
-              label={home.needed ? `Go shopping · ${home.needed} to buy` : "Check the house foods"}
+              label={home.needed ? V.home.goShopping(home.needed) : V.home.checkFoods}
               href={home.needed ? "/shop" : "/list"}
             />
           </>
@@ -273,14 +274,14 @@ const VersusHome = () => {
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.between}>
             <View>
-              <Kicker>{solo ? "Solo" : "House standings"}</Kicker>
+              <Kicker>{solo ? V.home.soloKicker : V.home.houseKicker}</Kicker>
               <VText face="display" size={skin.type.headline}>
-                {solo ? "You vs you" : "The house"}
+                {solo ? V.home.soloTitle : V.home.houseTitle}
               </VText>
             </View>
             {counter && (
               <View style={styles.pill}>
-                <VText face="bold" size={skin.type.caption}>{`${counter.balance} tickets`}</VText>
+                <VText face="bold" size={skin.type.caption}>{V.tickets(counter.balance)}</VText>
               </View>
             )}
           </View>
@@ -289,9 +290,9 @@ const VersusHome = () => {
             <Card>
               <View style={styles.between}>
                 <VText face="bold" size={skin.type.lead}>
-                  {home.needed ? `The list: ${home.needed} to buy` : "All stocked up"}
+                  {home.needed ? V.home.listNeeded(home.needed) : V.home.stocked}
                 </VText>
-                <VText size={skin.type.caption} color={P.muted}>{`${home.dashboard.foods.total} foods`}</VText>
+                <VText size={skin.type.caption} color={P.muted}>{V.foodsCount(home.dashboard.foods.total)}</VText>
               </View>
               <ListBar counts={home.counts} />
             </Card>

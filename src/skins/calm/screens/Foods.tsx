@@ -1,3 +1,4 @@
+import T from "../text";
 import FormInput from "@/components/elements/FormInput";
 import FoodPanels from "@/components/views/FoodList/_components/FoodPanels";
 import useFoodShelf from "@/hooks/screens/useFoodShelf";
@@ -66,7 +67,7 @@ const CalmFoods = () => {
   const actions = isSelectMode
     ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.list.deleteSelected(selectedIds.length), shelf.removeSelected, "danger")]
     : noResults
-      ? [half("Clear", () => shelf.setSearch(""), "secondary"), half(`Add “${query}”`, () => shelf.openAdd(shelf.search.trim()))]
+      ? [half(T.foods.clear, () => shelf.setSearch(""), "secondary"), half(T.foods.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty
         ? [half(skin.copy.list.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.list.addSuggested, () => router.push("/onboarding"))]
         : [half(skin.copy.list.select, shelf.startSelect, "secondary"), half(skin.copy.list.add, () => shelf.openAdd())];
@@ -97,12 +98,12 @@ const CalmFoods = () => {
         {noResults ? (
           <View style={styles.message}>
             <CText weight="medium" size={skin.type.title}>{skin.copy.list.noResults(query)}</CText>
-            <CText size={skin.type.body} color={C.soft}>Add it and Kilist will start keeping track of it.</CText>
+            <CText size={skin.type.body} color={C.soft}>{T.foods.noResultsLine}</CText>
           </View>
         ) : isEmpty ? (
           <View style={styles.message}>
             <CText weight="medium" size={skin.type.title}>{skin.copy.list.emptyTitle}</CText>
-            <CText size={skin.type.body} color={C.soft}>Add the foods you usually buy, and Kilist keeps the list for you.</CText>
+            <CText size={skin.type.body} color={C.soft}>{T.foods.emptyLine}</CText>
           </View>
         ) : (
           <FlatList

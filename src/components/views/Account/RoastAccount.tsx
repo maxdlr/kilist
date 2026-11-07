@@ -1,3 +1,4 @@
+import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import ActionRow from "@/components/elements/ActionRow";
 import KilButton from "@/components/elements/KilButton";
@@ -52,13 +53,13 @@ const RoastAccount = () => {
           </Title>
           <View style={styles.codeRow}>
             <ThemedText mono size={skin.type.mono} style={styles.flex}>
-              {`Code: ${joinCode}`}
+              {common.code(joinCode)}
             </ThemedText>
             <KilButton
               height={skin.size.button.sm}
               fontSize={skin.type.label}
               label={copy.share}
-              accessibilityLabel="Share household code"
+              accessibilityLabel={common.shareHouseholdAria}
               style={styles.chip}
               onTouch={account.shareCode}
             />
@@ -66,7 +67,7 @@ const RoastAccount = () => {
               height={skin.size.button.sm}
               fontSize={skin.type.label}
               label={copy.qr}
-              accessibilityLabel="Show household QR code"
+              accessibilityLabel={common.qrHouseholdAria}
               style={styles.chip}
               onTouch={() => setOpenPanel("qr")}
             />
@@ -92,6 +93,11 @@ const RoastAccount = () => {
           <ActionRow
             label={copy.suggested}
             onPress={account.replayOnboarding}
+            showChevron
+          />
+          <ActionRow
+            label={`${common.language} · ${account.languageName}`}
+            onPress={account.openLanguage}
             showChevron
           />
           <ActionRow

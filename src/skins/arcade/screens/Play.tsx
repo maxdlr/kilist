@@ -231,7 +231,7 @@ const Counter = ({ game, startedAt }: { game: SwipeGame; startedAt: number }) =>
         </View>
         <View style={styles.counterSide}>
           <ThemedText size={skin.type.label} color={P.white}>
-            {`${Math.min(game.position + 1, game.total)} of ${game.total}`}
+            {T.position(Math.min(game.position + 1, game.total), game.total)}
           </ThemedText>
           <Clock startedAt={startedAt} />
         </View>
@@ -330,9 +330,9 @@ const Arena = ({ game }: { game: SwipeGame }) => {
       style={styles.arena}
       dock={
         <View style={styles.roundRow}>
-          <RoundButton direction="left" label={copy.out} accessibilityLabel="Out of stock" game={game} />
-          <RoundButton direction="up" label={copy.unsure} accessibilityLabel="Not sure" game={game} small />
-          <RoundButton direction="right" label={copy.inStock} accessibilityLabel="In stock" game={game} />
+          <RoundButton direction="left" label={copy.out} accessibilityLabel={T.ariaOut} game={game} />
+          <RoundButton direction="up" label={copy.unsure} accessibilityLabel={T.ariaUnsure} game={game} small />
+          <RoundButton direction="right" label={copy.inStock} accessibilityLabel={T.ariaIn} game={game} />
         </View>
       }
     >

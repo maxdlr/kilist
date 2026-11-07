@@ -1,3 +1,4 @@
+import V from "../text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import type { Member, RaceAnswer } from "@/hooks/versus/api";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -228,7 +229,9 @@ export const Kicker = ({ children }: { children: string }) => {
   );
 };
 
-export const WORD: Record<RaceAnswer, string> = { in: "Got it", out: "Buy it", up: "Not sure" };
+export const WORD: Record<RaceAnswer, string> = new Proxy({} as Record<RaceAnswer, string>, {
+  get: (_, key) => V.word[key as RaceAnswer],
+});
 
 export const ANSWER_FILL: Record<RaceAnswer, string> = { in: P.agree, out: P.buy, up: P.line };
 
@@ -273,9 +276,9 @@ const createStyles = (s: Skin) =>
     },
     dock: {
       gap: s.spacing.small,
-      paddingBottom: s.spacing.inline,
+      paddingBottom: 0,
       paddingHorizontal: s.spacing.gutter,
-      paddingTop: s.spacing.tight,
+      paddingTop: s.spacing.section,
     },
     card: {
       backgroundColor: P.panel,
