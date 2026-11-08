@@ -87,6 +87,10 @@ const UserScreen = () => {
         <ARow label="Move to another household" tone="action" onPress={() => open("move")} />
       </ASection>
 
+      <ASection title="Emails">
+        <ARow first label="Emails sent" href={`/admin/emails/history?userId=${user.id}&username=${encodeURIComponent(user.username)}`} />
+      </ASection>
+
       <ASection title="Skins" note="Wear switches their skin right away. Unlocked skins are a gift: their points stay as they are.">
         {user.skins.map((skin, index) => {
           const wearing = user.skin === skin.skin;

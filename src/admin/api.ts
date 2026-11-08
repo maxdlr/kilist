@@ -130,6 +130,44 @@ export type AdminStats = {
   health: { foodsWithoutIcon: number; topMissingIcons: string[]; emptyHouseholds: number; neverActive: number };
 };
 
+export type AdminEmailTemplate = { id: string; skin: string | null; subject: string };
+
+export type AdminEmailPreview = {
+  id: string;
+  lang: string;
+  subject: string;
+  preheader: string;
+  html: string;
+  text: string;
+};
+
+export type AdminEmailLog = {
+  id: number;
+  emailId: string;
+  recipient: string;
+  lang: string;
+  status: "sent" | "failed" | "not_configured";
+  error: string | null;
+  at: string;
+  user: { id: number; username: string } | null;
+};
+
+const EMAIL_TITLES: Record<string, string> = {
+  passwordReset: "Password reset",
+  signupConfirm: "Signup confirmation",
+  memberJoined: "Someone joins the household",
+  accountDeleted: "Account deletion",
+  releaseUpdate: "Release update",
+  memberLeft: "Someone leaves the household",
+  purchaseConfirm: "Purchase confirmation",
+  skinUnlock: "Skin unlock",
+};
+
+export const emailTitle = (id: string, skin?: string | null) => {
+  const title = EMAIL_TITLES[id] ?? id;
+  return skin ? `${title}: ${skin.charAt(0).toUpperCase()}${skin.slice(1)}` : title;
+};
+
 export const query = (params: Record<string, string | number | undefined | false>) => {
   const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== "" && value !== false);
   return entries.length ? `?${entries.map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`).join("&")}` : "";
