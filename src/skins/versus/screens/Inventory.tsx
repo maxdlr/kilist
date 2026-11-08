@@ -1,8 +1,8 @@
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import FormInput from "@/components/elements/FormInput";
-import FoodPanels from "@/components/views/FoodList/_components/FoodPanels";
-import useFoodShelf from "@/hooks/screens/useFoodShelf";
+import FoodPanels from "@/components/views/Inventory/_components/FoodPanels";
+import useInventoryShelf from "@/hooks/screens/useInventoryShelf";
 import { RaceAnswer, useHouseVotes } from "@/hooks/versus/api";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -44,13 +44,13 @@ const FoodRow = ({
   const styles = useSkinStyles(createStyles);
   const level = levelOf(food.inStockScore);
   const clash = isClash(votes);
-  const voteText = votes.map((vote) => V.said(vote.username, vote.answer ? WORD[vote.answer] : V.foods.noVoteLower)).join(", ");
+  const voteText = votes.map((vote) => V.said(vote.username, vote.answer ? WORD[vote.answer] : V.inventory.noVoteLower)).join(", ");
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={selecting ? { selected } : undefined}
-      accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.foods.clashAria : ""}. ${voteText}`}
+      accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.inventory.clashAria : ""}. ${voteText}`}
       onPress={onPress}
       style={[styles.row, { borderColor: selected ? P.you : "transparent" }]}
     >
@@ -71,7 +71,7 @@ const FoodRow = ({
           <VText face="bold" size={skin.type.lead - 1} numberOfLines={1} style={styles.shrink}>
             {food.name}
           </VText>
-          {clash && <Chip label={V.foods.clash} fill={P.clash} />}
+          {clash && <Chip label={V.inventory.clash} fill={P.clash} />}
         </View>
         <Chip label={skin.copy.levels[level]} fill={skin.colors.levels[level]} />
       </View>
@@ -94,11 +94,11 @@ const FoodRow = ({
   );
 };
 
-const VersusFoods = () => {
+const VersusInventory = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
-  const shelf = useFoodShelf();
+  const shelf = useInventoryShelf();
   const { data: house, mutate: refreshVotes } = useHouseVotes();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
 
@@ -123,12 +123,12 @@ const VersusFoods = () => {
     <VButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
   );
   const actions = isSelectMode
-    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.list.deleteSelected(selectedIds.length), shelf.removeSelected, "buy")]
+    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "buy")]
     : noResults
-      ? [half(V.foods.clearSearch, () => shelf.setSearch(""), "secondary"), half(V.foods.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
+      ? [half(V.inventory.clearSearch, () => shelf.setSearch(""), "secondary"), half(V.inventory.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty
-        ? [half(skin.copy.list.addOwn, () => shelf.openAdd(), "secondary"), half(V.foods.suggested, () => router.push("/onboarding"))]
-        : [half(skin.copy.list.select, shelf.startSelect, "secondary"), half(skin.copy.list.add, () => shelf.openAdd())];
+        ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(V.inventory.suggested, () => router.push("/onboarding"))]
+        : [half(skin.copy.inventory.select, shelf.startSelect, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior="height">
@@ -138,8 +138,8 @@ const VersusFoods = () => {
           <>
             {!isEmpty && !isSelectMode && (
               <FormInput
-                accessibilityLabel={skin.copy.list.search}
-                placeholder={skin.copy.list.search}
+                accessibilityLabel={skin.copy.inventory.search}
+                placeholder={skin.copy.inventory.search}
                 value={shelf.search}
                 onChangeText={shelf.setSearch}
               />
@@ -149,12 +149,16 @@ const VersusFoods = () => {
         }
       >
         <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <View>
-              <Kicker>{V.foods.kicker}</Kicker>
-              <VText face="display" size={skin.type.headline}>{skin.copy.list.title}</VText>
+          <View>
+            <View style={styles.titleRow}>
+              <View style={styles.flex}>
+                <Kicker>{V.inventory.kicker}</Kicker>
+              </View>
+              <VText size={skin.type.label} color={P.muted}>{V.foodsCount(foods?.length ?? 0)}</VText>
             </View>
-            <VText size={skin.type.label} color={P.muted}>{V.foodsCount(foods?.length ?? 0)}</VText>
+            <VText face="display" size={skin.type.headline} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+              {skin.copy.inventory.title}
+            </VText>
           </View>
           {!isEmpty && !noResults && members.length > 1 && (
             <View style={styles.legend}>
@@ -166,7 +170,7 @@ const VersusFoods = () => {
               ))}
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: P.line }]} />
-                <VText size={skin.type.caption - 1} color={P.soft}>{V.foods.noVote}</VText>
+                <VText size={skin.type.caption - 1} color={P.soft}>{V.inventory.noVote}</VText>
               </View>
             </View>
           )}
@@ -174,13 +178,13 @@ const VersusFoods = () => {
 
         {noResults ? (
           <View style={styles.message}>
-            <VText face="display" size={skin.type.title}>{V.foods.noResults(query)}</VText>
-            <VText size={skin.type.body} color={P.soft}>{V.foods.noResultsLine}</VText>
+            <VText face="display" size={skin.type.title}>{V.inventory.noResults(query)}</VText>
+            <VText size={skin.type.body} color={P.soft}>{V.inventory.noResultsLine}</VText>
           </View>
         ) : isEmpty ? (
           <View style={styles.message}>
-            <VText face="display" size={skin.type.title}>{skin.copy.list.emptyTitle}</VText>
-            <VText size={skin.type.body} color={P.soft}>{V.foods.emptyLine}</VText>
+            <VText face="display" size={skin.type.title}>{skin.copy.inventory.emptyTitle}</VText>
+            <VText size={skin.type.body} color={P.soft}>{V.inventory.emptyLine}</VText>
           </View>
         ) : (
           <FlatList
@@ -217,7 +221,7 @@ const createStyles = (s: Skin) =>
     flex: { flex: 1, minWidth: 0 },
     shrink: { flexShrink: 1 },
     header: { gap: s.spacing.inline, paddingHorizontal: s.spacing.gutter },
-    titleRow: { alignItems: "flex-end", flexDirection: "row", justifyContent: "space-between" },
+    titleRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
     legend: { flexDirection: "row", gap: s.spacing.dock - 2 },
     legendItem: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight + 2 },
     legendDot: { borderRadius: 6, height: 12, width: 12 },
@@ -265,4 +269,4 @@ const createStyles = (s: Skin) =>
     actions: { flexDirection: "row", gap: s.spacing.inline },
   });
 
-export default VersusFoods;
+export default VersusInventory;

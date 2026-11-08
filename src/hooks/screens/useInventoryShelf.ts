@@ -1,15 +1,15 @@
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
-import useFoodList from "@/providers/FoodListProvider";
+import useInventory from "@/providers/InventoryProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 
-const useFoodShelf = () => {
+const useInventoryShelf = () => {
   const skin = useSkin();
-  const copy = skin.copy.list;
-  const list = useFoodList();
+  const copy = skin.copy.inventory;
+  const list = useInventory();
   const { foods, search, mutateFood, removeFoodsFromList } = list;
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -107,6 +107,6 @@ const useFoodShelf = () => {
   };
 };
 
-export type FoodShelf = ReturnType<typeof useFoodShelf>;
+export type InventoryShelf = ReturnType<typeof useInventoryShelf>;
 
-export default useFoodShelf;
+export default useInventoryShelf;

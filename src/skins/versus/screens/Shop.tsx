@@ -10,12 +10,95 @@ import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 import { versusPalette as P } from "..";
 import { Card, Kicker, Screen, VButton, VText } from "./parts";
 import { VersusEmpty, VersusLoading } from "./States";
 
 const CLOCK_MS = 250;
+const LIGHT_MS = 400;
+const LIGHT_DIM = 0.2;
+const LINEUP_SIZE = 9;
+
+const StartLight = ({ color, index }: { color: string; index: number }) => {
+  const styles = useSkinStyles(createStyles);
+  const glow = useSharedValue(LIGHT_DIM);
+
+  useEffect(() => {
+    glow.set(
+      withDelay(
+        index * LIGHT_MS,
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: LIGHT_MS }),
+            withTiming(LIGHT_DIM, { duration: LIGHT_MS * 2 }),
+          ),
+          -1,
+        ),
+      ),
+    );
+  }, [glow, index]);
+
+  const style = useAnimatedStyle(() => ({ opacity: glow.value }));
+
+  return <Animated.View style={[styles.light, { backgroundColor: color }, style]} />;
+};
+
+const StartLine = ({
+  foods,
+  record,
+  onStart,
+}: {
+  foods: FoodType[];
+  record: { ms: number; username: string } | null;
+  onStart: () => void;
+}) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const more = foods.length - LINEUP_SIZE;
+
+  return (
+    <Screen dock={<VButton big label={V.shop.start} onPress={onStart} />}>
+      <Kicker>{V.shop.kicker}</Kicker>
+      <View style={styles.startHero}>
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.lights}>
+          {[P.buy, P.tie, P.agree].map((color, index) => (
+            <StartLight key={color} color={color} index={index} />
+          ))}
+        </View>
+        <VText face="pixel" size={skin.type.display.md} color={P.you}>{mmss(0)}</VText>
+        <VText face="display" size={skin.type.headline} style={styles.centerText}>{V.shop.toBuy(foods.length)}</VText>
+      </View>
+      <Card>
+        <VText face="bold" size={skin.type.lead}>
+          {record ? V.home.timeToBeat(mmss(record.ms)) : V.shop.setRecord}
+        </VText>
+        {record && <VText size={skin.type.label} color={P.soft}>{V.shop.houseRecord(record.username)}</VText>}
+        <VText size={skin.type.label} color={P.soft}>{V.shop.clockLine}</VText>
+      </Card>
+      <View style={styles.lineup}>
+        {foods.slice(0, LINEUP_SIZE).map((food) => (
+          <View key={food.id} style={styles.lineupCell}>
+            <FoodPicture food={food} size={skin.size.icon.row - 8} />
+          </View>
+        ))}
+        {more > 0 && (
+          <View style={styles.lineupCell}>
+            <VText face="bold" size={skin.type.label} color={P.ink}>{V.shop.lineup(more)}</VText>
+          </View>
+        )}
+      </View>
+    </Screen>
+  );
+};
 
 const Row = ({ food, done }: { food: FoodType; done: boolean }) => {
   const skin = useSkin();
@@ -96,6 +179,7 @@ const VersusShop = () => {
   const { user } = useAuth();
   const run = useShopRun();
   const { data: records, mutate: refreshRecords } = useShopRecords();
+  const [started, setStarted] = useState(false);
   const [bought, setBought] = useState<FoodType[]>([]);
   const [elapsed, setElapsed] = useState(0);
   const [later, setLater] = useState<FoodType[]>([]);
@@ -105,11 +189,10 @@ const VersusShop = () => {
 
   const listId = run.shopListId;
   const remaining = run.foods ?? [];
-  const running = Boolean(listId) && !result && (remaining.length > 0 || bought.length > 0);
+  const running = started && Boolean(listId) && !result && (remaining.length > 0 || bought.length > 0);
 
   useEffect(() => {
     if (!running) return;
-    if (startedAt.current === null) startedAt.current = Date.now();
     timer.current = setInterval(() => setElapsed(Date.now() - startedAt.current!), CLOCK_MS);
     return () => {
       if (timer.current) clearInterval(timer.current);
@@ -123,6 +206,27 @@ const VersusShop = () => {
   const recordAtHere = bought.length ? ghost[Math.min(bought.length, ghost.length) - 1] ?? null : null;
   const gap = recordAtHere === null ? null : elapsed - recordAtHere;
   const recordName = record ? (record.userId === user?.id ? V.shop.yourRecord : record.username) : null;
+
+  const begin = () => {
+    startedAt.current = Date.now();
+    setElapsed(0);
+    setStarted(true);
+    run.startShopClock();
+  };
+
+  const resetRun = () => {
+    setStarted(false);
+    setResult(null);
+    setBought([]);
+    setLater([]);
+    setElapsed(0);
+    startedAt.current = null;
+  };
+
+  const abandon = () => {
+    resetRun();
+    return run.stop();
+  };
 
   const buy = async (food: FoodType) => {
     setBought((list) => [...list, food]);
@@ -144,10 +248,7 @@ const VersusShop = () => {
 
   const leave = () => {
     run.setShopListId(undefined);
-    setResult(null);
-    setBought([]);
-    setLater([]);
-    startedAt.current = null;
+    resetRun();
     router.navigate("/");
   };
 
@@ -201,6 +302,10 @@ const VersusShop = () => {
     );
   }
 
+  if (!started) {
+    return <StartLine foods={remaining} record={record} onStart={begin} />;
+  }
+
   const allDone = remaining.length === 0;
 
   return (
@@ -208,7 +313,7 @@ const VersusShop = () => {
       padded={false}
       dock={
         <View style={styles.actions}>
-          <VButton flex={1} variant="secondary" label={V.shop.stop} accessibilityLabel={V.shop.stopAria} onPress={run.stop} />
+          <VButton flex={1} variant="secondary" label={V.shop.stop} accessibilityLabel={V.shop.stopAria} onPress={abandon} />
           <VButton flex={1.6} label={allDone ? V.shop.stopClock : V.shop.finish(remaining.length)} onPress={finish} />
         </View>
       }
@@ -267,6 +372,19 @@ const createStyles = (s: Skin) =>
     between: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
     centered: { alignItems: "center", gap: s.spacing.tight, paddingTop: s.spacing.section },
     centerText: { textAlign: "center" },
+    startHero: { alignItems: "center", flex: 1, gap: s.spacing.inline, justifyContent: "center" },
+    lights: { flexDirection: "row", gap: s.spacing.inline },
+    light: { borderRadius: s.spacing.stack, height: s.spacing.stack, width: s.spacing.stack },
+    lineup: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
+    lineupCell: {
+      alignItems: "center",
+      aspectRatio: 1,
+      backgroundColor: P.white,
+      borderRadius: s.spacing.dock - 2,
+      flexBasis: "17%",
+      flexGrow: 0,
+      justifyContent: "center",
+    },
     hud: { gap: s.spacing.small, paddingBottom: s.spacing.small, paddingHorizontal: s.spacing.gutter },
     lane: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
     laneLabel: { width: 52 },

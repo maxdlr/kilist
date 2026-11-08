@@ -33,7 +33,7 @@ const calm: SkinSource = {
   textCase: "none",
   game: {
     stamp: "sticker",
-    strikeListTab: false,
+    strikeInventoryTab: false,
   },
   fonts: {
     display: {

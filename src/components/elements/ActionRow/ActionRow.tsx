@@ -8,15 +8,18 @@ const ActionRow = ({
   onPress,
   destructive = false,
   showChevron = false,
+  onPanel = false,
 }: {
   label: string;
   onPress: () => void;
   destructive?: boolean;
   showChevron?: boolean;
+  onPanel?: boolean;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const ink = destructive ? skin.colors.danger : skin.colors.onPaper;
+  const surfaceInk = onPanel ? skin.panel.ink : skin.colors.onPaper;
+  const ink = destructive ? skin.colors.danger : surfaceInk;
 
   return (
     <Pressable
@@ -28,7 +31,7 @@ const ActionRow = ({
         destructive
           ? { backgroundColor: skin.colors.ground }
           : {
-              borderTopColor: skin.colors.onPaper,
+              borderTopColor: surfaceInk,
               borderTopWidth: skin.shape.border + 1,
             },
         pressed && styles.pressed,

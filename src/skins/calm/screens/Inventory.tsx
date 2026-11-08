@@ -1,7 +1,7 @@
 import T from "../text";
 import FormInput from "@/components/elements/FormInput";
-import FoodPanels from "@/components/views/FoodList/_components/FoodPanels";
-import useFoodShelf from "@/hooks/screens/useFoodShelf";
+import FoodPanels from "@/components/views/Inventory/_components/FoodPanels";
+import useInventoryShelf from "@/hooks/screens/useInventoryShelf";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -53,10 +53,10 @@ const FoodRow = ({
   );
 };
 
-const CalmFoods = () => {
+const CalmInventory = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const shelf = useFoodShelf();
+  const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
 
   if (shelf.isLoading) return <CalmLoading />;
@@ -65,12 +65,12 @@ const CalmFoods = () => {
     <CButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
   );
   const actions = isSelectMode
-    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.list.deleteSelected(selectedIds.length), shelf.removeSelected, "danger")]
+    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "danger")]
     : noResults
-      ? [half(T.foods.clear, () => shelf.setSearch(""), "secondary"), half(T.foods.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
+      ? [half(T.inventory.clear, () => shelf.setSearch(""), "secondary"), half(T.inventory.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty
-        ? [half(skin.copy.list.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.list.addSuggested, () => router.push("/onboarding"))]
-        : [half(skin.copy.list.select, shelf.startSelect, "secondary"), half(skin.copy.list.add, () => shelf.openAdd())];
+        ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.inventory.addSuggested, () => router.push("/onboarding"))]
+        : [half(skin.copy.inventory.select, shelf.startSelect, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior="height">
@@ -80,8 +80,8 @@ const CalmFoods = () => {
           <>
             {!isEmpty && !isSelectMode && (
               <FormInput
-                accessibilityLabel={skin.copy.list.search}
-                placeholder={skin.copy.list.search}
+                accessibilityLabel={skin.copy.inventory.search}
+                placeholder={skin.copy.inventory.search}
                 value={shelf.search}
                 onChangeText={shelf.setSearch}
               />
@@ -91,19 +91,19 @@ const CalmFoods = () => {
         }
       >
         <View style={styles.titleRow}>
-          <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.list.title}</CText>
+          <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
           <CText size={skin.type.label} color={C.soft}>{`${foods?.length ?? 0}`}</CText>
         </View>
 
         {noResults ? (
           <View style={styles.message}>
-            <CText weight="medium" size={skin.type.title}>{skin.copy.list.noResults(query)}</CText>
-            <CText size={skin.type.body} color={C.soft}>{T.foods.noResultsLine}</CText>
+            <CText weight="medium" size={skin.type.title}>{skin.copy.inventory.noResults(query)}</CText>
+            <CText size={skin.type.body} color={C.soft}>{T.inventory.noResultsLine}</CText>
           </View>
         ) : isEmpty ? (
           <View style={styles.message}>
-            <CText weight="medium" size={skin.type.title}>{skin.copy.list.emptyTitle}</CText>
-            <CText size={skin.type.body} color={C.soft}>{T.foods.emptyLine}</CText>
+            <CText weight="medium" size={skin.type.title}>{skin.copy.inventory.emptyTitle}</CText>
+            <CText size={skin.type.body} color={C.soft}>{T.inventory.emptyLine}</CText>
           </View>
         ) : (
           <FlatList
@@ -155,4 +155,4 @@ const createStyles = (s: Skin) =>
     actions: { flexDirection: "row", gap: s.spacing.small + 2 },
   });
 
-export default CalmFoods;
+export default CalmInventory;

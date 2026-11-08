@@ -11,7 +11,7 @@ const versusCopy: RoastCopy = {
   },
   tabs: {
     index: "Home",
-    list: "Foods",
+    inventory: "Stock",
     shop: "Shop",
     swipe: "Race",
     account: "Me",
@@ -156,9 +156,9 @@ const versusCopy: RoastCopy = {
     emptyTitle: "Nothing to buy!",
     emptyLine: "Play today's 10 to update your list.",
   },
-  list: {
-    title: "House foods",
-    search: "Search the house foods",
+  inventory: {
+    title: "House stock",
+    search: "Search the house stock",
     noResults: (query: string) => `No “${query}” yet`,
     addQuery: "Add it",
     select: "Select",

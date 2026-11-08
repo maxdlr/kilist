@@ -71,7 +71,7 @@ export interface Skin {
   textCase: TextCase;
   game: {
     stamp: "shout" | "sticker";
-    strikeListTab: boolean;
+    strikeInventoryTab: boolean;
   };
   fonts: {
     display: SkinDisplayFont;

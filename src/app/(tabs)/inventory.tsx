@@ -1,5 +1,5 @@
 import { MaxContentWidth } from "@/constants/theme";
-import { FoodListProvider } from "@/providers/FoodListProvider";
+import { InventoryProvider } from "@/providers/InventoryProvider";
 import { SkinScreen } from "@/skins/screens";
 import { ListType } from "@/types/model";
 import { StyleSheet, View } from "react-native";
@@ -11,9 +11,9 @@ const ListsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FoodListProvider listIds={id}>
-        <SkinScreen slot="Foods" />
-      </FoodListProvider>
+      <InventoryProvider listIds={id}>
+        <SkinScreen slot="Inventory" />
+      </InventoryProvider>
     </View>
   );
 };

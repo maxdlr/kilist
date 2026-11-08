@@ -20,11 +20,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { versusPalette as P } from "..";
 import { VText } from "./parts";
 
-const ORDER = ["index", "list", "swipe", "shop", "account", "admin"];
+const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
-  list: ListBulletIcon,
+  inventory: ListBulletIcon,
   shop: ShoppingBagIcon,
   account: UserIcon,
   admin: WrenchIcon,

@@ -41,7 +41,7 @@ const RoastTabBar = ({ state, navigation }: TabBarProps) => {
         const name = route.name as keyof typeof skin.copy.tabs;
         const label = skin.copy.tabs[name];
         if (!label || (name === "admin" && !isAdmin)) return null;
-        const struck = name === "list" && skin.game.strikeListTab;
+        const struck = name === "inventory" && skin.game.strikeInventoryTab;
         const isCurrent = state.index === index;
 
         return (

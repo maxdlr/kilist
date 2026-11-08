@@ -1,12 +1,12 @@
 import ActionPanel from "@/components/elements/ActionPanel";
-import type { FoodShelf } from "@/hooks/screens/useFoodShelf";
+import type { InventoryShelf } from "@/hooks/screens/useInventoryShelf";
 import { useSkin } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import FoodFormModal from "./FoodFormModal";
 
-const FoodPanels = ({ shelf }: { shelf: FoodShelf }) => {
+const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
   const skin = useSkin();
-  const copy = skin.copy.list;
+  const copy = skin.copy.inventory;
   const { editingFood } = shelf;
 
   return (

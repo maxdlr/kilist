@@ -11,7 +11,7 @@ const fr: SkinCopy = {
   },
   tabs: {
     index: "ACCUEIL",
-    list: "LISTE",
+    inventory: "LISTE",
     shop: "COURSES",
     swipe: "SWIPE",
     account: "MOI",
@@ -169,7 +169,7 @@ const fr: SkinCopy = {
     emptyTitle: "RIEN À ACHETER.",
     emptyLine: "SOIT TON FRIGO EST PLEIN, SOIT TU ME MENS.",
   },
-  list: {
+  inventory: {
     title: "CECI N'EST PAS UNE LISTE.",
     search: "cherche. ne scrolle pas, sauvage",
     noResults: (query: string) => `PAS DE ${query}. ÉVIDEMMENT.`,

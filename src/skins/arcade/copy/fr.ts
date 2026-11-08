@@ -11,7 +11,7 @@ const fr: SkinCopy = {
   },
   tabs: {
     index: "Accueil",
-    list: "Aliments",
+    inventory: "Inventaire",
     shop: "Courses",
     swipe: "Jouer",
     account: "Moi",
@@ -156,16 +156,16 @@ const fr: SkinCopy = {
     emptyTitle: "Rien à acheter !",
     emptyLine: "Joue les 10 du jour pour mettre ta liste à jour.",
   },
-  list: {
-    title: "Tes aliments",
-    search: "Chercher tes aliments",
+  inventory: {
+    title: "Ton inventaire",
+    search: "Chercher dans ton inventaire",
     noResults: (query: string) => `Pas encore de « ${query} »`,
     addQuery: "L'ajouter",
     select: "Sélectionner",
     add: "Ajouter",
     deleteSelected: (count: number) => `Supprimer ${count}`,
     emptyLabel: "0 aliment",
-    emptyTitle: "Ton étagère est vide",
+    emptyTitle: "Ton inventaire est vide",
     addSuggested: "Ajouter des suggestions",
     addOwn: "Ajouter les miens",
     addTitle: "Ajouter un aliment",
@@ -176,7 +176,7 @@ const fr: SkinCopy = {
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "Retirer cet aliment ?" : `Retirer ${count} aliments ?`,
-    removeLine: "Il quitte tes aliments et ne reviendra plus dans les parties.",
+    removeLine: "Il quitte ton inventaire et ne reviendra plus dans les parties.",
   },
   intro: {
     steps: [

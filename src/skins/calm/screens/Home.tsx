@@ -49,7 +49,7 @@ const CalmHome = () => {
         <>
           {pending && <CButton label={T.home.check(toCheck)} href="/swipe" />}
           {needed.length > 0 && <CButton variant={pending ? "secondary" : "primary"} label={T.openList} href="/shop" />}
-          {allSet && <CButton variant="text" label={T.browseFoods} href="/list" />}
+          {allSet && <CButton variant="text" label={T.browseInventory} href="/inventory" />}
         </>
       }
     >

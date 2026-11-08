@@ -11,8 +11,8 @@ const fr: SkinCopy = {
   },
   tabs: {
     index: "Accueil",
-    list: "Aliments",
-    shop: "Courses",
+    inventory: "Stock",
+    shop: "Magasin",
     swipe: "Course",
     account: "Moi",
     admin: "Admin",
@@ -156,9 +156,9 @@ const fr: SkinCopy = {
     emptyTitle: "Rien à acheter !",
     emptyLine: "Joue les 10 du jour pour mettre ta liste à jour.",
   },
-  list: {
-    title: "Les aliments de la maison",
-    search: "Chercher dans la maison",
+  inventory: {
+    title: "Le stock de la maison",
+    search: "Chercher dans le stock",
     noResults: (query: string) => `Pas encore de « ${query} »`,
     addQuery: "L'ajouter",
     select: "Sélectionner",

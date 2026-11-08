@@ -7,7 +7,7 @@ import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
-export type FoodListContextType = {
+export type InventoryContextType = {
   foods?: FoodType[];
   isFoodLoading: boolean;
   mutateFood: () => void;
@@ -21,7 +21,7 @@ export type FoodListContextType = {
   removeFoodsFromList: (foodIds: number[]) => Promise<boolean>;
 };
 
-const FoodListContext = createContext<FoodListContextType>({
+const InventoryContext = createContext<InventoryContextType>({
   foods: [],
   isFoodLoading: false,
   mutateFood: () => {},
@@ -32,7 +32,7 @@ const FoodListContext = createContext<FoodListContextType>({
   removeFoodsFromList: async () => false,
 });
 
-export const FoodListProvider = ({
+export const InventoryProvider = ({
   children,
   listIds,
 }: {
@@ -112,7 +112,7 @@ export const FoodListProvider = ({
   };
 
   return (
-    <FoodListContext.Provider
+    <InventoryContext.Provider
       value={{
         foods,
         isFoodLoading,
@@ -125,16 +125,16 @@ export const FoodListProvider = ({
       }}
     >
       {children}
-    </FoodListContext.Provider>
+    </InventoryContext.Provider>
   );
 };
 
-const useFoodList = () => {
-  const context = React.useContext(FoodListContext);
+const useInventory = () => {
+  const context = React.useContext(InventoryContext);
   if (context === undefined) {
-    throw new Error("useFoodList must be used within a FoodListProvider");
+    throw new Error("useInventory must be used within a InventoryProvider");
   }
   return context;
 };
 
-export default useFoodList;
+export default useInventory;

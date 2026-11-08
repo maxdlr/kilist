@@ -265,8 +265,8 @@ const VersusHome = () => {
             <VButton big label={solo ? V.home.raceBest : V.home.raceToday} href="/swipe" />
             <VButton
               variant="secondary"
-              label={home.needed ? V.home.goShopping(home.needed) : V.home.checkFoods}
-              href={home.needed ? "/shop" : "/list"}
+              label={home.needed ? V.home.goShopping(home.needed) : V.home.checkInventory}
+              href={home.needed ? "/shop" : "/inventory"}
             />
           </>
         }

@@ -18,7 +18,7 @@ const roast: SkinSource = {
   textCase: "upper",
   game: {
     stamp: "shout",
-    strikeListTab: true,
+    strikeInventoryTab: true,
   },
   fonts: {
     display: {

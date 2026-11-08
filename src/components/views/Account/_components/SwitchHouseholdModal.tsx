@@ -116,7 +116,7 @@ const SwitchHouseholdForm = ({
       <KilToggleButton
         value={choice}
         onChange={setChoice}
-        onDark={skin.panel.fill === skin.colors.ground}
+        onDark={skin.panel.ink === skin.colors.onGround}
         options={[
           { label: copy.joinExisting, value: "join" },
           { label: copy.createNew, value: "create" },

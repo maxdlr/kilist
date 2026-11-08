@@ -9,7 +9,7 @@ import Sheet from "@/components/elements/Sheet/Sheet";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
-import useFoodShelf from "@/hooks/screens/useFoodShelf";
+import useInventoryShelf from "@/hooks/screens/useInventoryShelf";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
 import { StyleSheet, View } from "react-native";
@@ -19,12 +19,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FoodPanels from "./_components/FoodPanels";
 import FoodRow from "./_components/FoodRow";
 
-const FoodList = () => {
+const Inventory = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const copy = skin.copy.list;
+  const copy = skin.copy.inventory;
   const insets = useSafeAreaInsets();
-  const shelf = useFoodShelf();
+  const shelf = useInventoryShelf();
   const {
     foods,
     isFoodLoading,
@@ -211,4 +211,4 @@ const createStyles = (s: Skin) =>
     },
   });
 
-export default FoodList;
+export default Inventory;

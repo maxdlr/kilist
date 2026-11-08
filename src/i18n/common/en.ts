@@ -2,7 +2,7 @@ const en = {
   unexpected: "Something went wrong. Try again.",
   passwordsDiffer: "Passwords do not match",
   householdCodeMissing: "Enter a household code to join",
-  listNotReady: "Your list isn't ready yet, try again in a moment",
+  inventoryNotReady: "Your inventory isn't ready yet, try again in a moment",
   addFailed: "Couldn't add that item",
   shareMessage: (code: string) => `Join my household on Kilist with this code: ${code}`,
   shareFailed: "Couldn't open the share menu",
@@ -15,7 +15,7 @@ const en = {
   languageAuto: (name: string) => `Phone setting (${name})`,
   tabs: {
     index: "Home",
-    list: "Foods",
+    inventory: "Inventory",
     shop: "Shopping list",
     swipe: "Swipe game",
     account: "Account",

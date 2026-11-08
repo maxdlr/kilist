@@ -64,7 +64,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
 
   const addFood = async (data: { name: string; description?: string }) => {
     if (!mainList?.id) {
-      showToast(common.listNotReady);
+      showToast(common.inventoryNotReady);
       return false;
     }
     const res = await postCreateFood({

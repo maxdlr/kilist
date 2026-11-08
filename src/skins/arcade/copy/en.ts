@@ -11,7 +11,7 @@ const arcadeCopy: RoastCopy = {
   },
   tabs: {
     index: "Home",
-    list: "Foods",
+    inventory: "Inventory",
     shop: "Shop",
     swipe: "Play",
     account: "Me",
@@ -156,16 +156,16 @@ const arcadeCopy: RoastCopy = {
     emptyTitle: "Nothing to buy!",
     emptyLine: "Play today's 10 to update your list.",
   },
-  list: {
-    title: "Your foods",
-    search: "Search your foods",
+  inventory: {
+    title: "Your inventory",
+    search: "Search your inventory",
     noResults: (query: string) => `No “${query}” yet`,
     addQuery: "Add it",
     select: "Select",
     add: "Add",
     deleteSelected: (count: number) => `Delete ${count}`,
     emptyLabel: "0 foods",
-    emptyTitle: "Your shelf is empty",
+    emptyTitle: "Your inventory is empty",
     addSuggested: "Add suggested foods",
     addOwn: "Add my own",
     addTitle: "Add a food",
@@ -176,7 +176,7 @@ const arcadeCopy: RoastCopy = {
     removeOne: (name: string) => `Remove ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,
-    removeLine: "It leaves your foods and won't come up in games anymore.",
+    removeLine: "It leaves your inventory and won't come up in games anymore.",
   },
   intro: {
     steps: [

@@ -432,7 +432,7 @@ const VersusPlay = () => {
           kicker={V.play.todaysRace}
           title={V.play.nothingTitle}
           line={V.play.nothingLine}
-          action={{ label: V.home.checkFoods, onPress: () => router.navigate("/list") }}
+          action={{ label: V.home.checkInventory, onPress: () => router.navigate("/inventory") }}
         />
       );
     default:

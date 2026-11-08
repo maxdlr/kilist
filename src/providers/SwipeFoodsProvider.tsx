@@ -160,7 +160,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
 const useSwipeFoods = () => {
   const context = React.useContext(SwipeFoodsContext);
   if (context === undefined) {
-    throw new Error("useSwipeFoods must be used within a FoodListProvider");
+    throw new Error("useSwipeFoods must be used within a SwipeFoodsProvider");
   }
   return context;
 };

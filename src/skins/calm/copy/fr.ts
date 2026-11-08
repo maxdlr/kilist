@@ -11,9 +11,9 @@ const fr: SkinCopy = {
   },
   tabs: {
     index: "Aujourd'hui",
-    list: "Aliments",
+    inventory: "Garde-manger",
     shop: "Liste",
-    swipe: "Vérifier",
+    swipe: "Trier",
     account: "Réglages",
     admin: "Admin",
   },
@@ -96,13 +96,13 @@ const fr: SkinCopy = {
         ? "Tout est en ordre."
         : `${needed} ${needed <= 1 ? "chose" : "choses"} à acheter.`,
     shop: "Ouvrir la liste",
-    swipe: "Vérifier les aliments",
+    swipe: "Trier les aliments",
     tally: (foods: number, shops: number, swipes: number) =>
-      `${foods} aliments · ${shops} courses · ${swipes} vérifications`,
+      `${foods} aliments · ${shops} courses · ${swipes} tris`,
   },
   swipe: {
     startLabel: () => "",
-    startTitle: "Quelques aliments à vérifier",
+    startTitle: "Quelques aliments à trier",
     startLine: (count: number) => `${count} aliments. Environ trente secondes.`,
     start: "Commencer",
     dignity: "Progression",
@@ -122,11 +122,11 @@ const fr: SkinCopy = {
     overShop: "Ouvrir la liste",
     overAgain: "Fermer",
     tomorrowLabel: () => "",
-    tomorrowTitle: "Rien à vérifier.",
-    tomorrowLine: "Tu as déjà vérifié aujourd'hui. La liste est à jour.",
+    tomorrowTitle: "Rien à trier.",
+    tomorrowLine: "Tu as déjà tout trié aujourd'hui. La liste est à jour.",
     tomorrowAction: "Ouvrir la liste",
     emptyLabel: "",
-    emptyTitle: "Rien à vérifier.",
+    emptyTitle: "Rien à trier.",
     emptyLine: "Kilist te préviendra quand quelque chose risque de manquer.",
   },
   shop: {
@@ -146,10 +146,10 @@ const fr: SkinCopy = {
     doneAction: "Retour à aujourd'hui",
     emptyLabel: "",
     emptyTitle: "Rien à acheter.",
-    emptyLine: "La liste se remplit au fil de tes vérifications.",
+    emptyLine: "La liste se remplit au fil de tes tris.",
   },
-  list: {
-    title: "Aliments",
+  inventory: {
+    title: "Garde-manger",
     search: "Chercher",
     noResults: (query: string) => `Pas de « ${query} ».`,
     addQuery: "L'ajouter",
@@ -157,7 +157,7 @@ const fr: SkinCopy = {
     add: "Ajouter",
     deleteSelected: (count: number) => `Retirer ${count}`,
     emptyLabel: "0 aliment",
-    emptyTitle: "Pas encore d'aliments.",
+    emptyTitle: "Ton garde-manger est vide.",
     addSuggested: "Aliments courants",
     addOwn: "Ajouter les miens",
     addTitle: "Ajouter un aliment",
@@ -168,7 +168,7 @@ const fr: SkinCopy = {
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "Retirer cet aliment ?" : `Retirer ${count} aliments ?`,
-    removeLine: "Il ne sera plus vérifié ni ajouté à la liste.",
+    removeLine: "Il ne sera plus trié ni ajouté à la liste.",
   },
   intro: {
     steps: [
@@ -239,7 +239,7 @@ const fr: SkinCopy = {
     row: (balance: number) => `Apparence · ${balance} points`,
     title: "Apparence",
     balance: (count: number) =>
-      `Tu as ${count} points. Chaque aliment vérifié en ajoute 10, et les points débloquent d'autres styles.`,
+      `Tu as ${count} points. Chaque aliment trié en ajoute 10, et les points débloquent d'autres styles.`,
     wear: "Utiliser",
     wearing: "Utilisé",
     redeem: (price: number) => `Débloquer · ${price} points`,
@@ -249,11 +249,11 @@ const fr: SkinCopy = {
     redeemed: (name: string) => `${name} débloqué.`,
     failed: "Impossible",
     sectionTitle: "Styles",
-    sectionLine: (count: number) => `${count} points. Chaque aliment vérifié en ajoute 10.`,
+    sectionLine: (count: number) => `${count} points. Chaque aliment trié en ajoute 10.`,
     locked: (count: number) => `Verrouillé · encore ${count} points`,
     buy: (price: string) => `Acheter · ${price}`,
     storeSoon: "L'achat n'est pas encore disponible.",
-    earnHint: "Vérifie des aliments pour gagner des points.",
+    earnHint: "Trie des aliments pour gagner des points.",
   },
 };
 

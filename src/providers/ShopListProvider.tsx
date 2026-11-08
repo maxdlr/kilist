@@ -13,6 +13,7 @@ export type ShopListContextType = {
   mutateFood: () => void;
   buyFood: (currentFoodId: number) => Promise<void>;
   startNewShopList: () => Promise<number | null>;
+  startShopClock: () => Promise<void>;
   cancelShopList: () => Promise<ShopListType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
@@ -31,6 +32,7 @@ const ShopListContext = createContext<ShopListContextType>({
   orderFoodBy: () => {},
   buyFood: async () => {},
   startNewShopList: async () => null,
+  startShopClock: async () => {},
   cancelShopList: async () => ({}) as Promise<ShopListType>,
   snoozeFood: async () => {},
   suggestedFoodIds: [],
@@ -77,6 +79,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   const { postData: startShopList } = useAxios("shop-list/start");
   const { postData: endShopList } = useAxios(`shop-list/cancel/${shopListId}`);
   const { putData: editFood } = useAxios(`shop-list/edit/${shopListId}`);
+  const { postData: postShopClock } = useAxios(`shop-list/clock/${shopListId}`);
 
   const orderFoodBy = (type: "score" | "name") => {
     setShopList((prev) => {
@@ -145,6 +148,13 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     return res.data as number;
   };
 
+  const startShopClock = async () => {
+    const res = await postShopClock({});
+    if (res.error) {
+      showToast(res.error.message || common.unexpected);
+    }
+  };
+
   const cancelShopList = async () => {
     setSuggestedFoodIds([]);
     const res = await endShopList({});
@@ -165,6 +175,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
         suggestedFoodIds,
         shopListId,
         startNewShopList,
+        startShopClock,
         cancelShopList,
         orderFoodBy,
         reverseOrderFood,
@@ -180,7 +191,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
 const useShopList = () => {
   const context = React.useContext(ShopListContext);
   if (context === undefined) {
-    throw new Error("useFoodList must be used within a FoodListProvider");
+    throw new Error("useShopList must be used within a ShopListProvider");
   }
   return context;
 };

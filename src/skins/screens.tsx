@@ -10,7 +10,7 @@ export type SkinScreens = {
   Home: ComponentType;
   Play: ComponentType;
   Shop: ComponentType;
-  Foods: ComponentType;
+  Inventory: ComponentType;
   Account: ComponentType;
   TabBar: ComponentType<TabBarProps>;
 };

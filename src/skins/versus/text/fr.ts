@@ -39,7 +39,7 @@ const fr: VersusText = {
     raceBest: "Bats ton record",
     raceToday: "Les 10 du jour",
     goShopping: (count: number) => `Faire les courses · ${count} à acheter`,
-    checkFoods: "Voir les aliments de la maison",
+    checkInventory: "Voir le stock de la maison",
     soloKicker: "Solo",
     houseKicker: "Classement de la maison",
     soloTitle: "Toi contre toi",
@@ -132,8 +132,12 @@ const fr: VersusText = {
     setRecord: "Pose le record de la maison",
     record: (time: string) => `Record ${time}`,
     usuallyNext: "D'habitude juste après en magasin",
+    start: "DÉPART",
+    toBuy: (count: number) => `${count} à acheter`,
+    clockLine: "Le chrono démarre quand tu appuies. Attends d'être au magasin.",
+    lineup: (more: number) => `+${more}`,
   },
-  foods: {
+  inventory: {
     noVoteLower: "pas de vote",
     noVote: "Pas de vote",
     clashAria: ", votes en désaccord",

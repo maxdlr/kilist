@@ -9,8 +9,9 @@ import { ComponentType, useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import {
   Cog6ToothIcon,
-  RectangleStackIcon,
-  Square2StackIcon,
+  ListBulletIcon,
+  PlayIcon,
+  ShoppingBagIcon,
   SunIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
@@ -19,12 +20,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmPalette as C } from "..";
 import { Dot, useCheckPending } from "./parts";
 
-const ORDER = ["index", "swipe", "list", "account", "admin"];
+const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: SunIcon,
-  swipe: RectangleStackIcon,
-  list: Square2StackIcon,
+  swipe: PlayIcon,
+  shop: ShoppingBagIcon,
+  inventory: ListBulletIcon,
   account: Cog6ToothIcon,
   admin: WrenchIcon,
 };
@@ -56,7 +58,7 @@ const CalmTabBar = ({ state, navigation }: TabBarProps) => {
           const name = route.name as keyof typeof skin.copy.tabs;
           const label = skin.copy.tabs[name];
           if (!label || (name === "admin" && user?.type !== "admin")) return null;
-          const isCurrent = currentName === route.name || (currentName === "shop" && name === "index");
+          const isCurrent = currentName === route.name;
           const badge = name === "swipe" && pending && !isCurrent;
           const Icon = ICONS[name] ?? SunIcon;
 

@@ -1,6 +1,6 @@
 import type { SkinScreens } from "../../screens";
 import ArcadeAccount from "./Account";
-import ArcadeFoods from "./Foods";
+import ArcadeInventory from "./Inventory";
 import ArcadeHome from "./Home";
 import ArcadePlay from "./Play";
 import ArcadeShop from "./Shop";
@@ -10,7 +10,7 @@ const arcadeScreens: SkinScreens = {
   Home: ArcadeHome,
   Play: ArcadePlay,
   Shop: ArcadeShop,
-  Foods: ArcadeFoods,
+  Inventory: ArcadeInventory,
   Account: ArcadeAccount,
   TabBar: ArcadeTabBar,
 };

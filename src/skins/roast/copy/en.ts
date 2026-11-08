@@ -9,7 +9,7 @@ const roastCopy = {
   },
   tabs: {
     index: "HOME",
-    list: "LIST",
+    inventory: "LIST",
     shop: "SHOP",
     swipe: "SWIPE",
     account: "ME",
@@ -167,7 +167,7 @@ const roastCopy = {
     emptyTitle: "NOTHING TO BUY.",
     emptyLine: "EITHER YOUR FRIDGE IS FULL OR YOU'RE LYING TO ME.",
   },
-  list: {
+  inventory: {
     title: "THIS IS NOT A LIST.",
     search: "find it. don't scroll, you animal",
     noResults: (query: string) => `NO ${query}. OBVIOUSLY.`,

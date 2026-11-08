@@ -37,7 +37,7 @@ const en = {
     raceBest: "Race your best",
     raceToday: "Race today's 10",
     goShopping: (count: number) => `Go shopping · ${count} to buy`,
-    checkFoods: "Check the house foods",
+    checkInventory: "Check the house stock",
     soloKicker: "Solo",
     houseKicker: "House standings",
     soloTitle: "You vs you",
@@ -130,8 +130,12 @@ const en = {
     setRecord: "Set the house record",
     record: (time: string) => `Record ${time}`,
     usuallyNext: "Usually next in the store",
+    start: "START",
+    toBuy: (count: number) => `${count} to buy`,
+    clockLine: "The clock starts when you press. Wait until you're at the store.",
+    lineup: (more: number) => `+${more}`,
   },
-  foods: {
+  inventory: {
     noVoteLower: "no vote",
     noVote: "No vote",
     clashAria: ", votes clash",

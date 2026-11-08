@@ -7,7 +7,7 @@ import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen } from "./parts";
@@ -177,15 +177,6 @@ const CalmShop = () => {
       dock={<CButton label={T.shop.doneShopping} onPress={finish} />}
     >
       <View style={styles.head}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.navigate("/")}
-          style={styles.back}
-        >
-          <CText size={skin.type.label + 1} color={C.soft}>
-            {T.back}
-          </CText>
-        </Pressable>
         <View style={styles.titleRow}>
           <CText
             weight="medium"
@@ -268,11 +259,6 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.tight,
       paddingBottom: s.spacing.inline,
       paddingHorizontal: s.spacing.gutter,
-    },
-    back: {
-      alignSelf: "flex-start",
-      justifyContent: "center",
-      minHeight: s.size.button.xs,
     },
     titleRow: {
       alignItems: "baseline",

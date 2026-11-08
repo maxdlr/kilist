@@ -1,6 +1,6 @@
-import FoodList from "@/components/views/FoodList";
+import Inventory from "@/components/views/Inventory";
 import RequireAuth from "@/components/RequireAuth";
-import { FoodListProvider } from "@/providers/FoodListProvider";
+import { InventoryProvider } from "@/providers/InventoryProvider";
 import { useLocalSearchParams } from "expo-router";
 
 const ListDetailsScreen = () => {
@@ -8,9 +8,9 @@ const ListDetailsScreen = () => {
 
   return (
     <RequireAuth>
-      <FoodListProvider listIds={[Number(id)]}>
-        <FoodList />
-      </FoodListProvider>
+      <InventoryProvider listIds={[Number(id)]}>
+        <Inventory />
+      </InventoryProvider>
     </RequireAuth>
   );
 };

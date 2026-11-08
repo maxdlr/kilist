@@ -1,6 +1,6 @@
 import type { SkinScreens } from "../../screens";
 import VersusAccount from "./Account";
-import VersusFoods from "./Foods";
+import VersusInventory from "./Inventory";
 import VersusHome from "./Home";
 import VersusPlay from "./Play";
 import VersusShop from "./Shop";
@@ -10,7 +10,7 @@ const versusScreens: SkinScreens = {
   Home: VersusHome,
   Play: VersusPlay,
   Shop: VersusShop,
-  Foods: VersusFoods,
+  Inventory: VersusInventory,
   Account: VersusAccount,
   TabBar: VersusTabBar,
 };

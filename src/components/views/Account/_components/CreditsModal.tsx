@@ -32,7 +32,7 @@ const CreditsModal = ({
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>
           {copy.creditsIcons}
         </ThemedText>
-        <ActionRow label={common.creditsIcons} onPress={onOpenIcons} showChevron />
+        <ActionRow label={common.creditsIcons} onPress={onOpenIcons} showChevron onPanel />
       </View>
       <View style={styles.group}>
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>

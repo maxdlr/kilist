@@ -10,7 +10,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -23,168 +23,158 @@ import { ArcadeCard, Row, shadowOf } from "./parts";
 import { ArcadeLoading } from "./States";
 import { arcadeText as T } from "./text";
 
-const CARD_CELLS = 8;
-const FREE_AT = 4;
-const HEADER = ["KIL", "I", "ST"];
+const BRAND = "KILIST";
+const EMPTY_ROWS = 5;
 
-const Stamp = ({ on }: { on: boolean }) => {
+const Star = () => {
+  const skin = useSkin();
+  const size = skin.size.icon.action - 6;
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"
+        fill={P.yellow}
+      />
+    </Svg>
+  );
+};
+
+const Marquee = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const progress = useSharedValue(on ? 1 : 0);
+
+  return (
+    <View style={styles.marquee}>
+      <View style={styles.marqueeSide}>
+        <Star />
+      </View>
+      <View style={styles.marqueeCenter}>
+        <ThemedText size={skin.type.label} color={P.white} numberOfLines={1}>
+          {BRAND}
+        </ThemedText>
+      </View>
+      <View style={styles.marqueeSide}>
+        <Star />
+      </View>
+    </View>
+  );
+};
+
+const Stamp = () => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    progress.set(withTiming(on ? 1 : 0, { duration: 160 }));
-  }, [on, progress]);
+    progress.set(withTiming(1, { duration: 160 }));
+  }, [progress]);
 
   const style = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ rotateZ: "-12deg" }, { scale: 1.6 - progress.value * 0.6 }],
+    transform: [{ rotateZ: "-8deg" }, { scale: 1.6 - progress.value * 0.6 }],
   }));
 
   return (
-    <Animated.View pointerEvents="none" style={[styles.stamp, style]}>
-      <ThemedText size={skin.type.label} color={P.white}>
+    <Animated.View style={[styles.stamp, style]}>
+      <ThemedText size={skin.type.caption - 2} color={P.white} numberOfLines={1}>
         {T.bought}
       </ThemedText>
     </Animated.View>
   );
 };
 
-const Cell = ({
+const GameRow = ({
   food,
-  stamped,
-  bonus,
-  onStamp,
-  onLater,
+  rank,
+  done = false,
+  highlight = false,
 }: {
   food: FoodType;
-  stamped: boolean;
-  bonus: boolean;
-  onStamp: () => void;
-  onLater: () => void;
+  rank: number;
+  done?: boolean;
+  highlight?: boolean;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const level = levelOf(food.inStockScore);
-  const [size, setSize] = useState(0);
-  const [stamping, setStamping] = useState(true);
 
-  const cell = (
+  return (
     <View
       accessible
-      accessibilityLabel={`${food.name}, ${stamped ? T.boughtLower : T.notBought}`}
-      onLayout={(event) => {
-        const { width, height } = event.nativeEvent.layout;
-        setSize(Math.min(width, height));
-      }}
-      style={[
-        styles.cell,
-        { backgroundColor: skin.colors.levels[level] },
-        bonus && styles.dashed,
-      ]}
+      accessibilityLabel={`${food.name}, ${done ? T.boughtLower : T.notBought}`}
+      style={[styles.row, highlight && styles.rowHighlight, done && styles.rowDone]}
     >
-      {size > 0 && <FoodPicture food={food} size={size * 0.46} />}
-      <ThemedText numberOfLines={1} size={skin.type.caption} color={P.navy}>
+      <View style={styles.rank}>
+        <ThemedText mono size={skin.type.caption} color={P.white}>
+          {String(rank).padStart(2, "0")}
+        </ThemedText>
+      </View>
+      <View style={done ? styles.dimmed : undefined}>
+        <FoodPicture food={food} size={skin.size.icon.row} />
+      </View>
+      <ThemedText
+        numberOfLines={1}
+        size={skin.type.body}
+        color={done ? P.dimInk : P.navy}
+        style={[styles.flex, done && styles.struck]}
+      >
         {food.name}
       </ThemedText>
-      <ThemedText numberOfLines={1} size={skin.type.caption - 4} color={P.navy}>
-        {bonus ? T.bonusPick : skin.copy.levels[level]}
-      </ThemedText>
-      <Stamp on={stamped} />
-    </View>
-  );
-
-  if (stamped) return cell;
-
-  return (
-    <View
-      accessibilityActions={[
-        { name: "activate", label: T.bought },
-        { name: "later", label: T.nextTime },
-      ]}
-      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onStamp())}
-      style={[styles.swipeSlot, { backgroundColor: stamping ? P.navy : P.lilac }]}
-    >
-      <View style={[styles.behind, { justifyContent: stamping ? "flex-start" : "flex-end" }]}>
-        <ThemedText size={skin.type.caption - 2} color={stamping ? P.white : P.navy}>
-          {stamping ? T.bought : T.nextTime}
-        </ThemedText>
-      </View>
-      <SwipeGesture
-        onSwipeRight={onStamp}
-        onSwipeLeft={onLater}
-        onSwipingRight={() => setStamping(true)}
-        onSwipingLeft={() => setStamping(false)}
-        swipeThreshold={48}
-        styles={{ box: styles.swipeBox }}
-      >
-        {cell}
-      </SwipeGesture>
-    </View>
-  );
-};
-
-const NextStop = ({ food, onStamp, onLater }: { food: FoodType; onStamp: () => void; onLater: () => void }) => {
-  const skin = useSkin();
-  const styles = useSkinStyles(createStyles);
-  const [stamping, setStamping] = useState(true);
-
-  return (
-    <View
-      accessible
-      accessibilityLabel={`${T.nextStop}: ${food.name}`}
-      accessibilityActions={[
-        { name: "activate", label: T.bought },
-        { name: "later", label: T.nextTime },
-      ]}
-      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onStamp())}
-      style={[styles.nextSlot, { backgroundColor: stamping ? P.navy : P.lilac }]}
-    >
-      <View style={[styles.behind, { justifyContent: stamping ? "flex-start" : "flex-end" }]}>
-        <ThemedText size={skin.type.caption} color={stamping ? P.white : P.navy}>
-          {stamping ? T.bought : T.nextTime}
-        </ThemedText>
-      </View>
-      <SwipeGesture
-        onSwipeRight={onStamp}
-        onSwipeLeft={onLater}
-        onSwipingRight={() => setStamping(true)}
-        onSwipingLeft={() => setStamping(false)}
-        swipeThreshold={100}
-        styles={{ box: styles.nextBox }}
-      >
-        <FoodPicture food={food} size={skin.size.icon.row} />
-        <View style={styles.flex}>
-          <ThemedText size={skin.type.caption - 3} color={P.dimInk}>
-            {T.nextStop}
-          </ThemedText>
-          <ThemedText numberOfLines={1} size={skin.type.body} color={P.navy}>
-            {food.name}
+      {done ? (
+        <Stamp />
+      ) : (
+        <View style={[styles.level, { backgroundColor: skin.colors.levels[level] }]}>
+          <ThemedText size={skin.type.caption - 2} color={P.navy} numberOfLines={1}>
+            {skin.copy.levels[level]}
           </ThemedText>
         </View>
-      </SwipeGesture>
+      )}
     </View>
   );
 };
 
-const FreeCell = () => {
+const SwipeRow = ({
+  food,
+  rank,
+  highlight = false,
+  onBuy,
+  onLater,
+}: {
+  food: FoodType;
+  rank: number;
+  highlight?: boolean;
+  onBuy: () => void;
+  onLater: () => void;
+}) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const [buying, setBuying] = useState(true);
 
   return (
-    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={[styles.cell, styles.free]}>
-      <Svg width={skin.size.icon.action + 2} height={skin.size.icon.action + 2} viewBox="0 0 24 24">
-        <Path
-          d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"
-          fill={P.white}
-          stroke={P.white}
-          strokeWidth={1.5}
-          strokeLinejoin="round"
-        />
-      </Svg>
-      <ThemedText size={skin.type.caption} color={P.white}>
-        {T.free}
-      </ThemedText>
+    <View
+      accessibilityActions={[
+        { name: "activate", label: T.bought },
+        { name: "later", label: T.nextTime },
+      ]}
+      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onBuy())}
+      style={[styles.swipeSlot, { backgroundColor: buying ? P.navy : P.lilac }]}
+    >
+      <View style={[styles.behind, { justifyContent: buying ? "flex-start" : "flex-end" }]}>
+        <ThemedText size={skin.type.label} color={buying ? P.white : P.navy}>
+          {buying ? T.bought : T.nextTime}
+        </ThemedText>
+      </View>
+      <SwipeGesture
+        onSwipeRight={onBuy}
+        onSwipeLeft={onLater}
+        onSwipingRight={() => setBuying(true)}
+        onSwipingLeft={() => setBuying(false)}
+        swipeThreshold={100}
+        styles={{ box: styles.swipeBox }}
+      >
+        <GameRow food={food} rank={rank} highlight={highlight} />
+      </SwipeGesture>
     </View>
   );
 };
@@ -193,21 +183,12 @@ const ArcadeShop = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const run = useShopRun();
-  const [card, setCard] = useState<FoodType[]>([]);
-  const [stamped, setStamped] = useState<number[]>([]);
+  const [stamped, setStamped] = useState<FoodType[]>([]);
 
-  const remaining = run.foods ?? [];
-  const live = new Set(remaining.map((food) => food.id));
-  const onCard = card.filter((food) => live.has(food.id) || stamped.includes(food.id));
-  const isCardDone = onCard.length > 0 && onCard.every((food) => stamped.includes(food.id));
-  const needsDeal =
-    remaining.length > 0 && (onCard.length === 0 || (isCardDone && stamped.length === 0));
-
-  if (needsDeal) {
-    const regulars = run.rows.slice(0, run.suggestion ? CARD_CELLS - 1 : CARD_CELLS);
-    setCard(run.suggestion ? [...regulars, run.suggestion] : regulars);
+  const leave = () => {
     setStamped([]);
-  }
+    return run.stop();
+  };
 
   if (run.isLoading) return <ArcadeLoading />;
 
@@ -220,7 +201,7 @@ const ArcadeShop = () => {
             height={skin.size.button.lg}
             fontSize={skin.type.lead}
             label={T.backToFloor}
-            onTouch={run.stop}
+            onTouch={leave}
           />
         }
       >
@@ -261,11 +242,9 @@ const ArcadeShop = () => {
             {T.noCard}
           </Title>
         </View>
-        <View style={[styles.grid, styles.emptyCard]}>
-          {Array.from({ length: CARD_CELLS + 1 }, (_, index) => (
-            <View key={index} style={[styles.gridSlot]}>
-              <View style={[styles.cell, styles.emptyCell]} />
-            </View>
+        <View style={styles.emptyBoard}>
+          {Array.from({ length: EMPTY_ROWS }, (_, index) => (
+            <View key={index} style={styles.emptyRow} />
           ))}
         </View>
         <ThemedText size={skin.type.label} color={P.white}>
@@ -275,32 +254,23 @@ const ArcadeShop = () => {
     );
   }
 
-  const left = remaining.length;
-  const nextId = run.suggestion?.id;
-  const offCard = run.suggestion && !onCard.some((food) => food.id === nextId) ? run.suggestion : null;
-  const stamp = (food: FoodType) => {
-    setStamped((ids) => [...ids, food.id]);
-    run.buy(food.id);
-  };
-  const cells: (FoodType | null)[] = [...onCard];
-  cells.splice(Math.min(FREE_AT, cells.length), 0, null);
+  const stampedIds = new Set(stamped.map((food) => food.id));
+  const isOpen = (food: FoodType) => !stampedIds.has(food.id);
+  const suggestion = run.suggestion && isOpen(run.suggestion) ? run.suggestion : null;
+  const rows = run.rows.filter(isOpen);
+  const left = (run.foods ?? []).filter(isOpen).length;
+  const firstRank = suggestion ? 2 : 1;
 
-  const finishLabel =
-    left === 0 ? T.bingoFinish : isCardDone ? T.nextCard : T.finishRun;
-  const finish = () => {
-    if (isCardDone && left > 0) {
-      setStamped([]);
-      setCard([]);
-      return;
-    }
-    run.stop();
+  const stamp = (food: FoodType) => {
+    setStamped((list) => [...list, food]);
+    run.buy(food.id);
   };
 
   return (
     <Ground
       dock={
         <>
-          <ThemedText size={skin.type.caption} color={P.white} style={styles.center}>
+          <ThemedText size={skin.type.caption} color={P.white} style={[styles.center, styles.hint]}>
             {T.stampHint}
           </ThemedText>
           <View style={styles.actions}>
@@ -311,14 +281,14 @@ const ArcadeShop = () => {
               variant="secondary"
               label={skin.copy.shop.stop}
               accessibilityLabel={T.stopAria}
-              onTouch={run.stop}
+              onTouch={leave}
             />
             <KilButton
               flex={1.6}
               height={skin.size.button.lg - skin.spacing.tight}
               fontSize={skin.type.body}
-              label={finishLabel}
-              onTouch={finish}
+              label={left === 0 ? T.bingoFinish : T.finishRun}
+              onTouch={leave}
             />
           </View>
         </>
@@ -335,94 +305,64 @@ const ArcadeShop = () => {
         </View>
         <View
           accessible
-          accessibilityLabel={T.boughtLeftAria(run.bought, left)}
+          accessibilityLabel={T.boughtLeftAria(stamped.length, left)}
           style={[styles.progress, { boxShadow: shadowOf(skin, -1) }]}
         >
           <ThemedText size={skin.type.label} color={P.navy}>
-            {`${run.bought}/${run.bought + left}`}
+            {`${stamped.length}/${stamped.length + left}`}
           </ThemedText>
         </View>
       </View>
 
-      {offCard && (
-        <NextStop food={offCard} onStamp={() => run.buy(offCard.id)} onLater={() => run.snooze(offCard.id)} />
-      )}
-
       <ArcadeCard lift={2} style={styles.board}>
-        <View style={styles.header}>
-          {HEADER.map((letter) => (
-            <View key={letter} style={styles.headerCell}>
-              <ThemedText size={skin.type.label} color={P.white}>
-                {letter}
+        <Marquee />
+        <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+          {suggestion && (
+            <View style={styles.next}>
+              <ThemedText size={skin.type.caption - 2} color={P.dimInk}>
+                {T.nextStop}
               </ThemedText>
+              <SwipeRow
+                food={suggestion}
+                rank={1}
+                highlight
+                onBuy={() => stamp(suggestion)}
+                onLater={() => run.snooze(suggestion.id)}
+              />
             </View>
+          )}
+          {rows.map((food, index) => (
+            <SwipeRow
+              key={food.id}
+              food={food}
+              rank={firstRank + index}
+              onBuy={() => stamp(food)}
+              onLater={() => run.snooze(food.id)}
+            />
           ))}
-        </View>
-        <View style={styles.grid}>
-          {cells.map((food, index) => (
-            <View key={food?.id ?? `free-${index}`} style={styles.gridSlot}>
-              {food ? (
-                <Cell
-                  food={food}
-                  stamped={stamped.includes(food.id)}
-                  bonus={food.id === nextId}
-                  onStamp={() => stamp(food)}
-                  onLater={() => run.snooze(food.id)}
-                />
-              ) : (
-                <FreeCell />
-              )}
-            </View>
+          {stamped.map((food, index) => (
+            <GameRow key={`stamped-${food.id}`} food={food} rank={left + index + 1} done />
           ))}
-        </View>
+        </ScrollView>
       </ArcadeCard>
     </Ground>
   );
 };
 
 const createStyles = (s: Skin) => {
-  const gap = s.spacing.small + 2;
+  const gap = s.spacing.small;
 
   return StyleSheet.create({
-    swipeSlot: {
-      borderRadius: s.spacing.section - 2,
-      flex: 1,
-      overflow: "hidden",
-    },
-    behind: {
-      alignItems: "center",
-      bottom: 0,
-      flexDirection: "row",
-      left: 0,
-      paddingHorizontal: s.spacing.small,
-      position: "absolute",
-      right: 0,
-      top: 0,
-    },
-    swipeBox: {
-      flex: 1,
-    },
-    nextSlot: {
-      borderRadius: s.shape.radius,
-      overflow: "hidden",
-    },
-    nextBox: {
-      alignItems: "center",
-      backgroundColor: P.white,
-      borderColor: P.navy,
-      borderRadius: s.shape.radius,
-      borderWidth: s.shape.border,
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      paddingHorizontal: s.spacing.inline,
-      paddingVertical: s.spacing.small,
-    },
     flex: {
       flex: 1,
       minWidth: 0,
     },
     center: {
       textAlign: "center",
+    },
+    hint: {
+      paddingBottom: s.spacing.tight,
+      paddingTop: s.spacing.small,
     },
     middle: {
       alignItems: "center",
@@ -447,68 +387,114 @@ const createStyles = (s: Skin) => {
       minHeight: 0,
       padding: s.spacing.inline,
     },
-    header: {
+    marquee: {
       flexDirection: "row",
       gap,
     },
-    headerCell: {
+    marqueeSide: {
       alignItems: "center",
       backgroundColor: P.navy,
       borderRadius: s.spacing.inline,
       flex: 1,
+      justifyContent: "center",
       paddingVertical: s.spacing.tight,
     },
-    grid: {
-      flex: 1,
-      flexDirection: "row",
-      flexWrap: "wrap",
-      minHeight: 0,
-      rowGap: gap,
-      columnGap: gap,
-    },
-    gridSlot: {
-      flexBasis: "30%",
-      flexGrow: 1,
-      height: "31%",
-    },
-    cell: {
+    marqueeCenter: {
       alignItems: "center",
-      borderColor: P.navy,
-      borderRadius: s.spacing.section - 2,
-      borderWidth: s.shape.border,
-      flex: 1,
-      gap: s.spacing.hair,
-      justifyContent: "center",
-      overflow: "hidden",
-      padding: s.spacing.tight + 2,
-    },
-    dashed: {
-      borderStyle: "dashed",
-    },
-    free: {
       backgroundColor: P.navy,
+      borderRadius: s.spacing.inline,
+      flex: 2,
+      justifyContent: "center",
+      paddingVertical: s.spacing.tight,
+    },
+    list: {
+      gap,
+    },
+    next: {
+      gap: s.spacing.hair + 2,
+    },
+    swipeSlot: {
+      borderRadius: s.spacing.inline + 2,
+      overflow: "hidden",
+    },
+    behind: {
+      alignItems: "center",
+      bottom: 0,
+      flexDirection: "row",
+      left: 0,
+      paddingHorizontal: s.spacing.stack,
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
+    swipeBox: {
+      borderRadius: s.spacing.inline + 2,
+    },
+    row: {
+      alignItems: "center",
+      backgroundColor: P.white,
+      borderBottomWidth: s.shape.border + 2,
+      borderColor: P.navy,
+      borderRadius: s.spacing.inline + 2,
+      borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.small,
+      minHeight: s.size.row.shop,
+      paddingHorizontal: s.spacing.small,
+      paddingVertical: s.spacing.tight,
+    },
+    rowHighlight: {
+      backgroundColor: P.lilac,
+    },
+    rowDone: {
+      borderBottomWidth: s.shape.border,
+      borderColor: P.dimInk,
+    },
+    rank: {
+      alignItems: "center",
+      backgroundColor: P.navy,
+      borderRadius: s.spacing.small,
+      justifyContent: "center",
+      paddingHorizontal: s.spacing.tight + 2,
+      paddingVertical: s.spacing.tight,
+    },
+    dimmed: {
+      opacity: 0.45,
+    },
+    struck: {
+      textDecorationLine: "line-through",
+    },
+    level: {
+      borderColor: P.navy,
+      borderRadius: s.spacing.small,
+      borderWidth: s.shape.divider,
+      flexShrink: 0,
+      maxWidth: "34%",
+      paddingHorizontal: s.spacing.tight + 2,
+      paddingVertical: s.spacing.hair + 1,
     },
     stamp: {
-      alignItems: "center",
-      backgroundColor: "rgba(106,63,200,0.72)",
-      borderColor: P.navy,
-      borderRadius: s.size.button.xl,
-      borderWidth: s.shape.border,
-      height: s.size.button.xl + s.spacing.small,
-      justifyContent: "center",
-      position: "absolute",
-      width: s.size.button.xl + s.spacing.small,
+      backgroundColor: P.navy,
+      borderRadius: s.spacing.small,
+      flexShrink: 0,
+      paddingHorizontal: s.spacing.small,
+      paddingVertical: s.spacing.tight,
     },
-    emptyCard: {
+    emptyBoard: {
       borderColor: P.white,
       borderRadius: s.shape.radius + s.spacing.small,
       borderStyle: "dashed",
       borderWidth: s.shape.border,
+      flex: 1,
+      gap,
       padding: s.spacing.inline,
     },
-    emptyCell: {
+    emptyRow: {
       borderColor: "rgba(255,255,255,0.5)",
+      borderRadius: s.spacing.inline + 2,
       borderStyle: "dashed",
+      borderWidth: s.shape.border,
+      height: s.size.row.shop,
     },
     bingoSign: {
       backgroundColor: P.navy,

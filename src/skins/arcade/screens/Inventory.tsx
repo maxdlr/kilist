@@ -3,8 +3,8 @@ import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import FoodPanels from "@/components/views/FoodList/_components/FoodPanels";
-import useFoodShelf from "@/hooks/screens/useFoodShelf";
+import FoodPanels from "@/components/views/Inventory/_components/FoodPanels";
+import useInventoryShelf from "@/hooks/screens/useInventoryShelf";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -89,10 +89,10 @@ const Tile = ({
   );
 };
 
-const ArcadeFoods = () => {
+const ArcadeInventory = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const shelf = useFoodShelf();
+  const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
 
   if (shelf.isLoading) return <ArcadeLoading />;
@@ -118,13 +118,13 @@ const ArcadeFoods = () => {
     </>
   ) : isEmpty ? (
     <>
-      <KilButton {...half} variant="secondary" label={skin.copy.list.addOwn} onTouch={() => shelf.openAdd()} />
+      <KilButton {...half} variant="secondary" label={skin.copy.inventory.addOwn} onTouch={() => shelf.openAdd()} />
       <KilButton {...half} label={T.suggested} onTouch={() => router.push("/onboarding")} />
     </>
   ) : (
     <>
-      <KilButton {...half} variant="secondary" label={skin.copy.list.select} onTouch={shelf.startSelect} />
-      <KilButton {...half} label={skin.copy.list.add} onTouch={() => shelf.openAdd()} />
+      <KilButton {...half} variant="secondary" label={skin.copy.inventory.select} onTouch={shelf.startSelect} />
+      <KilButton {...half} label={skin.copy.inventory.add} onTouch={() => shelf.openAdd()} />
     </>
   );
 
@@ -300,4 +300,4 @@ const createStyles = (s: Skin) =>
     },
   });
 
-export default ArcadeFoods;
+export default ArcadeInventory;

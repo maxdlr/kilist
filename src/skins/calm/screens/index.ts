@@ -1,6 +1,6 @@
 import type { SkinScreens } from "../../screens";
 import CalmAccount from "./Account";
-import CalmFoods from "./Foods";
+import CalmInventory from "./Inventory";
 import CalmHome from "./Home";
 import CalmPlay from "./Play";
 import CalmShop from "./Shop";
@@ -10,7 +10,7 @@ const calmScreens: SkinScreens = {
   Home: CalmHome,
   Play: CalmPlay,
   Shop: CalmShop,
-  Foods: CalmFoods,
+  Inventory: CalmInventory,
   Account: CalmAccount,
   TabBar: CalmTabBar,
 };

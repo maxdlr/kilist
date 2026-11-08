@@ -11,9 +11,9 @@ const calmCopy: RoastCopy = {
   },
   tabs: {
     index: "Today",
-    list: "Foods",
+    inventory: "Pantry",
     shop: "List",
-    swipe: "Check",
+    swipe: "Sort",
     account: "Settings",
     admin: "Admin",
   },
@@ -96,13 +96,13 @@ const calmCopy: RoastCopy = {
         ? "All set."
         : `${needed} ${needed === 1 ? "thing" : "things"} to buy.`,
     shop: "Open the list",
-    swipe: "Check foods",
+    swipe: "Sort foods",
     tally: (foods: number, shops: number, swipes: number) =>
-      `${foods} foods · ${shops} shops · ${swipes} checks`,
+      `${foods} foods · ${shops} shops · ${swipes} sorts`,
   },
   swipe: {
     startLabel: () => "",
-    startTitle: "A few foods to check",
+    startTitle: "A few foods to sort",
     startLine: (count: number) => `${count} foods. About half a minute.`,
     start: "Start",
     dignity: "Progress",
@@ -122,11 +122,11 @@ const calmCopy: RoastCopy = {
     overShop: "Open the list",
     overAgain: "Close",
     tomorrowLabel: () => "",
-    tomorrowTitle: "Nothing to check.",
-    tomorrowLine: "You've checked today. The list is up to date.",
+    tomorrowTitle: "Nothing to sort.",
+    tomorrowLine: "You've sorted today. The list is up to date.",
     tomorrowAction: "Open the list",
     emptyLabel: "",
-    emptyTitle: "Nothing to check.",
+    emptyTitle: "Nothing to sort.",
     emptyLine: "Kilist will ask when something might be running low.",
   },
   shop: {
@@ -146,10 +146,10 @@ const calmCopy: RoastCopy = {
     doneAction: "Back to today",
     emptyLabel: "",
     emptyTitle: "Nothing to buy.",
-    emptyLine: "The list fills itself as you check foods.",
+    emptyLine: "The list fills itself as you sort foods.",
   },
-  list: {
-    title: "Foods",
+  inventory: {
+    title: "Pantry",
     search: "Search",
     noResults: (query: string) => `No “${query}”.`,
     addQuery: "Add it",
@@ -157,7 +157,7 @@ const calmCopy: RoastCopy = {
     add: "Add",
     deleteSelected: (count: number) => `Remove ${count}`,
     emptyLabel: "0 foods",
-    emptyTitle: "No foods yet.",
+    emptyTitle: "Your pantry is empty.",
     addSuggested: "Common foods",
     addOwn: "Add my own",
     addTitle: "Add a food",
@@ -168,7 +168,7 @@ const calmCopy: RoastCopy = {
     removeOne: (name: string) => `Remove ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,
-    removeLine: "It won't be checked or added to the list anymore.",
+    removeLine: "It won't be sorted or added to the list anymore.",
   },
   intro: {
     steps: [
@@ -239,7 +239,7 @@ const calmCopy: RoastCopy = {
     row: (balance: number) => `Appearance · ${balance} points`,
     title: "Appearance",
     balance: (count: number) =>
-      `You have ${count} points. Every food you check adds 10, and points unlock other looks.`,
+      `You have ${count} points. Every food you sort adds 10, and points unlock other looks.`,
     wear: "Use",
     wearing: "In use",
     redeem: (price: number) => `Unlock · ${price} points`,
@@ -249,11 +249,11 @@ const calmCopy: RoastCopy = {
     redeemed: (name: string) => `${name} unlocked.`,
     failed: "Couldn't do that",
     sectionTitle: "Looks",
-    sectionLine: (count: number) => `${count} points. Every food you check adds 10.`,
+    sectionLine: (count: number) => `${count} points. Every food you sort adds 10.`,
     locked: (count: number) => `Locked · ${count} points to go`,
     buy: (price: string) => `Buy · ${price}`,
     storeSoon: "Buying isn't available yet.",
-    earnHint: "Check foods to earn points.",
+    earnHint: "Sort foods to earn points.",
   },
 };
 

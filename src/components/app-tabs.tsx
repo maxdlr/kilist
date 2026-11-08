@@ -14,9 +14,9 @@ export default function AppTabs() {
       }}
     >
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="list" />
-      <Tabs.Screen name="shop" />
+      <Tabs.Screen name="inventory" />
       <Tabs.Screen name="swipe" />
+      <Tabs.Screen name="shop" />
       <Tabs.Screen name="account" />
       <Tabs.Screen name="admin" />
     </Tabs>

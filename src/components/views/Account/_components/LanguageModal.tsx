@@ -35,6 +35,7 @@ const LanguageModal = ({ visible, onClose }: { visible: boolean; onClose: () => 
             key={option.value ?? "auto"}
             label={`${option.value === choice ? "● " : "○ "}${option.label}`}
             onPress={() => pick(option.value)}
+            onPanel
           />
         ))}
       </View>

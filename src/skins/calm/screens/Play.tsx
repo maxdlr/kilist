@@ -193,7 +193,7 @@ const CalmPlay = () => {
         <CalmMessage
           title={copy.emptyTitle}
           line={copy.emptyLine}
-          dock={<CButton variant="text" label={T.browseFoods} href="/list" />}
+          dock={<CButton variant="text" label={T.browseInventory} href="/inventory" />}
         />
       );
     default:

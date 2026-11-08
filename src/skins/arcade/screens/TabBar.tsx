@@ -26,11 +26,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { arcadePalette as P } from "..";
 import { shadowOf } from "./parts";
 
-const ORDER = ["index", "list", "swipe", "shop", "account", "admin"];
+const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
 
-const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
+const ICONS: Record<
+  string,
+  ComponentType<{ size: number; color: string; strokeWidth?: number }>
+> = {
   index: HomeIcon,
-  list: Squares2X2Icon,
+  inventory: Squares2X2Icon,
   swipe: PlayIcon,
   shop: ShoppingCartIcon,
   account: UserCircleIcon,
@@ -44,8 +47,11 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
   const isAdmin = user?.type === "admin";
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
-  const raise = skin.spacing.section + skin.spacing.small + skin.shape.shadow.offset;
+  const raise =
+    skin.spacing.stack +
+    (ORDER[state.index] === "account" ? skin.shape.shadow.offset : 0);
   const fullHeight = skin.size.tabBar + insets.bottom + raise;
+
   const height = useSharedValue(fullHeight);
 
   useEffect(() => {
@@ -62,9 +68,15 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
   return (
     <Animated.View
       accessibilityRole="tablist"
-      style={[styles.wrap, onAdmin && { backgroundColor: A.ground }, animatedStyle]}
+      style={[
+        styles.wrap,
+        onAdmin && { backgroundColor: A.ground },
+        animatedStyle,
+      ]}
     >
-      <View style={[styles.bar, { paddingBottom: insets.bottom, marginTop: raise }]}>
+      <View
+        style={[styles.bar, { paddingBottom: insets.bottom, marginTop: raise }]}
+      >
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
           const label = skin.copy.tabs[name];
@@ -104,23 +116,36 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
                     },
                   ]}
                 >
-                  <PlayIcon size={skin.size.icon.action} color={P.navy} strokeWidth={2.4} />
+                  <PlayIcon
+                    size={skin.size.icon.action}
+                    color={P.navy}
+                    strokeWidth={2.4}
+                  />
                 </View>
               ) : (
                 <View
                   style={[
                     styles.pill,
-                    isCurrent && { backgroundColor: P.pale, borderColor: P.navy },
+                    isCurrent && {
+                      backgroundColor: P.pale,
+                      borderColor: P.navy,
+                    },
                   ]}
                 >
-                  <Icon size={skin.size.icon.action - skin.spacing.small} color={P.navy} strokeWidth={2.2} />
+                  <Icon
+                    size={skin.size.icon.action - skin.spacing.small}
+                    color={P.navy}
+                    strokeWidth={2.2}
+                  />
                 </View>
               )}
               <ThemedText
                 allowFontScaling={false}
                 size={skin.type.caption - 2}
                 color={isCurrent ? P.navy : P.dimInk}
-                numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
               >
                 {label}
               </ThemedText>

@@ -4,7 +4,7 @@ const fr: CommonText = {
   unexpected: "Un problème est survenu. Réessaie.",
   passwordsDiffer: "Les mots de passe ne correspondent pas",
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
-  listNotReady: "Ta liste n'est pas encore prête, réessaie dans un instant",
+  inventoryNotReady: "Ton inventaire n'est pas encore prêt, réessaie dans un instant",
   addFailed: "Impossible d'ajouter cet aliment",
   shareMessage: (code: string) => `Rejoins mon foyer sur Kilist avec ce code : ${code}`,
   shareFailed: "Impossible d'ouvrir le partage",
@@ -17,7 +17,7 @@ const fr: CommonText = {
   languageAuto: (name: string) => `Réglage du téléphone (${name})`,
   tabs: {
     index: "Accueil",
-    list: "Aliments",
+    inventory: "Inventaire",
     shop: "Liste de courses",
     swipe: "Jeu de swipe",
     account: "Compte",
