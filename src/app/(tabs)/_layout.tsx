@@ -1,6 +1,7 @@
 import AppTabs from "@/components/app-tabs";
 import RequireAuth from "@/components/RequireAuth";
 import SyncBridge from "@/offline/SyncBridge";
+import { AccountGateProvider } from "@/providers/AccountGateProvider";
 import { HouseholdProvider } from "@/providers/HouseholdProvider";
 import { TabBarProvider } from "@/providers/TabBarProvider";
 import { TicketsProvider } from "@/providers/TicketsProvider";
@@ -11,8 +12,10 @@ export default function TabsLayout() {
       <HouseholdProvider>
         <TicketsProvider>
           <TabBarProvider>
-            <AppTabs />
-            <SyncBridge />
+            <AccountGateProvider>
+              <AppTabs />
+              <SyncBridge />
+            </AccountGateProvider>
           </TabBarProvider>
         </TicketsProvider>
       </HouseholdProvider>

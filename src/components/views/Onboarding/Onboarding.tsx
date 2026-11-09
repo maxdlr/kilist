@@ -62,7 +62,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
       : "dark",
   );
 
-  const addFood = async (data: { name: string; description?: string }) => {
+  const addFood = async (data: { name: string; description?: string; icon?: string }) => {
     if (!mainList?.id) {
       showToast(common.inventoryNotReady);
       return false;
@@ -90,6 +90,7 @@ const Onboarding = ({ onDone, intro = false }: { onDone: () => void; intro?: boo
     const added = await addFood({
       name: item.name,
       description: item.description,
+      icon: item.icon,
     });
     if (!added) {
       setSwipedNames((prev) => {

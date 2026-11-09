@@ -34,16 +34,26 @@ export const addHistory = (food: LocalFood, entry: HistoryEntry) => {
   food.inStockScore = calculateScore(food.histories);
 };
 
-export const swipeDeck = (foods: LocalFood[], now: number) =>
-  foods
+export const STALE_DAYS = 7;
+
+const lastActivity = (food: LocalFood) =>
+  Math.max(time(food.lastBoughtAt), ...food.histories.map((entry) => time(entry.at)));
+
+export const swipeDeck = (foods: LocalFood[], now: number) => {
+  const eligible = foods.filter(
+    (food) => food.lists.length > 0 && !food.histories.some((entry) => time(entry.at) >= now - DAY_MS),
+  );
+  const low = eligible
+    .filter((food) => food.inStockScore < SWIPE_ELIGIBLE_BELOW)
+    .sort((a, b) => b.inStockScore - a.inStockScore);
+  const stale = eligible
     .filter(
       (food) =>
-        food.lists.length > 0 &&
-        food.inStockScore < SWIPE_ELIGIBLE_BELOW &&
-        !food.histories.some((entry) => time(entry.at) >= now - DAY_MS),
+        food.inStockScore >= SWIPE_ELIGIBLE_BELOW && lastActivity(food) < now - STALE_DAYS * DAY_MS,
     )
-    .sort((a, b) => b.inStockScore - a.inStockScore)
-    .slice(0, SWIPE_DECK_SIZE);
+    .sort((a, b) => lastActivity(a) - lastActivity(b));
+  return [...low, ...stale].slice(0, SWIPE_DECK_SIZE);
+};
 
 export const shopCandidates = (foods: LocalFood[], now: number) =>
   foods.filter(

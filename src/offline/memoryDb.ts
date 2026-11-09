@@ -30,7 +30,9 @@ export const createMemoryDb = (): OfflineDb => {
     },
     clear: () => {
       ops = [];
-      values.clear();
+      for (const key of [...values.keys()]) {
+        if (!key.startsWith("keep:")) values.delete(key);
+      }
     },
     transaction: (work) => work(),
   };

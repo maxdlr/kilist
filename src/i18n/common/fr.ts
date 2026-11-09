@@ -3,6 +3,9 @@ import type { CommonText } from "./en";
 const fr: CommonText = {
   unexpected: "Un problème est survenu. Réessaie.",
   needsConnection: "Il faut une connexion pour ça.",
+  needsAccount: "Il te faut un compte pour ça.",
+  notEnoughTickets: "Pas encore assez de tickets.",
+  guestName: "Invité",
   passwordsDiffer: "Les mots de passe ne correspondent pas",
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
   inventoryNotReady: "Ton inventaire n'est pas encore prêt, réessaie dans un instant",

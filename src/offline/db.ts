@@ -62,7 +62,7 @@ const db: OfflineDb = {
     open().runSync("DELETE FROM outbox WHERE id = ?", id);
   },
   clear: () => {
-    open().execSync("DELETE FROM outbox; DELETE FROM kv;");
+    open().execSync("DELETE FROM outbox; DELETE FROM kv WHERE key NOT LIKE 'keep:%';");
   },
   transaction: (work) => {
     open().withTransactionSync(work);

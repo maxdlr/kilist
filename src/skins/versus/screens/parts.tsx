@@ -57,7 +57,7 @@ export const memberColor = (members: Member[], myId: number | undefined, userId:
   if (userId === myId) return P.you;
   const mates = members.filter((member) => member.id !== myId);
   const index = Math.max(0, mates.findIndex((member) => member.id === userId));
-  return P.mates[index % P.mates.length]!;
+  return P.mates[Math.abs(index) % P.mates.length]!;
 };
 
 export const initialOf = (name: string) => name.trim().charAt(0).toUpperCase() || "?";

@@ -1,5 +1,6 @@
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
+import ActionPanel from "@/components/elements/ActionPanel";
 import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
@@ -11,7 +12,7 @@ import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import AnimationService from "@/services/animation";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView, useKeyboardState } from "react-native-keyboard-controller";
@@ -42,9 +43,12 @@ const LoginScreen = () => {
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
   const insets = useSafeAreaInsets();
-  const { login, signup } = useAuth();
+  const { login, signup, isGuest, mergePending, resolveMerge } = useAuth();
+  const guestCopy = skin.copy.guest;
   const { showToast } = useToast();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const [mode, setMode] = useState<"login" | "signup">(params.mode === "signup" ? "signup" : "login");
+  const [mergeOpen, setMergeOpen] = useState(false);
   const [householdChoice, setHouseholdChoice] = useState<"join" | "create">(
     "create",
   );
@@ -110,8 +114,19 @@ const LoginScreen = () => {
       return;
     }
 
-    const success = await login(username, password);
-    if (success) router.replace("/");
+    const result = await login(username, password);
+    if (!result) return;
+    if (result === "merge") {
+      setMergeOpen(true);
+      return;
+    }
+    router.replace("/");
+  };
+
+  const chooseMerge = async (keep: boolean) => {
+    const done = await resolveMerge(keep);
+    if (done) router.replace("/");
+    else setMergeOpen(true);
   };
 
   const signupSheet = skin.colors.signup ?? { fill: skin.colors.alert, ink: skin.colors.onAlert };
@@ -257,7 +272,33 @@ const LoginScreen = () => {
             label={isSignup ? copy.toLogin : copy.toSignup}
             onTouch={() => switchMode(isSignup ? "login" : "signup")}
           />
+          {isGuest && !mergePending && router.canGoBack() && (
+            <KilButton
+              variant="ghost"
+              height={skin.size.button.xs}
+              fontSize={skin.type.label}
+              label={guestCopy.later}
+              onTouch={() => router.back()}
+            />
+          )}
         </Dock>
+
+        <ActionPanel
+          request={
+            mergeOpen
+              ? {
+                  title: guestCopy.mergeTitle,
+                  message: guestCopy.mergeLine,
+                  cancelLabel: guestCopy.later,
+                  actions: [
+                    { label: guestCopy.mergeDiscard, destructive: true, onPress: () => chooseMerge(false) },
+                    { label: guestCopy.mergeKeep, onPress: () => chooseMerge(true) },
+                  ],
+                }
+              : null
+          }
+          onClose={() => setMergeOpen(false)}
+        />
 
         <Animated.View
           pointerEvents="none"

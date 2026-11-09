@@ -3,6 +3,8 @@ import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
+import useAuth from "@/providers/AuthProvider";
+import { router } from "expo-router";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import AnimationService from "@/services/animation";
@@ -23,6 +25,7 @@ const Intro = ({ onDone }: { onDone: () => void }) => {
   const sheets = skin.colors.sheets;
   const sheet = sheets[step % sheets.length]!;
   const skipShown = useSharedValue(1);
+  const { isGuest } = useAuth();
 
   useEffect(() => {
     skipShown.set(withTiming(step < last ? 1 : 0, AnimationService.config));
@@ -113,6 +116,15 @@ const Intro = ({ onDone }: { onDone: () => void }) => {
             onTouch={onDone}
           />
         </Animated.View>
+        {isGuest && (
+          <KilButton
+            variant="ghost"
+            height={skin.size.button.xs}
+            fontSize={skin.type.label}
+            label={skin.copy.guest.login}
+            onTouch={() => router.push("/login")}
+          />
+        )}
       </Dock>
     </View>
   );

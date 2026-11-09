@@ -10,10 +10,10 @@ const LOGIN_ROUTE = "/login";
 // Its only job: bounce an already-authenticated user away from /login.
 // Unauthenticated access to protected screens is handled by RequireAuth.
 const AuthGate = () => {
-  const { user, needsOnboarding } = useAuth();
+  const { user, isGuest, needsOnboarding } = useAuth();
   const pathname = usePathname();
 
-  if (user && pathname === LOGIN_ROUTE) {
+  if (user && !isGuest && pathname === LOGIN_ROUTE) {
     return <Redirect href={needsOnboarding ? "/onboarding?intro=1" : "/"} />;
   }
 

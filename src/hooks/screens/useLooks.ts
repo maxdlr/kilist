@@ -1,6 +1,8 @@
 import { useSkinSwitch } from "@/providers/SkinProvider";
 import useTickets, { PrizeType } from "@/providers/TicketsProvider";
 import useToast from "@/providers/ToastProvider";
+import { useAccountGate } from "@/providers/AccountGateProvider";
+import useAuth from "@/providers/AuthProvider";
 import { findSkin, SKINS } from "@/skins";
 import type { Skin } from "@/skins/types";
 import { useState } from "react";
@@ -23,6 +25,9 @@ const useLooks = () => {
   const { skin, setSkin } = useSkinSwitch();
   const { counter, redeem } = useTickets();
   const { showToast } = useToast();
+  const { isGuest } = useAuth();
+  const { requireAccount } = useAccountGate();
+  const needsAccount = (look: Look) => isGuest && look.skin.id === "versus";
   const [busy, setBusy] = useState<string | null>(null);
   const copy = skin.copy.prizes;
   const balance = counter?.balance ?? 0;
@@ -60,14 +65,14 @@ const useLooks = () => {
   };
 
   const wear = (look: Look) =>
-    run(look.prize.id, async () => {
+    needsAccount(look) ? requireAccount("versus") : run(look.prize.id, async () => {
       const ok = await setSkin(look.skin.id);
       if (!ok) showToast(copy.failed);
       return ok;
     });
 
   const unlock = (look: Look) =>
-    run(look.prize.id, async () => {
+    needsAccount(look) ? requireAccount("versus") : run(look.prize.id, async () => {
       const ok = await redeem(look.prize.id);
       showToast(ok ? copy.redeemed(look.skin.name) : copy.failed, ok ? "success" : "error");
       return ok;

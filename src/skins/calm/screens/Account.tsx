@@ -1,5 +1,6 @@
 import common from "@/i18n/common";
 import T from "../text";
+import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
@@ -78,17 +79,25 @@ const CalmAccount = () => {
 
           <LooksShowcase titleColor={C.ink} lineColor={C.soft} />
 
-          <Group label={copy.household}>
-            <View style={styles.row}>
-              <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
-              <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
-                {others.length ? T.settings.with(others.map((member) => member.username)) : T.settings.justYou}
-              </CText>
-            </View>
-            <Row label={T.settings.invite} detail={account.joinCode} onPress={() => setOpenPanel("qr")} />
-            <Row label={T.settings.share} onPress={account.shareCode} />
-            <Row label={copy.switch} onPress={() => setOpenPanel("switch")} />
-          </Group>
+          {account.isGuest ? (
+            <Group label={copy.household}>
+              <View style={styles.guest}>
+                <GuestCard account={account} ink={C.ink} />
+              </View>
+            </Group>
+          ) : (
+            <Group label={copy.household}>
+              <View style={styles.row}>
+                <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
+                <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
+                  {others.length ? T.settings.with(others.map((member) => member.username)) : T.settings.justYou}
+                </CText>
+              </View>
+              <Row label={T.settings.invite} detail={account.joinCode} onPress={() => setOpenPanel("qr")} />
+              <Row label={T.settings.share} onPress={account.shareCode} />
+              <Row label={copy.switch} onPress={() => setOpenPanel("switch")} />
+            </Group>
+          )}
 
           <Group label={T.settings.app}>
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
@@ -96,12 +105,14 @@ const CalmAccount = () => {
             <Row label={copy.credits} onPress={account.openCredits} />
           </Group>
 
-          <Group label={copy.dangerTitle}>
-            <Row label={copy.logout} chevron={false} onPress={account.logOut} />
-            {!account.isAdmin && (
-              <Row label={copy.delete} color={C.danger} chevron={false} onPress={() => setOpenPanel("delete")} />
-            )}
-          </Group>
+          {!account.isGuest && (
+            <Group label={copy.dangerTitle}>
+              <Row label={copy.logout} chevron={false} onPress={account.logOut} />
+              {!account.isAdmin && (
+                <Row label={copy.delete} color={C.danger} chevron={false} onPress={() => setOpenPanel("delete")} />
+              )}
+            </Group>
+          )}
         </ScrollView>
       </Screen>
       <AccountPanels account={account} />
@@ -124,6 +135,7 @@ const createStyles = (s: Skin) =>
       minHeight: s.size.row.list - 4,
     },
     detail: { flexShrink: 1, textAlign: "right" },
+    guest: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
   });
 
 export default CalmAccount;

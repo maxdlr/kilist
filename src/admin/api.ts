@@ -88,6 +88,26 @@ export type AdminList = {
 
 type Rate = { rate: number | null; cohort: number };
 
+type Split = { name: string; count: number; share: number | null }[];
+type Retention = { rate: number | null; cohort: number };
+
+export type AdminInstallStats = {
+  period: number;
+  active: { today: number; week: number; month: number };
+  newInstalls: number;
+  guests: { guest: number; account: number };
+  retention: { day1: Retention; day7: Retention; day30: Retention };
+  rounds: number;
+  cardsPerRound: number | null;
+  runs: number;
+  suggestionsTaken: number;
+  foodsPerInventory: number | null;
+  skins: Split;
+  gates: { household: number; versus: number; signups: number; signupsAfterGate: number; conversion: number | null };
+  versions: Split;
+  errors: number;
+};
+
 export type AdminStats = {
   period: number;
   growth: {

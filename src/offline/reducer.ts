@@ -21,6 +21,7 @@ export const toState = (snapshot: Snapshot): LocalState => ({
   ...JSON.parse(JSON.stringify(snapshot)),
   raceAnswers: [],
   localAliases: {},
+  runs: [],
 });
 
 const closeShopList = (state: LocalState, at: string) => {
@@ -37,6 +38,8 @@ const closeShopList = (state: LocalState, at: string) => {
       latest: { date: at, bought: list.boughtFoodIds.length, snoozed },
       total: state.dashboard.shopLists.total + 1,
     };
+    const { id: _id, ...run } = list;
+    state.runs.push({ ...run, endedAt: at });
   }
   state.openShopList = null;
 };
@@ -100,6 +103,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         boughtFoodIds: [],
         buyLog: [],
         startedAt: null,
+        createdAt: at,
       };
       return payload.tempId;
     }
@@ -171,7 +175,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         id: payload.tempId,
         name: payload.name,
         description: payload.description,
-        icon: null,
+        icon: payload.fromOnboarding ? (payload.icon ?? null) : null,
         inStockScore: payload.fromOnboarding ? 0.5 : 1,
         snoozedUntil: null,
         lastBoughtAt: null,
@@ -208,5 +212,14 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "me.language":
       state.user.language = payload.language ?? null;
       return state.user;
+
+    case "prize.redeem": {
+      const prize = state.prizes.prizes.find((entry) => entry.id === payload.prizeId);
+      if (!prize || prize.owned || state.prizes.balance < prize.price) return null;
+      prize.owned = true;
+      prize.wearable = true;
+      state.prizes.balance -= prize.price;
+      return state.prizes;
+    }
   }
 };

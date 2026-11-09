@@ -11,6 +11,7 @@ import { caseFor } from "@/skins";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import GuestCard from "./_components/GuestCard";
 import AccountPanels from "./_components/AccountPanels";
 import LooksShowcase from "./_components/LooksShowcase";
 
@@ -44,50 +45,59 @@ const RoastAccount = () => {
           <LooksShowcase />
         </View>
 
-        <View
-          style={[styles.household, { backgroundColor: skin.colors.accent }]}
-        >
-          <ThemedText size={skin.type.label}>{copy.household}</ThemedText>
-          <Title size={skin.type.headline} lines={1} header={false}>
-            {caseFor(skin, householdName || copy.householdFallback)}
-          </Title>
-          <View style={styles.codeRow}>
-            <ThemedText mono size={skin.type.mono} style={styles.flex}>
-              {common.code(joinCode)}
-            </ThemedText>
-            <KilButton
-              height={skin.size.button.sm}
-              fontSize={skin.type.label}
-              label={copy.share}
-              accessibilityLabel={common.shareHouseholdAria}
-              style={styles.chip}
-              onTouch={account.shareCode}
-            />
-            <KilButton
-              height={skin.size.button.sm}
-              fontSize={skin.type.label}
-              label={copy.qr}
-              accessibilityLabel={common.qrHouseholdAria}
-              style={styles.chip}
-              onTouch={() => setOpenPanel("qr")}
-            />
+        {account.isGuest ? (
+          <View style={[styles.household, { backgroundColor: skin.colors.accent }]}>
+            <GuestCard account={account} ink={skin.colors.onPaper} />
           </View>
-          <View style={styles.members}>
-            {members.map((member) => (
-              <ThemedText key={member.id} numberOfLines={1} size={skin.type.lead}>
-                {caseFor(skin, member.username) +
-                  (member.id === user.id ? copy.you : "")}
-              </ThemedText>
-            ))}
-          </View>
-        </View>
-        <View style={{ backgroundColor: skin.colors.accent }}>
-          <ActionRow
-            label={copy.switch}
-            onPress={() => setOpenPanel("switch")}
-            showChevron
-          />
-        </View>
+        ) : (
+          <>
+            <View
+              style={[styles.household, { backgroundColor: skin.colors.accent }]}
+            >
+              <ThemedText size={skin.type.label}>{copy.household}</ThemedText>
+              <Title size={skin.type.headline} lines={1} header={false}>
+                {caseFor(skin, householdName || copy.householdFallback)}
+              </Title>
+              <View style={styles.codeRow}>
+                <ThemedText mono size={skin.type.mono} style={styles.flex}>
+                  {common.code(joinCode)}
+                </ThemedText>
+                <KilButton
+                  height={skin.size.button.sm}
+                  fontSize={skin.type.label}
+                  label={copy.share}
+                  accessibilityLabel={common.shareHouseholdAria}
+                  style={styles.chip}
+                  onTouch={account.shareCode}
+                />
+                <KilButton
+                  height={skin.size.button.sm}
+                  fontSize={skin.type.label}
+                  label={copy.qr}
+                  accessibilityLabel={common.qrHouseholdAria}
+                  style={styles.chip}
+                  onTouch={() => setOpenPanel("qr")}
+                />
+              </View>
+              <View style={styles.members}>
+                {members.map((member) => (
+                  <ThemedText key={member.id} numberOfLines={1} size={skin.type.lead}>
+                    {caseFor(skin, member.username) +
+                      (member.id === user.id ? copy.you : "")}
+                  </ThemedText>
+                ))}
+              </View>
+            </View>
+            <View style={{ backgroundColor: skin.colors.accent }}>
+              <ActionRow
+                label={copy.switch}
+                onPress={() => setOpenPanel("switch")}
+                showChevron
+              />
+            </View>
+
+          </>
+        )}
 
         <View style={{ backgroundColor: skin.colors.paper }}>
           <ActionRow
@@ -107,21 +117,25 @@ const RoastAccount = () => {
           />
         </View>
 
-        <View style={styles.dangerHead}>
-          <ThemedText size={skin.type.label} color={skin.colors.onGround}>
-            {copy.dangerTitle}
-          </ThemedText>
-        </View>
-        <View style={{ backgroundColor: skin.colors.paper, paddingBottom: skin.spacing.section }}>
-          <ActionRow label={copy.logout} onPress={account.logOut} />
-          {!account.isAdmin && (
-            <ActionRow
-              label={copy.delete}
-              onPress={() => setOpenPanel("delete")}
-              destructive
-            />
-          )}
-        </View>
+        {!account.isGuest && (
+          <>
+            <View style={styles.dangerHead}>
+              <ThemedText size={skin.type.label} color={skin.colors.onGround}>
+                {copy.dangerTitle}
+              </ThemedText>
+            </View>
+            <View style={{ backgroundColor: skin.colors.paper, paddingBottom: skin.spacing.section }}>
+              <ActionRow label={copy.logout} onPress={account.logOut} />
+              {!account.isAdmin && (
+                <ActionRow
+                  label={copy.delete}
+                  onPress={() => setOpenPanel("delete")}
+                  destructive
+                />
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       <AccountPanels account={account} />

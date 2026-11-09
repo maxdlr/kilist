@@ -1,6 +1,8 @@
 import db from "./db";
+import { exportGuestState, hasLearnedAnything, prizeEntries } from "./guest";
 import { applyOp, toState } from "./reducer";
-import type { LocalState, Op, OpType, Snapshot, SyncResponse } from "./types";
+import { countStat, setStatsSource } from "./stats";
+import type { Catalog, LocalState, Op, OpType, Snapshot, SyncResponse } from "./types";
 
 const KEY_SNAPSHOT = "snapshot";
 const KEY_HASH = "hash";
@@ -8,6 +10,10 @@ const KEY_ALIASES = "aliases";
 const KEY_NEXT_TEMP = "nextTemp";
 const KEY_OWNER = "owner";
 const KEY_ENDED = "sessionEnded";
+const KEY_GUEST = "guest";
+const KEY_GUEST_STATE = "guestState";
+const KEY_IMPORT_ID = "guestImportId";
+const KEY_INTRO = "introPending";
 const CACHE_PREFIX = "http:";
 
 const FIRST_TEMP_ID = -2;
@@ -28,10 +34,12 @@ let aliases: Record<string, number> = {};
 let nextTemp = FIRST_TEMP_ID;
 let owner: number | null = null;
 let sessionEnded = false;
+let guest = false;
 let state: LocalState | null = null;
 const listeners = new Set<() => void>();
 
 const rebuild = () => {
+  if (guest) return;
   if (!base) {
     state = null;
     return;
@@ -51,8 +59,17 @@ const load = () => {
   owner = db.loadValue<number>(KEY_OWNER) ?? null;
   sessionEnded = db.loadValue<boolean>(KEY_ENDED) ?? false;
   ops = db.loadOps();
+  guest = db.loadValue<boolean>(KEY_GUEST) ?? false;
+  if (guest) {
+    const saved = db.loadValue<LocalState>(KEY_GUEST_STATE);
+    state = saved ? { ...saved, runs: saved.runs ?? [] } : null;
+    if (!state) guest = false;
+    return;
+  }
   rebuild();
 };
+
+const persistGuest = () => db.saveValue(KEY_GUEST_STATE, state);
 
 const notify = () => listeners.forEach((listener) => listener());
 
@@ -77,7 +94,51 @@ export const subscribeStore = (listener: () => void) => {
 
 export const hasSession = () => {
   load();
-  return state !== null && !sessionEnded;
+  return state !== null && !sessionEnded && !guest;
+};
+
+export const isGuest = () => {
+  load();
+  return guest && state !== null;
+};
+
+export const isSessionEnded = () => {
+  load();
+  return sessionEnded && state !== null && !guest;
+};
+
+export const startGuest = (snapshot: Snapshot) => {
+  wipe();
+  guest = true;
+  state = toState(snapshot);
+  db.transaction(() => {
+    db.saveValue(KEY_GUEST, true);
+    db.saveValue(KEY_IMPORT_ID, uuid());
+    db.saveValue(KEY_INTRO, true);
+    persistGuest();
+  });
+  notify();
+};
+
+export const applyCatalog = (catalog: Catalog) => {
+  if (!isGuest()) return;
+  state!.prizes.prizes = prizeEntries(catalog.prizes, state!.prizes.prizes);
+  persistGuest();
+  notify();
+};
+
+export const isIntroPending = () => db.loadValue<boolean>(KEY_INTRO) === true;
+
+export const consumeIntro = () => {
+  db.saveValue(KEY_INTRO, false);
+  notify();
+};
+
+export const hasGuestData = () => isGuest() && hasLearnedAnything(state!);
+
+export const exportGuest = () => {
+  if (!isGuest()) return undefined;
+  return exportGuestState(state!, db.loadValue<string>(KEY_IMPORT_ID) ?? uuid());
 };
 
 export const getState = () => {
@@ -113,9 +174,25 @@ export const resolveAlias = (id: number) => {
   return aliases[String(id)] ?? id;
 };
 
+let lastSuggested: number | null = null;
+
+const recordStats = (type: OpType, payload: Record<string, any>, result: unknown, runsBefore: number, roundsBefore: number) => {
+  if (type === "swipe") countStat("cards");
+  if (type === "swipe.complete" && state!.playedAt.length > roundsBefore) countStat("rounds");
+  if (type === "shop.buy" && lastSuggested !== null && Number(payload.foodId) === lastSuggested) {
+    countStat("suggestionsTaken");
+  }
+  if (type === "shop.buy" || type === "shop.snooze") {
+    lastSuggested = Array.isArray(result) && typeof result[0] === "number" ? result[0] : null;
+  }
+  if (state!.dashboard.shopLists.total > runsBefore) countStat("runs");
+};
+
 export const enqueue = (type: OpType, payload: Record<string, any>) => {
   load();
   if (!state) throw new Error("Offline store has no state");
+  const runsBefore = state.dashboard.shopLists.total;
+  const roundsBefore = state.playedAt.length;
   const op: Op = {
     id: uuid(),
     type,
@@ -123,9 +200,17 @@ export const enqueue = (type: OpType, payload: Record<string, any>) => {
     payload: remap(payload),
     attempts: 0,
   };
+  if (guest) {
+    const result = applyOp(state, op);
+    persistGuest();
+    recordStats(type, payload, result, runsBefore, roundsBefore);
+    notify();
+    return result;
+  }
   db.insertOp(op);
   ops.push(op);
   const result = applyOp(state, op);
+  recordStats(type, payload, result, runsBefore, roundsBefore);
   notify();
   return result;
 };
@@ -206,6 +291,7 @@ export const wipe = () => {
   nextTemp = FIRST_TEMP_ID;
   owner = null;
   sessionEnded = false;
+  guest = false;
   state = null;
   notify();
 };
@@ -229,6 +315,12 @@ export const resetStoreForTests = () => {
   nextTemp = FIRST_TEMP_ID;
   owner = null;
   sessionEnded = false;
+  guest = false;
   state = null;
   listeners.clear();
 };
+
+setStatsSource(() => {
+  load();
+  return { guest, state };
+});

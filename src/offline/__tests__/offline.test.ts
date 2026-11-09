@@ -99,14 +99,15 @@ describe("the swipe game offline", () => {
     const deck = swipeDeck(
       [
         food(1, 0.5, { histories: [{ isInStock: true, at: new Date(now - 3600000).toISOString() }] }),
-        food(2, 0.9),
+        food(2, 0.9, { lastBoughtAt: new Date(now - 3600000).toISOString() }),
+        food(6, 1, { lastBoughtAt: new Date(now - 8 * 24 * 3600000).toISOString() }),
         food(3, 0.5, { lists: [] }),
         food(4, 0.25),
         food(5, 0.5),
       ],
       now,
     );
-    expect(deck.map((entry) => entry.id)).toEqual([5, 4]);
+    expect(deck.map((entry) => entry.id)).toEqual([5, 4, 6]);
   });
 
   it("matches the server's score rules", () => {

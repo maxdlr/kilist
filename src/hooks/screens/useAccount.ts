@@ -1,4 +1,5 @@
 import common from "@/i18n/common";
+import { useAccountGate } from "@/providers/AccountGateProvider";
 import useAuth from "@/providers/AuthProvider";
 import useHousehold from "@/providers/HouseholdProvider";
 import { useSkin } from "@/providers/SkinProvider";
@@ -15,18 +16,26 @@ export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language";
 const useAccount = () => {
   const skin = useSkin();
   const copy = skin.copy.account;
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, isGuest, logout, deleteAccount } = useAuth();
+  const { requireAccount } = useAccountGate();
   const { household, switchHousehold } = useHousehold();
   const { showToast } = useToast();
   const { counter } = useTickets();
-  const [openPanel, setOpenPanel] = useState<AccountPanel | null>(null);
+  const [openPanel, setPanel] = useState<AccountPanel | null>(null);
+  const setOpenPanel = (panel: AccountPanel | null) => {
+    if (isGuest && (panel === "qr" || panel === "switch")) {
+      requireAccount("household");
+      return;
+    }
+    setPanel(panel);
+  };
   const { lang, choice } = useLanguage();
-  const closePanel = useCallback(() => setOpenPanel(null), []);
+  const closePanel = useCallback(() => setPanel(null), []);
 
   const joinCode = household?.joinCode ?? user?.household.joinCode ?? "";
 
   const logOut = async () => {
-    if (await logout()) router.replace("/login");
+    if (await logout()) router.replace("/");
   };
 
   const deleteRequest = {
@@ -39,13 +48,17 @@ const useAccount = () => {
         destructive: true,
         onPress: async () => {
           const success = await deleteAccount();
-          if (success) router.replace("/login");
+          if (success) router.replace("/");
         },
       },
     ],
   };
 
   const shareCode = async () => {
+    if (isGuest) {
+      requireAccount("household");
+      return;
+    }
     try {
       await Share.share({
         message: common.shareMessage(joinCode),
@@ -71,6 +84,9 @@ const useAccount = () => {
 
   return {
     user,
+    isGuest,
+    createAccount: () => router.push("/login?mode=signup"),
+    logIn: () => router.push("/login"),
     isAdmin: user?.type === "admin",
     joinCode,
     householdName: household?.name ?? user?.household.name,

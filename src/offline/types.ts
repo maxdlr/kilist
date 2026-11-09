@@ -25,7 +25,10 @@ export type LocalShopList = {
   boughtFoodIds: number[];
   buyLog: { foodId: number; at: string }[];
   startedAt: string | null;
+  createdAt?: string | null;
 };
+
+export type CompletedRun = Omit<LocalShopList, "id"> & { endedAt: string };
 
 export type DashboardTotals = {
   shopLists: {
@@ -38,10 +41,26 @@ export type DashboardTotals = {
   };
 };
 
+export type CatalogPrize = { id: string; kind: "skin"; skin: string; price: number };
+
+export type Catalog = {
+  foodBanks: Record<string, { name: string; description?: string; icon?: string }[]>;
+  prizes: CatalogPrize[];
+};
+
+export type PrizeEntry = {
+  id: string;
+  kind: "skin";
+  skin: string;
+  price: number;
+  owned: boolean;
+  wearable: boolean;
+};
+
 export type Prizes = {
   balance: number;
   premium: boolean;
-  prizes: unknown[];
+  prizes: PrizeEntry[];
 };
 
 export type Snapshot = {
@@ -62,6 +81,7 @@ export type RaceAnswer = "in" | "out" | "up";
 export type LocalState = Snapshot & {
   raceAnswers: { raceId: number; foodId: number; answer: RaceAnswer; ms: number }[];
   localAliases: Record<string, number>;
+  runs: CompletedRun[];
 };
 
 export type OpType =
@@ -77,7 +97,8 @@ export type OpType =
   | "food.edit"
   | "food.remove"
   | "me.skin"
-  | "me.language";
+  | "me.language"
+  | "prize.redeem";
 
 export type Op = {
   id: string;

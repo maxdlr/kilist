@@ -2,6 +2,7 @@ import common from "@/i18n/common";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
+import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
@@ -19,7 +20,7 @@ import { arcadeText as T } from "./text";
 
 const AVATAR_FILLS = [P.mint, P.pale, P.plank, P.yellow, P.lilac];
 
-const avatarFill = (id: number) => AVATAR_FILLS[id % AVATAR_FILLS.length]!;
+const avatarFill = (id: number) => AVATAR_FILLS[Math.abs(id) % AVATAR_FILLS.length]!;
 
 const Avatar = ({
   name,
@@ -138,55 +139,62 @@ const ArcadeAccount = () => {
 
           <LooksShowcase titleColor={P.white} inset={skin.spacing.section} />
 
-          <ArcadeCard lift={1} style={styles.team}>
-            <ThemedText size={skin.type.caption - 2} color={P.dimInk}>
-              {T.team}
-            </ThemedText>
-            <Title size={skin.type.lead} lines={1} color={P.navy}>
-              {account.householdName || T.teamFallback}
-            </Title>
-            <View style={styles.codeRow}>
-              <View style={styles.code}>
-                <ThemedText mono size={skin.type.mono} color={P.navy}>
-                  {T.code(account.joinCode)}
-                </ThemedText>
-              </View>
-              <KilButton
-                height={skin.size.button.xs + 4}
-                fontSize={skin.type.label}
-                label={copy.share}
-                accessibilityLabel={T.shareTeamAria}
-                style={styles.chip}
-                onTouch={account.shareCode}
-              />
-              <KilButton
-                height={skin.size.button.xs + 4}
-                fontSize={skin.type.label}
-                label={copy.qr}
-                accessibilityLabel={T.qrTeamAria}
-                style={styles.chip}
-                onTouch={() => setOpenPanel("qr")}
-              />
-            </View>
-            <View style={styles.roster}>
-              {account.members.map((member) => (
-                <View key={member.id} style={styles.member}>
-                  <Avatar name={member.username} id={member.id} size={skin.size.button.xs} />
-                  <ThemedText numberOfLines={1} size={skin.type.caption} color={P.navy}>
-                    {member.id === user.id ? T.you : member.username}
+          {account.isGuest ? (
+            <ArcadeCard lift={1} style={styles.team}>
+              <GuestCard account={account} ink={P.navy} />
+            </ArcadeCard>
+          ) : (
+            <ArcadeCard lift={1} style={styles.team}>
+              <ThemedText size={skin.type.caption - 2} color={P.dimInk}>
+                {T.team}
+              </ThemedText>
+              <Title size={skin.type.lead} lines={1} color={P.navy}>
+                {account.householdName || T.teamFallback}
+              </Title>
+              <View style={styles.codeRow}>
+                <View style={styles.code}>
+                  <ThemedText mono size={skin.type.mono} color={P.navy}>
+                    {T.code(account.joinCode)}
                   </ThemedText>
                 </View>
-              ))}
-            </View>
-          </ArcadeCard>
+                <KilButton
+                  height={skin.size.button.xs + 4}
+                  fontSize={skin.type.label}
+                  label={copy.share}
+                  accessibilityLabel={T.shareTeamAria}
+                  style={styles.chip}
+                  onTouch={account.shareCode}
+                />
+                <KilButton
+                  height={skin.size.button.xs + 4}
+                  fontSize={skin.type.label}
+                  label={copy.qr}
+                  accessibilityLabel={T.qrTeamAria}
+                  style={styles.chip}
+                  onTouch={() => setOpenPanel("qr")}
+                />
+              </View>
+              <View style={styles.roster}>
+                {account.members.map((member) => (
+                  <View key={member.id} style={styles.member}>
+                    <Avatar name={member.username} id={member.id} size={skin.size.button.xs} />
+                    <ThemedText numberOfLines={1} size={skin.type.caption} color={P.navy}>
+                      {member.id === user.id ? T.you : member.username}
+                    </ThemedText>
+                  </View>
+                ))}
+              </View>
+            </ArcadeCard>
+          )}
 
           <View style={styles.menu}>
-            <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />
+            {!account.isGuest && <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />}
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
             <MenuRow label={copy.credits} onPress={account.openCredits} />
           </View>
 
+          {!account.isGuest && (
           <View style={[styles.menu, styles.danger]}>
             <ThemedText size={skin.type.caption} color={P.white}>
               {copy.dangerTitle}
@@ -203,6 +211,7 @@ const ArcadeAccount = () => {
               />
             )}
           </View>
+          )}
         </ScrollView>
       </Ground>
       <AccountPanels account={account} />

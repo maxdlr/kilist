@@ -1,4 +1,4 @@
-import { AdminStats, useAdmin } from "@/admin/api";
+import { AdminInstallStats, AdminStats, useAdmin } from "@/admin/api";
 import { A, AChips, ALoading, AText, ARow, AScreen, ASection, ATiles } from "@/admin/ui";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -28,6 +28,7 @@ const Bar = ({ label, rate }: { label: string; rate: { rate: number | null; coho
 
 const StatsScreen = () => {
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["value"]>("30");
+  const { data: installs, mutate: mutateInstalls } = useAdmin<AdminInstallStats>(`/installs?days=${period}`);
   const { data: stats, mutate, isValidating } = useAdmin<AdminStats>(`/stats?days=${period}`);
 
   if (!stats) return <ALoading />;
@@ -50,9 +51,47 @@ const StatsScreen = () => {
       title="Stats"
       subtitle={`New, active and shopping figures cover ${periodLabel}. Totals are all time.`}
       refreshing={isValidating}
-      onRefresh={() => mutate()}
+      onRefresh={() => {
+        mutate();
+        mutateInstalls();
+      }}
       header={<AChips options={[...PERIODS]} value={period} onChange={setPeriod} />}
     >
+      {installs && (
+        <ASection title="Installs (anonymous)" note="Counted per phone with a random id, guests included. No names or foods.">
+          <View style={styles.inner}>
+            <ATiles
+              tiles={[
+                { value: n(installs.active.today), label: "Active today" },
+                { value: n(installs.active.week), label: "Active this week" },
+                { value: n(installs.active.month), label: "Active this month" },
+              ]}
+            />
+          </View>
+          <ARow first label="New installs" value={n(installs.newInstalls)} />
+          <ARow label="Guests / accounts" value={`${installs.guests.guest} / ${installs.guests.account}`} />
+          <ARow label="Back after 1 day" value={cohortPct(installs.retention.day1)} />
+          <ARow label="Back after 7 days" value={cohortPct(installs.retention.day7)} />
+          <ARow label="Back after 30 days" value={cohortPct(installs.retention.day30)} />
+          <ARow label="Rounds finished" value={n(installs.rounds)} />
+          <ARow label="Cards per round" value={n(installs.cardsPerRound)} />
+          <ARow label="Shopping runs finished" value={n(installs.runs)} />
+          <ARow label="Suggestions taken" value={n(installs.suggestionsTaken)} />
+          <ARow label="Foods per inventory (median)" value={n(installs.foodsPerInventory)} />
+          <ARow label="Skins in use" value={installs.skins.map((row) => `${row.name} ${pct(row.share)}`).join(", ") || "–"} />
+          <ARow
+            label="Account gates shown"
+            value={`${installs.gates.household} household · ${installs.gates.versus} Versus`}
+          />
+          <ARow
+            label="Signups after a gate"
+            value={`${installs.gates.signupsAfterGate} of ${installs.gates.signups} · ${pct(installs.gates.conversion)}`}
+          />
+          <ARow label="App versions" value={installs.versions.map((row) => `${row.name} ${pct(row.share)}`).join(", ") || "–"} />
+          <ARow label="Errors" value={n(installs.errors)} />
+        </ASection>
+      )}
+
       <ASection title="Growth">
         <View style={styles.inner}>
           <ATiles

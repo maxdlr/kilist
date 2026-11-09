@@ -7,6 +7,7 @@ import {
   forgetHousehold,
   getHash,
   hasSession,
+  isGuest,
   pendingCount,
   pendingOps,
   subscribeStore,
@@ -117,6 +118,7 @@ const run = async () => {
 };
 
 export const syncNow = (): Promise<void> => {
+  if (isGuest()) return Promise.resolve();
   if (debounce) {
     clearTimeout(debounce);
     debounce = null;
@@ -132,6 +134,7 @@ export const syncNow = (): Promise<void> => {
 };
 
 export const requestSync = () => {
+  if (isGuest()) return;
   if (debounce) clearTimeout(debounce);
   debounce = setTimeout(() => {
     debounce = null;

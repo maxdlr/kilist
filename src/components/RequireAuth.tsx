@@ -1,20 +1,23 @@
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import useAuth from "@/providers/AuthProvider";
-import { Redirect } from "expo-router";
-import { ReactNode } from "react";
+import { Redirect, router } from "expo-router";
+import { ReactNode, useEffect } from "react";
 
-// Guards a screen/layout that requires an authenticated session: shows a
-// loading spinner while the session is resolving, redirects to /login if
-// there isn't one, otherwise renders its children.
 const RequireAuth = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, sessionExpired, pendingIntro, consumeIntro } = useAuth();
 
-  if (isLoading) {
-    return <LoadingAnim />;
+  useEffect(() => {
+    if (!user || !pendingIntro) return;
+    consumeIntro();
+    router.push("/onboarding?intro=1");
+  }, [user, pendingIntro, consumeIntro]);
+
+  if (sessionExpired) {
+    return <Redirect href="/login" />;
   }
 
-  if (!user) {
-    return <Redirect href="/login" />;
+  if (isLoading || !user) {
+    return <LoadingAnim />;
   }
 
   return <>{children}</>;

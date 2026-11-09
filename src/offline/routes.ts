@@ -8,6 +8,9 @@ import {
   verdictOf,
   toLocalDay,
 } from "./domain";
+import { getLang } from "@/i18n";
+import { getCatalog } from "./catalog";
+import { normalizeName } from "./domain";
 import { resolveLocalId } from "./reducer";
 import {
   allocateTempId,
@@ -223,6 +226,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
           description: body.description,
           listId: body.listId,
           fromOnboarding: body.fromOnboarding === true,
+          icon: typeof body.icon === "string" ? body.icon : undefined,
         }),
       );
     },
@@ -312,6 +316,63 @@ export const matchLocal = ({ method, path }: Pick<Request, "method" | "path">) =
   }
   return null;
 };
+
+export class LocalError extends Error {
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
+}
+
+const GUEST_ROUTES: [string, RegExp, Handler][] = [
+  [
+    "get",
+    /^food-bank\/browse$/,
+    () => {
+      const onList = new Set(
+        state()
+          .foods.filter((food) => food.lists.length > 0)
+          .map((food) => normalizeName(food.name)),
+      );
+      const bank = getCatalog()?.foodBanks[getLang()];
+      if (!bank) throw new LocalError(503, "catalog.missing");
+      return bank.filter((item) => !onList.has(normalizeName(item.name)));
+    },
+  ],
+  [
+    "post",
+    /^prizes\/([^/]+)\/redeem$/,
+    (_request, match) => {
+      const counter = enqueue("prize.redeem", { prizeId: decodeURIComponent(match[1]!) });
+      if (!counter) throw new LocalError(402, "prizes.notEnough");
+      return counter;
+    },
+  ],
+  [
+    "put",
+    /^me\/skin$/,
+    ({ body }) => {
+      const prize = state().prizes.prizes.find((entry) => entry.skin === body.skin);
+      if (!prize?.wearable) throw new LocalError(403, "skins.locked");
+      return enqueue("me.skin", { skin: body.skin });
+    },
+  ],
+];
+
+const GUEST_NETWORK = [/^login$/, /^signup$/, /^refresh$/];
+
+export const matchGuest = ({ method, path }: Pick<Request, "method" | "path">) => {
+  for (const [routeMethod, pattern, handler] of GUEST_ROUTES) {
+    const match = path.match(pattern);
+    if (routeMethod === method && match) return { handler, match };
+  }
+  return null;
+};
+
+export const isGuestNetwork = ({ path }: Pick<Request, "path">) =>
+  GUEST_NETWORK.some((pattern) => pattern.test(path));
 
 export const isCachedRead = ({ method, path }: Pick<Request, "method" | "path">) =>
   method === "get" && CACHED_READS.some((pattern) => pattern.test(path));
