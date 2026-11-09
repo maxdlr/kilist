@@ -8,10 +8,12 @@ import { useTabBarVisibility } from "@/providers/TabBarProvider";
 const Dock = ({
   children,
   row = false,
+  overKeyboard = false,
   style,
 }: {
   children: ReactNode;
   row?: boolean;
+  overKeyboard?: boolean;
   style?: StyleProp<ViewStyle>;
 }) => {
   const skin = useSkin();
@@ -26,7 +28,7 @@ const Dock = ({
         { backgroundColor: skin.colors.ground },
         row && styles.row,
         style,
-        !insideTabs && {
+        !insideTabs && !overKeyboard && {
           paddingBottom:
             (StyleSheet.flatten(style)?.paddingBottom as number | undefined ?? skin.spacing.dock) + insets.bottom,
         },

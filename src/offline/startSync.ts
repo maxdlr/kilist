@@ -22,7 +22,7 @@ const startSync = () => {
     const online = state.isConnected !== false && state.isInternetReachable !== false;
     const wasOffline = !getSyncStatus().online;
     setOnline(online);
-    if (online && wasOffline) syncNow();
+    if (online && wasOffline && hasSession()) syncNow();
   });
 
   AppState.addEventListener("change", (next) => {

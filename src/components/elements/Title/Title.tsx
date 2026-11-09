@@ -61,6 +61,7 @@ const Title = ({
       <Text
         accessibilityRole={header ? "header" : undefined}
         adjustsFontSizeToFit={lines === 1}
+        minimumFontScale={0.85}
         numberOfLines={lines === 1 ? 1 : undefined}
         allowFontScaling={false}
         android_hyphenationFrequency="none"

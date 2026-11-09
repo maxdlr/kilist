@@ -40,7 +40,7 @@ const ICONS: Record<
   admin: WrenchIcon,
 };
 
-const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
+const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -86,13 +86,13 @@ const ArcadeTabBar = ({ state, navigation }: TabBarProps) => {
           const isPlay = name === "swipe";
 
           const press = () => {
-            const event = navigation.emit({
+            const event = emitter.emit({
               type: "tabPress",
               target: route.key,
               canPreventDefault: true,
             });
             if (!isCurrent && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+              navigateToTab(route.key);
             }
           };
 

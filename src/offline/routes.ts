@@ -157,7 +157,17 @@ export const offlineRaceView = (tzOffset: unknown) => {
 };
 
 export const queueRaceAnswer = (raceId: number, body: { foodId: number; answer: RaceAnswer; ms: number }, tzOffset: number) => {
-  const reward = enqueue("race.answer", { raceId, foodId: body.foodId, answer: body.answer, ms: body.ms });
+  const before = raceId < 0 ? offlineRaceView(tzOffset) : null;
+  const reward = enqueue("race.answer", {
+    raceId,
+    foodId: body.foodId,
+    answer: body.answer,
+    ms: body.ms,
+    ...(before && {
+      day: before.day,
+      foodIds: before.foods.map((food: { id: number }) => food.id),
+    }),
+  });
   const view = offlineRaceView(tzOffset);
   const { user } = state();
   const mates = (view.runs as any[])

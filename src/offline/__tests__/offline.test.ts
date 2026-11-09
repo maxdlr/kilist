@@ -375,6 +375,19 @@ describe("Versus offline", () => {
     expect(second.runs[0].answers).toHaveLength(1);
   });
 
+  it("sends its day and deck so the server can make it the real race", () => {
+    pull();
+    const view = offlineRaceView(0);
+
+    queueRaceAnswer(view.raceId, { foodId: view.foods[0].id, answer: "out", ms: 800 }, 0);
+
+    expect(pendingOps()[0]!.payload).toMatchObject({
+      raceId: GHOST_RACE_ID,
+      day: view.day,
+      foodIds: view.foods.map((entry: any) => entry.id),
+    });
+  });
+
   it("finishes a ghost race and pays provisional tickets", () => {
     pull();
     const view = offlineRaceView(0);

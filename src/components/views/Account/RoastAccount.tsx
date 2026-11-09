@@ -27,7 +27,7 @@ const RoastAccount = () => {
   if (!user) return null;
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <ScrollView
         style={[styles.flex, { backgroundColor: skin.colors.ground }]}
       >

@@ -131,7 +131,7 @@ const VersusInventory = () => {
         : [half(skin.copy.inventory.select, shelf.startSelect, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <Screen
         padded={false}
         dock={

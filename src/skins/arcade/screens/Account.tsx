@@ -111,7 +111,7 @@ const ArcadeAccount = () => {
   if (!user) return null;
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <Ground padded={false} style={styles.ground}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={[styles.player, { boxShadow: shadowOf(skin, 1, P.plankShadow) }]}>

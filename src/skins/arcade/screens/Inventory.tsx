@@ -129,7 +129,7 @@ const ArcadeInventory = () => {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <Ground
         padded={false}
         dock={

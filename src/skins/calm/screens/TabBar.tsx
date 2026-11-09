@@ -31,7 +31,7 @@ const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeW
   admin: WrenchIcon,
 };
 
-const CalmTabBar = ({ state, navigation }: TabBarProps) => {
+const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -69,8 +69,8 @@ const CalmTabBar = ({ state, navigation }: TabBarProps) => {
               accessibilityLabel={badge ? T.tabWaiting(label) : label}
               accessibilityState={{ selected: isCurrent }}
               onPress={() => {
-                const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-                if (currentName !== route.name && !event.defaultPrevented) navigation.navigate(route.name);
+                const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+                if (currentName !== route.name && !event.defaultPrevented) navigateToTab(route.key);
               }}
               style={styles.tab}
             >

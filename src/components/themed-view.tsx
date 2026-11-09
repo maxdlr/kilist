@@ -3,7 +3,7 @@ import { View, type ViewProps } from "react-native";
 import { ThemeColor } from "@/constants/theme";
 
 export type ThemedViewProps = ViewProps & {
-  ref?: React.RefObject<View | null>;
+  ref?: React.RefObject<React.ComponentRef<typeof View> | null>;
   lightColor?: string;
   darkColor?: string;
   type?: ThemeColor;

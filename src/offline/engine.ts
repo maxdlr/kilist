@@ -110,7 +110,7 @@ const run = async () => {
     if (!isNetworkFailure(error) && error?.response?.status < 500) {
       console.error("Sync failed", error?.response?.status);
     }
-    setStatus({ waiting: true, pending: pendingCount() });
+    setStatus({ waiting: hasSession(), pending: pendingCount() });
     return;
   }
   await refreshScreens();

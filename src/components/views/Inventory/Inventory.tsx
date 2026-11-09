@@ -53,7 +53,7 @@ const Inventory = () => {
 
   if (isEmpty) {
     return (
-      <KeyboardAvoidingView style={styles.flex} behavior="height">
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <Sheet
           fill={skin.colors.accent}
           dock={
@@ -104,7 +104,7 @@ const Inventory = () => {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
         <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
           <Title size={skin.type.display.sm} lines={1} color={skin.colors.onGround}>

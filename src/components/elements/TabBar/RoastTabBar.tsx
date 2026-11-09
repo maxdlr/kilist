@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export const tabAria = (name: string) =>
   common.tabs[name as keyof typeof common.tabs] ?? name;
 
-const RoastTabBar = ({ state, navigation }: TabBarProps) => {
+const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const { user } = useAuth();
   const isAdmin = user?.type === "admin";
@@ -51,13 +51,13 @@ const RoastTabBar = ({ state, navigation }: TabBarProps) => {
             accessibilityLabel={tabAria(name)}
             accessibilityState={{ selected: isCurrent }}
             onPress={() => {
-              const event = navigation.emit({
+              const event = emitter.emit({
                 type: "tabPress",
                 target: route.key,
                 canPreventDefault: true,
               });
               if (!isCurrent && !event.defaultPrevented) {
-                navigation.navigate(route.name);
+                navigateToTab(route.key);
               }
             }}
             style={[

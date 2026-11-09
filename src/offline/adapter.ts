@@ -13,12 +13,11 @@ import {
   raceRead,
   type Request,
 } from "./routes";
-import { hasSession, loadCached, saveCached } from "./store";
+import { hasSession, loadCached, pendingCount, saveCached } from "./store";
 
 const READ_TIMEOUT_MS = 8000;
 
-const rawNetwork = axios.getAdapter(axios.defaults.adapter);
-const network: AxiosAdapter = (c) => rawNetwork(c).catch((e: any) => { console.warn("TMPNET", c.baseURL, c.url, e?.message, e?.code, e?.response?.status, String(e?.stack).slice(0,300)); throw e; });
+const network = axios.getAdapter(axios.defaults.adapter);
 
 const parseBody = (data: unknown) => {
   if (typeof data !== "string") return data ?? {};
@@ -73,6 +72,7 @@ const cachedRead = async (config: InternalAxiosRequestConfig, request: Request) 
 const readRace = async (config: InternalAxiosRequestConfig, request: Request) => {
   const key = raceCacheKey(request.query.tzOffset);
   if (getSyncStatus().online) {
+    if (pendingCount() > 0) await syncNow();
     try {
       const response = await fromNetwork(config);
       const data = typeof response.data === "string" ? JSON.parse(response.data) : response.data;

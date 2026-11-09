@@ -31,7 +31,9 @@ const CalmHome = () => {
     }, [refreshFoods]),
   );
 
-  const refresh = () => Promise.all([refreshList(), refreshFoods()]);
+  const refresh = async () => {
+    await Promise.all([refreshList(), refreshFoods()]);
+  };
 
   if (!foods) {
     return error ? <CalmError onRetry={refresh} /> : <CalmLoading />;

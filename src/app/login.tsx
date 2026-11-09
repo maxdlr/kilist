@@ -14,7 +14,7 @@ import AnimationService from "@/services/animation";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { KeyboardAvoidingView, useKeyboardState } from "react-native-keyboard-controller";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -56,6 +56,7 @@ const LoginScreen = () => {
   const [joinCode, setJoinCode] = useState("");
   const [householdName, setHouseholdName] = useState("");
   const [showScanner, setShowScanner] = useState(false);
+  const isKeyboardOpen = useKeyboardState((state) => state.isVisible);
 
   const isSignup = mode === "signup";
   useStatusBarStyle(isSignup ? "dark" : skin.statusBarOnGround);
@@ -133,14 +134,16 @@ const LoginScreen = () => {
           ]}
           keyboardShouldPersistTaps="handled"
         >
-          <Title
-            size={isSignup ? 76 : 124}
-            lines={isSignup ? 1 : 2}
-            color={isSignup ? signupSheet.ink : skin.colors.accent}
-            style={styles.title}
-          >
-            {isSignup ? copy.signupTitle : copy.loginTitle}
-          </Title>
+          {!isKeyboardOpen && (
+            <Title
+              size={isSignup ? 76 : 124}
+              lines={isSignup ? 1 : 2}
+              color={isSignup ? signupSheet.ink : skin.colors.accent}
+              style={styles.title}
+            >
+              {isSignup ? copy.signupTitle : copy.loginTitle}
+            </Title>
+          )}
 
           <FormInput
             label={copy.username}
@@ -240,7 +243,7 @@ const LoginScreen = () => {
           )}
         </ScrollView>
 
-        <Dock style={styles.dock}>
+        <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
           <KilButton
             height={isSignup ? 68 : 84}
             fontSize={isSignup ? 34 : 42}

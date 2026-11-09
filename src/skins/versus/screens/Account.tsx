@@ -69,7 +69,7 @@ const VersusAccount = () => {
   }));
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="height">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <Screen padded={false}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.profile}>

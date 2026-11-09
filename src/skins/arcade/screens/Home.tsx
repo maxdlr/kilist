@@ -94,7 +94,7 @@ const ArcadeHome = () => {
             <ThemedText size={skin.type.caption} color={P.lilac} style={styles.tally}>
               {copy.tally(dashboard.foods.total, dashboard.shopLists.total, dashboard.swipes.total)}
             </ThemedText>
-            <SyncNote color={P.lilac} />
+            <SyncNote color={P.lilac} style={styles.tally} />
           </>
         }
       >
