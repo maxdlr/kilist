@@ -51,7 +51,7 @@ const useAxios = (url: string) => {
       }
 
       const error: KilistResponseError = (err as any)?.response?.data ?? {
-        message: common.unexpected,
+        message: (err as any)?.response ? common.unexpected : common.needsConnection,
       };
 
       return {

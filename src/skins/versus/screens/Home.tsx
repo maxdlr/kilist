@@ -1,3 +1,4 @@
+import SyncNote from "@/components/elements/SyncNote";
 import V from "../text";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import useHomeData from "@/hooks/screens/useHomeData";
@@ -285,6 +286,7 @@ const VersusHome = () => {
               </View>
             )}
           </View>
+          <SyncNote />
           {solo ? <SoloHome /> : <HouseHome standings={standings.data} period={period} onPick={setPeriod} />}
           {home.dashboard && (
             <Card>

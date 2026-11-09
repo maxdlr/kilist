@@ -5,6 +5,7 @@ import { notifyToast } from "@/services/toastBridge";
 import { KilistApiError } from "@/types/api";
 
 export const onError = (err: KilistApiError) => {
+  if (err?.status === 0) return;
   notifyToast(err?.message || common.unexpected);
 };
 
@@ -30,7 +31,9 @@ const fetcher = async ({
     // all) — always throw a well-formed Error so SWR settles correctly
     // instead of hanging on a nullish/malformed thrown value.
     const kissError = new Error(
-      responseData?.message || axiosError?.message || common.unexpected,
+      responseData?.message ||
+        (axiosError?.response ? axiosError?.message : common.needsConnection) ||
+        common.unexpected,
     ) as KilistApiError;
     kissError.status = responseData?.status ?? axiosError?.response?.status ?? 0;
 

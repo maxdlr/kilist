@@ -28,6 +28,7 @@ const useSwipeGame = () => {
     swipe,
     update,
     completeSession,
+    freezeDeck,
   } = useSwipeFoods();
 
   const [phase, setPhase] = useState<"idle" | "play" | "done">("idle");
@@ -42,6 +43,10 @@ const useSwipeGame = () => {
   const flingRef = useRef<SwipeDeckFling | null>(null);
   const pendingUpdates = useRef<Promise<SwipeReward | null>[]>([]);
   const bonusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    freezeDeck(phase === "play");
+  }, [phase, freezeDeck]);
 
   useEffect(
     () => () => {

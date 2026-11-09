@@ -1,4 +1,6 @@
 import { deviceLang, getLang } from "@/i18n";
+import { offlineAdapter } from "@/offline/adapter";
+import { setSyncClient } from "@/offline/engine";
 import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
@@ -48,7 +50,10 @@ const rejectRefreshSubscribers = (error: unknown) => {
 const instance = axios.create({
   withCredentials: true,
   baseURL,
+  adapter: offlineAdapter,
 });
+
+setSyncClient(instance);
 
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
@@ -107,6 +112,9 @@ instance.interceptors.response.use(
         resolveRefreshSubscribers();
         return instance(originalRequest);
       } catch (refreshError) {
+        if (axios.isAxiosError(refreshError) && !refreshError.response) {
+          resetRefreshCount();
+        }
         rejectRefreshSubscribers(refreshError);
         return Promise.reject(refreshError);
       } finally {

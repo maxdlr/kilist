@@ -1,5 +1,6 @@
 const en = {
   unexpected: "Something went wrong. Try again.",
+  needsConnection: "This needs a connection.",
   passwordsDiffer: "Passwords do not match",
   householdCodeMissing: "Enter a household code to join",
   inventoryNotReady: "Your inventory isn't ready yet, try again in a moment",

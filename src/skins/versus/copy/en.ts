@@ -56,6 +56,10 @@ const versusCopy: RoastCopy = {
     keep: "Keep",
     remove: "Remove",
   },
+  sync: {
+    toast: "Offline. Couldn't sync, your answers are saved for the rematch.",
+    waiting: "Waiting to be back online",
+  },
   login: {
     loginTitle: "Back in the ring",
     signupTitle: "Start a house",

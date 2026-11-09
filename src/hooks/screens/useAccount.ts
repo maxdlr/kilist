@@ -26,8 +26,7 @@ const useAccount = () => {
   const joinCode = household?.joinCode ?? user?.household.joinCode ?? "";
 
   const logOut = async () => {
-    await logout();
-    router.replace("/login");
+    if (await logout()) router.replace("/login");
   };
 
   const deleteRequest = {

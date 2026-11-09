@@ -54,6 +54,10 @@ const roastCopy = {
     keep: "KEEP",
     remove: "REMOVE",
   },
+  sync: {
+    toast: "I SAVED IT. THE INTERNET LEFT YOU.",
+    waiting: "WAITING TO BE BACK ONLINE",
+  },
   login: {
     loginTitle: "YOU AGAIN.",
     signupTitle: "NEW HERE?",

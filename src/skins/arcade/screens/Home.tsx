@@ -1,4 +1,5 @@
 import KilButton from "@/components/elements/KilButton";
+import SyncNote from "@/components/elements/SyncNote";
 import Title from "@/components/elements/Title/Title";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import { ThemedText } from "@/components/themed-text";
@@ -93,6 +94,7 @@ const ArcadeHome = () => {
             <ThemedText size={skin.type.caption} color={P.lilac} style={styles.tally}>
               {copy.tally(dashboard.foods.total, dashboard.shopLists.total, dashboard.swipes.total)}
             </ThemedText>
+            <SyncNote color={P.lilac} />
           </>
         }
       >

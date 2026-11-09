@@ -56,6 +56,10 @@ const calmCopy: RoastCopy = {
     keep: "Keep",
     remove: "Remove",
   },
+  sync: {
+    toast: "You're offline. Your changes are saved and will sync later.",
+    waiting: "Waiting to be back online",
+  },
   login: {
     loginTitle: "Log in",
     signupTitle: "Create an account",

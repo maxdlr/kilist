@@ -56,6 +56,10 @@ const fr: SkinCopy = {
     keep: "Garder",
     remove: "Retirer",
   },
+  sync: {
+    toast: "Tu es hors ligne. Tes changements sont gardés et seront synchronisés plus tard.",
+    waiting: "En attente de retour en ligne",
+  },
   login: {
     loginTitle: "Connexion",
     signupTitle: "Créer un compte",

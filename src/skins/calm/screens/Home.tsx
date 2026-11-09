@@ -1,3 +1,4 @@
+import SyncNote from "@/components/elements/SyncNote";
 import T from "../text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -67,6 +68,7 @@ const CalmHome = () => {
               {T.home.allSetLine}
             </CText>
           )}
+          <SyncNote color={C.soft} />
         </View>
 
         {pending && (

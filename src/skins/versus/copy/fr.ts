@@ -56,6 +56,10 @@ const fr: SkinCopy = {
     keep: "Garder",
     remove: "Retirer",
   },
+  sync: {
+    toast: "Hors ligne. Pas de synchro, tes réponses sont gardées pour la revanche.",
+    waiting: "En attente de retour en ligne",
+  },
   login: {
     loginTitle: "De retour sur le ring",
     signupTitle: "Lance une maison",

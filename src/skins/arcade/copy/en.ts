@@ -56,6 +56,10 @@ const arcadeCopy: RoastCopy = {
     keep: "Keep",
     remove: "Remove",
   },
+  sync: {
+    toast: "Offline! Couldn't sync, but your moves are saved.",
+    waiting: "Waiting to be back online",
+  },
   login: {
     loginTitle: "Player 1, ready?",
     signupTitle: "New player",

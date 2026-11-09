@@ -1,8 +1,10 @@
 import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
+import { onSessionEnded } from "@/offline/engine";
+import startSync from "@/offline/startSync";
 import useToast from "@/providers/ToastProvider";
 import { UserType } from "@/types/model";
-import React, { createContext, ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
 export type HouseholdChoice =
@@ -21,7 +23,7 @@ export type AuthContextType = {
   needsOnboarding: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   signup: (payload: SignupPayload) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
   mutateUser: () => void;
 };
@@ -32,7 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   needsOnboarding: false,
   login: async () => false,
   signup: async () => false,
-  logout: async () => {},
+  logout: async () => false,
   deleteAccount: async () => false,
   mutateUser: () => {},
 });
@@ -90,9 +92,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await postLogout({});
+    const res = await postLogout({});
+    if (res.error) {
+      showToast(res.error.message || common.unexpected);
+      return false;
+    }
     await clearSession();
+    return true;
   };
+
+  useEffect(() => {
+    startSync();
+    onSessionEnded(clearSession);
+    return () => onSessionEnded(null);
+  }, []);
 
   const deleteAccount = async () => {
     const res = await deleteUser({ params: { id: user?.id } });

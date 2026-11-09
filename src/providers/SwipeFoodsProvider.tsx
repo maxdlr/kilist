@@ -5,6 +5,7 @@ import { FoodType } from "@/types/model";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -38,6 +39,7 @@ export type SwipeFoodsContextType = {
     isInStock: boolean | null;
   }) => Promise<SwipeReward | null>;
   completeSession: () => Promise<void>;
+  freezeDeck: (frozen: boolean) => void;
 };
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
@@ -52,6 +54,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   mutateFoods: () => {},
   update: async () => null,
   completeSession: async () => {},
+  freezeDeck: () => {},
 });
 
 export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
@@ -91,12 +94,21 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
 
   const [foods, setFoods] = useState<FoodType[] | undefined>(data);
   const swipedIds = useRef(new Set<number>());
+  const deckFrozen = useRef(false);
+  const latestData = useRef(data);
 
-  useEffect(
-    () =>
-      setFoods(data?.filter((food) => !swipedIds.current.has(food.id))),
-    [data],
-  );
+  useEffect(() => {
+    latestData.current = data;
+    if (deckFrozen.current) return;
+    setFoods(data?.filter((food) => !swipedIds.current.has(food.id)));
+  }, [data]);
+
+  const freezeDeck = useCallback((frozen: boolean) => {
+    deckFrozen.current = frozen;
+    if (!frozen) {
+      setFoods(latestData.current?.filter((food) => !swipedIds.current.has(food.id)));
+    }
+  }, []);
 
   const update = async (payload: {
     foodId: number;
@@ -150,6 +162,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         mutateFoods,
         update,
         completeSession,
+        freezeDeck,
       }}
     >
       {children}

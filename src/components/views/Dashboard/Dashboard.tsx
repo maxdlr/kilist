@@ -1,3 +1,4 @@
+import SyncNote from "@/components/elements/SyncNote";
 import type { Skin } from "@/skins/types";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
@@ -99,6 +100,7 @@ const Dashboard = ({
         <ThemedText size={skin.type.label} color={skin.colors.onGround} style={styles.tally}>
           {copy.tally(foods.total, shopLists.total, swipes.total)}
         </ThemedText>
+        <SyncNote color={skin.colors.onGround} />
       </View>
     </PullToRefresh>
   );

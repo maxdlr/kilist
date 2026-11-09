@@ -73,7 +73,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setShopList(data);
-    orderFoodBy("score");
+    orderFoodBy(orderedBy);
   }, [data]);
 
   const { postData: startShopList } = useAxios("shop-list/start");

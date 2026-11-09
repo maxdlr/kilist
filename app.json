@@ -59,7 +59,8 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan a household code."
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
