@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.kilist",
+      "bundleIdentifier": "com.maxdlr.kilist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -22,12 +22,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.kilist",
+      "package": "com.maxdlr.kilist",
       "versionCode": 2,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -67,7 +68,13 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan a household code."
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-notifications",
+        {
+          "color": "#6A3FC8"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

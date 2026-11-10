@@ -4,12 +4,10 @@ export const GUEST_USER_ID = -1;
 export const GUEST_LIST_ID = -1;
 
 export const prizeEntries = (prizes: CatalogPrize[], current: PrizeEntry[] = []): PrizeEntry[] =>
-  prizes.map((prize) => ({
-    ...prize,
-    kind: "skin",
-    owned: prize.price === 0,
-    wearable: prize.price === 0,
-  }));
+  prizes.map((prize) => {
+    const owned = prize.price === 0 || !!current.find((entry) => entry.id === prize.id)?.owned;
+    return { ...prize, kind: "skin", owned, wearable: owned };
+  });
 
 export const makeGuestSnapshot = (name: string, skin: string, prizes: CatalogPrize[] = []): Snapshot => ({
   user: {
@@ -70,6 +68,7 @@ export const exportGuestState = (state: LocalState, importId: string) => {
     recentSwipes: state.recentSwipes,
     skin: state.user.skin,
     language: state.user.language ?? null,
+    notifications: state.user.notifications ?? null,
   };
 };
 

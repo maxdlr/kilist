@@ -30,6 +30,7 @@ const ActionPanel = ({
   }
 
   const isDestructive = shown?.actions.some((action) => action.destructive);
+  const stacked = (shown?.actions.length ?? 0) > 1;
 
   return (
     <BottomPanel visible={request !== null} onClose={onClose} dismissible>
@@ -45,6 +46,31 @@ const ActionPanel = ({
       {shown?.message && (
         <ThemedText color={skin.panel.ink}>{shown.message}</ThemedText>
       )}
+      {stacked && (
+        <View style={styles.stack}>
+          {[...(shown?.actions ?? [])].reverse().map((action, index) => (
+            <KilButton
+              key={action.label}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant={action.destructive ? "danger" : index === 0 ? "primary" : skin.panel.secondary}
+              label={action.label}
+              onTouch={() => {
+                onClose();
+                action.onPress();
+              }}
+            />
+          ))}
+          <KilButton
+            height={skin.size.button.sm}
+            fontSize={skin.type.label}
+            variant={skin.panel.secondary}
+            label={shown?.cancelLabel ?? skin.copy.common.cancel}
+            onTouch={onClose}
+          />
+        </View>
+      )}
+      {!stacked && (
       <View style={styles.actions}>
         <KilButton
           flex={1}
@@ -69,6 +95,7 @@ const ActionPanel = ({
           />
         ))}
       </View>
+      )}
     </BottomPanel>
   );
 };
@@ -78,6 +105,9 @@ const createStyles = (s: Skin) =>
     actions: {
       flexDirection: "row",
       gap: s.spacing.inline,
+    },
+    stack: {
+      gap: s.spacing.small,
     },
   });
 

@@ -11,7 +11,7 @@ import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Linking, Share } from "react-native";
 
-export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language";
+export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode";
 
 const useAccount = () => {
   const skin = useSkin();
@@ -100,6 +100,9 @@ const useAccount = () => {
     shareCode,
     openCredits: () => setOpenPanel("credits"),
     openLanguage: () => setOpenPanel("language"),
+    openNotifications: () => router.push("/notifications"),
+    needsEmailCode: !isGuest && !!user && !user.emailConfirmedAt,
+    openEmailCode: () => setOpenPanel("emailCode"),
     languageName: choice ? LANGUAGE_NAMES[choice] : common.languageAuto(LANGUAGE_NAMES[lang]),
     openIconsSite,
     switchTo,

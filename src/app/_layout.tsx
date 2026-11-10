@@ -42,6 +42,7 @@ const SkinnedApp = () => {
             <Stack.Screen name="[id]" options={{ title: "" }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen name="notifications" options={{ headerShown: false }} />
             <Stack.Screen name="admin" options={{ headerShown: false }} />
           </Stack>
           <AuthGate />

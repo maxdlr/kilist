@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "724639035241",
+    "project_id": "kilist",
+    "storage_bucket": "kilist.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724639035241:android:8af7218906314fdacfd7f8",
+        "android_client_info": {
+          "package_name": "com.maxdlr.kilist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKDQ5blE1_2z5A27RICPFNqnecDqe1kz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -41,11 +41,21 @@ export type DashboardTotals = {
   };
 };
 
-export type CatalogPrize = { id: string; kind: "skin"; skin: string; price: number };
+export type CatalogPrize = { id: string; kind: "skin"; skin: string; price: number; accountOnly?: boolean };
+
+export type NotificationChoice = "none" | "email" | "push" | "both";
+
+export type NotificationEvent = {
+  id: string;
+  channels: ("email" | "push")[];
+  default: NotificationChoice;
+  guestDefault: NotificationChoice;
+};
 
 export type Catalog = {
   foodBanks: Record<string, { name: string; description?: string; icon?: string }[]>;
   prizes: CatalogPrize[];
+  notifications?: { events: NotificationEvent[]; alwaysEmail: string[] };
 };
 
 export type PrizeEntry = {
@@ -53,12 +63,14 @@ export type PrizeEntry = {
   kind: "skin";
   skin: string;
   price: number;
+  accountOnly?: boolean;
   owned: boolean;
   wearable: boolean;
 };
 
 export type Prizes = {
   balance: number;
+  reserved?: number;
   premium: boolean;
   prizes: PrizeEntry[];
 };
@@ -98,7 +110,8 @@ export type OpType =
   | "food.remove"
   | "me.skin"
   | "me.language"
-  | "prize.redeem";
+  | "prize.redeem"
+  | "me.notifications";
 
 export type Op = {
   id: string;

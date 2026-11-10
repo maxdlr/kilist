@@ -1,5 +1,5 @@
 import { useSkinSwitch } from "@/providers/SkinProvider";
-import useTickets, { PrizeType } from "@/providers/TicketsProvider";
+import useTickets, { fundsFor, PrizeType } from "@/providers/TicketsProvider";
 import useToast from "@/providers/ToastProvider";
 import { useAccountGate } from "@/providers/AccountGateProvider";
 import useAuth from "@/providers/AuthProvider";
@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export const STORE_PRICE = "€1.99";
 
-export type LookState = "current" | "owned" | "unlockable" | "locked";
+export type LookState = "current" | "owned" | "unlockable" | "locked" | "account";
 
 export type Look = {
   prize: PrizeType;
@@ -19,7 +19,7 @@ export type Look = {
   wearableAnyway: boolean;
 };
 
-const ORDER: LookState[] = ["current", "owned", "unlockable", "locked"];
+const ORDER: LookState[] = ["current", "owned", "unlockable", "locked", "account"];
 
 const useLooks = () => {
   const { skin, setSkin } = useSkinSwitch();
@@ -27,7 +27,7 @@ const useLooks = () => {
   const { showToast } = useToast();
   const { isGuest } = useAuth();
   const { requireAccount } = useAccountGate();
-  const needsAccount = (look: Look) => isGuest && look.skin.id === "versus";
+  const needsAccount = (look: Look) => isGuest && !!look.prize.accountOnly;
   const [busy, setBusy] = useState<string | null>(null);
   const copy = skin.copy.prizes;
   const balance = counter?.balance ?? 0;
@@ -41,14 +41,16 @@ const useLooks = () => {
           ? "current"
           : prize.owned || prize.price === 0
             ? "owned"
-            : balance >= prize.price
+            : isGuest && prize.accountOnly
+              ? "account"
+            : fundsFor(counter, prize) >= prize.price
               ? "unlockable"
               : "locked";
       return {
         prize,
         skin: look,
         state,
-        missing: Math.max(0, prize.price - balance),
+        missing: Math.max(0, prize.price - fundsFor(counter, prize)),
         wearableAnyway: prize.wearable && (state === "unlockable" || state === "locked"),
       };
     })

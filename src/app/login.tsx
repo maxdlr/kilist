@@ -6,6 +6,7 @@ import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import KilToggleButton from "@/components/elements/KilToggleButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
+import ResetPasswordModal from "@/components/views/Login/ResetPasswordModal";
 import Title from "@/components/elements/Title/Title";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useAuth from "@/providers/AuthProvider";
@@ -49,6 +50,7 @@ const LoginScreen = () => {
   const params = useLocalSearchParams<{ mode?: string }>();
   const [mode, setMode] = useState<"login" | "signup">(params.mode === "signup" ? "signup" : "login");
   const [mergeOpen, setMergeOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [householdChoice, setHouseholdChoice] = useState<"join" | "create">(
     "create",
   );
@@ -258,6 +260,7 @@ const LoginScreen = () => {
           )}
         </ScrollView>
 
+        {!resetOpen && (
         <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
           <KilButton
             height={isSignup ? 68 : 84}
@@ -272,6 +275,15 @@ const LoginScreen = () => {
             label={isSignup ? copy.toLogin : copy.toSignup}
             onTouch={() => switchMode(isSignup ? "login" : "signup")}
           />
+          {!isSignup && (
+            <KilButton
+              variant="ghost"
+              height={skin.size.button.xs}
+              fontSize={skin.type.label}
+              label={common.reset.link}
+              onTouch={() => setResetOpen(true)}
+            />
+          )}
           {isGuest && !mergePending && router.canGoBack() && (
             <KilButton
               variant="ghost"
@@ -282,6 +294,9 @@ const LoginScreen = () => {
             />
           )}
         </Dock>
+        )}
+
+        <ResetPasswordModal visible={resetOpen} onClose={() => setResetOpen(false)} />
 
         <ActionPanel
           request={

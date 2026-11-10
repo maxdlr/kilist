@@ -1,3 +1,4 @@
+import useAuth from "@/providers/AuthProvider";
 import axios from "@/services/axios";
 import React, { createContext, ReactNode, useCallback, useMemo } from "react";
 import useSWR from "swr";
@@ -7,25 +8,32 @@ export type PrizeType = {
   kind: "skin";
   skin: string;
   price: number;
+  accountOnly?: boolean;
   owned: boolean;
   wearable: boolean;
 };
 
 export type PrizeCounterType = {
   balance: number;
+  reserved?: number;
   premium: boolean;
   prizes: PrizeType[];
 };
 
+export const fundsFor = (counter: PrizeCounterType | undefined, prize: Pick<PrizeType, "accountOnly">) =>
+  Math.max(0, (counter?.balance ?? 0) - (prize.accountOnly ? counter?.reserved ?? 0 : 0));
+
 type TicketsContextType = {
   counter?: PrizeCounterType;
   nextPrize?: PrizeType;
+  nextPrizeFunds: number;
   refresh: () => Promise<unknown>;
   setBalance: (balance: number) => void;
   redeem: (prizeId: string) => Promise<boolean>;
 };
 
 const TicketsContext = createContext<TicketsContextType>({
+  nextPrizeFunds: 0,
   refresh: async () => undefined,
   setBalance: () => {},
   redeem: async () => false,
@@ -36,13 +44,15 @@ export const TicketsProvider = ({ children }: { children: ReactNode }) => {
     url: "/prizes",
   });
 
+  const { isGuest } = useAuth();
   const nextPrize = useMemo(
     () =>
       counter?.prizes
-        .filter((prize) => !prize.owned)
+        .filter((prize) => !prize.owned && !(isGuest && prize.accountOnly))
         .sort((a, b) => a.price - b.price)[0],
-    [counter],
+    [counter, isGuest],
   );
+  const nextPrizeFunds = nextPrize ? fundsFor(counter, nextPrize) : counter?.balance ?? 0;
 
   const setBalance = useCallback(
     (balance: number) => {
@@ -69,8 +79,8 @@ export const TicketsProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const value = useMemo(
-    () => ({ counter, nextPrize, refresh: () => mutate(), setBalance, redeem }),
-    [counter, nextPrize, mutate, setBalance, redeem],
+    () => ({ counter, nextPrize, nextPrizeFunds, refresh: () => mutate(), setBalance, redeem }),
+    [counter, nextPrize, nextPrizeFunds, mutate, setBalance, redeem],
   );
 
   return (

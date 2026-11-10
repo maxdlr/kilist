@@ -5,6 +5,7 @@ import { countSignup } from "@/offline/stats";
 import { onSessionEnded } from "@/offline/engine";
 import { GUEST_USER_ID, makeGuestSnapshot } from "@/offline/guest";
 import startSync from "@/offline/startSync";
+import { unregisterPushToken } from "@/notifications/push";
 import {
   consumeIntro,
   exportGuest,
@@ -53,7 +54,7 @@ export type AuthContextType = {
   signup: (payload: SignupPayload) => Promise<boolean>;
   logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
-  mutateUser: () => void;
+  mutateUser: (data?: UserType) => unknown;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -168,6 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    await unregisterPushToken();
     const res = await postLogout({});
     if (res.error) {
       showToast(res.error.message || common.unexpected);

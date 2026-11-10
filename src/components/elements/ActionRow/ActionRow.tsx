@@ -1,16 +1,18 @@
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 const ActionRow = ({
   label,
+  detail,
   onPress,
   destructive = false,
   showChevron = false,
   onPanel = false,
 }: {
   label: string;
+  detail?: string;
   onPress: () => void;
   destructive?: boolean;
   showChevron?: boolean;
@@ -25,7 +27,7 @@ const ActionRow = ({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={detail ? `${label}, ${detail}` : label}
       style={({ pressed }) => [
         styles.row,
         destructive
@@ -34,12 +36,20 @@ const ActionRow = ({
               borderTopColor: surfaceInk,
               borderTopWidth: skin.shape.border + 1,
             },
+        detail ? styles.tall : null,
         pressed && styles.pressed,
       ]}
     >
-      <ThemedText size={skin.type.lead} color={ink} style={styles.label} numberOfLines={1}>
-        {label}
-      </ThemedText>
+      <View style={styles.label}>
+        <ThemedText size={skin.type.lead} color={ink} numberOfLines={1}>
+          {label}
+        </ThemedText>
+        {detail ? (
+          <ThemedText size={skin.type.caption} color={ink} numberOfLines={1}>
+            {detail}
+          </ThemedText>
+        ) : null}
+      </View>
       {showChevron && (
         <ThemedText importantForAccessibility="no" size={skin.type.lead} color={ink}>
           {">"}
@@ -61,6 +71,12 @@ const createStyles = (s: Skin) =>
     },
     label: {
       flex: 1,
+      minWidth: 0,
+    },
+    tall: {
+      height: undefined,
+      minHeight: s.size.row.list,
+      paddingVertical: s.spacing.small,
     },
     pressed: {
       opacity: s.shape.pressedOpacity,

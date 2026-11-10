@@ -213,9 +213,16 @@ export const applyOp = (state: LocalState, op: Op): any => {
       state.user.language = payload.language ?? null;
       return state.user;
 
+    case "me.notifications":
+      state.user.notifications = { ...(state.user.notifications ?? {}), [payload.event]: payload.choice };
+      return state.user;
+
     case "prize.redeem": {
       const prize = state.prizes.prizes.find((entry) => entry.id === payload.prizeId);
-      if (!prize || prize.owned || state.prizes.balance < prize.price) return null;
+      const reserved = state.prizes.reserved ?? 0;
+      const funds = state.prizes.balance - (prize?.accountOnly ? reserved : 0);
+      if (!prize || prize.owned || funds < prize.price) return null;
+      if (!prize.accountOnly) state.prizes.reserved = Math.max(0, reserved - prize.price);
       prize.owned = true;
       prize.wearable = true;
       state.prizes.balance -= prize.price;

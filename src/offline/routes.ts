@@ -203,6 +203,11 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
   ["get", /^me$/, () => state().user],
   ["put", /^me\/skin$/, ({ body }) => enqueue("me.skin", { skin: body.skin })],
   ["put", /^me\/language$/, ({ body }) => enqueue("me.language", { language: body.language ?? null })],
+  [
+    "put",
+    /^me\/notifications$/,
+    ({ body }) => enqueue("me.notifications", { event: body.event, choice: body.choice }),
+  ],
   ["get", /^households\/me$/, () => state().household],
   ["get", /^dashboard$/, dashboard],
   ["get", /^prizes$/, () => state().prizes],
@@ -345,7 +350,11 @@ const GUEST_ROUTES: [string, RegExp, Handler][] = [
     "post",
     /^prizes\/([^/]+)\/redeem$/,
     (_request, match) => {
-      const counter = enqueue("prize.redeem", { prizeId: decodeURIComponent(match[1]!) });
+      const prizeId = decodeURIComponent(match[1]!);
+      if (state().prizes.prizes.find((prize) => prize.id === prizeId)?.accountOnly) {
+        throw new LocalError(403, "prizes.accountOnly");
+      }
+      const counter = enqueue("prize.redeem", { prizeId });
       if (!counter) throw new LocalError(402, "prizes.notEnough");
       return counter;
     },
@@ -361,7 +370,7 @@ const GUEST_ROUTES: [string, RegExp, Handler][] = [
   ],
 ];
 
-const GUEST_NETWORK = [/^login$/, /^signup$/, /^refresh$/];
+const GUEST_NETWORK = [/^login$/, /^signup$/, /^refresh$/, /^password\/(forgot|reset)$/];
 
 export const matchGuest = ({ method, path }: Pick<Request, "method" | "path">) => {
   for (const [routeMethod, pattern, handler] of GUEST_ROUTES) {

@@ -401,7 +401,7 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.tickets;
-  const balance = game.balance ?? 0;
+  const balance = game.nextPrizeFunds;
   const prize = game.nextPrize;
   const prizeName = prize ? findSkin(prize.skin).name : "";
   const goal = !prize

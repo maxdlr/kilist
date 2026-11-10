@@ -140,6 +140,7 @@ const useSwipeGame = () => {
     balance: tickets.counter?.balance,
     counter: tickets.counter,
     nextPrize: tickets.nextPrize,
+    nextPrizeFunds: tickets.nextPrizeFunds,
     flingRef,
     fling,
     begin,

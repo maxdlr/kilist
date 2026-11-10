@@ -52,6 +52,8 @@ export interface UserType {
   id: number;
   username: string;
   email: string;
+  emailConfirmedAt?: string | null;
+  notifications?: Record<string, string> | null;
   description?: string;
   type: "user" | "admin";
   skin?: string;

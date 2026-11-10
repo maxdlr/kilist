@@ -102,6 +102,8 @@ const CalmAccount = () => {
           <Group label={T.settings.app}>
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
             <Row label={common.language} detail={account.languageName} onPress={account.openLanguage} />
+            <Row label={common.notifications.menu} onPress={account.openNotifications} />
+            {account.needsEmailCode && <Row label={common.emailCode.menu} onPress={account.openEmailCode} />}
             <Row label={copy.credits} onPress={account.openCredits} />
           </Group>
 

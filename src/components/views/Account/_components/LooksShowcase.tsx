@@ -82,6 +82,7 @@ const LookCard = ({ look, width, looks }: { look: Look; width: number; looks: Re
     owned: look.prize.price === 0 ? copy.free : look.skin.tagline,
     unlockable: `${look.prize.price} · ${copy.premium}`,
     locked: `${look.prize.price} · ${copy.premium}`,
+    account: `${look.prize.price} · ${copy.premium}`,
   }[look.state];
 
   return (
@@ -124,6 +125,15 @@ const LookCard = ({ look, width, looks }: { look: Look; width: number; looks: Re
         )}
         {look.state === "unlockable" && (
           <KilButton {...button} label={busy ? "…" : copy.redeem(look.prize.price)} onTouch={() => looks.unlock(look)} />
+        )}
+        {look.state === "account" && (
+          <KilButton
+            {...button}
+            variant="attached"
+            label={copy.needsAccount}
+            icon={(color) => <LockIcon color={color} />}
+            onTouch={() => looks.unlock(look)}
+          />
         )}
         {look.state === "locked" && (
           <>

@@ -15,6 +15,7 @@ const catalog = await import("../catalog");
 const PRIZES = [
   { id: "skin:arcade", kind: "skin" as const, skin: "arcade", price: 0 },
   { id: "skin:roast", kind: "skin" as const, skin: "roast", price: 1000 },
+  { id: "skin:versus", kind: "skin" as const, skin: "versus", price: 1000, accountOnly: true },
 ];
 
 const call = (method: string, path: string, body: unknown = {}, query: Record<string, unknown> = {}) => {
@@ -132,13 +133,32 @@ describe("guest mode", () => {
     expect(store.exportGuest()!.ownedPrizes).toEqual(["skin:roast"]);
   });
 
+  it("never sells Versus to a guest, whatever the balance", () => {
+    start();
+    store.getState()!.prizes.balance = 5000;
+
+    expect(() => call("post", "prizes/skin:versus/redeem")).toThrow();
+    expect(() => call("put", "me/skin", { skin: "versus" })).toThrow();
+    expect(store.getState()!.prizes.balance).toBe(5000);
+  });
+
+  it("keeps a bought skin when the catalogue refreshes", () => {
+    start();
+    store.getState()!.prizes.balance = 1000;
+    call("post", "prizes/skin:roast/redeem");
+
+    store.applyCatalog({ foodBanks: {}, prizes: PRIZES });
+
+    expect(store.getState()!.prizes.prizes.find((prize) => prize.id === "skin:roast")?.owned).toBe(true);
+  });
+
   it("fills in prizes when the catalogue arrives after the guest started", () => {
     start([]);
     expect(store.getState()!.prizes.prizes).toEqual([]);
 
     store.applyCatalog({ foodBanks: {}, prizes: PRIZES });
 
-    expect(store.getState()!.prizes.prizes.map((prize) => prize.id)).toEqual(["skin:arcade", "skin:roast"]);
+    expect(store.getState()!.prizes.prizes.map((prize) => prize.id)).toEqual(["skin:arcade", "skin:roast", "skin:versus"]);
   });
 
   it("asks for the intro once", () => {

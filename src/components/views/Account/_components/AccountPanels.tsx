@@ -3,6 +3,7 @@ import type { Account } from "@/hooks/screens/useAccount";
 import InviteQrModal from "./InviteQrModal";
 import CreditsModal from "./CreditsModal";
 import LanguageModal from "./LanguageModal";
+import EmailCodeModal from "./EmailCodeModal";
 import SwitchHouseholdModal from "./SwitchHouseholdModal";
 
 const AccountPanels = ({ account }: { account: Account }) => {
@@ -20,6 +21,7 @@ const AccountPanels = ({ account }: { account: Account }) => {
         onClose={closePanel}
       />
       <LanguageModal visible={openPanel === "language"} onClose={closePanel} />
+      <EmailCodeModal visible={openPanel === "emailCode"} onClose={closePanel} />
       <CreditsModal visible={openPanel === "credits"} onClose={closePanel} onOpenIcons={account.openIconsSite} />
       <SwitchHouseholdModal
         visible={openPanel === "switch"}

@@ -106,10 +106,14 @@ const RoastAccount = () => {
             showChevron
           />
           <ActionRow
-            label={`${common.language} · ${account.languageName}`}
+            label={`${common.language} · ${account.languageName}`.toUpperCase()}
             onPress={account.openLanguage}
             showChevron
           />
+          <ActionRow label={common.notifications.menu.toUpperCase()} onPress={account.openNotifications} showChevron />
+          {account.needsEmailCode && (
+            <ActionRow label={common.emailCode.menu.toUpperCase()} onPress={account.openEmailCode} showChevron />
+          )}
           <ActionRow
             label={copy.credits}
             onPress={account.openCredits}
