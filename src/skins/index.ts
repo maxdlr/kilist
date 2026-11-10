@@ -5,7 +5,7 @@ import roast from "./roast";
 import versus from "./versus";
 import type { Skin, SkinSource } from "./types";
 
-export const DEFAULT_SKIN_ID = "arcade";
+export const DEFAULT_SKIN_ID = "calm";
 
 export const SKINS: SkinSource[] = [roast, arcade, versus, calm];
 
