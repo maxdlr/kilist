@@ -4,7 +4,12 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { setToastTrigger } from "@/services/toastBridge";
 import React, { createContext, ReactNode, useEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  InformationCircleIcon,
+} from "react-native-heroicons/outline";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 
 const DISPLAY_DURATION = 2500;
@@ -17,6 +22,12 @@ type Toast = { id: number; message: string; type: ToastType };
 
 export type ToastContextType = {
   showToast: (message: string, type?: ToastType) => void;
+};
+
+const ICONS = {
+  error: ExclamationCircleIcon,
+  success: CheckCircleIcon,
+  info: InformationCircleIcon,
 };
 
 const ToastContext = createContext<ToastContextType>({
@@ -57,10 +68,12 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]);
 
   const lookByType: Record<ToastType, { fill: string; ink: string }> = {
-    error: { fill: skin.colors.alert, ink: skin.colors.onAlert },
+    error: skin.colors.toast ?? { fill: skin.colors.alert, ink: skin.colors.onAlert },
     success: skin.colors.toast ?? { fill: skin.colors.success, ink: skin.colors.onAlert },
     info: skin.colors.toast ?? { fill: skin.colors.paper, ink: skin.colors.onPaper },
   };
+
+  const Icon = toast && skin.colors.toast ? ICONS[toast.type] : null;
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -73,13 +86,23 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             { transform: [{ translateY }] },
           ]}
         >
-          <ThemedText
-            accessibilityRole="alert"
-            size={skin.type.lead}
-            color={lookByType[toast.type].ink}
-          >
-            {caseFor(skin, toast.message)}
-          </ThemedText>
+          <View style={styles.row}>
+            {Icon && (
+              <Icon
+                size={skin.size.icon.action + 2}
+                color={lookByType[toast.type].ink}
+                strokeWidth={1.8}
+              />
+            )}
+            <ThemedText
+              accessibilityRole="alert"
+              size={skin.type.lead}
+              color={lookByType[toast.type].ink}
+              style={styles.message}
+            >
+              {caseFor(skin, toast.message)}
+            </ThemedText>
+          </View>
         </Animated.View>
       )}
     </ToastContext.Provider>
@@ -108,4 +131,6 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.gutter,
       zIndex: 1000,
     },
+    row: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight + 2 },
+    message: { flex: 1 },
   });

@@ -7,7 +7,6 @@ const WIDE = new Set([..."mwMW%@"]);
 const ground = "#F6F4EF";
 const ink = "#23221F";
 const white = "#FFFFFF";
-const rust = "#8F4F43";
 
 export const calmPalette = {
   ground,
@@ -19,10 +18,10 @@ export const calmPalette = {
   field: "#D6D1C6",
   ring: "#A8A399",
   tint: "#EFECE5",
-  danger: rust,
+  danger: ink,
   pending: "#5E8A63",
   haveIt: "#3F6A47",
-  needIt: rust,
+  needIt: ink,
 };
 
 const calm: SkinSource = {
@@ -63,9 +62,9 @@ const calm: SkinSource = {
     toast: { fill: ink, ink: ground },
     placeholder: "#8B887F",
     scrim: "rgba(35,34,31,0.32)",
-    danger: rust,
-    alert: rust,
-    onAlert: white,
+    danger: ink,
+    alert: ink,
+    onAlert: ground,
     success: "#5E8A63",
     levels: {
       1: "#7FA982",
@@ -86,7 +85,7 @@ const calm: SkinSource = {
     primary: { fill: ink, ink: ground, line: ink },
     secondary: { fill: "transparent", ink, line: "#D6D1C6" },
     secondaryOnLight: { fill: "transparent", ink, line: "#D6D1C6" },
-    danger: { fill: "transparent", ink: rust, line: rust },
+    danger: { fill: "transparent", ink, line: ink },
     ghost: { fill: "transparent", ink: "#5F5D57", line: "transparent" },
     attached: { fill: white, ink, line: "#D6D1C6" },
   },
