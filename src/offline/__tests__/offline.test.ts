@@ -262,6 +262,31 @@ describe("shopping offline", () => {
 });
 
 describe("the inventory offline", () => {
+  it("keeps a scanned product on the food and finds it again by barcode", () => {
+    pull();
+    const product = { barcode: "3017620422003", quantity: "1 kg", icon: "pasta" };
+
+    call("post", "foods/create", { name: "Spread", listId: 1, product });
+    call("post", "foods/create", { name: "spread", listId: 1, product: { barcode: "8076800195057", icon: "rice" } });
+
+    expect(call("get", "foods/find", {}, { name: "Spread" })).toMatchObject({ barcodes: ["3017620422003", "8076800195057"], quantity: "1 kg", icon: "pasta" });
+    expect(pendingOps()[0]!.payload.product).toEqual(product);
+    expect(call("get", "foods/find", {}, { barcode: "8076800195057" }).name).toBe("Spread");
+    expect(call("get", "foods/find", {}, { barcode: "00000000" })).toBeNull();
+  });
+
+  it("waits longer before asking again about a big pack", async () => {
+    const { packSize, staleDaysFor } = await import("../domain");
+    const now = Date.now();
+    const bought = new Date(now - 8 * 24 * 3600000).toISOString();
+    const small = food(1, 1, { lastBoughtAt: bought, quantity: "250 g" });
+    const big = food(2, 1, { lastBoughtAt: bought, quantity: "6 x 33 cl" });
+
+    expect(packSize("6 x 33 cl")).toBe(1980);
+    expect(staleDaysFor("1,5 L")).toBe(10);
+    expect(swipeDeck([small, big], now).map((entry) => entry.id)).toEqual([1]);
+  });
+
   it("adds a food under a temporary id and swaps it after sync", () => {
     pull();
 

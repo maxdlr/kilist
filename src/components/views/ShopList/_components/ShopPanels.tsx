@@ -5,7 +5,7 @@ import KilButton from "@/components/elements/KilButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import type { ShopAddAction, ShopRun } from "@/hooks/screens/useShopRun";
+import type { ScanResult, ShopAddAction, ShopRun } from "@/hooks/screens/useShopRun";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
@@ -26,13 +26,23 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
   const [existing, setExisting] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [scan, setScan] = useState<"off" | "camera" | "searching">("off");
+  const [found, setFound] = useState<ScanResult | null>(null);
+  const [warning, setWarning] = useState<ScanResult | null>(null);
   const { findFood } = run;
+
+  const accept = (result: ScanResult) => {
+    setFound(result);
+    setName(result.name);
+    setWarning(null);
+  };
 
   const scanned = async (barcode: string) => {
     setScan("searching");
-    const found = await run.findProduct(barcode.replace(/\D/g, ""));
-    if (found) setName(found);
+    const result = await run.findProduct(barcode.replace(/\D/g, ""));
     setScan("off");
+    if (!result) return;
+    if (result.conflicts.length > 0) setWarning(result);
+    else accept(result);
   };
 
   useEffect(() => {
@@ -54,7 +64,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
       return;
     }
     setBusy(true);
-    const added = await run.addFood(name.trim(), action);
+    const added = await run.addFood(name.trim(), action, found?.product);
     setBusy(false);
     if (added) run.closePanel();
   };
@@ -76,6 +86,36 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
           label={T.scanCancel}
           onTouch={() => setScan("off")}
         />
+      </>
+    );
+  }
+
+  if (warning) {
+    return (
+      <>
+        <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
+          {T.scanWarnTitle(warning.name)}
+        </Title>
+        <ThemedText color={skin.panel.ink}>
+          {T.scanWarnLine(warning.conflicts.map((tag) => T.scanTags[tag] ?? tag))}
+        </ThemedText>
+        <View style={styles.actions}>
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            variant={skin.panel.secondary}
+            label={T.scanWarnAdd}
+            onTouch={() => accept(warning)}
+          />
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            label={T.scanWarnSkip}
+            onTouch={() => setWarning(null)}
+          />
+        </View>
       </>
     );
   }

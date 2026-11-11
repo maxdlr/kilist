@@ -9,6 +9,7 @@ import {
   SAME_TRIP_MS,
   SNOOZE_MS,
   toLocalDay,
+  attachProduct,
 } from "./domain";
 import type { LocalFood, LocalState, Op, Reward, Snapshot } from "./types";
 
@@ -170,6 +171,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (twin) {
         state.localAliases[String(payload.tempId)] = twin.id;
         if (!twin.lists.includes(listId)) twin.lists.push(listId);
+        attachProduct(twin, payload.product);
         if (payload.needed === true) addHistory(twin, { isInStock: false, at });
         return twin;
       }
@@ -184,6 +186,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         lists: [listId],
         histories: [],
       };
+      attachProduct(created, payload.product);
       state.foods.push(created);
       if (payload.needed === true) addHistory(created, { isInStock: false, at });
       return created;

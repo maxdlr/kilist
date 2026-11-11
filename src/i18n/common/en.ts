@@ -120,6 +120,21 @@ const en = {
     scanSearching: "Looking it up…",
     scanFailed: "Couldn't find that product. Type its name instead.",
     scanCamera: "Camera access is needed to scan a barcode.",
+    scanWarnTitle: (name: string) => `Heads up: ${name}`,
+    scanWarnLine: (tags: string[]) =>
+      `This product seems to contain ${tags.join(", ")}, which your household said it leaves out.`,
+    scanWarnAdd: "Add anyway",
+    scanWarnSkip: "Don't add",
+    scanTags: {
+      meat: "meat",
+      pork: "pork",
+      fish: "fish",
+      shellfish: "shellfish",
+      dairy: "dairy",
+      gluten: "gluten",
+      soda: "soda",
+      alcohol: "alcohol",
+    } as Record<string, string>,
   },
   suggestion: {
     label: "Your 10 are done · one suggestion",

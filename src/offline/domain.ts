@@ -36,6 +36,39 @@ export const addHistory = (food: LocalFood, entry: HistoryEntry) => {
 };
 
 export const STALE_DAYS = 7;
+export const BIG_PACK_STALE_DAYS = 10;
+const BIG_PACK = 1000;
+const MAX_BARCODES = 20;
+const QUANTITY_LENGTH = 40;
+const UNITS: Record<string, number> = { kg: 1000, g: 1, l: 1000, cl: 10, ml: 1 };
+const PACK = /(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|l|cl|ml)\b/i;
+
+export type ScannedProduct = { barcode?: string; icon?: string; quantity?: string };
+
+export const packSize = (quantity?: string | null): number | null => {
+  const match = quantity?.match(PACK);
+  if (!match) return null;
+  const count = match[1] ? Number(match[1]) : 1;
+  return count * Number(match[2]!.replace(",", ".")) * UNITS[match[3]!.toLowerCase()]!;
+};
+
+export const staleDaysFor = (quantity?: string | null) =>
+  (packSize(quantity) ?? 0) >= BIG_PACK ? BIG_PACK_STALE_DAYS : STALE_DAYS;
+
+export const isBarcode = (value: unknown): value is string =>
+  typeof value === "string" && /^\d{8,14}$/.test(value);
+
+export const attachProduct = (food: LocalFood, product?: ScannedProduct | null) => {
+  if (!product || typeof product !== "object") return;
+  const barcodes = food.barcodes ?? [];
+  if (isBarcode(product.barcode) && !barcodes.includes(product.barcode)) {
+    food.barcodes = [...barcodes, product.barcode].slice(-MAX_BARCODES);
+  }
+  if (typeof product.quantity === "string" && product.quantity.trim()) {
+    food.quantity = product.quantity.trim().slice(0, QUANTITY_LENGTH);
+  }
+  if (!food.icon && typeof product.icon === "string" && product.icon) food.icon = product.icon;
+};
 
 const lastActivity = (food: LocalFood) =>
   Math.max(time(food.lastBoughtAt), ...food.histories.map((entry) => time(entry.at)));
@@ -50,7 +83,7 @@ export const swipeDeck = (foods: LocalFood[], now: number) => {
   const stale = eligible
     .filter(
       (food) =>
-        food.inStockScore >= SWIPE_ELIGIBLE_BELOW && lastActivity(food) < now - STALE_DAYS * DAY_MS,
+        food.inStockScore >= SWIPE_ELIGIBLE_BELOW && lastActivity(food) < now - staleDaysFor(food.quantity) * DAY_MS,
     )
     .sort((a, b) => lastActivity(a) - lastActivity(b));
   return [...low, ...stale].slice(0, SWIPE_DECK_SIZE);

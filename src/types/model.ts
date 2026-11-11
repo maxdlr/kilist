@@ -12,6 +12,8 @@ export interface FoodType {
   name: string;
   imageUrl?: string;
   icon?: string | null;
+  barcodes?: string[];
+  quantity?: string | null;
   lists: ListType[] | number[];
   description?: string;
   inStockScore: number;

@@ -14,6 +14,8 @@ export type LocalFood = {
   description?: string;
   imageUrl?: string;
   icon?: string | null;
+  barcodes?: string[];
+  quantity?: string | null;
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;

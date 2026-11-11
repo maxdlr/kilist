@@ -122,6 +122,21 @@ const fr: CommonText = {
     scanSearching: "Recherche…",
     scanFailed: "Produit introuvable. Tape plutôt son nom.",
     scanCamera: "L'accès à la caméra est nécessaire pour scanner un code-barres.",
+    scanWarnTitle: (name: string) => `Attention : ${name}`,
+    scanWarnLine: (tags: string[]) =>
+      `Ce produit semble contenir : ${tags.join(", ")}. Ton foyer a dit qu'il n'en achète pas.`,
+    scanWarnAdd: "Ajouter quand même",
+    scanWarnSkip: "Ne pas ajouter",
+    scanTags: {
+      meat: "viande",
+      pork: "porc",
+      fish: "poisson",
+      shellfish: "fruits de mer",
+      dairy: "produits laitiers",
+      gluten: "gluten",
+      soda: "soda",
+      alcohol: "alcool",
+    } as Record<string, string>,
   },
   suggestion: {
     label: "Tes 10 sont faits · une suggestion",

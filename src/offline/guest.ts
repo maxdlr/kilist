@@ -52,6 +52,8 @@ export const exportGuestState = (state: LocalState, importId: string) => {
       description: food.description,
       icon: food.icon ?? null,
       imageUrl: food.imageUrl ?? null,
+      barcodes: food.barcodes ?? [],
+      quantity: food.quantity ?? null,
       inStockScore: food.inStockScore,
       snoozedUntil: food.snoozedUntil ?? null,
       lastBoughtAt: food.lastBoughtAt ?? null,

@@ -234,6 +234,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
           fromOnboarding: body.fromOnboarding === true,
           icon: typeof body.icon === "string" ? body.icon : undefined,
           ...(body.needed === true && { needed: true }),
+          ...(body.product && typeof body.product === "object" && { product: body.product }),
         }),
       );
     },
@@ -317,7 +318,12 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
     /^foods\/find$/,
     ({ query }) => {
       const name = normalizeName(String(query.name ?? ""));
-      const found = name ? state().foods.find((food) => normalizeName(food.name) === name) : undefined;
+      const barcode = String(query.barcode ?? "");
+      const found = barcode
+        ? state().foods.find((food) => food.lists.length > 0 && (food.barcodes ?? []).includes(barcode))
+        : name
+          ? state().foods.find((food) => normalizeName(food.name) === name)
+          : undefined;
       return found ? { ...toFood(found), onList: found.lists.length > 0 } : null;
     },
   ],
