@@ -272,7 +272,7 @@ const arcadeCopy: RoastCopy = {
     wear: "Wear",
     wearing: "Wearing",
     redeem: (price: number) => `Redeem · ${price}`,
-    missing: (count: number) => `${count} to go`,
+    missing: (count: number) => `${count} tickets to go`,
     free: "Free",
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked!`,

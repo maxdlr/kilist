@@ -274,7 +274,7 @@ const calmCopy: RoastCopy = {
     wear: "Use",
     wearing: "In use",
     redeem: (price: number) => `Unlock · ${price} points`,
-    missing: (count: number) => `${count} to go`,
+    missing: (count: number) => `${count} points to go`,
     free: "Free",
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked.`,

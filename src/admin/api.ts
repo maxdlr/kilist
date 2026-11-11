@@ -115,6 +115,7 @@ export type AdminStats = {
     newUsers: number;
     households: number;
     newHouseholds: number;
+    deletedHouseholds?: number;
     foods: number;
     peoplePerHousehold: number | null;
     soloHouseholds: number;

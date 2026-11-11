@@ -64,7 +64,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan a household code."
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan household codes and product barcodes."
         }
       ],
       "expo-sqlite",

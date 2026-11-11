@@ -172,7 +172,7 @@ const fr: SkinCopy = {
     emptyLine: "REVIENS DEMAIN, OU AJOUTE UN TRUC.",
   },
   shop: {
-    toGo: (count: number) => `ENCORE ${count}`,
+    toGo: (count: number) => `ENCORE ${count} TICKETS`,
     stop: "STOP",
     flip: "INVERSER",
     byName: "AZ",
@@ -285,7 +285,7 @@ const fr: SkinCopy = {
     wear: "LE PORTER",
     wearing: "PORTÉ",
     redeem: (price: number) => `ÉCHANGER · ${price}`,
-    missing: (count: number) => `ENCORE ${count}`,
+    missing: (count: number) => `ENCORE ${count} TICKETS`,
     free: "GRATUIT",
     premium: "PREMIUM",
     redeemed: (name: string) => `${name} EST À TOI.`,

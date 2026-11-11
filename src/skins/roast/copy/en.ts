@@ -170,7 +170,7 @@ const roastCopy = {
     emptyLine: "COME BACK TOMORROW, OR ADD SOMETHING.",
   },
   shop: {
-    toGo: (count: number) => `${count} TO GO`,
+    toGo: (count: number) => `${count} TICKETS TO GO`,
     stop: "STOP",
     flip: "FLIP",
     byName: "AZ",
@@ -283,7 +283,7 @@ const roastCopy = {
     wear: "WEAR IT",
     wearing: "WEARING IT",
     redeem: (price: number) => `REDEEM · ${price}`,
-    missing: (count: number) => `${count} TO GO`,
+    missing: (count: number) => `${count} TICKETS TO GO`,
     free: "FREE",
     premium: "PREMIUM",
     redeemed: (name: string) => `${name} IS YOURS.`,

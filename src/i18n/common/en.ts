@@ -17,6 +17,8 @@ const en = {
   loading: "Loading",
   scanQr: "Scan a household QR code",
   creditsIcons: "Icons8 · icons8.com",
+  creditsProductsLabel: "Product names",
+  creditsProducts: "Open Food Facts · openfoodfacts.org",
   language: "Language",
   languageAuto: (name: string) => `Phone setting (${name})`,
   notifications: {
@@ -112,6 +114,12 @@ const en = {
     addBought: "Bought",
     addLater: "Next time",
     addMissing: "Type a name first",
+    scan: "Scan a barcode",
+    scanLine: "Point the camera at the product's barcode.",
+    scanCancel: "Type the name instead",
+    scanSearching: "Looking it up…",
+    scanFailed: "Couldn't find that product. Type its name instead.",
+    scanCamera: "Camera access is needed to scan a barcode.",
   },
   suggestion: {
     label: "Your 10 are done · one suggestion",
@@ -130,6 +138,13 @@ const en = {
     confirmEmail: "Confirm your email to share your household",
     teasers: { versus: "Race your housemates on the same 10 foods." } as Record<string, string>,
     prizesAria: "Open the prize counter",
+  },
+  looks: {
+    discover: "Discover",
+    preview: "Preview",
+    previewAria: (name: string) => `Preview ${name} with your data`,
+    slides: { Home: "Home", Play: "Game", Shop: "Shopping" },
+    slideOf: (label: string, position: number, total: number) => `${label} · ${position}/${total}`,
   },
   emailGate: {
     title: "Confirm your email first",

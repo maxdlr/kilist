@@ -19,6 +19,8 @@ const fr: CommonText = {
   loading: "Chargement",
   scanQr: "Scanne le QR code d'un foyer",
   creditsIcons: "Icons8 · icons8.com",
+  creditsProductsLabel: "Noms des produits",
+  creditsProducts: "Open Food Facts · openfoodfacts.org",
   language: "Langue",
   languageAuto: (name: string) => `Réglage du téléphone (${name})`,
   notifications: {
@@ -114,6 +116,12 @@ const fr: CommonText = {
     addBought: "Acheté",
     addLater: "La prochaine fois",
     addMissing: "Écris d'abord un nom",
+    scan: "Scanner un code-barres",
+    scanLine: "Vise le code-barres du produit avec la caméra.",
+    scanCancel: "Taper plutôt le nom",
+    scanSearching: "Recherche…",
+    scanFailed: "Produit introuvable. Tape plutôt son nom.",
+    scanCamera: "L'accès à la caméra est nécessaire pour scanner un code-barres.",
   },
   suggestion: {
     label: "Tes 10 sont faits · une suggestion",
@@ -132,6 +140,13 @@ const fr: CommonText = {
     confirmEmail: "Confirme ton e-mail pour partager ton foyer",
     teasers: { versus: "Fais la course avec ton foyer sur les 10 mêmes aliments." } as Record<string, string>,
     prizesAria: "Ouvrir le comptoir des lots",
+  },
+  looks: {
+    discover: "Découvrir",
+    preview: "Aperçu",
+    previewAria: (name: string) => `Aperçu de ${name} avec tes données`,
+    slides: { Home: "Accueil", Play: "Jeu", Shop: "Courses" },
+    slideOf: (label: string, position: number, total: number) => `${label} · ${position}/${total}`,
   },
   emailGate: {
     title: "Confirme d'abord ton e-mail",

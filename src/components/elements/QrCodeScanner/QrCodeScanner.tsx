@@ -5,14 +5,20 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { type BarcodeType, CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
 
+const QR: BarcodeType[] = ["qr"];
+
 const QrCodeScanner = ({
   onScanned,
+  barcodeTypes = QR,
+  notice = common.cameraNeeded,
 }: {
   onScanned: (data: string) => void;
+  barcodeTypes?: BarcodeType[];
+  notice?: string;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -25,7 +31,7 @@ const QrCodeScanner = ({
     return (
       <ThemedView style={styles.permission}>
         <ThemedText size={skin.type.caption} style={styles.notice}>
-          {common.cameraNeeded}
+          {notice}
         </ThemedText>
         <KilButton label={caseFor(skin, common.allowCamera)} onTouch={requestPermission} />
       </ThemedView>
@@ -35,7 +41,7 @@ const QrCodeScanner = ({
   return (
     <CameraView
       style={styles.camera}
-      barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+      barcodeScannerSettings={{ barcodeTypes }}
       onBarcodeScanned={({ data }) => {
         if (scanned) return;
         setScanned(true);

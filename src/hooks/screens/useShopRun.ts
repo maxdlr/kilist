@@ -123,6 +123,16 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     return data ?? null;
   };
 
+  const findProduct = async (barcode: string) => {
+    try {
+      const { data } = await axios.get<{ name: string }>(`products/${barcode}`);
+      return data?.name ?? null;
+    } catch (error: any) {
+      showToast(error?.response?.data?.message || common.shop.scanFailed);
+      return null;
+    }
+  };
+
   const addFood = async (name: string, action: ShopAddAction) => {
     if (!mainList?.id) {
       showToast(common.inventoryNotReady);
@@ -175,6 +185,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     openAdd: () => setPanel("add"),
     closePanel: () => setPanel(null),
     findFood,
+    findProduct,
     addFood,
     refreshEmpty,
   };

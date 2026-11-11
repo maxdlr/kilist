@@ -20,6 +20,7 @@ export default function AppTabs() {
       <Tabs.Screen name="shop" />
       <Tabs.Screen name="account" />
       <Tabs.Screen name="looks" />
+      <Tabs.Screen name="look-preview" />
       <Tabs.Screen name="admin" />
     </Tabs>
   );

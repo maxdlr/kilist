@@ -40,6 +40,34 @@ type Sample = { name: string; icon?: string | null };
 type Answer = Sample & { direction: SwipeDirection };
 type Step = "intro" | "profile" | "practice" | "shop" | "done";
 
+type QuestionId = "diet" | "avoid" | "drinks" | "home" | "baking";
+
+const QUESTIONS: { id: QuestionId; single?: boolean; options: string[] }[] = [
+  { id: "diet", single: true, options: ["everything", "noPork", "noMeat", "veggie"] },
+  { id: "avoid", options: ["dairy", "gluten", "shellfish"] },
+  { id: "drinks", options: ["coffee", "soda", "alcohol"] },
+  { id: "home", options: ["baby", "cat", "dog"] },
+  { id: "baking", single: true, options: ["yes", "no"] },
+];
+
+const DIETS: Record<string, string[]> = {
+  everything: [],
+  noPork: ["pork"],
+  noMeat: ["meat", "pork"],
+  veggie: ["meat", "pork", "fish", "shellfish"],
+};
+
+const profilesFrom = (picked: Record<QuestionId, string[]>) => [
+  ...new Set([
+    ...(DIETS[picked.diet[0] ?? "everything"] ?? []),
+    ...picked.avoid,
+    ...["soda", "alcohol"].filter((drink) => !picked.drinks.includes(drink)),
+    ...picked.drinks.filter((drink) => drink === "coffee"),
+    ...picked.home,
+    ...(picked.baking[0] === "yes" ? ["baking"] : []),
+  ]),
+];
+
 const ProfilePick = ({
   listId,
   onDone,
@@ -52,7 +80,14 @@ const ProfilePick = ({
   const copy = T.tutorial;
   const { showToast } = useToast();
   const [catalog, setCatalog] = useState(getCatalog());
-  const [chosen, setChosen] = useState<string[]>([]);
+  const [at, setAt] = useState(0);
+  const [picked, setPicked] = useState<Record<QuestionId, string[]>>({
+    diet: ["everything"],
+    avoid: [],
+    drinks: [],
+    home: [],
+    baking: ["no"],
+  });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -68,10 +103,18 @@ const ProfilePick = ({
 
   const profiles = catalog?.profiles ?? [];
   const bank: FoodBankItemType[] = catalog?.foodBanks[getLang()] ?? [];
+  const chosen = profilesFrom(picked);
   const starters = profiles.length > 0 ? starterFoods(bank, chosen) : [];
+  const question = QUESTIONS[at]!;
+  const text = copy.questions[question.id];
+  const isLast = at === QUESTIONS.length - 1 || profiles.length === 0;
 
-  const toggle = (id: string) =>
-    setChosen((list) => (list.includes(id) ? list.filter((entry) => entry !== id) : [...list, id]));
+  const pick = (id: string) =>
+    setPicked((all) => {
+      const current = all[question.id];
+      const next = question.single ? [id] : current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id];
+      return { ...all, [question.id]: next };
+    });
 
   const finish = async () => {
     if (busy) return;
@@ -89,57 +132,58 @@ const ProfilePick = ({
     }
   };
 
-  const group = (kind: "exclude" | "include", label: string) => (
-    <View style={styles.group}>
-      <CText size={skin.type.label} color={C.soft}>
-        {label}
-      </CText>
-      <View style={styles.chips}>
-        {profiles
-          .filter((profile) => profile.kind === kind)
-          .map((profile) => {
-            const on = chosen.includes(profile.id);
-            return (
-              <Pressable
-                key={profile.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                onPress={() => toggle(profile.id)}
-                style={withPressed([styles.chip, on && styles.chipOn])}
-              >
-                <CText size={skin.type.label + 1} color={on ? C.ground : C.ink}>
-                  {copy.profiles[profile.id] ?? profile.id}
-                </CText>
-              </Pressable>
-            );
-          })}
-      </View>
-    </View>
-  );
-
   return (
     <Screen
       padded={false}
       dock={
         <>
-          <CText size={skin.type.label + 1} color={C.soft} style={styles.center}>
-            {profiles.length > 0 ? copy.profileCount(starters.length) : copy.profileOffline}
-          </CText>
-          <CButton label={busy ? copy.profileAdding : copy.profileDone} onPress={finish} />
+          {isLast && (
+            <CText size={skin.type.label + 1} color={C.soft} style={styles.center}>
+              {profiles.length > 0 ? copy.profileCount(starters.length) : copy.profileOffline}
+            </CText>
+          )}
+          <CButton
+            label={!isLast ? copy.questionNext : busy ? copy.profileAdding : copy.profileDone}
+            onPress={isLast ? finish : () => setAt(at + 1)}
+          />
+          {at > 0 && !busy && <CButton variant="text" label={copy.questionBack} onPress={() => setAt(at - 1)} />}
         </>
       }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.head}>
+          {profiles.length > 0 && (
+            <CText size={skin.type.label} color={C.soft}>
+              {copy.questionAt(at + 1, QUESTIONS.length)}
+            </CText>
+          )}
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-            {copy.profileTitle}
+            {profiles.length > 0 ? text.title : copy.profileTitle}
           </CText>
           <CText size={skin.type.body} color={C.soft}>
-            {copy.profileLine}
+            {profiles.length > 0 ? text.line : copy.profileLine}
           </CText>
         </View>
-        {profiles.length > 0 && group("exclude", copy.exclude)}
-        {profiles.length > 0 && group("include", copy.include)}
+        {profiles.length > 0 && (
+          <View style={styles.options}>
+            {question.options.map((id) => {
+              const on = picked[question.id].includes(id);
+              return (
+                <Pressable
+                  key={id}
+                  accessibilityRole={question.single ? "radio" : "checkbox"}
+                  accessibilityState={{ checked: on }}
+                  onPress={() => pick(id)}
+                  style={withPressed([styles.option, on && styles.optionOn])}
+                >
+                  <CText weight="medium" size={skin.type.body} color={on ? C.ground : C.ink}>
+                    {copy.answers[id] ?? id}
+                  </CText>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
     </Screen>
   );
@@ -477,18 +521,16 @@ const createStyles = (s: Skin) =>
     center: { textAlign: "center" },
     scroll: { gap: s.spacing.section + 4, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },
     head: { gap: s.spacing.small },
-    group: { gap: s.spacing.small + 2 },
-    chips: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
-    chip: {
-      alignItems: "center",
+    options: { gap: s.spacing.small + 2 },
+    option: {
       borderColor: C.field,
-      borderRadius: s.size.button.xs / 2,
+      borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
-      height: s.size.button.xs,
       justifyContent: "center",
+      minHeight: s.size.button.lg,
       paddingHorizontal: s.spacing.stack,
     },
-    chipOn: { backgroundColor: C.ink, borderColor: C.ink },
+    optionOn: { backgroundColor: C.ink, borderColor: C.ink },
     topRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
     deck: { flex: 1, minHeight: 0 },
     sheet: { alignItems: "center", backgroundColor: C.ground, flex: 1, justifyContent: "center" },

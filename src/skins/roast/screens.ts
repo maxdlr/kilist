@@ -1,3 +1,4 @@
+import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import RoastTabBar from "@/components/elements/TabBar/RoastTabBar";
 import RoastAccount from "@/components/views/Account/RoastAccount";
 import RoastHome from "@/components/views/Dashboard/RoastHome";
@@ -12,6 +13,7 @@ const roastScreens: SkinScreens = {
   Shop: ShopList,
   Inventory: Inventory,
   Account: RoastAccount,
+  Loading: LoadingAnim,
   TabBar: RoastTabBar,
 };
 

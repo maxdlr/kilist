@@ -4,6 +4,7 @@ import ArcadeInventory from "./Inventory";
 import ArcadeHome from "./Home";
 import ArcadePlay from "./Play";
 import ArcadeShop from "./Shop";
+import { ArcadeLoading } from "./States";
 import ArcadeTabBar from "./TabBar";
 
 const arcadeScreens: SkinScreens = {
@@ -12,6 +13,7 @@ const arcadeScreens: SkinScreens = {
   Shop: ArcadeShop,
   Inventory: ArcadeInventory,
   Account: ArcadeAccount,
+  Loading: ArcadeLoading,
   TabBar: ArcadeTabBar,
 };
 

@@ -36,6 +36,14 @@ const CreditsModal = ({
       </View>
       <View style={styles.group}>
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>
+          {common.creditsProductsLabel}
+        </ThemedText>
+        <ThemedText size={skin.type.body} color={skin.panel.ink}>
+          {common.creditsProducts}
+        </ThemedText>
+      </View>
+      <View style={styles.group}>
+        <ThemedText size={skin.type.caption} color={skin.panel.ink}>
           {copy.creditsFonts}
         </ThemedText>
         <ThemedText size={skin.type.body} color={skin.panel.ink}>

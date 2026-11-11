@@ -5,6 +5,7 @@ import { useAccountGate } from "@/providers/AccountGateProvider";
 import useAuth from "@/providers/AuthProvider";
 import { findSkin, SKINS } from "@/skins";
 import type { Skin } from "@/skins/types";
+import { type Href, router } from "expo-router";
 import { useState } from "react";
 
 export const STORE_PRICE = "€1.99";
@@ -16,6 +17,8 @@ export type Look = {
   skin: Skin;
   state: LookState;
   missing: number;
+  funds: number;
+  progress: number;
   wearableAnyway: boolean;
 };
 
@@ -46,11 +49,14 @@ const useLooks = () => {
             : fundsFor(counter, prize) >= prize.price
               ? "unlockable"
               : "locked";
+      const funds = fundsFor(counter, prize);
       return {
         prize,
         skin: look,
         state,
-        missing: Math.max(0, prize.price - fundsFor(counter, prize)),
+        missing: Math.max(0, prize.price - funds),
+        funds: Math.min(funds, prize.price),
+        progress: prize.price > 0 ? Math.min(1, funds / prize.price) : 1,
         wearableAnyway: prize.wearable && (state === "unlockable" || state === "locked"),
       };
     })
@@ -82,8 +88,12 @@ const useLooks = () => {
 
   const buy = () => showToast(copy.storeSoon, "info");
   const earnMore = () => showToast(copy.earnHint, "info");
+  const preview = (look: Look) =>
+    needsAccount(look)
+      ? requireAccount("versus")
+      : router.navigate(`/look-preview?skin=${look.skin.id}` as Href);
 
-  return { balance, looks, busy, wear, unlock, buy, earnMore, price: STORE_PRICE };
+  return { balance, looks, busy, wear, unlock, buy, earnMore, preview, price: STORE_PRICE };
 };
 
 export type Looks = ReturnType<typeof useLooks>;

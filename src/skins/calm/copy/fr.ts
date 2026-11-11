@@ -274,7 +274,7 @@ const fr: SkinCopy = {
     wear: "Utiliser",
     wearing: "Utilisé",
     redeem: (price: number) => `Débloquer · ${price} points`,
-    missing: (count: number) => `Encore ${count}`,
+    missing: (count: number) => `Encore ${count} points`,
     free: "Gratuit",
     premium: "Premium",
     redeemed: (name: string) => `${name} débloqué.`,

@@ -12,6 +12,7 @@ export type SkinScreens = {
   Shop: ComponentType;
   Inventory: ComponentType;
   Account: ComponentType;
+  Loading: ComponentType;
   TabBar: ComponentType<TabBarProps>;
 };
 
@@ -22,7 +23,7 @@ const SKIN_SCREENS: Record<string, SkinScreens> = {
   calm: calmScreens,
 };
 
-type ScreenSlot = Exclude<keyof SkinScreens, "TabBar">;
+export type ScreenSlot = Exclude<keyof SkinScreens, "TabBar">;
 
 const useScreens = () => SKIN_SCREENS[useSkin().id] ?? roastScreens;
 

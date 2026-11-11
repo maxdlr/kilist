@@ -42,33 +42,48 @@ const HomeLinksBlock = ({
           </ThemedText>
         </Pressable>
       ) : (
-        links.prizes.map((prize) => (
-          <Pressable
-            key={prize.id}
-            accessibilityRole="button"
-            accessibilityLabel={`${prize.name}. ${prize.line} ${prize.status}`}
-            onPress={prize.open}
-            style={({ pressed }) => [
-              styles.prize,
-              { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
-            ]}
-          >
-            <View style={styles.prizeText}>
-              <ThemedText size={skin.type.label} color={text}>
-                {caseFor(skin, prize.name)}
-              </ThemedText>
-              <ThemedText size={skin.type.label} color={soft} numberOfLines={1} style={styles.detail}>
-                {caseFor(skin, prize.status)}
-              </ThemedText>
-            </View>
-            <ThemedText size={skin.type.caption} color={soft}>
-              {caseFor(skin, prize.line)}
+        <View style={[styles.looks, { backgroundColor: fill ?? skin.colors.raised, borderColor: soft }]}>
+          <View style={styles.looksHead}>
+            <ThemedText size={skin.type.label} color={text} accessibilityRole="header">
+              {caseFor(skin, links.prizesTitle)}
             </ThemedText>
-            <View style={[styles.track, { backgroundColor: soft }]}>
-              <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(prize.progress * 100)}%` }]} />
-            </View>
-          </Pressable>
-        ))
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={T.prizesAria}
+              hitSlop={8}
+              onPress={links.openPrizes}
+              style={({ pressed }) => [
+                styles.discover,
+                { borderColor: text, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+              ]}
+            >
+              <ThemedText size={skin.type.caption} color={text}>
+                {caseFor(skin, links.discoverLabel)}
+              </ThemedText>
+            </Pressable>
+          </View>
+          {links.prizes.map((prize) => (
+            <Pressable
+              key={prize.id}
+              accessibilityRole="button"
+              accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
+              onPress={prize.open}
+              style={({ pressed }) => [styles.prizeRow, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+            >
+              <View style={styles.prizeText}>
+                <ThemedText size={skin.type.label} color={text} numberOfLines={1} style={styles.prizeName}>
+                  {caseFor(skin, prize.name)}
+                </ThemedText>
+                <ThemedText size={skin.type.label} color={soft} numberOfLines={1} style={styles.detail}>
+                  {caseFor(skin, prize.away)}
+                </ThemedText>
+              </View>
+              <View style={[styles.track, { backgroundColor: soft }]}>
+                <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(prize.progress * 100)}%` }]} />
+              </View>
+            </Pressable>
+          ))}
+        </View>
       )}
 
       {links.notice && (
@@ -85,6 +100,22 @@ const HomeLinksBlock = ({
 const createStyles = (s: Skin) =>
   StyleSheet.create({
     block: { gap: s.spacing.small },
+    looks: {
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      gap: s.spacing.inline,
+      marginTop: s.spacing.stack,
+      padding: s.spacing.stack,
+    },
+    looksHead: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
+    discover: {
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      paddingHorizontal: s.spacing.inline,
+      paddingVertical: s.spacing.tight,
+    },
+    prizeRow: { gap: s.spacing.small },
+    prizeName: { flexShrink: 1 },
     prize: {
       borderRadius: s.shape.radius,
       gap: s.spacing.small,

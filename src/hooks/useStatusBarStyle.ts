@@ -1,12 +1,15 @@
+import { useIsPreview } from "@/providers/PreviewProvider";
 import { useFocusEffect } from "expo-router";
 import { setStatusBarStyle, type StatusBarStyle } from "expo-status-bar";
 import { useCallback } from "react";
 
 const useStatusBarStyle = (style: StatusBarStyle) => {
+  const isPreview = useIsPreview();
+
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle(style);
-    }, [style]),
+      if (!isPreview) setStatusBarStyle(style);
+    }, [style, isPreview]),
   );
 };
 

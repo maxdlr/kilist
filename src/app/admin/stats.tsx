@@ -97,7 +97,7 @@ const StatsScreen = () => {
           <ATiles
             tiles={[
               { value: n(growth.users), label: `Users · +${growth.newUsers}` },
-              { value: n(growth.households), label: `Households · +${growth.newHouseholds}` },
+              { value: n(growth.households), label: `Households · +${growth.newHouseholds} · −${growth.deletedHouseholds ?? 0}` },
               { value: n(growth.peoplePerHousehold), label: "People per household" },
             ]}
           />

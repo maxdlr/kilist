@@ -114,22 +114,35 @@ const CalmHome = () => {
 
         {links.prizes.length > 0 && (
           <View style={styles.prizes}>
-            <CText size={skin.type.label} color={C.soft}>{links.prizesTitle}</CText>
+            <View style={styles.prizesHead}>
+              <CText weight="medium" size={skin.type.label + 1} accessibilityRole="header" style={styles.flex}>
+                {links.prizesTitle}
+              </CText>
+              <Pressable
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={links.openPrizes}
+                style={({ pressed }) => [styles.discover, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+              >
+                <CText size={skin.type.label}>{links.discoverLabel}</CText>
+              </Pressable>
+            </View>
             {links.prizes.map((prize) => (
               <Pressable
                 key={prize.id}
                 accessibilityRole="button"
-                accessibilityLabel={`${prize.name}. ${prize.line} ${prize.status}`}
+                accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
                 onPress={prize.open}
                 style={({ pressed }) => [styles.prize, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
               >
                 <View style={styles.prizeText}>
-                  <CText weight="medium" size={skin.type.label + 1}>{prize.name}</CText>
+                  <CText weight="medium" size={skin.type.label + 1} numberOfLines={1} style={styles.prizeName}>
+                    {prize.name}
+                  </CText>
                   <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.prizeDetail}>
-                    {prize.status}
+                    {prize.away}
                   </CText>
                 </View>
-                <CText size={skin.type.label} color={C.soft}>{prize.line}</CText>
                 <View style={styles.track}>
                   <View style={[styles.trackFill, { width: `${Math.round(prize.progress * 100)}%` }]} />
                 </View>
@@ -156,14 +169,23 @@ const createStyles = (s: Skin) =>
       padding: s.spacing.stack + 2,
     },
     sectionLabel: { paddingBottom: s.spacing.small },
-    prizes: { gap: s.spacing.small },
-    prize: {
+    prizes: {
       backgroundColor: C.tint,
-      borderRadius: s.shape.radius,
-      gap: s.spacing.small,
-      paddingHorizontal: s.spacing.stack,
-      paddingVertical: s.spacing.inline + 2,
+      borderRadius: s.shape.radius + 2,
+      gap: s.spacing.stack,
+      marginTop: s.spacing.small,
+      padding: s.spacing.stack + 2,
     },
+    prizesHead: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    discover: {
+      borderColor: C.field,
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      paddingHorizontal: s.spacing.inline,
+      paddingVertical: s.spacing.tight,
+    },
+    prize: { gap: s.spacing.small },
+    prizeName: { flexShrink: 1 },
     prizeText: { flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
     prizeDetail: { flexShrink: 1, textAlign: "right" },
     track: { backgroundColor: C.field, borderRadius: 2, height: 4, overflow: "hidden" },
