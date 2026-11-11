@@ -52,6 +52,14 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
 };
 
+export const SkinOverride = ({ id, children }: { id: string; children: ReactNode }) => {
+  const parent = React.useContext(SkinContext);
+  const { lang } = useLanguage();
+  const value = useMemo(() => ({ ...parent, skin: findSkin(id, lang) }), [parent, id, lang]);
+
+  return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
+};
+
 export const useSkinSwitch = () => React.useContext(SkinContext);
 
 export const useSkin = () => React.useContext(SkinContext).skin;

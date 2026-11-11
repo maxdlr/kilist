@@ -193,13 +193,22 @@ const calmCopy: RoastCopy = {
   },
   intro: {
     steps: [
-      { title: "A list that keeps itself.", line: "Kilist remembers what you buy." },
-      { title: "Answer a few foods now and then.", line: "Have it, need it, or not sure." },
-      { title: "The list stays up to date.", line: "Open it when you shop. That's all." },
-      { title: "Points, quietly.", line: "Each answer earns points toward other looks." },
+      { title: "Kilist keeps your shopping list up to date.", line: "You never write it." },
+      {
+        title: "Every day, sort 10 foods.",
+        line: "Swipe right if you still have some, left if you're out, up if you're not sure.",
+      },
+      {
+        title: "In the store, swipe each food as you buy it.",
+        line: "Right when it's in your basket, left to keep it for next time.",
+      },
+      {
+        title: "Kilist learns your habits.",
+        line: "Your list gets more accurate every day, so it's ready whenever you go to the store.",
+      },
     ],
     next: "Next",
-    start: "Choose my foods",
+    start: "Continue",
     skip: "Skip",
   },
   account: {

@@ -1,3 +1,5 @@
+import SuggestionStep from "./SuggestionStep";
+import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import common from "@/i18n/common";
 import Dock from "@/components/elements/Dock/Dock";
 import EmptyData from "@/components/elements/EmptyData";
@@ -241,6 +243,7 @@ const SwipeFoodGame = () => {
   const copy = skin.copy.swipe;
   const game = useSwipeGame();
   const { screen, position, total, intent } = game;
+  const suggestion = useDailySuggestion(screen === "done");
 
   useStatusBarStyle(
     screen === "done" ||
@@ -248,6 +251,8 @@ const SwipeFoodGame = () => {
       ? skin.statusBarOnGround
       : "dark",
   );
+
+  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
   if (screen === "done") {
     return (

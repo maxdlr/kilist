@@ -1,12 +1,14 @@
 import SyncNote from "@/components/elements/SyncNote";
 import T from "../text";
+import useHomeLinks from "@/hooks/screens/useHomeLinks";
+import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType, ListType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
 import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen, useCheckPending } from "./parts";
@@ -24,6 +26,7 @@ const CalmHome = () => {
     params: { listIds, search: undefined },
   });
   const { count: toCheck, pending } = useCheckPending();
+  const links = useHomeLinks();
 
   useFocusEffect(
     useCallback(() => {
@@ -50,9 +53,20 @@ const CalmHome = () => {
       padded={false}
       dock={
         <>
-          {pending && <CButton label={T.home.check(toCheck)} href="/swipe" />}
-          {needed.length > 0 && <CButton variant={pending ? "secondary" : "primary"} label={T.openList} href="/shop" />}
-          {allSet && <CButton variant="text" label={T.browseInventory} href="/inventory" />}
+          {links.notice && (
+            <Pressable accessibilityRole="button" onPress={links.notice.open} style={styles.notice}>
+              <CText size={skin.type.label + 1} style={styles.noticeText}>
+                {links.notice.label}
+              </CText>
+            </Pressable>
+          )}
+          <View style={styles.dockRow}>
+            <CButton flex={1} variant="secondary" label={skin.copy.tabs.inventory} onPress={links.openInventory} />
+            <CButton flex={1} variant="secondary" label={skin.copy.tabs.account} onPress={links.openAccount} />
+            {links.isAdmin && (
+              <CButton flex={1} variant="secondary" label={common.home.admin} onPress={links.openAdmin} />
+            )}
+          </View>
         </>
       }
     >
@@ -100,6 +114,27 @@ const CalmHome = () => {
             )}
           </View>
         )}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={common.home.prizesAria}
+          onPress={links.prize.open}
+          style={({ pressed }) => [styles.prize, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+        >
+          <View style={styles.prizeText}>
+            <CText weight="medium" size={skin.type.label + 1}>
+              {links.prize.label}
+            </CText>
+            {links.prize.detail && (
+              <CText size={skin.type.label + 1} color={C.soft} numberOfLines={1} style={styles.prizeDetail}>
+                {links.prize.detail}
+              </CText>
+            )}
+          </View>
+          <View style={styles.track}>
+            <View style={[styles.trackFill, { width: `${Math.round(links.prize.progress * 100)}%` }]} />
+          </View>
+        </Pressable>
       </ScrollView>
     </Screen>
   );
@@ -118,6 +153,20 @@ const createStyles = (s: Skin) =>
       padding: s.spacing.stack + 2,
     },
     sectionLabel: { paddingBottom: s.spacing.small },
+    prize: {
+      backgroundColor: C.tint,
+      borderRadius: s.shape.radius,
+      gap: s.spacing.small,
+      paddingHorizontal: s.spacing.stack,
+      paddingVertical: s.spacing.inline + 2,
+    },
+    prizeText: { flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
+    prizeDetail: { flexShrink: 1, textAlign: "right" },
+    track: { backgroundColor: C.field, borderRadius: 2, height: 4, overflow: "hidden" },
+    trackFill: { backgroundColor: C.ink, borderRadius: 2, height: 4 },
+    notice: { alignItems: "center", justifyContent: "center", minHeight: s.size.button.xs },
+    noticeText: { textAlign: "center", textDecorationLine: "underline" },
+    dockRow: { flexDirection: "row", gap: s.spacing.inline },
     row: {
       alignItems: "center",
       borderTopColor: C.hairline,

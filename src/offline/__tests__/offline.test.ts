@@ -11,7 +11,7 @@ vi.mock("../db", () => ({
 const { applySyncResponse, getState, hasSession, pendingCount, pendingOps, resetStoreForTests, resolveAlias } =
   await import("../store");
 const { GHOST_RACE_ID, matchLocal, offlineRaceView, queueRaceAnswer } = await import("../routes");
-const { calculateScore, swipeDeck, swipeGame } = await import("../domain");
+const { calculateScore, nextSuggestion, starterFoods, swipeDeck, swipeGame } = await import("../domain");
 
 const food = (id: number, score = 0.5, extra = {}) => ({
   id,
@@ -401,5 +401,74 @@ describe("Versus offline", () => {
     expect(result.totalMs).toBe(3000);
     expect(result.reward.earned).toBeGreaterThan(0);
     expect(offlineRaceView(0).runs[0].finished).toBe(true);
+  });
+});
+
+describe("inventory without maintenance", () => {
+  beforeEach(() => {
+    memory.db = createMemoryDb();
+    resetStoreForTests();
+    pull();
+  });
+
+  it("adds a typed food as needed", () => {
+    const created = call("post", "foods/create", { name: "Oat milk", listId: 1, needed: true });
+
+    expect(getState()!.foods.find((entry) => entry.id === created.id)!.inStockScore).toBe(0);
+  });
+
+  it("does not count a discarded shop", () => {
+    const id = call("post", "shop-list/start");
+    call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 3 });
+    call("post", `shop-list/cancel/${id}`, { discard: true });
+
+    expect(getState()!.openShopList).toBeNull();
+    expect(getState()!.dashboard.shopLists.total).toBe(0);
+    expect(getState()!.runs).toHaveLength(0);
+  });
+
+  it("previews the shop without opening it", () => {
+    const preview = call("get", "shop-list/preview");
+
+    expect(preview.map((entry: { id: number }) => entry.id)).toEqual([3, 1, 2]);
+    expect(getState()!.openShopList).toBeNull();
+  });
+});
+
+describe("eater profiles and suggestions", () => {
+  const bank = [
+    { name: "Milk", staple: true, tags: ["dairy"] },
+    { name: "Rice", staple: true },
+    { name: "Cat food", group: "cat" },
+    { name: "Salmon", tags: ["fish"] },
+    { name: "Tofu" },
+  ];
+  const today = new Date("2026-11-10T12:00:00Z").getTime();
+
+  it("picks staples and the groups that apply, minus exclusions", () => {
+    expect(starterFoods(bank, ["dairy", "cat"]).map((item) => item.name)).toEqual(["Rice", "Cat food"]);
+  });
+
+  const stateWith = (playedAt: string[], declined = {}) =>
+    ({
+      ...snapshot({ playedAt }),
+      household: { id: 1, joinCode: "", members: [], eaterProfiles: ["fish"], declinedSuggestions: declined },
+      foods: [food(1, 0.5, { name: "Rice" })],
+    }) as any;
+
+  it("suggests every other day, skipping known and excluded foods", () => {
+    expect(nextSuggestion(stateWith([]), bank, 0, today)).toBeNull();
+    expect(nextSuggestion(stateWith(["2026-11-09T10:00:00Z"]), bank, 0, today)?.name).toBe("Milk");
+  });
+
+  it("offers a declined food once more after a month", () => {
+    const played = ["2026-11-09T10:00:00Z"];
+    const recent = { milk: { at: "2026-11-01T00:00:00Z", count: 1 } };
+    const old = { milk: { at: "2026-09-01T00:00:00Z", count: 1 } };
+    const twice = { milk: { at: "2026-09-01T00:00:00Z", count: 2 } };
+
+    expect(nextSuggestion(stateWith(played, recent), bank, 0, today)?.name).toBe("Tofu");
+    expect(nextSuggestion(stateWith(played, old), bank, 0, today)?.name).toBe("Milk");
+    expect(nextSuggestion(stateWith(played, twice), bank, 0, today)?.name).toBe("Tofu");
   });
 });

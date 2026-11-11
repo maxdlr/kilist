@@ -1,3 +1,5 @@
+import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
+import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
@@ -552,6 +554,9 @@ const ArcadePlay = () => {
   const skin = useSkin();
   const game = useSwipeGame();
   const copy = skin.copy.swipe;
+  const suggestion = useDailySuggestion(game.screen === "done");
+
+  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
   switch (game.screen) {
     case "loading":

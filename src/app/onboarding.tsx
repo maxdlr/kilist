@@ -10,9 +10,18 @@ const OnboardingScreen = () => {
   const [asking, setAsking] = useState(false);
   const T = common.notifications.ask;
 
-  const done = async () => {
+  const [target, setTarget] = useState<"/" | "/swipe">("/");
+
+  const done = async (startRound: boolean) => {
+    const next = startRound ? "/swipe" : "/";
+    if (intro !== "1") {
+      if (router.canGoBack()) router.back();
+      else router.replace("/");
+      return;
+    }
+    setTarget(next);
     if (await canAskPermission().catch(() => false)) setAsking(true);
-    else router.replace("/");
+    else router.replace(next);
   };
 
   return (
@@ -31,7 +40,7 @@ const OnboardingScreen = () => {
         }
         onClose={() => {
           setAsking(false);
-          router.replace("/");
+          router.replace(target);
         }}
       />
     </>

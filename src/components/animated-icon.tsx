@@ -3,15 +3,20 @@ import Title from "@/components/elements/Title/Title";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import * as SplashScreen from "expo-splash-screen";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
+import { ThemedText } from "@/components/themed-text";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Keyframe } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
 const DURATION = 1400;
+const MARK = require("../../assets/images/kilist-mark.png");
+const MARK_SIZE = 120;
 
 export function AnimatedSplashOverlay() {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const insets = useSafeAreaInsets();
   const [animate, setAnimate] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -24,8 +29,25 @@ export function AnimatedSplashOverlay() {
   });
 
   const { top, name, bottom } = skin.copy.splash;
-  const style = [styles.splash, { backgroundColor: skin.colors.accent }];
-  const content = (
+  const centered = skin.splash === "centered";
+  const style = centered
+    ? [styles.splash, styles.centered, { backgroundColor: skin.colors.ground }]
+    : [styles.splash, { backgroundColor: skin.colors.accent }];
+  const content = centered ? (
+    <>
+      <Image source={MARK} style={styles.mark} accessibilityIgnoresInvertColors />
+      <ThemedText size={skin.type.title} color={skin.colors.onGround} style={styles.name}>
+        {name}
+      </ThemedText>
+      <ThemedText
+        size={skin.type.body}
+        color={skin.colors.muted}
+        style={[styles.tagline, { bottom: insets.bottom + skin.spacing.section }]}
+      >
+        {bottom}
+      </ThemedText>
+    </>
+  ) : (
     <>
       <Title size={skin.type.body} lines={1} header={false}>
         {top}
@@ -79,4 +101,16 @@ const createStyles = (s: Skin) =>
       top: 0,
       zIndex: 1000,
     },
+    centered: { alignItems: "center", justifyContent: "center", paddingBottom: 0, paddingTop: 0 },
+    mark: { height: MARK_SIZE, width: MARK_SIZE },
+    name: {
+      fontFamily: s.fonts.body?.medium ?? s.fonts.display.family,
+      left: 0,
+      marginTop: MARK_SIZE / 2 + s.spacing.stack,
+      position: "absolute",
+      right: 0,
+      textAlign: "center",
+      top: "50%",
+    },
+    tagline: { left: s.spacing.gutter, position: "absolute", right: s.spacing.gutter, textAlign: "center" },
   });

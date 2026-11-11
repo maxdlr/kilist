@@ -193,13 +193,22 @@ const fr: SkinCopy = {
   },
   intro: {
     steps: [
-      { title: "Une liste qui se tient toute seule.", line: "Kilist retient ce que tu achètes." },
-      { title: "Réponds pour quelques aliments, de temps en temps.", line: "J'en ai, il en faut, ou je ne sais pas." },
-      { title: "La liste reste à jour.", line: "Ouvre-la quand tu fais tes courses. C'est tout." },
-      { title: "Des points, discrètement.", line: "Chaque réponse rapporte des points pour d'autres styles." },
+      { title: "Kilist tient ta liste de courses à jour.", line: "Tu ne l'écris jamais." },
+      {
+        title: "Chaque jour, trie 10 aliments.",
+        line: "Glisse à droite s'il t'en reste, à gauche s'il n'y en a plus, en haut si tu ne sais pas.",
+      },
+      {
+        title: "Au magasin, glisse chaque aliment quand tu l'achètes.",
+        line: "À droite quand il est dans ton panier, à gauche pour le garder pour la prochaine fois.",
+      },
+      {
+        title: "Kilist apprend tes habitudes.",
+        line: "Ta liste devient plus juste chaque jour, donc elle est prête dès que tu vas au magasin.",
+      },
     ],
     next: "Suivant",
-    start: "Choisir mes aliments",
+    start: "Continuer",
     skip: "Passer",
   },
   account: {

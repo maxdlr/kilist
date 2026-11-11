@@ -1,7 +1,8 @@
 import common from "@/i18n/common";
 import type { TabBarProps } from "./types";
 import { ThemedText } from "@/components/themed-text";
-import useAuth from "@/providers/AuthProvider";
+import useRoundOpen from "@/hooks/useRoundOpen";
+import { MAIN_TABS, shownTab } from "./tabs";
 import { useSkin } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
@@ -19,8 +20,7 @@ export const tabAria = (name: string) =>
 
 const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
-  const { user } = useAuth();
-  const isAdmin = user?.type === "admin";
+  const { pending } = useRoundOpen();
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
   const fullHeight = skin.size.tabBar + insets.bottom;
@@ -40,9 +40,10 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
       {state.routes.map((route, index) => {
         const name = route.name as keyof typeof skin.copy.tabs;
         const label = skin.copy.tabs[name];
-        if (!label || (name === "admin" && !isAdmin)) return null;
-        const struck = name === "inventory" && skin.game.strikeInventoryTab;
-        const isCurrent = state.index === index;
+        if (!label || !MAIN_TABS.includes(route.name)) return null;
+        const isActual = state.index === index;
+        const isCurrent = shownTab(state.routes[state.index]?.name) === route.name;
+        const open = route.name === "swipe" && pending && !isCurrent;
 
         return (
           <Pressable
@@ -56,7 +57,7 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 target: route.key,
                 canPreventDefault: true,
               });
-              if (!isCurrent && !event.defaultPrevented) {
+              if (!isActual && !event.defaultPrevented) {
                 navigateToTab(route.key);
               }
             }}
@@ -69,8 +70,8 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
             <ThemedText
               allowFontScaling={false}
               size={skin.type.label}
-              color={isCurrent ? skin.colors.onGround : skin.colors.muted}
-              style={struck && styles.struck}
+              color={isCurrent || open ? skin.colors.onGround : skin.colors.muted}
+              style={open && styles.open}
               numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}
             >
               {label}
@@ -92,8 +93,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
-  struck: {
-    textDecorationLine: "line-through",
+  open: {
+    textDecorationLine: "underline",
   },
 });
 

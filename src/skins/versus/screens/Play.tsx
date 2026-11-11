@@ -1,3 +1,5 @@
+import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
+import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
@@ -416,6 +418,9 @@ const Closed = ({ game }: { game: RaceGame }) => {
 
 const VersusPlay = () => {
   const game = useRaceGame();
+  const suggestion = useDailySuggestion(game.screen === "done");
+
+  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
   switch (game.screen) {
     case "loading":

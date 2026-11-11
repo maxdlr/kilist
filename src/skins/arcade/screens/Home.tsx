@@ -1,4 +1,4 @@
-import KilButton from "@/components/elements/KilButton";
+import HomeLinksBlock from "@/components/views/Dashboard/_components/HomeLinksBlock";
 import SyncNote from "@/components/elements/SyncNote";
 import Title from "@/components/elements/Title/Title";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
@@ -84,13 +84,7 @@ const ArcadeHome = () => {
       <Ground
         dock={
           <>
-            <KilButton
-              height={skin.size.button.xl - skin.spacing.tight}
-              fontSize={skin.type.title}
-              {...(needed
-                ? { label: copy.shop, href: "/shop" as const }
-                : { label: copy.swipe, href: "/swipe" as const })}
-            />
+            <HomeLinksBlock ink={P.white} muted={P.lilac} />
             <ThemedText size={skin.type.caption} color={P.lilac} style={styles.tally}>
               {copy.tally(dashboard.foods.total, dashboard.shopLists.total, dashboard.swipes.total)}
             </ThemedText>

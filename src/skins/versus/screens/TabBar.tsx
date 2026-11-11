@@ -1,7 +1,8 @@
 import { A } from "@/admin/ui";
+import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
+import useRoundOpen from "@/hooks/useRoundOpen";
 import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
-import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
@@ -20,7 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { versusPalette as P } from "..";
 import { VText } from "./parts";
 
-const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
+const ORDER = MAIN_TABS;
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
@@ -33,7 +34,7 @@ const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeW
 const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const { user } = useAuth();
+  const { pending } = useRoundOpen();
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
   const fullHeight = skin.size.tabBar + insets.bottom + skin.spacing.section;
@@ -55,8 +56,9 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
           const label = skin.copy.tabs[name];
-          if (!label || (name === "admin" && user?.type !== "admin")) return null;
-          const isCurrent = state.routes[state.index]?.key === route.key;
+          if (!label) return null;
+          const isActual = state.routes[state.index]?.key === route.key;
+          const isCurrent = shownTab(state.routes[state.index]?.name) === route.name;
           const isRace = name === "swipe";
           const Icon = ICONS[name];
           const ink = isCurrent ? P.white : P.faint;
@@ -69,7 +71,7 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               accessibilityState={{ selected: isCurrent }}
               onPress={() => {
                 const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-                if (!isCurrent && !event.defaultPrevented) navigateToTab(route.key);
+                if (!isActual && !event.defaultPrevented) navigateToTab(route.key);
               }}
               style={styles.tab}
             >
@@ -78,6 +80,7 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                   <VText face="display" size={skin.type.title - 2} color={P.ink}>
                     VS
                   </VText>
+                  {pending && !isCurrent && <View style={styles.badge} />}
                 </View>
               ) : (
                 Icon && <Icon size={skin.size.icon.action} color={ink} strokeWidth={2} />
@@ -115,6 +118,17 @@ const createStyles = (s: Skin) =>
       flex: 1,
       gap: s.spacing.tight,
       justifyContent: "flex-end",
+    },
+    badge: {
+      backgroundColor: P.agree,
+      borderColor: P.ground,
+      borderRadius: s.spacing.small,
+      borderWidth: 2,
+      height: s.spacing.inline + 2,
+      position: "absolute",
+      right: -s.spacing.tight,
+      top: -s.spacing.tight,
+      width: s.spacing.inline + 2,
     },
     coin: {
       alignItems: "center",

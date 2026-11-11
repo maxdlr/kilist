@@ -30,6 +30,7 @@ const calm: SkinSource = {
   premium: false,
   statusBarOnGround: "dark",
   textCase: "none",
+  splash: "centered",
   game: {
     stamp: "sticker",
     strikeInventoryTab: false,

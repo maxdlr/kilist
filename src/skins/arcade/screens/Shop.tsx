@@ -3,14 +3,17 @@ import KilButton from "@/components/elements/KilButton";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
+import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
+import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { XMarkIcon } from "react-native-heroicons/outline";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -187,7 +190,7 @@ const ArcadeShop = () => {
 
   const leave = () => {
     setStamped([]);
-    return run.stop();
+    return run.finish();
   };
 
   if (run.isLoading) return <ArcadeLoading />;
@@ -218,6 +221,48 @@ const ArcadeShop = () => {
           <Row left={T.nextTime} right={String(run.handled - run.bought)} size={skin.type.label} />
           <Row left={T.listsWritten} right="0" size={skin.type.label} />
         </ArcadeCard>
+      </Ground>
+    );
+  }
+
+  if (!run.isStarted && !run.isEmpty) {
+    return (
+      <Ground
+        dock={
+          <KilButton
+            height={skin.size.button.lg}
+            fontSize={skin.type.lead}
+            label={common.shop.start}
+            onTouch={run.start}
+          />
+        }
+      >
+        <View>
+          <ThemedText size={skin.type.label} color={P.lilac}>
+            {common.shop.startLabel}
+          </ThemedText>
+          <Title size={skin.type.display.sm} lines={1} color={P.white}>
+            {common.shop.startTitle(run.preview.length)}
+          </Title>
+        </View>
+        <ArcadeCard lift={2} style={styles.board}>
+          <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+            {run.preview.map((food, index) => (
+              <GameRow key={food.id} food={food} rank={index + 1} />
+            ))}
+          </ScrollView>
+        </ArcadeCard>
+        <View style={styles.how}>
+          <ThemedText size={skin.type.label} color={P.lilac}>
+            {common.shop.startHow}
+          </ThemedText>
+          <ThemedText size={skin.type.label} color={P.white}>
+            {`→ ${common.shop.startRight}`}
+          </ThemedText>
+          <ThemedText size={skin.type.label} color={P.white}>
+            {`← ${common.shop.startLeft}`}
+          </ThemedText>
+        </View>
       </Ground>
     );
   }
@@ -267,6 +312,7 @@ const ArcadeShop = () => {
   };
 
   return (
+    <View style={styles.flex}>
     <Ground
       dock={
         <>
@@ -279,9 +325,8 @@ const ArcadeShop = () => {
               height={skin.size.button.lg - skin.spacing.tight}
               fontSize={skin.type.body}
               variant="secondary"
-              label={skin.copy.shop.stop}
-              accessibilityLabel={T.stopAria}
-              onTouch={leave}
+              label={common.shop.add}
+              onTouch={run.openAdd}
             />
             <KilButton
               flex={1.6}
@@ -299,10 +344,19 @@ const ArcadeShop = () => {
           <ThemedText size={skin.type.label} color={P.lilac}>
             {T.shopRun}
           </ThemedText>
-          <Title size={skin.type.display.sm} lines={1} color={P.white}>
+          <Title size={skin.type.display.sm} lines={1} color={P.white} gutter={skin.spacing.gutter * 2 + skin.size.button.xs * 3}>
             {left === 0 ? T.fullCard : T.toFind(left)}
           </Title>
         </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={T.stopAria}
+          onPress={() => (stamped.length === 0 ? (setStamped([]), run.discard()) : run.askStop())}
+          hitSlop={skin.spacing.small}
+          style={styles.close}
+        >
+          <XMarkIcon size={skin.size.icon.action} color={P.lilac} strokeWidth={2.5} />
+        </Pressable>
         <View
           accessible
           accessibilityLabel={T.boughtLeftAria(stamped.length, left)}
@@ -346,6 +400,8 @@ const ArcadeShop = () => {
         </ScrollView>
       </ArcadeCard>
     </Ground>
+      <ShopPanels run={run} />
+    </View>
   );
 };
 
@@ -368,6 +424,8 @@ const createStyles = (s: Skin) => {
       alignItems: "center",
       justifyContent: "center",
     },
+    close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
+    how: { gap: s.spacing.tight },
     titleRow: {
       alignItems: "flex-end",
       flexDirection: "row",

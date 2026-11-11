@@ -7,9 +7,11 @@ import useTickets from "@/providers/TicketsProvider";
 import useToast from "@/providers/ToastProvider";
 import { LANGUAGE_NAMES } from "@/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
-import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Linking, Share } from "react-native";
+
+const HIDDEN_CODE = "••••••";
 
 export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode";
 
@@ -22,17 +24,38 @@ const useAccount = () => {
   const { showToast } = useToast();
   const { counter } = useTickets();
   const [openPanel, setPanel] = useState<AccountPanel | null>(null);
+  const needsEmailCode = !isGuest && !!user && !user.emailConfirmedAt;
+  const askForEmailCode = () => {
+    showToast(common.emailGate.title, "info");
+    setPanel("emailCode");
+  };
   const setOpenPanel = (panel: AccountPanel | null) => {
     if (isGuest && (panel === "qr" || panel === "switch")) {
       requireAccount("household");
       return;
     }
+    if (needsEmailCode && (panel === "qr" || panel === "switch")) {
+      askForEmailCode();
+      return;
+    }
     setPanel(panel);
   };
+  const { panel: requestedPanel } = useLocalSearchParams<{ panel?: string }>();
+
+  const [handledPanel, setHandledPanel] = useState<string | undefined>();
+
+  if (requestedPanel !== handledPanel) {
+    setHandledPanel(requestedPanel);
+    if (requestedPanel === "emailCode" && needsEmailCode) setPanel("emailCode");
+  }
+
+  useEffect(() => {
+    if (requestedPanel) router.setParams({ panel: undefined });
+  }, [requestedPanel]);
   const { lang, choice } = useLanguage();
   const closePanel = useCallback(() => setPanel(null), []);
 
-  const joinCode = household?.joinCode ?? user?.household.joinCode ?? "";
+  const joinCode = (household?.joinCode ?? user?.household.joinCode) || HIDDEN_CODE;
 
   const logOut = async () => {
     if (await logout()) router.replace("/");
@@ -57,6 +80,10 @@ const useAccount = () => {
   const shareCode = async () => {
     if (isGuest) {
       requireAccount("household");
+      return;
+    }
+    if (needsEmailCode) {
+      askForEmailCode();
       return;
     }
     try {
@@ -101,7 +128,7 @@ const useAccount = () => {
     openCredits: () => setOpenPanel("credits"),
     openLanguage: () => setOpenPanel("language"),
     openNotifications: () => router.push("/notifications"),
-    needsEmailCode: !isGuest && !!user && !user.emailConfirmedAt,
+    needsEmailCode,
     openEmailCode: () => setOpenPanel("emailCode"),
     languageName: choice ? LANGUAGE_NAMES[choice] : common.languageAuto(LANGUAGE_NAMES[lang]),
     openIconsSite,

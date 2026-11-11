@@ -1,6 +1,6 @@
 import T from "../text";
+import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
-import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
@@ -18,9 +18,9 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmPalette as C } from "..";
-import { Dot, useCheckPending } from "./parts";
+import { CText, Dot, useCheckPending } from "./parts";
 
-const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
+const ORDER = MAIN_TABS;
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: SunIcon,
@@ -34,7 +34,6 @@ const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeW
 const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
   const { pending } = useCheckPending();
@@ -49,7 +48,8 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const routes = ORDER.map((name) => state.routes.find((route) => route.name === name)).filter(
     (route) => route !== undefined,
   );
-  const currentName = state.routes[state.index]?.name;
+  const actualName = state.routes[state.index]?.name;
+  const currentName = shownTab(actualName);
 
   return (
     <Animated.View accessibilityRole="tablist" style={[styles.bar, animatedStyle]}>
@@ -57,7 +57,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
           const label = skin.copy.tabs[name];
-          if (!label || (name === "admin" && user?.type !== "admin")) return null;
+          if (!label) return null;
           const isCurrent = currentName === route.name;
           const badge = name === "swipe" && pending && !isCurrent;
           const Icon = ICONS[name] ?? SunIcon;
@@ -70,7 +70,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               accessibilityState={{ selected: isCurrent }}
               onPress={() => {
                 const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-                if (currentName !== route.name && !event.defaultPrevented) navigateToTab(route.key);
+                if (actualName !== route.name && !event.defaultPrevented) navigateToTab(route.key);
               }}
               style={styles.tab}
             >
@@ -82,7 +82,15 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                   </View>
                 )}
               </View>
-              <Dot color={isCurrent ? C.ink : "transparent"} size={4} />
+              <CText
+                allowFontScaling={false}
+                weight={isCurrent ? "semibold" : "regular"}
+                size={skin.type.caption - 1}
+                color={isCurrent ? C.ink : C.soft}
+                numberOfLines={1}
+              >
+                {label}
+              </CText>
             </Pressable>
           );
         })}
@@ -100,7 +108,7 @@ const createStyles = (s: Skin) =>
       overflow: "hidden",
     },
     row: { flex: 1, flexDirection: "row", paddingHorizontal: s.spacing.tight },
-    tab: { alignItems: "center", flex: 1, gap: s.spacing.tight + 2, justifyContent: "center" },
+    tab: { alignItems: "center", flex: 1, gap: s.spacing.tight, justifyContent: "center" },
     iconWrap: { alignItems: "center", justifyContent: "center" },
     badge: { position: "absolute", right: -s.spacing.tight, top: -s.spacing.hair },
   });

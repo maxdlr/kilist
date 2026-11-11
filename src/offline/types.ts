@@ -1,4 +1,6 @@
 import type {
+  EaterProfileType,
+  FoodBankItemType,
   HouseholdWithMembersType,
   ListType,
   UserType,
@@ -53,7 +55,8 @@ export type NotificationEvent = {
 };
 
 export type Catalog = {
-  foodBanks: Record<string, { name: string; description?: string; icon?: string }[]>;
+  foodBanks: Record<string, FoodBankItemType[]>;
+  profiles?: EaterProfileType[];
   prizes: CatalogPrize[];
   notifications?: { events: NotificationEvent[]; alwaysEmail: string[] };
 };
@@ -111,7 +114,9 @@ export type OpType =
   | "me.skin"
   | "me.language"
   | "prize.redeem"
-  | "me.notifications";
+  | "me.notifications"
+  | "household.profiles"
+  | "suggestion.decline";
 
 export type Op = {
   id: string;

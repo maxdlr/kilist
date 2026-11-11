@@ -1,6 +1,6 @@
 import SyncNote from "@/components/elements/SyncNote";
 import type { Skin } from "@/skins/types";
-import KilButton from "@/components/elements/KilButton";
+import HomeLinksBlock from "./_components/HomeLinksBlock";
 import Title from "@/components/elements/Title/Title";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import { ThemedText } from "@/components/themed-text";
@@ -89,14 +89,7 @@ const Dashboard = ({
             })}
         </View>
 
-        <KilButton
-          height={skin.size.button.xl}
-          fontSize={skin.type.headline}
-          style={styles.cta}
-          {...(needed
-            ? { label: copy.shop, href: "/shop" as const }
-            : { label: copy.swipe, href: "/swipe" as const })}
-        />
+        <HomeLinksBlock style={styles.cta} />
         <ThemedText size={skin.type.label} color={skin.colors.onGround} style={styles.tally}>
           {copy.tally(foods.total, shopLists.total, swipes.total)}
         </ThemedText>

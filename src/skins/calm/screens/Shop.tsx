@@ -1,5 +1,7 @@
 import T from "../text";
+import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
+import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -7,11 +9,14 @@ import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, XMarkIcon } from "react-native-heroicons/outline";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
+
+const START_PREVIEW = 6;
 
 const Circle = ({ done }: { done: boolean }) => {
   const skin = useSkin();
@@ -112,12 +117,14 @@ const SwipeRow = ({
 const CalmShop = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const run = useShopRun();
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
     null,
   );
+  const run = useShopRun({
+    onSaved: (bought) => setResult({ bought, left: Math.max(0, run.total - bought) }),
+  });
   const remaining = run.foods ?? [];
 
   const tick = (food: FoodType) => {
@@ -130,17 +137,11 @@ const CalmShop = () => {
     run.snooze(food.id);
   };
 
-  const finish = async () => {
-    setResult({ bought: basket.length, left: remaining.length + later.length });
-    await run.cancelShopList();
-  };
-
   const leave = () => {
-    run.setShopListId(undefined);
     setBasket([]);
     setLater([]);
     setResult(null);
-    router.navigate("/");
+    run.leave();
   };
 
   if (result) {
@@ -154,6 +155,53 @@ const CalmShop = () => {
   }
 
   if (run.isLoading) return <CalmLoading />;
+
+  if (!run.isStarted && !run.isEmpty) {
+    return (
+      <Screen padded={false} dock={<CButton label={common.shop.start} onPress={run.start} />}>
+        <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+          <View style={styles.startHead}>
+            <CText size={skin.type.label} color={C.soft}>
+              {common.shop.startLabel}
+            </CText>
+            <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
+              {common.shop.startTitle(run.preview.length)}
+            </CText>
+          </View>
+          {run.preview.slice(0, START_PREVIEW).map((food) => (
+            <View key={food.id} style={styles.row}>
+              <Dot color={skin.colors.levels[levelOf(food.inStockScore)]} />
+              <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>
+                {food.name}
+              </CText>
+            </View>
+          ))}
+          {run.preview.length > START_PREVIEW && (
+            <CText size={skin.type.label} color={C.soft} style={styles.more}>
+              {common.shop.more(run.preview.length - START_PREVIEW)}
+            </CText>
+          )}
+          <View style={styles.how}>
+            <CText size={skin.type.label} color={C.soft}>
+              {common.shop.startHow}
+            </CText>
+            <View style={styles.howRow}>
+              <ArrowRightIcon size={skin.size.icon.action - 4} color={C.haveIt} strokeWidth={1.8} />
+              <CText size={skin.type.label + 1} style={styles.flex}>
+                {common.shop.startRight}
+              </CText>
+            </View>
+            <View style={styles.howRow}>
+              <ArrowLeftIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
+              <CText size={skin.type.label + 1} style={styles.flex}>
+                {common.shop.startLeft}
+              </CText>
+            </View>
+          </View>
+        </ScrollView>
+      </Screen>
+    );
+  }
 
   if (run.isEmpty && basket.length === 0 && later.length === 0) {
     return (
@@ -172,9 +220,10 @@ const CalmShop = () => {
   }
 
   return (
-    <Screen
+    <View style={styles.flex}>
+      <Screen
       padded={false}
-      dock={<CButton label={T.shop.doneShopping} onPress={finish} />}
+      dock={<CButton label={common.shop.finish} onPress={run.finish} />}
     >
       <View style={styles.head}>
         <View style={styles.titleRow}>
@@ -185,9 +234,20 @@ const CalmShop = () => {
           >
             {T.shop.title}
           </CText>
-          <CText size={skin.type.label} color={C.soft}>
-            {T.shop.toBuy(remaining.length)}
-          </CText>
+          <View style={styles.headSide}>
+            <CText size={skin.type.label} color={C.soft}>
+              {T.shop.toBuy(remaining.length)}
+            </CText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={common.stopShopping}
+              onPress={run.askStop}
+              hitSlop={skin.spacing.small}
+              style={styles.close}
+            >
+              <XMarkIcon size={skin.size.icon.action} color={C.soft} strokeWidth={1.6} />
+            </Pressable>
+          </View>
         </View>
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
@@ -216,6 +276,17 @@ const CalmShop = () => {
             onLater={() => postpone(food)}
           />
         ))}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={common.shop.add}
+          onPress={run.openAdd}
+          style={({ pressed }) => [styles.add, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+        >
+          <PlusIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
+          <CText weight="medium" size={skin.type.body}>
+            {common.shop.add}
+          </CText>
+        </Pressable>
         {basket.length > 0 && (
           <>
             <CText
@@ -249,6 +320,8 @@ const CalmShop = () => {
         )}
       </ScrollView>
     </Screen>
+      <ShopPanels run={run} />
+    </View>
   );
 };
 
@@ -261,7 +334,7 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.gutter,
     },
     titleRow: {
-      alignItems: "baseline",
+      alignItems: "center",
       flexDirection: "row",
       justifyContent: "space-between",
     },
@@ -285,6 +358,30 @@ const createStyles = (s: Skin) =>
       minHeight: s.size.row.shop,
     },
     hint: { paddingBottom: s.spacing.small },
+    startHead: { gap: s.spacing.small, paddingBottom: s.spacing.section },
+    more: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
+    how: {
+      backgroundColor: C.tint,
+      borderRadius: s.shape.radius,
+      gap: s.spacing.small + 2,
+      marginTop: s.spacing.section,
+      padding: s.spacing.stack,
+    },
+    howRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.small + 2 },
+    headSide: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
+    add: {
+      alignItems: "center",
+      borderColor: C.ring,
+      borderRadius: s.shape.radius,
+      borderStyle: "dashed",
+      borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.small,
+      height: s.size.button.md,
+      justifyContent: "center",
+      marginTop: s.spacing.stack,
+    },
     next: { gap: s.spacing.tight, paddingBottom: s.spacing.inline },
     slot: {
       borderTopColor: C.hairline,

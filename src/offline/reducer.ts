@@ -5,6 +5,7 @@ import {
   isShopListDone,
   nextFoods,
   normalizeName,
+  suggestionKey,
   SAME_TRIP_MS,
   SNOOZE_MS,
   toLocalDay,
@@ -24,10 +25,10 @@ export const toState = (snapshot: Snapshot): LocalState => ({
   runs: [],
 });
 
-const closeShopList = (state: LocalState, at: string) => {
+const closeShopList = (state: LocalState, at: string, discard = false) => {
   const list = state.openShopList;
   if (!list) return;
-  if (list.boughtFoodIds.length > 0) {
+  if (!discard && list.boughtFoodIds.length > 0) {
     const snoozed = state.foods.filter(
       (food) =>
         list.startFoodIds.includes(food.id) &&
@@ -157,7 +158,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
     }
 
     case "shop.cancel": {
-      if (openListFor(state, payload.shopListId)) closeShopList(state, at);
+      if (openListFor(state, payload.shopListId)) closeShopList(state, at, payload.discard === true);
       return null;
     }
 
@@ -169,6 +170,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (twin) {
         state.localAliases[String(payload.tempId)] = twin.id;
         if (!twin.lists.includes(listId)) twin.lists.push(listId);
+        if (payload.needed === true) addHistory(twin, { isInStock: false, at });
         return twin;
       }
       const created: LocalFood = {
@@ -183,6 +185,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         histories: [],
       };
       state.foods.push(created);
+      if (payload.needed === true) addHistory(created, { isInStock: false, at });
       return created;
     }
 
@@ -216,6 +219,22 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "me.notifications":
       state.user.notifications = { ...(state.user.notifications ?? {}), [payload.event]: payload.choice };
       return state.user;
+
+    case "household.profiles":
+      state.household.eaterProfiles = [
+        ...new Set((Array.isArray(payload.profiles) ? payload.profiles : []).filter((id) => typeof id === "string")),
+      ] as string[];
+      return state.household;
+
+    case "suggestion.decline": {
+      if (typeof payload.name !== "string" || !payload.name.trim()) return null;
+      const declined = (state.household.declinedSuggestions ??= {});
+      const key = suggestionKey(payload.name);
+      const previous = declined[key];
+      if (previous && time(previous.at) >= atMs) return null;
+      declined[key] = { at, count: (previous?.count ?? 0) + 1 };
+      return null;
+    }
 
     case "prize.redeem": {
       const prize = state.prizes.prizes.find((entry) => entry.id === payload.prizeId);

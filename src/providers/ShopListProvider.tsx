@@ -14,7 +14,7 @@ export type ShopListContextType = {
   buyFood: (currentFoodId: number) => Promise<void>;
   startNewShopList: () => Promise<number | null>;
   startShopClock: () => Promise<void>;
-  cancelShopList: () => Promise<ShopListType>;
+  cancelShopList: (discard?: boolean) => Promise<ShopListType>;
   snoozeFood: (foodId: number) => Promise<void>;
   suggestedFoodIds: number[];
   orderFoodBy: (type: "score" | "name") => void;
@@ -155,9 +155,9 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const cancelShopList = async () => {
+  const cancelShopList = async (discard = false) => {
     setSuggestedFoodIds([]);
-    const res = await endShopList({});
+    const res = await endShopList(discard ? { discard: true } : {});
     if (res.error) {
       showToast(res.error.message || common.unexpected);
     }

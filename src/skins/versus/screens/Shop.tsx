@@ -1,7 +1,10 @@
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
+import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
+import common from "@/i18n/common";
+import axios from "@/services/axios";
 import { mmss, useShopRecords } from "@/hooks/versus/api";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -9,7 +12,8 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { XMarkIcon } from "react-native-heroicons/outline";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -177,8 +181,8 @@ const VersusShop = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
-  const run = useShopRun();
   const { data: records, mutate: refreshRecords } = useShopRecords();
+  const run = useShopRun({ onSaved: () => conclude() });
   const [started, setStarted] = useState(false);
   const [bought, setBought] = useState<FoodType[]>([]);
   const [elapsed, setElapsed] = useState(0);
@@ -189,10 +193,11 @@ const VersusShop = () => {
 
   const listId = run.shopListId;
   const remaining = run.foods ?? [];
-  const running = started && Boolean(listId) && !result && (remaining.length > 0 || bought.length > 0);
+  const running = (started || run.isStarted) && Boolean(listId) && !result && (remaining.length > 0 || bought.length > 0);
 
   useEffect(() => {
     if (!running) return;
+    startedAt.current ??= Date.now();
     timer.current = setInterval(() => setElapsed(Date.now() - startedAt.current!), CLOCK_MS);
     return () => {
       if (timer.current) clearInterval(timer.current);
@@ -207,11 +212,13 @@ const VersusShop = () => {
   const gap = recordAtHere === null ? null : elapsed - recordAtHere;
   const recordName = record ? (record.userId === user?.id ? V.shop.yourRecord : record.username) : null;
 
-  const begin = () => {
+  const begin = async () => {
+    const id = await run.start();
+    if (!id) return;
     startedAt.current = Date.now();
     setElapsed(0);
     setStarted(true);
-    run.startShopClock();
+    axios.post(`shop-list/clock/${id}`, {}).catch(() => {});
   };
 
   const resetRun = () => {
@@ -224,8 +231,11 @@ const VersusShop = () => {
   };
 
   const abandon = () => {
-    resetRun();
-    return run.stop();
+    if (bought.length === 0) {
+      resetRun();
+      return run.discard();
+    }
+    return run.askStop();
   };
 
   const buy = async (food: FoodType) => {
@@ -238,18 +248,16 @@ const VersusShop = () => {
     await run.snooze(food.id);
   };
 
-  const finish = async () => {
+  const conclude = () => {
     if (timer.current) clearInterval(timer.current);
     const ms = startedAt.current ? Date.now() - startedAt.current : 0;
     setResult({ ms, items: bought.length, left: remaining.length + later.length });
-    await run.cancelShopList();
     refreshRecords();
   };
 
   const leave = () => {
-    run.setShopListId(undefined);
     resetRun();
-    router.navigate("/");
+    run.leave();
   };
 
   if (result) {
@@ -302,24 +310,34 @@ const VersusShop = () => {
     );
   }
 
-  if (!started) {
-    return <StartLine foods={remaining} record={record} onStart={begin} />;
+  if (!run.isStarted) {
+    return <StartLine foods={run.preview} record={record} onStart={begin} />;
   }
 
   const allDone = remaining.length === 0;
 
   return (
+    <View style={styles.flex}>
     <Screen
       padded={false}
       dock={
         <View style={styles.actions}>
-          <VButton flex={1} variant="secondary" label={V.shop.stop} accessibilityLabel={V.shop.stopAria} onPress={abandon} />
-          <VButton flex={1.6} label={allDone ? V.shop.stopClock : V.shop.finish(remaining.length)} onPress={finish} />
+          <VButton flex={1} variant="secondary" label={common.shop.add} onPress={run.openAdd} />
+          <VButton flex={1.6} label={allDone ? V.shop.stopClock : V.shop.finish(remaining.length)} onPress={run.finish} />
         </View>
       }
     >
       <View style={styles.hud}>
         <View style={styles.between}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={V.shop.stopAria}
+            onPress={abandon}
+            hitSlop={skin.spacing.small}
+            style={styles.close}
+          >
+            <XMarkIcon size={skin.size.icon.action} color={P.muted} strokeWidth={2} />
+          </Pressable>
           <VText face="pixel" size={skin.type.title - 2} color={P.you}>{mmss(elapsed)}</VText>
           <VText face="bold" size={skin.type.label} color={gap !== null && gap <= 0 ? P.agree : P.muted}>
             {!record ? V.shop.setRecord : gap === null ? V.shop.record(mmss(record.ms)) : gap <= 0 ? V.play.ahead(mmss(-gap), recordName ?? "") : V.play.behind(mmss(gap), recordName ?? "")}
@@ -363,6 +381,8 @@ const VersusShop = () => {
         ))}
       </ScrollView>
     </Screen>
+      <ShopPanels run={run} />
+    </View>
   );
 };
 
@@ -385,6 +405,7 @@ const createStyles = (s: Skin) =>
       flexGrow: 0,
       justifyContent: "center",
     },
+    close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
     hud: { gap: s.spacing.small, paddingBottom: s.spacing.small, paddingHorizontal: s.spacing.gutter },
     lane: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
     laneLabel: { width: 52 },

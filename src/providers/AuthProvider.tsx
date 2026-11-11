@@ -25,6 +25,7 @@ import React, {
   ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -51,7 +52,8 @@ export type AuthContextType = {
   mergePending: boolean;
   resolveMerge: (keep: boolean) => Promise<boolean>;
   login: (username: string, password: string) => Promise<boolean | "merge">;
-  signup: (payload: SignupPayload) => Promise<boolean>;
+  signup: (payload: SignupPayload) => Promise<boolean | "join">;
+  completeJoin: (join: { joinCode: string; code: string } | null) => Promise<boolean>;
   logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
   mutateUser: (data?: UserType) => unknown;
@@ -69,6 +71,7 @@ const AuthContext = createContext<AuthContextType>({
   resolveMerge: async () => false,
   login: async () => false,
   signup: async () => false,
+  completeJoin: async () => false,
   logout: async () => false,
   deleteAccount: async () => false,
   mutateUser: () => {},
@@ -80,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const pendingIntro = useSyncExternalStore(subscribeStore, isIntroPending, isIntroPending);
   const [mergePending, setMergePending] = useState(false);
+  const emailConfirmed = useRef(false);
 
   const {
     data: user,
@@ -151,13 +155,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signup = async (payload: SignupPayload) => {
     const guest = isGuest && hasGuestData() ? exportGuest() : undefined;
-    const res = await postSignup({ ...payload, ...(guest && { guest }) });
+    const joining = payload.householdChoice === "join";
+    const res = await postSignup({ ...payload, ...(guest && !joining && { guest }) });
     if (res.error) {
       showToast(res.error.message || common.unexpected);
       return false;
     }
     countSignup();
     setNeedsOnboarding(!guest);
+    if (joining) return "join" as const;
+    await enterAccount();
+    return true;
+  };
+
+  const completeJoin = async (join: { joinCode: string; code: string } | null) => {
+    const online = { network: true } as object;
+    try {
+      if (join) {
+        if (!emailConfirmed.current) {
+          await axios.post("/me/email/confirm", { code: join.code }, online);
+          emailConfirmed.current = true;
+        }
+        await axios.post("/households/switch", { householdChoice: "join", joinCode: join.joinCode }, online);
+      }
+      if (isGuest && hasGuestData()) await axios.post("/sync/import", exportGuest(), online);
+    } catch (error: any) {
+      showToast(error?.response?.data?.message || common.needsConnection);
+      return false;
+    }
+    emailConfirmed.current = false;
     await enterAccount();
     return true;
   };
@@ -209,6 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         resolveMerge,
         login,
         signup,
+        completeJoin,
         logout,
         deleteAccount,
         mutateUser,

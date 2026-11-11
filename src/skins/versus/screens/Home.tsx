@@ -1,5 +1,6 @@
 import SyncNote from "@/components/elements/SyncNote";
 import V from "../text";
+import HomeLinksBlock from "@/components/views/Dashboard/_components/HomeLinksBlock";
 import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
 import useHomeData from "@/hooks/screens/useHomeData";
 import { mmss, seconds, Standings, useStandings, useVersusMe } from "@/hooks/versus/api";
@@ -263,12 +264,7 @@ const VersusHome = () => {
         padded={false}
         dock={
           <>
-            <VButton big label={solo ? V.home.raceBest : V.home.raceToday} href="/swipe" />
-            <VButton
-              variant="secondary"
-              label={home.needed ? V.home.goShopping(home.needed) : V.home.checkInventory}
-              href={home.needed ? "/shop" : "/inventory"}
-            />
+            <HomeLinksBlock ink={P.white} muted={P.muted} fill={P.panel} />
           </>
         }
       >

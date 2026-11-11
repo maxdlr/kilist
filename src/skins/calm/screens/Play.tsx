@@ -1,3 +1,5 @@
+import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
+import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import T from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
@@ -171,9 +173,13 @@ const CalmPlay = () => {
   const copy = skin.copy.swipe;
   const { screen, begin } = game;
 
+  const suggestion = useDailySuggestion(screen === "done");
+
   useEffect(() => {
     if (screen === "start") begin();
   }, [screen, begin]);
+
+  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
   switch (screen) {
     case "play":

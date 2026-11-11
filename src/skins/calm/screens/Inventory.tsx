@@ -6,7 +6,10 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
+import { loadValue, saveValue } from "@/offline/store";
 import { router } from "expo-router";
+import { useState } from "react";
+import { INVENTORY_TOUR_KEY } from "./Tutorial";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
@@ -53,11 +56,53 @@ const FoodRow = ({
   );
 };
 
+type TourStep = "intro" | "delete" | "done";
+
+const InventoryTour = ({ onClose }: { onClose: () => void }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = T.tutorial;
+  const [step, setStep] = useState<TourStep>("intro");
+  const text = {
+    intro: { title: copy.tourTitle, line: copy.tourLine },
+    delete: { title: copy.tourDeleteTitle, line: copy.tourDeleteLine },
+    done: { title: copy.tourDoneTitle, line: copy.tourDoneLine },
+  }[step];
+
+  return (
+    <View style={styles.tour}>
+      <View accessibilityLiveRegion="polite" style={styles.tourCard}>
+        <CText weight="medium" size={skin.type.lead}>{text.title}</CText>
+        <CText size={skin.type.body} color={C.soft}>{text.line}</CText>
+        {step === "delete" && <CButton variant="danger" label={copy.tourDelete} onPress={() => setStep("done")} />}
+        {step === "done" && <CButton label={copy.tourClose} onPress={onClose} />}
+      </View>
+      {step === "intro" && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={copy.tourFood}
+          onPress={() => setStep("delete")}
+          style={({ pressed }) => [styles.row, styles.tourRow, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+        >
+          <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>{copy.tourFood}</CText>
+          <Dot color={C.ink} />
+        </Pressable>
+      )}
+    </View>
+  );
+};
+
 const CalmInventory = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
+  const [touring, setTouring] = useState(() => loadValue<string>(INVENTORY_TOUR_KEY) === "pending");
+
+  const closeTour = () => {
+    saveValue(INVENTORY_TOUR_KEY, "done");
+    setTouring(false);
+  };
 
   if (shelf.isLoading) return <CalmLoading />;
 
@@ -94,6 +139,8 @@ const CalmInventory = () => {
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
           <CText size={skin.type.label} color={C.soft}>{`${foods?.length ?? 0}`}</CText>
         </View>
+
+        {touring && !isSelectMode && <InventoryTour onClose={closeTour} />}
 
         {noResults ? (
           <View style={styles.message}>
@@ -153,6 +200,16 @@ const createStyles = (s: Skin) =>
     },
     message: { flex: 1, gap: s.spacing.small, justifyContent: "center", paddingHorizontal: s.spacing.gutter },
     actions: { flexDirection: "row", gap: s.spacing.small + 2 },
+    tour: { paddingHorizontal: s.spacing.gutter },
+    tourCard: {
+      backgroundColor: C.white,
+      borderColor: C.ink,
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      gap: s.spacing.small,
+      padding: s.spacing.stack,
+    },
+    tourRow: { borderTopWidth: 0, marginTop: s.spacing.small },
   });
 
 export default CalmInventory;

@@ -69,6 +69,8 @@ export const exportGuestState = (state: LocalState, importId: string) => {
     skin: state.user.skin,
     language: state.user.language ?? null,
     notifications: state.user.notifications ?? null,
+    eaterProfiles: state.household.eaterProfiles ?? [],
+    declinedSuggestions: state.household.declinedSuggestions ?? {},
   };
 };
 

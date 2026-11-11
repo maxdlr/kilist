@@ -69,6 +69,7 @@ export interface Skin {
   premium: boolean;
   statusBarOnGround: "light" | "dark";
   textCase: TextCase;
+  splash?: "centered";
   game: {
     stamp: "shout" | "sticker";
     strikeInventoryTab: boolean;

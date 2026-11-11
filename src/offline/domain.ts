@@ -1,3 +1,4 @@
+import type { FoodBankItemType } from "@/types/model";
 import type { HistoryEntry, LocalFood, LocalShopList, LocalState, RaceAnswer, Reward } from "./types";
 
 const DAY_MS = 24 * 3600000;
@@ -152,4 +153,41 @@ export const verdictOf = (answers: RaceAnswer[]) => {
     out,
     in: inStock,
   };
+};
+
+export const SUGGESTION_EVERY_DAYS = 2;
+export const SUGGESTION_RETRY_MS = 30 * DAY_MS;
+export const SUGGESTION_MAX_DECLINES = 2;
+
+export const suggestionKey = (name: string) => normalizeName(name).slice(0, 255);
+
+const fitsProfiles = (item: FoodBankItemType, profiles: string[]) =>
+  !(item.tags ?? []).some((tag) => profiles.includes(tag)) &&
+  (!item.group || profiles.includes(item.group));
+
+export const starterFoods = (bank: FoodBankItemType[], profiles: string[]) =>
+  bank.filter((item) => (item.staple || item.group) && fitsProfiles(item, profiles));
+
+export const nextSuggestion = (
+  state: LocalState,
+  bank: FoodBankItemType[],
+  tzOffset: number,
+  now: number,
+) => {
+  const days = new Set(state.playedAt.map((at) => toLocalDay(at, tzOffset)));
+  days.add(toLocalDay(new Date(now), tzOffset));
+  if (days.size % SUGGESTION_EVERY_DAYS !== 0) return null;
+
+  const known = new Set(state.foods.map((food) => normalizeName(food.name)));
+  const declined = state.household.declinedSuggestions ?? {};
+  const profiles = state.household.eaterProfiles ?? [];
+
+  return (
+    bank.find((item) => {
+      if (known.has(normalizeName(item.name)) || !fitsProfiles(item, profiles)) return false;
+      const refusal = declined[suggestionKey(item.name)];
+      if (!refusal) return true;
+      return refusal.count < SUGGESTION_MAX_DECLINES && now - time(refusal.at) >= SUGGESTION_RETRY_MS;
+    }) ?? null
+  );
 };

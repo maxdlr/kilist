@@ -1,6 +1,9 @@
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import ActionPanel from "@/components/elements/ActionPanel";
+import BottomPanel from "@/components/elements/BottomPanel";
+import { ThemedText } from "@/components/themed-text";
+import axios from "@/services/axios";
 import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
@@ -44,7 +47,9 @@ const LoginScreen = () => {
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
   const insets = useSafeAreaInsets();
-  const { login, signup, isGuest, mergePending, resolveMerge } = useAuth();
+  const { login, signup, completeJoin, isGuest, mergePending, resolveMerge } = useAuth();
+  const [joinStep, setJoinStep] = useState(false);
+  const [emailCode, setEmailCode] = useState("");
   const guestCopy = skin.copy.guest;
   const { showToast } = useToast();
   const params = useLocalSearchParams<{ mode?: string }>();
@@ -102,7 +107,7 @@ const LoginScreen = () => {
         return;
       }
 
-      await signup({
+      const result = await signup({
         username,
         email,
         password,
@@ -113,6 +118,7 @@ const LoginScreen = () => {
               householdName: householdName || undefined,
             }),
       });
+      if (result === "join") setJoinStep(true);
       return;
     }
 
@@ -123,6 +129,20 @@ const LoginScreen = () => {
       return;
     }
     router.replace("/");
+  };
+
+  const finishJoin = async (withCode: boolean) => {
+    const done = await completeJoin(withCode ? { joinCode, code: emailCode } : null);
+    if (done) setJoinStep(false);
+  };
+
+  const resendCode = async () => {
+    try {
+      await axios.post("/me/email/code", {}, { network: true } as object);
+      showToast(common.emailCode.sent, "info");
+    } catch (error: any) {
+      showToast(error?.response?.data?.message || common.needsConnection);
+    }
   };
 
   const chooseMerge = async (keep: boolean) => {
@@ -314,6 +334,43 @@ const LoginScreen = () => {
           }
           onClose={() => setMergeOpen(false)}
         />
+
+        <BottomPanel visible={joinStep} onClose={() => {}}>
+          <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
+            {common.emailGate.joinTitle}
+          </Title>
+          <ThemedText size={skin.type.body} color={skin.panel.ink}>
+            {common.emailGate.joinLine(email)}
+          </ThemedText>
+          <FormInput
+            label={common.emailCode.code}
+            labelColor={skin.panel.ink}
+            type="number"
+            maxLength={6}
+            value={emailCode}
+            onChangeText={setEmailCode}
+          />
+          <KilButton
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            label={common.emailCode.confirm}
+            onTouch={() => finishJoin(true)}
+          />
+          <KilButton
+            height={skin.size.button.sm}
+            fontSize={skin.type.label}
+            variant={skin.panel.secondary}
+            label={common.emailCode.resend}
+            onTouch={resendCode}
+          />
+          <KilButton
+            height={skin.size.button.sm}
+            fontSize={skin.type.label}
+            variant={skin.panel.secondary}
+            label={common.emailGate.joinSkip}
+            onTouch={() => finishJoin(false)}
+          />
+        </BottomPanel>
 
         <Animated.View
           pointerEvents="none"

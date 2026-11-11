@@ -1,8 +1,9 @@
 import { A } from "@/admin/ui";
+import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
+import useRoundOpen from "@/hooks/useRoundOpen";
 import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { ThemedText } from "@/components/themed-text";
-import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
@@ -26,7 +27,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { arcadePalette as P } from "..";
 import { shadowOf } from "./parts";
 
-const ORDER = ["index", "inventory", "swipe", "shop", "account", "admin"];
+const ORDER = MAIN_TABS;
 
 const ICONS: Record<
   string,
@@ -43,13 +44,12 @@ const ICONS: Record<
 const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const { user } = useAuth();
-  const isAdmin = user?.type === "admin";
+  const { pending } = useRoundOpen();
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
   const raise =
     skin.spacing.stack +
-    (ORDER[state.index] === "account" ? skin.shape.shadow.offset : 0);
+    (state.routes[state.index]?.name === "account" ? skin.shape.shadow.offset : 0);
   const fullHeight = skin.size.tabBar + insets.bottom + raise;
 
   const height = useSharedValue(fullHeight);
@@ -80,8 +80,9 @@ const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
           const label = skin.copy.tabs[name];
-          if (!label || (name === "admin" && !isAdmin)) return null;
-          const isCurrent = state.routes[state.index]?.key === route.key;
+          if (!label) return null;
+          const isActual = state.routes[state.index]?.key === route.key;
+          const isCurrent = shownTab(state.routes[state.index]?.name) === route.name;
           const Icon = ICONS[name]!;
           const isPlay = name === "swipe";
 
@@ -91,7 +92,7 @@ const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               target: route.key,
               canPreventDefault: true,
             });
-            if (!isCurrent && !event.defaultPrevented) {
+            if (!isActual && !event.defaultPrevented) {
               navigateToTab(route.key);
             }
           };
@@ -121,6 +122,7 @@ const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                     color={P.navy}
                     strokeWidth={2.4}
                   />
+                  {pending && !isCurrent && <View style={styles.badge} />}
                 </View>
               ) : (
                 <View
@@ -190,6 +192,17 @@ const createStyles = (s: Skin) =>
       height: s.size.icon.action,
       justifyContent: "center",
       width: s.size.icon.action * 1.7,
+    },
+    badge: {
+      backgroundColor: P.mint,
+      borderColor: P.navy,
+      borderRadius: s.spacing.small,
+      borderWidth: 2,
+      height: s.spacing.stack - 2,
+      position: "absolute",
+      right: -s.spacing.tight,
+      top: -s.spacing.tight,
+      width: s.spacing.stack - 2,
     },
     coin: {
       alignItems: "center",

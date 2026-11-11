@@ -1,4 +1,5 @@
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
+import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -86,14 +87,24 @@ export const Screen = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
+  const { insideTabs } = useTabBarVisibility();
   useStatusBarStyle(skin.statusBarOnGround);
 
   return (
     <View style={styles.root}>
-      <View style={[styles.content, padded && styles.padded, { paddingTop: insets.top + skin.spacing.page - skin.spacing.small }]}>
+      <View
+        style={[
+          styles.content,
+          padded && styles.padded,
+          { paddingTop: insets.top + skin.spacing.page - skin.spacing.small },
+          !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
+        ]}
+      >
         {children}
       </View>
-      {dock && <View style={styles.dock}>{dock}</View>}
+      {dock && (
+        <View style={[styles.dock, !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom }]}>{dock}</View>
+      )}
     </View>
   );
 };

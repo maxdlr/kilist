@@ -1,6 +1,7 @@
 import {
   classifyScores,
   isShopListDone,
+  nextSuggestion,
   remainingShopFoods,
   shopCandidates,
   swipeDeck,
@@ -232,6 +233,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
           listId: body.listId,
           fromOnboarding: body.fromOnboarding === true,
           icon: typeof body.icon === "string" ? body.icon : undefined,
+          ...(body.needed === true && { needed: true }),
         }),
       );
     },
@@ -293,8 +295,53 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
   [
     "post",
     /^shop-list\/cancel\/(-?\d+)$/,
-    (_request, match) => {
-      enqueue("shop.cancel", { shopListId: Number(match[1]) });
+    ({ body }, match) => {
+      enqueue("shop.cancel", {
+        shopListId: Number(match[1]),
+        ...(body?.discard === true && { discard: true }),
+      });
+      return null;
+    },
+  ],
+  ["get", /^shop-list\/open$/, () => state().openShopList?.id ?? null],
+  [
+    "get",
+    /^shop-list\/preview$/,
+    () =>
+      shopCandidates(state().foods, Date.now())
+        .sort((a, b) => a.inStockScore - b.inStockScore)
+        .map(toFood),
+  ],
+  [
+    "get",
+    /^foods\/find$/,
+    ({ query }) => {
+      const name = normalizeName(String(query.name ?? ""));
+      const found = name ? state().foods.find((food) => normalizeName(food.name) === name) : undefined;
+      return found ? { ...toFood(found), onList: found.lists.length > 0 } : null;
+    },
+  ],
+  [
+    "put",
+    /^households\/profiles$/,
+    ({ body }) => enqueue("household.profiles", { profiles: Array.isArray(body?.profiles) ? body.profiles : [] }),
+  ],
+  [
+    "get",
+    /^suggestions\/next$/,
+    ({ query }) =>
+      nextSuggestion(
+        state(),
+        getCatalog()?.foodBanks[getLang()] ?? [],
+        Number(query.tzOffset) || 0,
+        Date.now(),
+      ),
+  ],
+  [
+    "post",
+    /^suggestions\/decline$/,
+    ({ body }) => {
+      enqueue("suggestion.decline", { name: String(body?.name ?? "") });
       return null;
     },
   ],

@@ -36,7 +36,14 @@ export interface FoodBankItemType {
   name: string;
   description?: string;
   icon?: string;
+  staple?: boolean;
+  tags?: string[];
+  group?: string;
 }
+
+export type EaterProfileType = { id: string; kind: "exclude" | "include" };
+
+export type DeclinedSuggestionType = { at: string; count: number };
 
 export interface HouseholdType {
   id: number;
@@ -46,6 +53,8 @@ export interface HouseholdType {
 
 export interface HouseholdWithMembersType extends HouseholdType {
   members: HouseholdMemberType[];
+  eaterProfiles?: string[];
+  declinedSuggestions?: Record<string, DeclinedSuggestionType>;
 }
 
 export interface UserType {

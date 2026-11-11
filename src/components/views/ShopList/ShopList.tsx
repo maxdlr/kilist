@@ -11,17 +11,21 @@ import { ThemedText } from "@/components/themed-text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import useShopRun from "@/hooks/screens/useShopRun";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { XMarkIcon } from "react-native-heroicons/outline";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
+import ShopPanels from "./_components/ShopPanels";
 
 const ShopList = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.shop;
   const insets = useSafeAreaInsets();
+  const run = useShopRun();
   const {
     foods,
     isFoodLoading,
@@ -37,12 +41,35 @@ const ShopList = () => {
     handled,
     suggestion,
     rows,
-  } = useShopRun();
+  } = run;
 
   useStatusBarStyle(foods?.length ? skin.statusBarOnGround : "dark");
 
-  if (isFoodLoading && foods === undefined) {
+  if (run.isLoading) {
     return <LoadingAnim />;
+  }
+
+  if (!run.isStarted && !run.isEmpty) {
+    return (
+      <Sheet
+        fill={skin.colors.accent}
+        dock={
+          <Dock>
+            <KilButton
+              height={skin.size.button.xl}
+              fontSize={skin.type.headline}
+              label={caseFor(skin, common.shop.start)}
+              onTouch={run.start}
+            />
+          </Dock>
+        }
+      >
+        <ThemedText size={skin.type.body}>{caseFor(skin, common.shop.startLabel)}</ThemedText>
+        <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.preview.length))}</Title>
+        <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startRight)}</ThemedText>
+        <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startLeft)}</ThemedText>
+      </Sheet>
+    );
   }
 
   if (!foods || foods.length === 0) {
@@ -87,9 +114,24 @@ const ShopList = () => {
   return (
     <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
       <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
-        <Title size={skin.type.display.sm} lines={1} color={skin.colors.accent}>
+        <Title
+          size={skin.type.display.sm}
+          lines={1}
+          color={skin.colors.accent}
+          style={styles.flex}
+          gutter={skin.spacing.gutter * 2 + skin.size.button.xs}
+        >
           {copy.toGo(foods.length)}
         </Title>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={common.stopShopping}
+          onPress={run.askStop}
+          hitSlop={skin.spacing.small}
+          style={styles.close}
+        >
+          <XMarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={2.5} />
+        </Pressable>
       </View>
 
       <Animated.FlatList
@@ -131,11 +173,19 @@ const ShopList = () => {
             flex={1}
             height={skin.size.button.sm}
             fontSize={skin.type.body}
-            variant="danger"
-            label={copy.stop}
-            accessibilityLabel={common.stopShopping}
-            onTouch={handleStop}
+            variant="secondary"
+            label={caseFor(skin, common.shop.add)}
+            onTouch={run.openAdd}
           />
+          <KilButton
+            flex={1}
+            height={skin.size.button.sm}
+            fontSize={skin.type.body}
+            label={caseFor(skin, common.shop.finish)}
+            onTouch={run.finish}
+          />
+        </View>
+        <View style={styles.controls}>
           <KilButton
             flex={1}
             height={skin.size.button.sm}
@@ -158,6 +208,7 @@ const ShopList = () => {
           />
         </View>
       </Dock>
+      <ShopPanels run={run} />
     </View>
   );
 };
@@ -170,7 +221,10 @@ const createStyles = (s: Skin) =>
     flex: {
       flex: 1,
     },
+    close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
     header: {
+      alignItems: "center",
+      flexDirection: "row",
       paddingBottom: s.spacing.section,
       paddingHorizontal: s.spacing.gutter,
     },
