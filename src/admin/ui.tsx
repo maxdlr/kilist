@@ -124,7 +124,11 @@ export const AScreen = ({
           <View style={[styles.flex, styles.body]}>{children}</View>
         </View>
       )}
-      {dock && <View style={[styles.dock, { paddingBottom: 12 + insets.bottom }]}>{dock}</View>}
+      {dock ? (
+        <View style={[styles.dock, { paddingBottom: 12 + insets.bottom }]}>{dock}</View>
+      ) : (
+        <View style={{ height: insets.bottom }} />
+      )}
     </KeyboardAvoidingView>
   );
 };

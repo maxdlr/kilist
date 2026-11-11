@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, it } from "vitest";
-import arcade from "../arcade";
+import calm from "../calm";
 import roast from "../roast";
 import versus from "../versus";
 import type { SkinSource } from "../types";
@@ -21,12 +21,13 @@ const tokensOf = ({ colors, actions, panel, shape }: SkinSource) => ({
     onAlert: colors.onAlert,
   },
   primary: actions.primary,
+  panelLine: panel.line,
   panelRadius: panel.radius,
   radius: shape.radius,
   border: shape.border,
 });
 
-const emailTokens = () => ({ arcade: tokensOf(arcade), versus: tokensOf(versus), roast: tokensOf(roast) });
+const emailTokens = () => ({ calm: tokensOf(calm), versus: tokensOf(versus), roast: tokensOf(roast) });
 
 describe("email tokens", () => {
   it.runIf(existsSync(resolve(TARGET, "..")))("are in sync with the skins", () => {
