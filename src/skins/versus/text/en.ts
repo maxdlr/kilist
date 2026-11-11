@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 const en = {
   you: "You",
   youVsBest: "You vs your best",
@@ -42,7 +43,7 @@ const en = {
     houseKicker: "House standings",
     soloTitle: "You vs you",
     houseTitle: "The house",
-    listNeeded: (count: number) => `The list: ${count} to buy`,
+    listNeeded: (low: number, high: number) => `The list: ${countRange(low, high)} to buy`,
     stocked: "All stocked up",
   },
   play: {
@@ -131,7 +132,7 @@ const en = {
     record: (time: string) => `Record ${time}`,
     usuallyNext: "Usually next in the store",
     start: "START",
-    toBuy: (count: number) => `${count} to buy`,
+    toBuy: (low: number, high: number) => `${countRange(low, high)} to buy`,
     clockLine: "The clock starts when you press. Wait until you're at the store.",
     lineup: (more: number) => `+${more}`,
   },

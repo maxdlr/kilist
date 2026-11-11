@@ -2,7 +2,6 @@ import common from "@/i18n/common";
 import T from "../text";
 import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
-import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -77,8 +76,6 @@ const CalmAccount = () => {
             </View>
           </Group>
 
-          <LooksShowcase titleColor={C.ink} lineColor={C.soft} />
-
           {account.isGuest ? (
             <Group label={copy.household}>
               <View style={styles.guest}>
@@ -102,6 +99,7 @@ const CalmAccount = () => {
           <Group label={T.settings.app}>
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
             <Row label={common.language} detail={account.languageName} onPress={account.openLanguage} />
+            <Row label={account.looksLabel} onPress={account.openLooks} />
             <Row label={common.notifications.menu} onPress={account.openNotifications} />
             {account.needsEmailCode && <Row label={common.emailCode.menu} onPress={account.openEmailCode} />}
             <Row label={copy.credits} onPress={account.openCredits} />

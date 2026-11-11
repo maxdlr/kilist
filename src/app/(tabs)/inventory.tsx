@@ -1,3 +1,4 @@
+import BackBar from "@/components/elements/BackBar/BackBar";
 import { MaxContentWidth } from "@/constants/theme";
 import { InventoryProvider } from "@/providers/InventoryProvider";
 import { SkinScreen } from "@/skins/screens";
@@ -12,7 +13,9 @@ const ListsScreen = () => {
   return (
     <View style={styles.container}>
       <InventoryProvider listIds={id}>
-        <SkinScreen slot="Inventory" />
+        <BackBar>
+          <SkinScreen slot="Inventory" />
+        </BackBar>
       </InventoryProvider>
     </View>
   );

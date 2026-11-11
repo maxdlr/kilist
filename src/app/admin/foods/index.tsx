@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import { AdminFoodRow, AdminHouseholdRow, AdminUserRow, FoodScope, Paged, query, useAdmin, useAdminCall } from "@/admin/api";
 import { A, AButton, AChips, AEmpty, AField, ALoading, ARow, AScreen, ASearch, ASection, ASheet, AText, Dot, LEVEL_NAMES, levelIndex } from "@/admin/ui";
 import FoodIcon from "@/components/elements/FoodIcon";
@@ -116,7 +117,7 @@ const FoodsScreen = () => {
                   ? `${data.scope?.user?.username ?? scope.label}'s household · ${householdLabel}`
                   : `Household · ${householdLabel || scope.label}`}
               </AText>
-              <Pressable accessibilityRole="button" accessibilityLabel="Show every household" onPress={() => setScope(null)} style={styles.clear}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Show every household" onPress={() => setScope(null)} style={withPressed(styles.clear)}>
                 <AText size={14} weight="bold" color="#FFFFFF">Clear</AText>
               </Pressable>
             </View>

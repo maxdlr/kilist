@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 const roastCopy = {
   tagline: "THE APP HATES YOUR LISTS. LOUDLY.",
   levels: {
@@ -117,10 +118,10 @@ const roastCopy = {
     saved: (count: number) => `${count} SAVED. STILL NOT A LIST.`,
   },
   home: {
-    headline: (needed: number) =>
-      needed === 0
+    headline: (low: number, high: number) =>
+      high === 0
         ? "YOU NEED NOTHING. SUSPICIOUS."
-        : `YOU NEED ${needed} ${needed === 1 ? "THING" : "THINGS"}.`,
+        : `YOU NEED ${countRange(low, high)} ${high === 1 ? "THING" : "THINGS"}.`,
     shop: "GET OUT AND BUY IT",
     swipe: "PROVE IT. SWIPE.",
     tally: (foods: number, shops: number, swipes: number) =>
@@ -288,6 +289,7 @@ const roastCopy = {
     redeemed: (name: string) => `${name} IS YOURS.`,
     failed: "COULDN'T DO THAT. NOT MY FAULT.",
     sectionTitle: "SKINS. THE GOOD STUFF.",
+    progress: (have: number, price: number) => `${have} / ${price} TICKETS`,
     sectionLine: (count: number) => `${count} TICKETS. EVERY SWIPE PRINTS MORE.`,
     locked: (count: number) => `LOCKED · ${count} TO GO`,
     needsAccount: "LOCKED · ACCOUNT NEEDED",

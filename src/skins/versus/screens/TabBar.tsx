@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import { A } from "@/admin/ui";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import useRoundOpen from "@/hooks/useRoundOpen";
@@ -73,7 +74,7 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
                 if (!isActual && !event.defaultPrevented) navigateToTab(route.key);
               }}
-              style={styles.tab}
+              style={withPressed(styles.tab)}
             >
               {isRace ? (
                 <View style={[styles.coin, isCurrent && styles.coinOn]}>

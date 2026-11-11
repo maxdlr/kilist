@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 import type { SkinCopy } from "../../types";
 
 const fr: SkinCopy = {
@@ -119,10 +120,10 @@ const fr: SkinCopy = {
     saved: (count: number) => `${count} ajouté${count > 1 ? "s" : ""}. Bien joué !`,
   },
   home: {
-    headline: (needed: number) =>
-      needed === 0
+    headline: (low: number, high: number) =>
+      high === 0
         ? "Tout est en stock !"
-        : `${needed} ${needed <= 1 ? "truc" : "trucs"} à acheter`,
+        : `${countRange(low, high)} ${high <= 1 ? "truc" : "trucs"} à acheter`,
     shop: "Faire les courses",
     swipe: "Jouer les 10 du jour",
     tally: (foods: number, shops: number, swipes: number) =>
@@ -277,6 +278,7 @@ const fr: SkinCopy = {
     redeemed: (name: string) => `${name} débloqué !`,
     failed: "Impossible",
     sectionTitle: "L'étagère à lots",
+    progress: (have: number, price: number) => `${have} / ${price} tickets`,
     sectionLine: (count: number) => `${count} tickets. Chaque swipe en imprime d'autres.`,
     locked: (count: number) => `Verrouillé · encore ${count}`,
     needsAccount: "Verrouillé · compte requis",

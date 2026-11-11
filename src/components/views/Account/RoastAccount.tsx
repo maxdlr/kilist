@@ -13,7 +13,6 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import GuestCard from "./_components/GuestCard";
 import AccountPanels from "./_components/AccountPanels";
-import LooksShowcase from "./_components/LooksShowcase";
 
 const RoastAccount = () => {
   const skin = useSkin();
@@ -39,10 +38,6 @@ const RoastAccount = () => {
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
           </ThemedText>
-        </View>
-
-        <View style={styles.looks}>
-          <LooksShowcase />
         </View>
 
         {account.isGuest ? (
@@ -110,6 +105,7 @@ const RoastAccount = () => {
             onPress={account.openLanguage}
             showChevron
           />
+          <ActionRow label={account.looksLabel.toUpperCase()} onPress={account.openLooks} showChevron />
           <ActionRow label={common.notifications.menu.toUpperCase()} onPress={account.openNotifications} showChevron />
           {account.needsEmailCode && (
             <ActionRow label={common.emailCode.menu.toUpperCase()} onPress={account.openEmailCode} showChevron />
@@ -170,10 +166,6 @@ const createStyles = (s: Skin) =>
     },
     chip: {
       paddingHorizontal: s.spacing.dock,
-    },
-    looks: {
-      paddingBottom: s.spacing.section,
-      paddingHorizontal: s.spacing.gutter,
     },
     dangerHead: {
       paddingBottom: s.spacing.small,

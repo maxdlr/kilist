@@ -1,3 +1,5 @@
+import withPressed from "@/utils/withPressed";
+import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
@@ -79,7 +81,7 @@ const StartLine = ({
           ))}
         </View>
         <VText face="pixel" size={skin.type.display.md} color={P.you}>{mmss(0)}</VText>
-        <VText face="display" size={skin.type.headline} style={styles.centerText}>{V.shop.toBuy(foods.length)}</VText>
+        <VText face="display" size={skin.type.headline} style={styles.centerText}>{V.shop.toBuy(buyRangeOf(foods).low, foods.length)}</VText>
       </View>
       <Card>
         <VText face="bold" size={skin.type.lead}>
@@ -334,7 +336,7 @@ const VersusShop = () => {
             accessibilityLabel={V.shop.stopAria}
             onPress={abandon}
             hitSlop={skin.spacing.small}
-            style={styles.close}
+            style={withPressed(styles.close)}
           >
             <XMarkIcon size={skin.size.icon.action} color={P.muted} strokeWidth={2} />
           </Pressable>

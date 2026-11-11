@@ -1,3 +1,5 @@
+import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
+import useBuyRange from "@/hooks/screens/useBuyRange";
 import SyncNote from "@/components/elements/SyncNote";
 import type { Skin } from "@/skins/types";
 import HomeLinksBlock from "./_components/HomeLinksBlock";
@@ -40,9 +42,9 @@ const Dashboard = ({
   const insets = useSafeAreaInsets();
   const [available, setAvailable] = useState(0);
   useStatusBarStyle(skin.statusBarOnGround);
+  const range = useBuyRange();
 
   const { foods, shopLists, swipes } = dashboard;
-  const needed = foods.scoreSummary[0] + foods.scoreSummary[0.25];
   const counts = THRESHOLDS.map((threshold) => foods.scoreSummary[threshold]);
   const heights = stripeHeights(counts, available, skin.size.row.stripe);
 
@@ -50,8 +52,9 @@ const Dashboard = ({
     <PullToRefresh onRefresh={onRefresh}>
       <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
         <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
+          <HomeShortcuts style={styles.shortcuts} />
           <Title size={skin.type.display.md} lines={2} color={skin.colors.accent}>
-            {copy.headline(needed)}
+            {copy.headline(range.low, range.high)}
           </Title>
         </View>
 
@@ -101,6 +104,7 @@ const Dashboard = ({
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    shortcuts: { alignSelf: "flex-end" },
     root: {
       flex: 1,
     },

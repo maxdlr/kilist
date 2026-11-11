@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -75,7 +76,7 @@ const KilToggleButton = <T extends string>({
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            style={styles.segment}
+            style={withPressed(styles.segment)}
           >
             <ThemedText
               allowFontScaling={false}

@@ -127,13 +127,15 @@ const useAccount = () => {
     shareCode,
     openCredits: () => setOpenPanel("credits"),
     openLanguage: () => setOpenPanel("language"),
+    openLooks: () => router.navigate("/looks"),
+    looksLabel: skin.copy.prizes.sectionTitle,
     openNotifications: () => router.push("/notifications"),
     needsEmailCode,
     openEmailCode: () => setOpenPanel("emailCode"),
     languageName: choice ? LANGUAGE_NAMES[choice] : common.languageAuto(LANGUAGE_NAMES[lang]),
     openIconsSite,
     switchTo,
-    replayOnboarding: () => router.push("/onboarding?intro=1"),
+    replayOnboarding: () => router.push("/onboarding?intro=1&replay=1"),
   };
 };
 

@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import T from "../text";
@@ -86,7 +87,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
     <View style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }]}>
       <View style={styles.header}>
         <View style={styles.between}>
-          <Pressable accessibilityRole="button" onPress={() => router.navigate("/")} style={styles.close}>
+          <Pressable accessibilityRole="button" onPress={() => router.navigate("/")} style={withPressed(styles.close)}>
             <CText size={skin.type.label + 1} color={C.soft}>{T.close}</CText>
           </Pressable>
           <CText size={skin.type.label} color={C.soft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
@@ -110,7 +111,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
       </View>
       <View style={[styles.pads, { paddingBottom: skin.spacing.stack }]}>
         {pad("left", copy.out, T.play.ariaOut)}
-        <Pressable accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={styles.unsure}>
+        <Pressable accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={withPressed(styles.unsure)}>
           <CText size={skin.type.label} color={game.intent === "up" ? C.ink : C.soft}>{copy.unsure}</CText>
         </Pressable>
         {pad("right", copy.inStock, T.play.ariaIn)}

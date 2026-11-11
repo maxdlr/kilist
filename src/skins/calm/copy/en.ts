@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 import type { RoastCopy } from "../../roast/copy/en";
 
 const calmCopy: RoastCopy = {
@@ -112,10 +113,10 @@ const calmCopy: RoastCopy = {
     saved: (count: number) => `${count} added.`,
   },
   home: {
-    headline: (needed: number) =>
-      needed === 0
+    headline: (low: number, high: number) =>
+      high === 0
         ? "All set."
-        : `${needed} ${needed === 1 ? "thing" : "things"} to buy.`,
+        : `${countRange(low, high)} ${high === 1 ? "thing" : "things"} to buy.`,
     shop: "Open the list",
     swipe: "Sort foods",
     tally: (foods: number, shops: number, swipes: number) =>
@@ -279,6 +280,7 @@ const calmCopy: RoastCopy = {
     redeemed: (name: string) => `${name} unlocked.`,
     failed: "Couldn't do that",
     sectionTitle: "Looks",
+    progress: (have: number, price: number) => `${have} / ${price} points`,
     sectionLine: (count: number) => `${count} points. Every food you sort adds 10.`,
     locked: (count: number) => `Locked · ${count} points to go`,
     needsAccount: "Locked · needs an account",

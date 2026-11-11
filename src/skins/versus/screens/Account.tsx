@@ -1,7 +1,6 @@
 import common from "@/i18n/common";
 import V from "../text";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
-import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { mmss, seconds, useVersusMe } from "@/hooks/versus/api";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -86,8 +85,6 @@ const VersusAccount = () => {
             )}
           </View>
 
-          <LooksShowcase titleColor={P.white} lineColor={P.soft} />
-
           {solo ? (
             <Card dashed line={P.you}>
               <View style={styles.cardHead}>
@@ -163,6 +160,7 @@ const VersusAccount = () => {
             <MenuRow first label={solo ? V.account.joinHouse : copy.switch} onPress={() => setOpenPanel("switch")} />
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
+            <MenuRow label={account.looksLabel} onPress={account.openLooks} />
             <MenuRow label={common.notifications.menu} onPress={account.openNotifications} />
             {account.needsEmailCode && <MenuRow label={common.emailCode.menu} onPress={account.openEmailCode} />}
             <MenuRow label={copy.credits} onPress={account.openCredits} />

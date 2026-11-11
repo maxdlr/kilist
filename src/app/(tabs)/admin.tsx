@@ -20,7 +20,7 @@ const AdminHome = () => {
 
   if (!isAdmin) {
     return (
-      <AScreen title="Admin">
+      <AScreen back backLabel="Back" backTo="/" title="Admin">
         <AEmpty line="Admins only." />
       </AScreen>
     );
@@ -29,7 +29,7 @@ const AdminHome = () => {
   const number = (value?: number) => (value === undefined ? "–" : value.toLocaleString());
 
   return (
-    <AScreen title="Admin" subtitle="Last 7 days" refreshing={isValidating} onRefresh={() => mutate()}>
+    <AScreen back backLabel="Back" backTo="/" title="Admin" subtitle="Last 7 days" refreshing={isValidating} onRefresh={() => mutate()}>
       <ATiles
         onPress={() => router.push("/admin/stats")}
         tiles={[

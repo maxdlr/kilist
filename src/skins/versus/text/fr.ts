@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 import type { VersusText } from "./en";
 
 const fr: VersusText = {
@@ -44,7 +45,7 @@ const fr: VersusText = {
     houseKicker: "Classement de la maison",
     soloTitle: "Toi contre toi",
     houseTitle: "La maison",
-    listNeeded: (count: number) => `La liste : ${count} à acheter`,
+    listNeeded: (low: number, high: number) => `La liste : ${countRange(low, high)} à acheter`,
     stocked: "Tout est en stock",
   },
   play: {
@@ -133,7 +134,7 @@ const fr: VersusText = {
     record: (time: string) => `Record ${time}`,
     usuallyNext: "D'habitude juste après en magasin",
     start: "DÉPART",
-    toBuy: (count: number) => `${count} à acheter`,
+    toBuy: (low: number, high: number) => `${countRange(low, high)} à acheter`,
     clockLine: "Le chrono démarre quand tu appuies. Attends d'être au magasin.",
     lineup: (more: number) => `+${more}`,
   },

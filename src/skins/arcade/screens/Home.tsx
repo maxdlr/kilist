@@ -1,3 +1,4 @@
+import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
 import HomeLinksBlock from "@/components/views/Dashboard/_components/HomeLinksBlock";
 import SyncNote from "@/components/elements/SyncNote";
 import Title from "@/components/elements/Title/Title";
@@ -64,7 +65,7 @@ const ArcadeHome = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.home;
-  const { dashboard, isLoading, refresh, needed, counts } = useHomeData();
+  const { dashboard, isLoading, refresh, range, counts } = useHomeData();
   const { counter } = useTickets();
   const tzOffset = useMemo(() => new Date().getTimezoneOffset(), []);
   const { data: game } = useSWR<SwipeGameType>({
@@ -98,7 +99,10 @@ const ArcadeHome = () => {
               {T.day(game?.level ?? 1)}
             </ThemedText>
           </View>
-          {counter && <TicketChip count={counter.balance} />}
+          <View style={styles.topRight}>
+            {counter && <TicketChip count={counter.balance} />}
+            <HomeShortcuts ink={P.white} fill={P.plankShadow} />
+          </View>
         </View>
 
         <View style={[styles.marquee, { boxShadow: shadowOf(skin, 1, P.plankShadow) }]}>
@@ -109,7 +113,7 @@ const ArcadeHome = () => {
               color={P.white}
               textStyle={styles.center}
             >
-              {copy.headline(needed)}
+              {copy.headline(range.low, range.high)}
             </Title>
           </View>
         </View>
@@ -149,6 +153,7 @@ const createStyles = (s: Skin) =>
       flexDirection: "row",
       justifyContent: "space-between",
     },
+    topRight: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
     streak: {
       backgroundColor: P.yellow,
       borderColor: P.navy,

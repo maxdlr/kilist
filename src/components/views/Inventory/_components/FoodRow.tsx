@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
 import { ThemedText } from "@/components/themed-text";
@@ -33,13 +34,13 @@ const FoodRow = ({
       accessibilityState={isSelectMode ? { selected: isSelected } : undefined}
       accessibilityLabel={`${name}, ${label}`}
       onPress={() => (isSelectMode ? onToggleSelect?.(id) : onEdit?.(food))}
-      style={[
+      style={withPressed([
         styles.row,
         {
           backgroundColor: skin.colors.levels[level],
           borderBottomColor: skin.colors.ground,
         },
-      ]}
+      ])}
     >
       {isSelectMode && (
         <View

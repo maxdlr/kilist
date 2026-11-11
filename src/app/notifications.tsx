@@ -1,3 +1,4 @@
+import BackBar from "@/components/elements/BackBar/BackBar";
 import Dock from "@/components/elements/Dock/Dock";
 import KilButton from "@/components/elements/KilButton";
 import KilSwitch from "@/components/elements/KilSwitch";
@@ -57,6 +58,7 @@ const NotificationsScreen = () => {
   useStatusBarStyle(skin.statusBarOnGround);
 
   return (
+    <BackBar fallback="/account">
     <View style={[styles.flex, { backgroundColor: skin.colors.ground }]}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + skin.spacing.top }]}>
         <Title size={skin.type.display.sm} lines={2} color={skin.colors.accent}>
@@ -128,6 +130,7 @@ const NotificationsScreen = () => {
         />
       </Dock>
     </View>
+    </BackBar>
   );
 };
 

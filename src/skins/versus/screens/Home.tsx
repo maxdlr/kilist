@@ -1,3 +1,5 @@
+import withPressed from "@/utils/withPressed";
+import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
 import SyncNote from "@/components/elements/SyncNote";
 import V from "../text";
 import HomeLinksBlock from "@/components/views/Dashboard/_components/HomeLinksBlock";
@@ -60,7 +62,7 @@ const PeriodToggle = ({ period, onPick }: { period: "week" | "season"; onPick: (
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
             onPress={() => onPick(value)}
-            style={[styles.toggleItem, on && { backgroundColor: P.white }]}
+            style={withPressed([styles.toggleItem, on && { backgroundColor: P.white }])}
           >
             <VText face="bold" size={skin.type.caption} color={on ? P.ink : P.soft}>
               {value === "week" ? V.home.week : V.home.season}
@@ -276,11 +278,14 @@ const VersusHome = () => {
                 {solo ? V.home.soloTitle : V.home.houseTitle}
               </VText>
             </View>
-            {counter && (
-              <View style={styles.pill}>
-                <VText face="bold" size={skin.type.caption}>{V.tickets(counter.balance)}</VText>
-              </View>
-            )}
+            <View style={styles.topRight}>
+              {counter && (
+                <View style={styles.pill}>
+                  <VText face="bold" size={skin.type.caption}>{V.tickets(counter.balance)}</VText>
+                </View>
+              )}
+              <HomeShortcuts ink={P.white} fill={P.panel} />
+            </View>
           </View>
           <SyncNote />
           {solo ? <SoloHome /> : <HouseHome standings={standings.data} period={period} onPick={setPeriod} />}
@@ -288,7 +293,7 @@ const VersusHome = () => {
             <Card>
               <View style={styles.between}>
                 <VText face="bold" size={skin.type.lead}>
-                  {home.needed ? V.home.listNeeded(home.needed) : V.home.stocked}
+                  {home.range.high ? V.home.listNeeded(home.range.low, home.range.high) : V.home.stocked}
                 </VText>
                 <VText size={skin.type.caption} color={P.muted}>{V.foodsCount(home.dashboard.foods.total)}</VText>
               </View>
@@ -306,6 +311,7 @@ const createStyles = (s: Skin) =>
     flex: { flex: 1, minWidth: 0 },
     scroll: { gap: s.spacing.stack, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },
     between: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", gap: s.spacing.inline },
+    topRight: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
     pill: { backgroundColor: P.panel, borderRadius: 999, paddingHorizontal: s.spacing.inline, paddingVertical: s.spacing.tight + 2 },
     players: { flexDirection: "row", gap: s.spacing.small },
     player: {

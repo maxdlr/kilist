@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
@@ -65,7 +66,7 @@ const ShopList = () => {
         }
       >
         <ThemedText size={skin.type.body}>{caseFor(skin, common.shop.startLabel)}</ThemedText>
-        <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.preview.length))}</Title>
+        <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.range.low, run.range.high))}</Title>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startRight)}</ThemedText>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startLeft)}</ThemedText>
       </Sheet>
@@ -128,7 +129,7 @@ const ShopList = () => {
           accessibilityLabel={common.stopShopping}
           onPress={run.askStop}
           hitSlop={skin.spacing.small}
-          style={styles.close}
+          style={withPressed(styles.close)}
         >
           <XMarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={2.5} />
         </Pressable>

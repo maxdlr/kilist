@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import { AdminAction, useAdmin, useAdminCall } from "@/admin/api";
 import { A, AButton, AChips, AConfirm, AField, ALoading, ARow, AScreen, ASection, AText, ConfirmRequest, when } from "@/admin/ui";
 import { useState } from "react";
@@ -53,7 +54,7 @@ const JobsScreen = () => {
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
               onPress={() => setSelectedId(job.id)}
-              style={[styles.job, { borderColor: on ? A.action : A.line, borderWidth: on ? 2 : 1 }]}
+              style={withPressed([styles.job, { borderColor: on ? A.action : A.line, borderWidth: on ? 2 : 1 }])}
             >
               <AText weight="bold">{job.title}</AText>
               <AText size={14} color={A.mid}>{job.description}</AText>

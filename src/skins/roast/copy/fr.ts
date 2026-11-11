@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 import type { SkinCopy } from "../../types";
 
 const fr: SkinCopy = {
@@ -119,10 +120,10 @@ const fr: SkinCopy = {
     saved: (count: number) => `${count} ENREGISTRÉ${count > 1 ? "S" : ""}. TOUJOURS PAS UNE LISTE.`,
   },
   home: {
-    headline: (needed: number) =>
-      needed === 0
+    headline: (low: number, high: number) =>
+      high === 0
         ? "TU N'AS BESOIN DE RIEN. LOUCHE."
-        : `IL TE FAUT ${needed} ${needed <= 1 ? "TRUC" : "TRUCS"}.`,
+        : `IL TE FAUT ${countRange(low, high)} ${high <= 1 ? "TRUC" : "TRUCS"}.`,
     shop: "BOUGE ET VA L'ACHETER",
     swipe: "PROUVE-LE. SWIPE.",
     tally: (foods: number, shops: number, swipes: number) =>
@@ -290,6 +291,7 @@ const fr: SkinCopy = {
     redeemed: (name: string) => `${name} EST À TOI.`,
     failed: "IMPOSSIBLE. C'EST PAS MA FAUTE.",
     sectionTitle: "LES STYLES. LE BON MATOS.",
+    progress: (have: number, price: number) => `${have} / ${price} TICKETS`,
     sectionLine: (count: number) => `${count} TICKETS. CHAQUE SWIPE EN CRACHE D'AUTRES.`,
     locked: (count: number) => `VERROUILLÉ · ENCORE ${count}`,
     needsAccount: "VERROUILLÉ · COMPTE REQUIS",

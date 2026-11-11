@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import { A } from "@/admin/ui";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import useRoundOpen from "@/hooks/useRoundOpen";
@@ -104,7 +105,7 @@ const ArcadeTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               accessibilityLabel={tabAria(name)}
               accessibilityState={{ selected: isCurrent }}
               onPress={press}
-              style={styles.tab}
+              style={withPressed(styles.tab)}
             >
               {isPlay ? (
                 <View

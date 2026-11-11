@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
@@ -242,7 +243,7 @@ const ArcadeShop = () => {
             {common.shop.startLabel}
           </ThemedText>
           <Title size={skin.type.display.sm} lines={1} color={P.white}>
-            {common.shop.startTitle(run.preview.length)}
+            {common.shop.startTitle(run.range.low, run.range.high)}
           </Title>
         </View>
         <ArcadeCard lift={2} style={styles.board}>
@@ -353,7 +354,7 @@ const ArcadeShop = () => {
           accessibilityLabel={T.stopAria}
           onPress={() => (stamped.length === 0 ? (setStamped([]), run.discard()) : run.askStop())}
           hitSlop={skin.spacing.small}
-          style={styles.close}
+          style={withPressed(styles.close)}
         >
           <XMarkIcon size={skin.size.icon.action} color={P.lilac} strokeWidth={2.5} />
         </Pressable>

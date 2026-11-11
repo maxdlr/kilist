@@ -1,3 +1,4 @@
+import countRange from "@/utils/countRange";
 import type { RoastCopy } from "../../roast/copy/en";
 
 const versusCopy: RoastCopy = {
@@ -119,10 +120,10 @@ const versusCopy: RoastCopy = {
     saved: (count: number) => `${count} added. Nice!`,
   },
   home: {
-    headline: (needed: number) =>
-      needed === 0
+    headline: (low: number, high: number) =>
+      high === 0
         ? "All stocked up!"
-        : `${needed} ${needed === 1 ? "thing" : "things"} to buy`,
+        : `${countRange(low, high)} ${high === 1 ? "thing" : "things"} to buy`,
     shop: "Go shopping",
     swipe: "Race today's 10",
     tally: (foods: number, shops: number, swipes: number) =>
@@ -277,6 +278,7 @@ const versusCopy: RoastCopy = {
     redeemed: (name: string) => `${name} unlocked!`,
     failed: "Couldn't do that",
     sectionTitle: "Skins",
+    progress: (have: number, price: number) => `${have} / ${price} tickets`,
     sectionLine: (count: number) => `${count} tickets. Every answer in a race earns more.`,
     locked: (count: number) => `Locked · ${count} to go`,
     needsAccount: "Locked · account needed",

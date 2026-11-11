@@ -4,7 +4,6 @@ import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
-import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
@@ -137,8 +136,6 @@ const ArcadeAccount = () => {
             </View>
           </View>
 
-          <LooksShowcase titleColor={P.white} inset={skin.spacing.section} />
-
           {account.isGuest ? (
             <ArcadeCard lift={1} style={styles.team}>
               <GuestCard account={account} ink={P.navy} />
@@ -191,6 +188,7 @@ const ArcadeAccount = () => {
             {!account.isGuest && <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />}
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
+            <MenuRow label={account.looksLabel} onPress={account.openLooks} />
             <MenuRow label={common.notifications.menu} onPress={account.openNotifications} />
             {account.needsEmailCode && <MenuRow label={common.emailCode.menu} onPress={account.openEmailCode} />}
             <MenuRow label={copy.credits} onPress={account.openCredits} />

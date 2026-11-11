@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import T from "../text";
 import FoodIcon from "@/components/elements/FoodIcon";
 import SwipeDeck, { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
@@ -104,7 +105,7 @@ const ProfilePick = ({
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
                 onPress={() => toggle(profile.id)}
-                style={[styles.chip, on && styles.chipOn]}
+                style={withPressed([styles.chip, on && styles.chipOn])}
               >
                 <CText size={skin.type.label + 1} color={on ? C.ground : C.ink}>
                   {copy.profiles[profile.id] ?? profile.id}

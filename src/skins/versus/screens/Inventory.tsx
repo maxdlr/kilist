@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import FormInput from "@/components/elements/FormInput";
@@ -52,7 +53,7 @@ const FoodRow = ({
       accessibilityState={selecting ? { selected } : undefined}
       accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.inventory.clashAria : ""}. ${voteText}`}
       onPress={onPress}
-      style={[styles.row, { borderColor: selected ? P.you : "transparent" }]}
+      style={withPressed([styles.row, { borderColor: selected ? P.you : "transparent" }])}
     >
       {selecting && (
         <View style={[styles.box, { backgroundColor: selected ? P.you : "transparent", borderColor: selected ? P.you : P.faint }]}>

@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
@@ -43,14 +44,14 @@ const KilSwitch = ({
       disabled={disabled}
       hitSlop={8}
       onPress={() => onChange(!value)}
-      style={[
+      style={withPressed([
         styles.track,
         {
           backgroundColor: value ? on.fill : skin.colors.paper,
           borderColor: value ? on.line : skin.colors.onPaper,
         },
         disabled && styles.disabled,
-      ]}
+      ])}
     >
       <Animated.View
         style={[

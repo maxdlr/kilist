@@ -1,30 +1,45 @@
 import common from "@/i18n/common";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin } from "@/providers/SkinProvider";
-import useTickets from "@/providers/TicketsProvider";
+import useTickets, { fundsFor } from "@/providers/TicketsProvider";
 import { findSkin } from "@/skins";
 import { router } from "expo-router";
 
 const useHomeLinks = () => {
   const { user, isGuest } = useAuth();
-  const { counter, nextPrize, nextPrizeFunds } = useTickets();
+  const { counter } = useTickets();
   const skin = useSkin();
   const T = common.home;
 
   const needsEmailCode = !isGuest && !!user && !user.emailConfirmedAt;
   const balance = counter?.balance ?? 0;
-  const prizeName = nextPrize ? findSkin(nextPrize.skin).name : null;
-  const missing = nextPrize ? Math.max(0, nextPrize.price - nextPrizeFunds) : 0;
+  const prizes = (counter?.prizes ?? [])
+    .filter((prize) => !prize.owned && prize.price > 0)
+    .sort((a, b) => Number(!!a.accountOnly) - Number(!!b.accountOnly) || a.price - b.price)
+    .map((prize) => {
+      const look = findSkin(prize.skin);
+      const locked = isGuest && !!prize.accountOnly;
+      const funds = fundsFor(counter, prize);
+      return {
+        id: prize.id,
+        name: look.name,
+        line: T.teasers[prize.skin] ?? look.tagline,
+        status: locked
+          ? skin.copy.prizes.needsAccount
+          : funds >= prize.price
+            ? skin.copy.prizes.redeem(prize.price)
+            : skin.copy.prizes.progress(funds, prize.price),
+        progress: locked ? 0 : Math.min(1, funds / prize.price),
+        open: () => (locked ? router.push("/login?mode=signup") : router.navigate("/looks")),
+      };
+    });
 
   return {
     isAdmin: user?.type === "admin",
-    prize: {
-      balance,
-      label: /\D/.test(skin.copy.tickets.balance(balance)) ? skin.copy.tickets.balance(balance) : skin.copy.prizes.balance(balance),
-      detail: prizeName ? (missing > 0 ? T.toPrize(missing, prizeName) : T.prizeReady(prizeName)) : null,
-      progress: nextPrize && nextPrize.price > 0 ? Math.min(1, nextPrizeFunds / nextPrize.price) : 0,
-      open: () => router.navigate("/account"),
-    },
+    prizes,
+    prizesTitle: skin.copy.prizes.sectionTitle,
+    balanceLabel: /\D/.test(skin.copy.tickets.balance(balance)) ? skin.copy.tickets.balance(balance) : skin.copy.prizes.balance(balance),
+    openPrizes: () => router.navigate("/looks"),
     notice: isGuest
       ? { label: T.createAccount, open: () => router.push("/login?mode=signup") }
       : needsEmailCode

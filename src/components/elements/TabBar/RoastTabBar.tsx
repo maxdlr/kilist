@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import common from "@/i18n/common";
 import type { TabBarProps } from "./types";
 import { ThemedText } from "@/components/themed-text";
@@ -61,11 +62,11 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 navigateToTab(route.key);
               }
             }}
-            style={[
+            style={withPressed([
               styles.tab,
               { paddingBottom: insets.bottom },
               isCurrent && { backgroundColor: skin.colors.raised },
-            ]}
+            ])}
           >
             <ThemedText
               allowFontScaling={false}

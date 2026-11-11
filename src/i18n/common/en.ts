@@ -1,4 +1,6 @@
+import countRange from "@/utils/countRange";
 const en = {
+  back: "Back",
   unexpected: "Something went wrong. Try again.",
   needsConnection: "This needs a connection.",
   needsAccount: "You need an account for this.",
@@ -88,7 +90,7 @@ const en = {
     admin: "Admin",
   },
   shop: {
-    startTitle: (count: number) => `${count} ${count === 1 ? "thing" : "things"} to buy`,
+    startTitle: (low: number, high: number) => `${countRange(low, high)} ${high === 1 ? "thing" : "things"} to buy`,
     startLabel: "Your list",
     startHow: "Once you're in the store",
     startRight: "Swipe right when it's in your basket.",
@@ -126,8 +128,7 @@ const en = {
     admin: "Admin",
     createAccount: "Create an account to sync and share",
     confirmEmail: "Confirm your email to share your household",
-    toPrize: (count: number, name: string) => `${count} to ${name}`,
-    prizeReady: (name: string) => `${name} is ready to unlock`,
+    teasers: { versus: "Race your housemates on the same 10 foods." } as Record<string, string>,
     prizesAria: "Open the prize counter",
   },
   emailGate: {

@@ -1,4 +1,4 @@
-import KilButton from "@/components/elements/KilButton";
+import withPressed from "@/utils/withPressed";
 import { ThemedText } from "@/components/themed-text";
 import useHomeLinks from "@/hooks/screens/useHomeLinks";
 import common from "@/i18n/common";
@@ -24,47 +24,60 @@ const HomeLinksBlock = ({
   const T = common.home;
   const text = ink ?? skin.colors.onGround;
   const soft = muted ?? skin.colors.muted;
-  const button = { flex: 1, height: skin.size.button.sm, fontSize: skin.type.body, variant: "secondary" as const };
 
   return (
     <View style={[styles.block, style]}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={T.prizesAria}
-        onPress={links.prize.open}
-        style={({ pressed }) => [
-          styles.prize,
-          { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
-        ]}
-      >
-        <View style={styles.prizeText}>
+      {links.prizes.length === 0 ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={T.prizesAria}
+          onPress={links.openPrizes}
+          style={({ pressed }) => [
+            styles.prize,
+            { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+          ]}
+        >
           <ThemedText size={skin.type.label} color={text}>
-            {links.prize.label}
+            {links.balanceLabel}
           </ThemedText>
-          {links.prize.detail && (
-            <ThemedText size={skin.type.label} color={soft} numberOfLines={1} style={styles.detail}>
-              {caseFor(skin, links.prize.detail)}
+        </Pressable>
+      ) : (
+        links.prizes.map((prize) => (
+          <Pressable
+            key={prize.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${prize.name}. ${prize.line} ${prize.status}`}
+            onPress={prize.open}
+            style={({ pressed }) => [
+              styles.prize,
+              { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+            ]}
+          >
+            <View style={styles.prizeText}>
+              <ThemedText size={skin.type.label} color={text}>
+                {caseFor(skin, prize.name)}
+              </ThemedText>
+              <ThemedText size={skin.type.label} color={soft} numberOfLines={1} style={styles.detail}>
+                {caseFor(skin, prize.status)}
+              </ThemedText>
+            </View>
+            <ThemedText size={skin.type.caption} color={soft}>
+              {caseFor(skin, prize.line)}
             </ThemedText>
-          )}
-        </View>
-        <View style={[styles.track, { backgroundColor: soft }]}>
-          <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(links.prize.progress * 100)}%` }]} />
-        </View>
-      </Pressable>
+            <View style={[styles.track, { backgroundColor: soft }]}>
+              <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(prize.progress * 100)}%` }]} />
+            </View>
+          </Pressable>
+        ))
+      )}
 
       {links.notice && (
-        <Pressable accessibilityRole="button" onPress={links.notice.open} style={styles.notice}>
+        <Pressable accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
           <ThemedText size={skin.type.label} color={text} style={styles.noticeText}>
             {caseFor(skin, links.notice.label)}
           </ThemedText>
         </Pressable>
       )}
-
-      <View style={styles.row}>
-        <KilButton {...button} label={skin.copy.tabs.inventory} onTouch={links.openInventory} />
-        <KilButton {...button} label={skin.copy.tabs.account} onTouch={links.openAccount} />
-        {links.isAdmin && <KilButton {...button} label={caseFor(skin, T.admin)} onTouch={links.openAdmin} />}
-      </View>
     </View>
   );
 };
@@ -84,7 +97,6 @@ const createStyles = (s: Skin) =>
     fill: { borderRadius: 2, height: 4 },
     notice: { alignItems: "center", justifyContent: "center", minHeight: s.size.button.xs },
     noticeText: { textAlign: "center", textDecorationLine: "underline" },
-    row: { flexDirection: "row", gap: s.spacing.inline },
   });
 
 export default HomeLinksBlock;

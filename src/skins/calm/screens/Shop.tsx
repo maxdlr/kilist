@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import T from "../text";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
@@ -165,7 +166,7 @@ const CalmShop = () => {
               {common.shop.startLabel}
             </CText>
             <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-              {common.shop.startTitle(run.preview.length)}
+              {common.shop.startTitle(run.range.low, run.range.high)}
             </CText>
           </View>
           {run.preview.slice(0, START_PREVIEW).map((food) => (
@@ -243,7 +244,7 @@ const CalmShop = () => {
               accessibilityLabel={common.stopShopping}
               onPress={run.askStop}
               hitSlop={skin.spacing.small}
-              style={styles.close}
+              style={withPressed(styles.close)}
             >
               <XMarkIcon size={skin.size.icon.action} color={C.soft} strokeWidth={1.6} />
             </Pressable>

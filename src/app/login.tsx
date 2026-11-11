@@ -1,5 +1,6 @@
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
+import BackBar from "@/components/elements/BackBar/BackBar";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
 import { ThemedText } from "@/components/themed-text";
@@ -154,7 +155,9 @@ const LoginScreen = () => {
   const signupSheet = skin.colors.signup ?? { fill: skin.colors.alert, ink: skin.colors.onAlert };
   const labelColor = isSignup ? skin.colors.onPaper : skin.colors.accent;
 
-  return (
+  const canLeave = isGuest && !mergePending && router.canGoBack();
+
+  const screen = (
     <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <View
         style={[
@@ -304,7 +307,7 @@ const LoginScreen = () => {
               onTouch={() => setResetOpen(true)}
             />
           )}
-          {isGuest && !mergePending && router.canGoBack() && (
+          {canLeave && (
             <KilButton
               variant="ghost"
               height={skin.size.button.xs}
@@ -382,6 +385,14 @@ const LoginScreen = () => {
         />
       </View>
     </KeyboardAvoidingView>
+  );
+
+  return canLeave ? (
+    <BackBar fill={isSignup ? signupSheet.fill : undefined} ink={isSignup ? signupSheet.ink : undefined}>
+      {screen}
+    </BackBar>
+  ) : (
+    screen
   );
 };
 

@@ -7,6 +7,7 @@ export default function AppTabs() {
 
   return (
     <Tabs
+      backBehavior="history"
       tabBar={(props) => <SkinTabBar {...props} />}
       screenOptions={{
         headerShown: false,
@@ -18,6 +19,7 @@ export default function AppTabs() {
       <Tabs.Screen name="swipe" />
       <Tabs.Screen name="shop" />
       <Tabs.Screen name="account" />
+      <Tabs.Screen name="looks" />
       <Tabs.Screen name="admin" />
     </Tabs>
   );

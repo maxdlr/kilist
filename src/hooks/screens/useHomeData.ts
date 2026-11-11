@@ -1,3 +1,4 @@
+import useBuyRange from "@/hooks/screens/useBuyRange";
 import { DashboardType } from "@/components/views/Dashboard/interfaces";
 import { THRESHOLDS } from "@/utils/scoreUtils";
 import { useFocusEffect } from "expo-router";
@@ -15,12 +16,14 @@ const useHomeData = () => {
     }, [mutate]),
   );
 
+  const range = useBuyRange();
   const summary = data?.foods.scoreSummary;
 
   return {
     dashboard: data,
     isLoading,
     refresh: mutate,
+    range,
     needed: summary ? summary[0] + summary[0.25] : 0,
     counts: summary ? THRESHOLDS.map((threshold) => summary[threshold]) : [],
   };

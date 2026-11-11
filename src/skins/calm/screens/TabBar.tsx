@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import T from "../text";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
@@ -72,7 +73,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
                 if (actualName !== route.name && !event.defaultPrevented) navigateToTab(route.key);
               }}
-              style={styles.tab}
+              style={withPressed(styles.tab)}
             >
               <View style={styles.iconWrap}>
                 <Icon size={skin.size.icon.action + 2} color={isCurrent ? C.ink : C.soft} strokeWidth={isCurrent ? 1.8 : 1.4} />

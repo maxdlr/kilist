@@ -1,6 +1,8 @@
+import countRange from "@/utils/countRange";
 import type { CommonText } from "./en";
 
 const fr: CommonText = {
+  back: "Retour",
   unexpected: "Un problème est survenu. Réessaie.",
   needsConnection: "Il faut une connexion pour ça.",
   needsAccount: "Il te faut un compte pour ça.",
@@ -90,7 +92,7 @@ const fr: CommonText = {
     admin: "Admin",
   },
   shop: {
-    startTitle: (count: number) => `${count} ${count === 1 ? "chose" : "choses"} à acheter`,
+    startTitle: (low: number, high: number) => `${countRange(low, high)} ${high === 1 ? "chose" : "choses"} à acheter`,
     startLabel: "Ta liste",
     startHow: "Une fois au magasin",
     startRight: "Glisse à droite quand c'est dans ton panier.",
@@ -128,8 +130,7 @@ const fr: CommonText = {
     admin: "Admin",
     createAccount: "Crée un compte pour synchroniser et partager",
     confirmEmail: "Confirme ton e-mail pour partager ton foyer",
-    toPrize: (count: number, name: string) => `${count} avant ${name}`,
-    prizeReady: (name: string) => `${name} est prêt à débloquer`,
+    teasers: { versus: "Fais la course avec ton foyer sur les 10 mêmes aliments." } as Record<string, string>,
     prizesAria: "Ouvrir le comptoir des lots",
   },
   emailGate: {

@@ -1,3 +1,4 @@
+import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import useShopList from "@/providers/ShopListProvider";
@@ -152,6 +153,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     isLoading: isResuming || (isStarted && shop.isFoodLoading && foods === undefined) || (!isStarted && preview === undefined),
     isStarted,
     preview: preview ?? [],
+    range: buyRangeOf(preview ?? []),
     isFinished: isStarted && (!foods || foods.length === 0) && handled > 0,
     isEmpty: isStarted ? (!foods || foods.length === 0) && handled === 0 : (preview ?? []).length === 0,
     handled,

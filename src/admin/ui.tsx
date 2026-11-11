@@ -1,3 +1,4 @@
+import withPressed from "@/utils/withPressed";
 import { Href, router } from "expo-router";
 import { ReactNode, useState } from "react";
 import {
@@ -65,6 +66,7 @@ export const AScreen = ({
   subtitle,
   back,
   backLabel = "Admin",
+  backTo = "/admin",
   children,
   dock,
   header,
@@ -77,6 +79,7 @@ export const AScreen = ({
   subtitle?: string;
   back?: boolean;
   backLabel?: string;
+  backTo?: Href;
   children: ReactNode;
   dock?: ReactNode;
   header?: ReactNode;
@@ -88,7 +91,7 @@ export const AScreen = ({
   const top = (
     <View style={styles.head}>
       {back && (
-        <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.back}>
+        <Pressable accessibilityRole="button" onPress={() => (router.canGoBack() ? router.back() : router.replace(backTo))} style={withPressed(styles.back)}>
           <Chevron back color={A.mid} />
           <AText color={A.mid}>{backLabel}</AText>
         </Pressable>
@@ -185,7 +188,7 @@ export const ARow = ({
 };
 
 export const ATiles = ({ tiles, onPress }: { tiles: { value: string; label: string }[]; onPress?: () => void }) => (
-  <Pressable disabled={!onPress} onPress={onPress} accessibilityRole={onPress ? "button" : undefined} style={styles.tiles}>
+  <Pressable disabled={!onPress} onPress={onPress} accessibilityRole={onPress ? "button" : undefined} style={withPressed(styles.tiles)}>
     {tiles.map((tile) => (
       <View key={tile.label} style={styles.tile}>
         <AText size={21} weight="bold" numberOfLines={1} adjustsFontSizeToFit>{tile.value}</AText>
@@ -232,7 +235,7 @@ export const AChips = <T extends string>({
           accessibilityRole="button"
           accessibilityState={{ selected: on }}
           onPress={() => onChange(option.value)}
-          style={[styles.chip, on ? styles.chipOn : styles.chipOff]}
+          style={withPressed([styles.chip, on ? styles.chipOn : styles.chipOff])}
         >
           <AText size={13} weight="medium" color={on ? "#FFFFFF" : A.ink}>{option.label}</AText>
         </Pressable>
