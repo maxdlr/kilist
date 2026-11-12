@@ -1,4 +1,4 @@
-import AnimationService from "@/services/animation";
+import AnimationService, { CSS_EASE_OUT } from "@/services/animation";
 import { useState } from "react";
 import { Pressable, StyleSheet, type PressableProps} from "react-native";
 import Animated from "react-native-reanimated";
@@ -40,7 +40,7 @@ const Press = ({
 const MOTION = {
   transitionDuration: AnimationService.press.duration,
   transitionProperty: ["opacity", "backgroundColor", "borderColor", "transform"],
-  transitionTimingFunction: AnimationService.cssEaseOut,
+  transitionTimingFunction: CSS_EASE_OUT,
 } as const;
 
 const FLAT_MOTION = { ...MOTION, transitionProperty: ["opacity", "backgroundColor", "borderColor"] } as const;

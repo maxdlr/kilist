@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useReducedMotion } from "react-native-reanimated";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SWRConfig } from "swr";
+import AnimationService from "@/services/animation";
 import fetcher, { onError } from "@/services/fetcher";
 
 import AuthGate from "@/components/AuthGate";
@@ -42,7 +43,10 @@ const SkinnedApp = () => {
         <MarkProvider>
         <AnimatedSplashOverlay />
         <AuthProvider>
-          <Stack key={lang} screenOptions={{ animation: reduced ? "fade" : "default" }}>
+          <Stack key={lang} screenOptions={{
+              animation: reduced ? "fade" : "slide_from_right",
+              animationDuration: AnimationService.screen.duration,
+            }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="[id]" options={{ title: "" }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
