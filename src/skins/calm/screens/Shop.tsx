@@ -105,17 +105,10 @@ const SwipeRow = ({
         swipeThreshold={100}
         styles={{ box: styles.swipeBox }}
       >
-        <View style={styles.rowMain}>
-          <CText
-            size={skin.type.lead}
-            style={[
-              styles.flex,
-              {
-                paddingStart: skin.spacing.stack,
-              },
-            ]}
-            numberOfLines={1}
-          >
+        <View
+          style={[styles.rowMain, { paddingHorizontal: skin.spacing.stack }]}
+        >
+          <CText size={skin.type.lead} style={[styles.flex]} numberOfLines={1}>
             {food.name}
           </CText>
           <Dot color={skin.colors.levels[level]} />
@@ -135,7 +128,8 @@ const CalmShop = () => {
     null,
   );
   const run = useShopRun({
-    onSaved: (bought) => setResult({ bought, left: Math.max(0, run.total - bought) }),
+    onSaved: (bought) =>
+      setResult({ bought, left: Math.max(0, run.total - bought) }),
   });
   const remaining = run.foods ?? [];
 
@@ -176,7 +170,11 @@ const CalmShop = () => {
         onPress={run.openAdd}
         style={withPressed(styles.addButton)}
       >
-        <PlusIcon size={skin.size.icon.action} color={C.ink} strokeWidth={1.8} />
+        <PlusIcon
+          size={skin.size.icon.action}
+          color={C.ink}
+          strokeWidth={1.8}
+        />
       </Pressable>
       <CButton flex={1} label={label} onPress={onPress} />
     </View>
@@ -184,66 +182,111 @@ const CalmShop = () => {
   if (!run.isStarted && !run.isEmpty) {
     return (
       <View style={styles.flex}>
-      <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
-          <View style={styles.startHead}>
-            <View style={styles.titleRow}>
-              <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-                {T.shop.title}
-              </CText>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={T.shop.howAria}
-                accessibilityState={{ expanded: showHow }}
-                hitSlop={skin.spacing.small}
-                onPress={() => setShowHow((shown) => !shown)}
-                style={withPressed(styles.info)}
-              >
-                {showHow ? (
-                  <InformationCircleSolid size={skin.size.icon.action + 2} color={C.ink} />
-                ) : (
-                  <InformationCircleIcon size={skin.size.icon.action + 2} color={C.soft} strokeWidth={1.6} />
-                )}
-              </Pressable>
+        <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
+          <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+            <View style={styles.startHead}>
+              <View style={styles.titleRow}>
+                <CText
+                  weight="medium"
+                  size={skin.type.display.md}
+                  accessibilityRole="header"
+                >
+                  {T.shop.title}
+                </CText>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={T.shop.howAria}
+                  accessibilityState={{ expanded: showHow }}
+                  hitSlop={skin.spacing.small}
+                  onPress={() => setShowHow((shown) => !shown)}
+                  style={withPressed(styles.info)}
+                >
+                  {showHow ? (
+                    <InformationCircleSolid
+                      size={skin.size.icon.action + 2}
+                      color={C.ink}
+                    />
+                  ) : (
+                    <InformationCircleIcon
+                      size={skin.size.icon.action + 2}
+                      color={C.soft}
+                      strokeWidth={1.6}
+                    />
+                  )}
+                </Pressable>
+              </View>
+              <StockBars
+                rows={[
+                  {
+                    label: T.stock.sure,
+                    count: run.range.low,
+                    color: skin.colors.levels[1],
+                    icon: (
+                      <ShoppingBagIcon
+                        size={18}
+                        color={C.haveIt}
+                        strokeWidth={1.8}
+                      />
+                    ),
+                  },
+                  {
+                    label: T.stock.maybe,
+                    count: run.range.high - run.range.low,
+                    color: skin.colors.levels[3],
+                    icon: (
+                      <QuestionMarkCircleIcon
+                        size={18}
+                        color={C.faint}
+                        strokeWidth={1.8}
+                      />
+                    ),
+                  },
+                ]}
+              />
             </View>
-            <StockBars
-              rows={[
-                { label: T.stock.sure, count: run.range.low, color: skin.colors.levels[1], icon: <ShoppingBagIcon size={18} color={C.haveIt} strokeWidth={1.8} /> },
-                { label: T.stock.maybe, count: run.range.high - run.range.low, color: skin.colors.levels[3], icon: <QuestionMarkCircleIcon size={18} color={C.faint} strokeWidth={1.8} /> },
-              ]}
-            />
-          </View>
-          {run.preview.slice(0, START_PREVIEW).map((food) => (
-            <View key={food.id} style={styles.row}>
-              <Dot color={skin.colors.levels[levelOf(food.inStockScore)]} />
-              <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>
-                {food.name}
-              </CText>
-            </View>
-          ))}
-          {run.preview.length > START_PREVIEW && (
-            <CText size={skin.type.label} color={C.soft} style={styles.more}>
-              {common.shop.more(run.preview.length - START_PREVIEW)}
-            </CText>
-          )}
-          {showHow && (
-            <View style={styles.how}>
-              <View style={styles.howRow}>
-                <ArrowRightIcon size={skin.size.icon.action - 4} color={C.haveIt} strokeWidth={1.8} />
-                <CText size={skin.type.label + 1} style={styles.flex}>
-                  {common.shop.startRight}
+            {run.preview.slice(0, START_PREVIEW).map((food) => (
+              <View key={food.id} style={styles.row}>
+                <Dot color={skin.colors.levels[levelOf(food.inStockScore)]} />
+                <CText
+                  size={skin.type.lead}
+                  style={styles.flex}
+                  numberOfLines={1}
+                >
+                  {food.name}
                 </CText>
               </View>
-              <View style={styles.howRow}>
-                <ArrowLeftIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
-                <CText size={skin.type.label + 1} style={styles.flex}>
-                  {common.shop.startLeft}
-                </CText>
+            ))}
+            {run.preview.length > START_PREVIEW && (
+              <CText size={skin.type.label} color={C.soft} style={styles.more}>
+                {common.shop.more(run.preview.length - START_PREVIEW)}
+              </CText>
+            )}
+            {showHow && (
+              <View style={styles.how}>
+                <View style={styles.howRow}>
+                  <ArrowRightIcon
+                    size={skin.size.icon.action - 4}
+                    color={C.haveIt}
+                    strokeWidth={1.8}
+                  />
+                  <CText size={skin.type.label + 1} style={styles.flex}>
+                    {common.shop.startRight}
+                  </CText>
+                </View>
+                <View style={styles.howRow}>
+                  <ArrowLeftIcon
+                    size={skin.size.icon.action - 4}
+                    color={C.ink}
+                    strokeWidth={1.8}
+                  />
+                  <CText size={skin.type.label + 1} style={styles.flex}>
+                    {common.shop.startLeft}
+                  </CText>
+                </View>
               </View>
-            </View>
-          )}
-        </ScrollView>
-      </Screen>
+            )}
+          </ScrollView>
+        </Screen>
         <ShopPanels run={run} />
       </View>
     );
@@ -257,8 +300,16 @@ const CalmShop = () => {
           line={skin.copy.shop.emptyLine}
           dock={
             <>
-              <CButton variant="secondary" label={common.shop.add} onPress={run.openAdd} />
-              <CButton variant="text" label={T.shop.backToday} onPress={() => router.navigate("/")} />
+              <CButton
+                variant="secondary"
+                label={common.shop.add}
+                onPress={run.openAdd}
+              />
+              <CButton
+                variant="text"
+                label={T.shop.backToday}
+                onPress={() => router.navigate("/")}
+              />
             </>
           }
         />
@@ -269,103 +320,112 @@ const CalmShop = () => {
 
   return (
     <View style={styles.flex}>
-      <Screen
-      padded={false}
-      dock={dockWith(common.shop.finish, run.finish)}
-    >
-      <View style={styles.head}>
-        <View style={styles.titleRow}>
-          <CText
-            weight="medium"
-            size={skin.type.headline}
-            accessibilityRole="header"
-          >
-            {T.shop.title}
-          </CText>
-          <View style={styles.headSide}>
-            <CText size={skin.type.label} color={C.soft}>
-              {T.shop.toBuy(remaining.length)}
-            </CText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={common.stopShopping}
-              onPress={run.askStop}
-              hitSlop={skin.spacing.small}
-              style={withPressed(styles.close)}
+      <Screen padded={false} dock={dockWith(common.shop.finish, run.finish)}>
+        <View style={styles.head}>
+          <View style={styles.titleRow}>
+            <CText
+              weight="medium"
+              size={skin.type.headline}
+              accessibilityRole="header"
             >
-              <XMarkIcon size={skin.size.icon.action} color={C.soft} strokeWidth={1.6} />
-            </Pressable>
+              {T.shop.title}
+            </CText>
+            <View style={styles.headSide}>
+              <CText size={skin.type.label} color={C.soft}>
+                {T.shop.toBuy(remaining.length)}
+              </CText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={common.stopShopping}
+                onPress={run.askStop}
+                hitSlop={skin.spacing.small}
+                style={withPressed(styles.close)}
+              >
+                <XMarkIcon
+                  size={skin.size.icon.action}
+                  color={C.soft}
+                  strokeWidth={1.6}
+                />
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
-      <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
-        {remaining.length > 0 && (
-          <View accessible accessibilityLabel={T.shop.hintAria} style={[styles.legend, styles.hint]}>
-            <View style={styles.legendItem}>
-              <ArrowLeftIcon size={16} color={C.soft} strokeWidth={1.8} />
-              <ClockIcon size={16} color={C.soft} strokeWidth={1.8} />
-              <CText size={skin.type.label} color={C.soft}>{T.shop.later}</CText>
-            </View>
-            <View style={styles.legendItem}>
-              <CText size={skin.type.label} color={C.soft}>{T.shop.legendBasket}</CText>
-              <ShoppingBagIcon size={16} color={C.haveIt} strokeWidth={1.8} />
-              <ArrowRightIcon size={16} color={C.haveIt} strokeWidth={1.8} />
-            </View>
-          </View>
-        )}
-        {run.suggestion && (
-          <View style={styles.next}>
-            <CText size={skin.type.caption} color={C.soft}>
-              {T.shop.usuallyNext}
-            </CText>
-            <SwipeRow
-              food={run.suggestion}
-              onBuy={() => tick(run.suggestion!)}
-              onLater={() => postpone(run.suggestion!)}
-            />
-          </View>
-        )}
-        {run.rows.map((food) => (
-          <SwipeRow
-            key={food.id}
-            food={food}
-            onBuy={() => tick(food)}
-            onLater={() => postpone(food)}
-          />
-        ))}
-        {basket.length > 0 && (
-          <>
-            <CText
-              size={skin.type.label}
-              color={C.soft}
-              style={styles.basketLabel}
+        <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+          {remaining.length > 0 && (
+            <View
+              accessible
+              accessibilityLabel={T.shop.hintAria}
+              style={[styles.legend, styles.hint]}
             >
-              {T.shop.inBasket}
-            </CText>
-            {basket.map((food) => (
-              <View
-                key={`basket-${food.id}`}
-                accessible
-                accessibilityLabel={T.shop.inBasketAria(food.name)}
-                style={styles.row}
-              >
-                <View style={styles.rowMain}>
-                  <Circle done />
-                  <CText
-                    size={skin.type.lead}
-                    color={C.faint}
-                    style={[styles.flex, styles.struck]}
-                    numberOfLines={1}
-                  >
-                    {food.name}
-                  </CText>
-                </View>
+              <View style={styles.legendItem}>
+                <ArrowLeftIcon size={16} color={C.soft} strokeWidth={1.8} />
+                <ClockIcon size={16} color={C.soft} strokeWidth={1.8} />
+                <CText size={skin.type.label} color={C.soft}>
+                  {T.shop.later}
+                </CText>
               </View>
-            ))}
-          </>
-        )}
-      </ScrollView>
-    </Screen>
+              <View style={styles.legendItem}>
+                <CText size={skin.type.label} color={C.soft}>
+                  {T.shop.legendBasket}
+                </CText>
+                <ShoppingBagIcon size={16} color={C.haveIt} strokeWidth={1.8} />
+                <ArrowRightIcon size={16} color={C.haveIt} strokeWidth={1.8} />
+              </View>
+            </View>
+          )}
+          {run.suggestion && (
+            <View style={styles.next}>
+              <CText size={skin.type.caption} color={C.soft}>
+                {T.shop.usuallyNext}
+              </CText>
+              <SwipeRow
+                food={run.suggestion}
+                onBuy={() => tick(run.suggestion!)}
+                onLater={() => postpone(run.suggestion!)}
+              />
+            </View>
+          )}
+          {run.rows.map((food) => (
+            <SwipeRow
+              key={food.id}
+              food={food}
+              onBuy={() => tick(food)}
+              onLater={() => postpone(food)}
+            />
+          ))}
+          {basket.length > 0 && (
+            <>
+              <CText
+                size={skin.type.label}
+                color={C.soft}
+                style={styles.basketLabel}
+              >
+                {T.shop.inBasket}
+              </CText>
+              {basket.map((food) => (
+                <View
+                  key={`basket-${food.id}`}
+                  accessible
+                  accessibilityLabel={T.shop.inBasketAria(food.name)}
+                  style={styles.row}
+                >
+                  <View style={styles.rowMain}>
+                    <Circle done />
+                    <CText
+                      size={skin.type.lead}
+                      color={C.faint}
+                      style={[styles.flex, styles.struck]}
+                      numberOfLines={1}
+                    >
+                      {food.name}
+                    </CText>
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+        </ScrollView>
+      </Screen>
       <ShopPanels run={run} />
     </View>
   );
@@ -405,9 +465,18 @@ const createStyles = (s: Skin) =>
     },
     hint: { paddingBottom: s.spacing.small },
     startHead: { gap: s.spacing.inline, paddingBottom: s.spacing.section },
-    info: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
+    info: {
+      alignItems: "center",
+      height: s.size.button.xs,
+      justifyContent: "center",
+      width: s.size.button.xs,
+    },
     legend: { flexDirection: "row", justifyContent: "space-between" },
-    legendItem: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight + 2 },
+    legendItem: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.tight + 2,
+    },
     dockRow: { flexDirection: "row", gap: s.spacing.small },
     addButton: {
       alignItems: "center",
@@ -418,7 +487,11 @@ const createStyles = (s: Skin) =>
       justifyContent: "center",
       width: s.size.button.lg,
     },
-    more: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
+    more: {
+      borderTopColor: C.hairline,
+      borderTopWidth: s.shape.divider,
+      paddingTop: s.spacing.inline,
+    },
     how: {
       backgroundColor: C.tint,
       borderRadius: s.shape.radius,
@@ -426,9 +499,22 @@ const createStyles = (s: Skin) =>
       marginTop: s.spacing.section,
       padding: s.spacing.stack,
     },
-    howRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.small + 2 },
-    headSide: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
-    close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
+    howRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.small + 2,
+    },
+    headSide: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
+    close: {
+      alignItems: "center",
+      height: s.size.button.xs,
+      justifyContent: "center",
+      width: s.size.button.xs,
+    },
     next: { gap: s.spacing.tight, paddingBottom: s.spacing.inline },
     slot: {
       borderTopColor: C.hairline,
