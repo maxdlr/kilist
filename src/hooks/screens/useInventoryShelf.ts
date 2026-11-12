@@ -90,6 +90,13 @@ const useInventoryShelf = () => {
     askRemove([food.id], copy.removeOne(caseFor(skin, food.name)));
   };
 
+  const editSelected = () => {
+    const food = foods?.find((entry) => entry.id === selectedIds[0]);
+    if (!food) return;
+    exitSelectMode();
+    setEditingFood(food);
+  };
+
   const removeSelected = () => {
     if (selectedIds.length === 0) return;
     askRemove(selectedIds, copy.removeMany(selectedIds.length));
@@ -110,6 +117,7 @@ const useInventoryShelf = () => {
     selectedIds,
     toggleSelect,
     removeSelected,
+    editSelected,
     isAddVisible,
     addInitialName,
     addWithScan,

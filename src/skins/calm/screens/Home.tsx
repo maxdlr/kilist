@@ -13,7 +13,7 @@ import { useCallback } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
 import { calmPalette as C } from "..";
-import { CText, Dot, Screen, useCheckPending } from "./parts";
+import { CText, Dot, Screen, StockBars, useCheckPending } from "./parts";
 import { CalmError, CalmLoading } from "./States";
 
 const PREVIEW = 6;
@@ -74,7 +74,7 @@ const CalmHome = () => {
             <HomeShortcuts />
           </View>
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-            {skin.copy.home.headline(range.low, range.high)}
+            {range.high === 0 ? skin.copy.home.headline(0, 0) : T.home.ready}
           </CText>
           {allSet && (
             <CText size={skin.type.body} color={C.soft}>
@@ -83,6 +83,16 @@ const CalmHome = () => {
           )}
           <SyncNote color={C.soft} />
         </View>
+
+        {foods.length > 0 && (
+          <StockBars
+            rows={[
+              { label: T.stock.sure, count: range.low, color: skin.colors.levels[1] },
+              { label: T.stock.maybe, count: range.high - range.low, color: skin.colors.levels[3] },
+              { label: T.stock.stocked, count: Math.max(0, foods.length - range.high), color: skin.colors.levels[5] },
+            ]}
+          />
+        )}
 
         {pending && (
           <View style={styles.card}>

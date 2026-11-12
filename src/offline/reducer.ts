@@ -64,7 +64,8 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "swipe": {
       const target = food(payload.foodId);
       if (!target) return NO_REWARD;
-      addHistory(target, { isInStock: payload.isInStock, at });
+      addHistory(target, { isInStock: payload.isInStock, at }, payload.replay === true);
+      if (payload.replay === true) return { ...NO_REWARD, balance: state.prizes.balance };
       return awardSwipe(state, target.id, at);
     }
 

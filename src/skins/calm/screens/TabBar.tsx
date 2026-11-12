@@ -13,7 +13,7 @@ import {
   ListBulletIcon,
   PlayIcon,
   ShoppingBagIcon,
-  SunIcon,
+  HomeIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
@@ -24,7 +24,7 @@ import { CText, Dot, useCheckPending } from "./parts";
 const ORDER = MAIN_TABS;
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
-  index: SunIcon,
+  index: HomeIcon,
   swipe: PlayIcon,
   shop: ShoppingBagIcon,
   inventory: ListBulletIcon,
@@ -61,7 +61,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           if (!label) return null;
           const isCurrent = currentName === route.name;
           const badge = name === "swipe" && pending && !isCurrent;
-          const Icon = ICONS[name] ?? SunIcon;
+          const Icon = ICONS[name] ?? HomeIcon;
 
           return (
             <Pressable

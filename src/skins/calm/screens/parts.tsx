@@ -117,6 +117,33 @@ export const Dot = ({ color, size = 8 }: { color: string; size?: number }) => (
   />
 );
 
+export const StockBars = ({ rows }: { rows: { label: string; count: number; color: string }[] }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+
+  return (
+    <View style={styles.bars}>
+      {rows.map((row) => (
+        <View key={row.label} accessible accessibilityLabel={`${row.label}, ${row.count}`} style={styles.barRow}>
+          <View style={styles.barHead}>
+            <CText size={skin.type.label + 1}>{row.label}</CText>
+            <CText size={skin.type.label + 1} color={C.soft}>{`${row.count}`}</CText>
+          </View>
+          <View style={styles.barTrack}>
+            <View
+              style={[
+                styles.barFill,
+                { backgroundColor: row.color, width: `${total ? Math.round((row.count / total) * 100) : 0}%` },
+              ]}
+            />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
 export const useCheckPending = () => {
   const tzOffset = useMemo(() => new Date().getTimezoneOffset(), []);
   const { data: foods } = useSWR<FoodType[]>({ url: "foods/swipe/browse" });
@@ -130,6 +157,11 @@ const createStyles = (s: Skin) =>
     root: { backgroundColor: C.ground, flex: 1 },
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
+    bars: { gap: s.spacing.inline },
+    barRow: { gap: s.spacing.tight },
+    barHead: { flexDirection: "row", justifyContent: "space-between" },
+    barTrack: { backgroundColor: C.hairline, borderRadius: 3, height: 6, overflow: "hidden" },
+    barFill: { borderRadius: 3, height: 6 },
     dock: { gap: s.spacing.small + 2, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter, paddingTop: s.spacing.small },
     button: {
       alignItems: "center",

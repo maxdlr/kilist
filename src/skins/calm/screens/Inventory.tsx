@@ -110,7 +110,11 @@ const CalmInventory = () => {
     <CButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
   );
   const actions = isSelectMode
-    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "danger")]
+    ? [
+        half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"),
+        ...(selectedIds.length === 1 ? [half(T.inventory.editOne, shelf.editSelected, "secondary")] : []),
+        half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "danger"),
+      ]
     : noResults
       ? [half(T.inventory.clear, () => shelf.setSearch(""), "secondary"), half(T.inventory.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty

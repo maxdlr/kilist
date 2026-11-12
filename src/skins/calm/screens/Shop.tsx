@@ -14,7 +14,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, XMarkIcon } from "react-native-heroicons/outline";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
-import { CButton, CText, Dot, Screen } from "./parts";
+import { CButton, CText, Dot, Screen, StockBars } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
 const START_PREVIEW = 6;
@@ -150,15 +150,30 @@ const CalmShop = () => {
       <CalmMessage
         title={T.done}
         line={T.shop.result(result.bought, result.left)}
-        dock={<CButton label={T.shop.backToday} onPress={leave} />}
+        dock={<CButton label={T.close} onPress={leave} />}
       />
     );
   }
 
   if (run.isLoading) return <CalmLoading />;
 
+  const addRow = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={common.shop.add}
+      onPress={run.openAdd}
+      style={({ pressed }) => [styles.add, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+    >
+      <PlusIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
+      <CText weight="medium" size={skin.type.body}>
+        {common.shop.add}
+      </CText>
+    </Pressable>
+  );
+
   if (!run.isStarted && !run.isEmpty) {
     return (
+      <View style={styles.flex}>
       <Screen padded={false} dock={<CButton label={common.shop.start} onPress={run.start} />}>
         <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
           <View style={styles.startHead}>
@@ -166,8 +181,14 @@ const CalmShop = () => {
               {common.shop.startLabel}
             </CText>
             <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-              {common.shop.startTitle(run.range.low, run.range.high)}
+              {T.shop.title}
             </CText>
+            <StockBars
+              rows={[
+                { label: T.stock.sure, count: run.range.low, color: skin.colors.levels[1] },
+                { label: T.stock.maybe, count: run.range.high - run.range.low, color: skin.colors.levels[3] },
+              ]}
+            />
           </View>
           {run.preview.slice(0, START_PREVIEW).map((food) => (
             <View key={food.id} style={styles.row}>
@@ -182,6 +203,7 @@ const CalmShop = () => {
               {common.shop.more(run.preview.length - START_PREVIEW)}
             </CText>
           )}
+          {addRow}
           <View style={styles.how}>
             <CText size={skin.type.label} color={C.soft}>
               {common.shop.startHow}
@@ -201,22 +223,26 @@ const CalmShop = () => {
           </View>
         </ScrollView>
       </Screen>
+        <ShopPanels run={run} />
+      </View>
     );
   }
 
   if (run.isEmpty && basket.length === 0 && later.length === 0) {
     return (
-      <CalmMessage
-        title={skin.copy.shop.emptyTitle}
-        line={skin.copy.shop.emptyLine}
-        dock={
-          <CButton
-            variant="secondary"
-            label={T.shop.backToday}
-            onPress={() => router.navigate("/")}
-          />
-        }
-      />
+      <View style={styles.flex}>
+        <CalmMessage
+          title={skin.copy.shop.emptyTitle}
+          line={skin.copy.shop.emptyLine}
+          dock={
+            <>
+              <CButton variant="secondary" label={common.shop.add} onPress={run.openAdd} />
+              <CButton variant="text" label={T.shop.backToday} onPress={() => router.navigate("/")} />
+            </>
+          }
+        />
+        <ShopPanels run={run} />
+      </View>
     );
   }
 
@@ -277,17 +303,7 @@ const CalmShop = () => {
             onLater={() => postpone(food)}
           />
         ))}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={common.shop.add}
-          onPress={run.openAdd}
-          style={({ pressed }) => [styles.add, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
-        >
-          <PlusIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
-          <CText weight="medium" size={skin.type.body}>
-            {common.shop.add}
-          </CText>
-        </Pressable>
+        {addRow}
         {basket.length > 0 && (
           <>
             <CText

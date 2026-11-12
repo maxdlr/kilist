@@ -12,6 +12,7 @@ import {
   isGuestNetwork,
   isOnlineAction,
   LocalError,
+  isPhoneOnlyRead,
   matchGuest,
   matchLocal,
   offlineRaceView,
@@ -179,7 +180,7 @@ export const offlineAdapter: AxiosAdapter = async (config) => {
 
   const request = toRequest(config);
   if (isGuest()) return guestRequest(config, request);
-  if (!hasSession()) return passthrough(config, request);
+  if (!hasSession()) return isPhoneOnlyRead(request) ? respond(config, null) : passthrough(config, request);
 
   const local = matchLocal(request);
   if (local) {

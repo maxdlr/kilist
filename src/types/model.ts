@@ -45,7 +45,7 @@ export interface FoodBankItemType {
   group?: string;
 }
 
-export type EaterProfileType = { id: string; kind: "exclude" | "include" };
+export type EaterProfileType = { id: string; kind: "exclude" | "include"; ask?: string };
 
 export type DeclinedSuggestionType = { at: string; count: number };
 

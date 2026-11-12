@@ -461,6 +461,27 @@ describe("inventory without maintenance", () => {
   });
 });
 
+describe("replay", () => {
+  it("replaces today's answers instead of adding to them, without paying twice", () => {
+    applySyncResponse({ acks: [], ids: {}, retry: false, serverTime: "", snapshot: snapshot({ foods: [food(1), food(2)] as any }) });
+    call("put", "foods/swipe/edit/1", { isInStock: false });
+    const balance = getState()!.prizes.balance;
+
+    expect(call("get", "foods/swipe/browse").map((entry: { id: number }) => entry.id)).toEqual([2]);
+    expect(call("get", "foods/swipe/browse", {}, { replay: 1 }).map((entry: { id: number }) => entry.id)).toEqual([1]);
+
+    call("put", "foods/swipe/edit/1", { isInStock: true, replay: true });
+
+    const replayed = getState()!.foods.find((entry) => entry.id === 1)!;
+    expect(replayed.histories).toHaveLength(1);
+    expect(replayed.histories[0]!.isInStock).toBe(true);
+    expect(getState()!.prizes.balance).toBe(balance);
+
+    call("put", "foods/swipe/edit/2", { isInStock: true, replay: true });
+    expect(getState()!.prizes.balance).toBe(balance);
+  });
+});
+
 describe("rules pack", () => {
   it("waits for the pack before replaying queued actions", async () => {
     const { resetRulesForTests, setRules, rules } = await import("../rules");

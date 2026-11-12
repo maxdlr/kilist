@@ -85,6 +85,19 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
         value={name}
         onChangeText={setName}
       />
+      {!run.isStarted ? (
+        <>
+          <ThemedText color={skin.panel.ink}>{T.addListLine}</ThemedText>
+          <KilButton
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            variant={hasName ? "primary" : skin.panel.secondary}
+            label={T.addToList}
+            onTouch={() => submit("list")}
+          />
+        </>
+      ) : (
+        <>
       <ThemedText color={skin.panel.ink}>{existing ? T.addExists(existing) : T.addLine}</ThemedText>
       <View style={styles.actions}>
         <KilButton
@@ -104,6 +117,8 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
           onTouch={() => submit("buy")}
         />
       </View>
+        </>
+      )}
     </>
   );
 };

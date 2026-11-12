@@ -6,11 +6,12 @@ import useShopList from "@/providers/ShopListProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { FoodType, ListType } from "@/types/model";
-import { router, useFocusEffect } from "expo-router";
+import goBack from "@/utils/goBack";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import useSWR from "swr";
 
-export type ShopAddAction = "buy" | "later";
+export type ShopAddAction = "buy" | "later" | "list";
 
 const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) => {
   const shop = useShopList();
@@ -72,7 +73,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
 
   const leave = () => {
     reset();
-    router.navigate("/");
+    goBack();
   };
 
   const start = async () => {
@@ -133,12 +134,12 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
       const { data: food } = await axios.post<FoodType>("foods/create", {
         name,
         listId: mainList.id,
-        ...(action === "later" && { needed: true }),
+        ...(action !== "buy" && { needed: true }),
         ...(product && { product }),
       });
       if (!food?.id) throw new Error("no food");
       if (action === "buy") await buy(food.id);
-      else await snooze(food.id);
+      else if (action === "later") await snooze(food.id);
       refreshPreview();
       return true;
     } catch {

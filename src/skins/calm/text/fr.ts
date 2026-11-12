@@ -26,7 +26,9 @@ const fr: CalmText = {
     checkLine: "Environ trente secondes. Ça garde la liste juste, et chaque réponse rapporte des points pour d'autres styles.",
     onTheList: "Sur la liste",
     more: (count: number) => `et ${count} de plus`,
+    ready: "Ta liste est prête.",
   },
+  stock: { sure: "À acheter", maybe: "Peut-être", stocked: "En stock" },
   play: {
     question: "Il t'en reste ?",
     position: (at: number, total: number) => `${at} sur ${total}`,
@@ -36,6 +38,8 @@ const fr: CalmText = {
     nothingNew: "Rien de nouveau à acheter. La liste est à jour.",
     points: "Points pour d'autres styles",
     pointsTotal: (earned: number, total: number) => `+${earned} · ${total} au total`,
+    replay: "Rejouer la partie du jour",
+    replayLine: "Rejouer remplace tes réponses d'aujourd'hui et ne rapporte pas de points en plus.",
   },
   shop: {
     title: "Liste",
@@ -49,10 +53,11 @@ const fr: CalmText = {
     usuallyNext: "D'habitude juste après",
     result: (bought: number, left: number) =>
       `${bought} ${bought <= 1 ? "acheté" : "achetés"}${left ? `, ${left} pour la prochaine fois` : ""}.`,
-    backToday: "Retour à aujourd'hui",
+    backToday: "Retour à l'accueil",
   },
   inventory: {
     clear: "Effacer",
+    editOne: "Modifier",
     addQuery: (query: string) => `Ajouter « ${query} »`,
     noResultsLine: "Ajoute-le et Kilist commencera à le suivre.",
     emptyLine: "Ajoute les aliments que tu achètes d'habitude, et Kilist tient la liste pour toi.",
@@ -79,6 +84,10 @@ const fr: CalmText = {
       dairy: "Les produits laitiers",
       gluten: "Le gluten",
       shellfish: "Les fruits de mer",
+      egg: "Les œufs",
+      peanut: "Les arachides",
+      nuts: "Les fruits à coque",
+      soy: "Le soja",
       coffee: "Du café",
       soda: "Des sodas",
       alcohol: "De l'alcool",

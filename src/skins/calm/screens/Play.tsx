@@ -1,3 +1,4 @@
+import goBack from "@/utils/goBack";
 import withPressed from "@/utils/withPressed";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
@@ -88,7 +89,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
     <View style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }]}>
       <View style={styles.header}>
         <View style={styles.between}>
-          <Pressable accessibilityRole="button" onPress={() => router.navigate("/")} style={withPressed(styles.close)}>
+          <Pressable accessibilityRole="button" onPress={goBack} style={withPressed(styles.close)}>
             <CText size={skin.type.label + 1} color={C.soft}>{T.close}</CText>
           </Pressable>
           <CText size={skin.type.label} color={C.soft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
@@ -129,7 +130,7 @@ const Done = ({ game }: { game: SwipeGame }) => {
   const added = game.outFoods;
   const close = () => {
     game.reset();
-    router.navigate("/");
+    goBack();
   };
 
   return (
@@ -177,7 +178,7 @@ const CalmPlay = () => {
   const copy = skin.copy.swipe;
   const { screen, begin } = game;
 
-  const suggestion = useDailySuggestion(screen === "done");
+  const suggestion = useDailySuggestion(screen === "done" && !game.isReplay);
 
   useEffect(() => {
     if (screen === "start") begin();
@@ -194,8 +195,13 @@ const CalmPlay = () => {
       return (
         <CalmMessage
           title={copy.tomorrowTitle}
-          line={copy.tomorrowLine}
-          dock={<CButton variant="secondary" label={copy.tomorrowAction} href="/shop" />}
+          line={`${copy.tomorrowLine} ${T.play.replayLine}`}
+          dock={
+            <>
+              <CButton variant="secondary" label={T.play.replay} onPress={game.replay} />
+              <CButton variant="text" label={copy.tomorrowAction} href="/shop" />
+            </>
+          }
         />
       );
     case "empty":

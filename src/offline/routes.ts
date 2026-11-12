@@ -3,6 +3,7 @@ import {
   isShopListDone,
   nextSuggestion,
   remainingShopFoods,
+  replayDeck,
   shopCandidates,
   swipeDeck,
   swipeGame,
@@ -218,11 +219,19 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
   ["get", /^dashboard$/, dashboard],
   ["get", /^prizes$/, () => state().prizes],
   ["get", /^foods\/browse$/, ({ query }) => browseFoods(query)],
-  ["get", /^foods\/swipe\/browse$/, () => swipeDeck(state().foods, Date.now()).map(toFood)],
+  [
+    "get",
+    /^foods\/swipe\/browse$/,
+    ({ query }) => (query.replay ? replayDeck : swipeDeck)(state().foods, Date.now()).map(toFood),
+  ],
   [
     "put",
     /^foods\/swipe\/edit\/(-?\d+)$/,
-    ({ body }, match) => enqueue("swipe", { foodId: Number(match[1]), isInStock: body.isInStock }),
+    ({ body }, match) => enqueue("swipe", {
+        foodId: Number(match[1]),
+        isInStock: body.isInStock,
+        ...(body.replay === true && { replay: true }),
+      }),
   ],
   [
     "post",
@@ -442,6 +451,11 @@ export const matchGuest = ({ method, path }: Pick<Request, "method" | "path">) =
 
 export const isGuestNetwork = ({ path }: Pick<Request, "path">) =>
   GUEST_NETWORK.some((pattern) => pattern.test(path));
+
+const PHONE_ONLY_READS = [/^shop-list\/(preview|open)$/, /^suggestions\/next$/, /^foods\/find$/];
+
+export const isPhoneOnlyRead = ({ method, path }: Pick<Request, "method" | "path">) =>
+  method === "get" && PHONE_ONLY_READS.some((pattern) => pattern.test(path));
 
 export const isCachedRead = ({ method, path }: Pick<Request, "method" | "path">) =>
   method === "get" && CACHED_READS.some((pattern) => pattern.test(path));

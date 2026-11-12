@@ -25,6 +25,7 @@ const useSwipeGame = () => {
   const skin = useSkin();
   const { showToast } = useToast();
   const [removing, setRemoving] = useState<FoodType | null>(null);
+  const [isReplay, setIsReplay] = useState(false);
   const {
     foods,
     game,
@@ -34,6 +35,7 @@ const useSwipeGame = () => {
     mutateGame,
     swipe,
     update,
+    loadReplay,
     completeSession,
     freezeDeck,
   } = useSwipeFoods();
@@ -72,7 +74,19 @@ const useSwipeGame = () => {
     }, [mutateFoods, mutateGame]),
   );
 
+  const replay = async () => {
+    const count = await loadReplay();
+    if (count === 0) return;
+    setIsReplay(true);
+    start();
+  };
+
   const begin = () => {
+    setIsReplay(false);
+    start();
+  };
+
+  const start = () => {
     setSwiped(0);
     setOutFoods([]);
     setEarned(0);
@@ -111,7 +125,7 @@ const useSwipeGame = () => {
     if (direction === "left") setOutFoods((out) => [...out, food]);
     swipe(food.id);
     pendingUpdates.current.push(
-      update({ foodId: food.id, isInStock: IN_STOCK[direction] }).then(collect),
+      update({ foodId: food.id, isInStock: IN_STOCK[direction], ...(isReplay && { replay: true }) }).then(collect),
     );
 
     if (isLast) finishRound();
@@ -179,6 +193,8 @@ const useSwipeGame = () => {
     flingRef,
     fling,
     begin,
+    replay,
+    isReplay,
     handleSwipe,
     askRemove: setRemoving,
     removeRequest,

@@ -44,7 +44,7 @@ type QuestionId = "diet" | "avoid" | "drinks" | "home" | "baking";
 
 const QUESTIONS: { id: QuestionId; single?: boolean; options: string[] }[] = [
   { id: "diet", single: true, options: ["everything", "noPork", "noMeat", "veggie"] },
-  { id: "avoid", options: ["dairy", "gluten", "shellfish"] },
+  { id: "avoid", options: [] },
   { id: "drinks", options: ["coffee", "soda", "alcohol"] },
   { id: "home", options: ["baby", "cat", "dog"] },
   { id: "baking", single: true, options: ["yes", "no"] },
@@ -105,7 +105,11 @@ const ProfilePick = ({
   const bank: FoodBankItemType[] = catalog?.foodBanks[getLang()] ?? [];
   const chosen = profilesFrom(picked);
   const starters = profiles.length > 0 ? starterFoods(bank, chosen) : [];
-  const question = QUESTIONS[at]!;
+  const asked = QUESTIONS[at]!;
+  const question =
+    asked.id === "avoid"
+      ? { ...asked, options: profiles.filter((profile) => profile.ask === "avoid").map((profile) => profile.id) }
+      : asked;
   const text = copy.questions[question.id];
   const isLast = at === QUESTIONS.length - 1 || profiles.length === 0;
 

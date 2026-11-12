@@ -37,7 +37,9 @@ export type SwipeFoodsContextType = {
   update: (payload: {
     foodId: number;
     isInStock: boolean | null;
+    replay?: boolean;
   }) => Promise<SwipeReward | null>;
+  loadReplay: () => Promise<number>;
   completeSession: () => Promise<void>;
   freezeDeck: (frozen: boolean) => void;
 };
@@ -53,6 +55,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   isLoading: false,
   mutateFoods: () => {},
   update: async () => null,
+  loadReplay: async () => 0,
   completeSession: async () => {},
   freezeDeck: () => {},
 });
@@ -110,9 +113,22 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const loadReplay = async () => {
+    try {
+      const { data: deck } = await axios.get<FoodType[]>("foods/swipe/browse", { params: { replay: 1 } });
+      swipedIds.current.clear();
+      deckFrozen.current = true;
+      setFoods(deck ?? []);
+      return deck?.length ?? 0;
+    } catch {
+      return 0;
+    }
+  };
+
   const update = async (payload: {
     foodId: number;
     isInStock: boolean | null;
+    replay?: boolean;
   }) => {
     try {
       const res = await axios.put<SwipeReward>(
@@ -161,6 +177,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         mutateFoods,
         update,
+        loadReplay,
         completeSession,
         freezeDeck,
       }}

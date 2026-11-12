@@ -10,7 +10,7 @@ import fetcher, { onError } from "@/services/fetcher";
 import AuthGate from "@/components/AuthGate";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { AuthProvider } from "@/providers/AuthProvider";
-import { LanguageProvider } from "@/providers/LanguageProvider";
+import { LanguageProvider, useLanguage } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 
@@ -18,6 +18,7 @@ SplashScreen.preventAutoHideAsync();
 
 const SkinnedApp = () => {
   const skin = useSkin();
+  const { lang } = useLanguage();
   const navigationTheme = useMemo(
     () => ({
       ...DarkTheme,
@@ -37,7 +38,7 @@ const SkinnedApp = () => {
       <ToastProvider>
         <AnimatedSplashOverlay />
         <AuthProvider>
-          <Stack>
+          <Stack key={lang}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="[id]" options={{ title: "" }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />

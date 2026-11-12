@@ -21,9 +21,13 @@ export const calculateScore = (histories: HistoryEntry[]) => {
   return Number((inStock / histories.length).toFixed(2));
 };
 
-export const addHistory = (food: LocalFood, entry: HistoryEntry) => {
+export const addHistory = (food: LocalFood, entry: HistoryEntry, replace = false) => {
   if (time(food.lastBoughtAt) > time(entry.at)) return;
-  food.histories = [...food.histories, entry]
+  const since = time(entry.at) - rules().swipe.restHours * HOUR_MS;
+  const kept = replace
+    ? food.histories.filter((past) => time(past.at) < since || time(past.at) > time(entry.at))
+    : food.histories;
+  food.histories = [...kept, entry]
     .sort((a, b) => time(a.at) - time(b.at))
     .slice(-rules().swipe.historyLimit);
   food.inStockScore = calculateScore(food.histories);
@@ -81,6 +85,16 @@ export const swipeDeck = (foods: LocalFood[], now: number) => {
     )
     .sort((a, b) => lastActivity(a) - lastActivity(b));
   return [...low, ...stale].slice(0, deckSize);
+};
+
+export const replayDeck = (foods: LocalFood[], now: number) => {
+  const { deckSize, restHours } = rules().swipe;
+  const since = now - restHours * HOUR_MS;
+  const lastSwipe = (food: LocalFood) => Math.max(0, ...food.histories.map((entry) => time(entry.at)));
+  return foods
+    .filter((food) => food.lists.length > 0 && lastSwipe(food) >= since)
+    .sort((a, b) => lastSwipe(a) - lastSwipe(b))
+    .slice(0, deckSize);
 };
 
 export const shopCandidates = (foods: LocalFood[], now: number) =>
