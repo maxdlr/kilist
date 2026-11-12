@@ -1,9 +1,10 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -71,7 +72,7 @@ const KilToggleButton = <T extends string>({
       {options.map((option) => {
         const isSelected = option.value === value;
         return (
-          <Pressable
+          <Press
             key={option.value}
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
@@ -86,7 +87,7 @@ const KilToggleButton = <T extends string>({
             >
               {option.label}
             </ThemedText>
-          </Pressable>
+          </Press>
         );
       })}
     </View>

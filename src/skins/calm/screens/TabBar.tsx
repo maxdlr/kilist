@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import T from "../text";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
@@ -7,7 +8,7 @@ import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { ComponentType, useEffect } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Cog6ToothIcon,
   ListBulletIcon,
@@ -64,7 +65,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           const Icon = ICONS[name] ?? HomeIcon;
 
           return (
-            <Pressable
+            <Press
               key={route.key}
               accessibilityRole="tab"
               accessibilityLabel={badge ? T.tabWaiting(label) : label}
@@ -92,7 +93,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               >
                 {label}
               </CText>
-            </Pressable>
+            </Press>
           );
         })}
       </View>

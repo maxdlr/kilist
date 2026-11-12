@@ -1,4 +1,3 @@
-import common from "@/i18n/common";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
@@ -42,13 +41,6 @@ const GuestCard = ({
           variant={secondary}
           label={copy.login}
           onTouch={account.logIn}
-        />
-        <KilButton
-          height={skin.size.button.sm}
-          fontSize={skin.type.label}
-          variant={secondary}
-          label={common.guestRename.action}
-          onTouch={account.openGuestName}
         />
       </View>
     </View>

@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import V from "../text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import type { Member, RaceAnswer } from "@/hooks/versus/api";
@@ -6,7 +7,6 @@ import type { Skin } from "@/skins/types";
 import { Href, router } from "expo-router";
 import { ReactNode } from "react";
 import {
-  Pressable,
   StyleProp,
   StyleSheet,
   Text,
@@ -156,7 +156,7 @@ export const VButton = ({
   }[variant];
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       onPress={onPress ?? (href ? () => router.navigate(href) : undefined)}
@@ -183,7 +183,7 @@ export const VButton = ({
       >
         {label}
       </VText>
-    </Pressable>
+    </Press>
   );
 };
 

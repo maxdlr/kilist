@@ -1,7 +1,10 @@
+import Press from "@/components/elements/Press";
+import withPressed from "@/utils/withPressed";
 import common from "@/i18n/common";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
+import EditBadge from "@/components/views/Account/_components/EditBadge";
 import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import useAccount from "@/hooks/screens/useAccount";
@@ -9,7 +12,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
 import type { Skin } from "@/skins/types";
 import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import useSWR from "swr";
 import { arcadePalette as P } from "..";
@@ -80,7 +83,7 @@ const MenuRow = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
@@ -92,7 +95,7 @@ const MenuRow = ({
       <ThemedText size={skin.type.caption} color={P.navy}>
         {detail ?? "›"}
       </ThemedText>
-    </Pressable>
+    </Press>
   );
 };
 
@@ -115,7 +118,13 @@ const ArcadeAccount = () => {
       <Ground padded={false} style={styles.ground}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={[styles.player, { boxShadow: shadowOf(skin, 1, P.plankShadow) }]}>
-            <View style={styles.playerTop}>
+            <Press
+              accessibilityRole={account.isGuest ? "button" : undefined}
+              accessibilityLabel={account.isGuest ? `${user.username}, ${common.guestRename.action}` : undefined}
+              disabled={!account.isGuest}
+              onPress={account.openGuestName}
+              style={withPressed(styles.playerTop)}
+            >
               <Avatar name={user.username} id={user.id} size={skin.size.button.lg} ring={P.white} />
               <View style={styles.flex}>
                 <ThemedText size={skin.type.caption - 2} color={P.softNavy}>
@@ -128,7 +137,8 @@ const ArcadeAccount = () => {
                   {user.email}
                 </ThemedText>
               </View>
-            </View>
+              {account.isGuest && <EditBadge />}
+            </Press>
             <View style={styles.stats}>
               <Stat value={T.day(game?.level ?? 1)} label={T.streak} />
               <Stat value={String(account.balance)} label={T.ticketsLabel} />

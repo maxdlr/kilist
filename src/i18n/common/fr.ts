@@ -8,6 +8,11 @@ const fr: CommonText = {
   needsAccount: "Il te faut un compte pour ça.",
   notEnoughTickets: "Pas encore assez de tickets.",
   guestName: "Invité",
+  marks: {
+    added: (name: string) => `${name} ajouté`,
+    removed: (count: number) => (count > 1 ? `${count} aliments retirés` : "Retiré"),
+    saved: "Enregistré",
+  },
   guestRename: {
     action: "Choisir ton nom",
     title: "Comment t'appeler ?",

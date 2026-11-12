@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
@@ -13,7 +14,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { XMarkIcon } from "react-native-heroicons/outline";
 import Animated, {
   useAnimatedStyle,
@@ -349,7 +350,7 @@ const ArcadeShop = () => {
             {left === 0 ? T.fullCard : T.toFind(left)}
           </Title>
         </View>
-        <Pressable
+        <Press
           accessibilityRole="button"
           accessibilityLabel={T.stopAria}
           onPress={() => (stamped.length === 0 ? (setStamped([]), run.discard()) : run.askStop())}
@@ -357,7 +358,7 @@ const ArcadeShop = () => {
           style={withPressed(styles.close)}
         >
           <XMarkIcon size={skin.size.icon.action} color={P.lilac} strokeWidth={2.5} />
-        </Pressable>
+        </Press>
         <View
           accessible
           accessibilityLabel={T.boughtLeftAria(stamped.length, left)}

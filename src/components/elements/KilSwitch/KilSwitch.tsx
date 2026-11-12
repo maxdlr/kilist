@@ -1,9 +1,10 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import { useEffect } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 const TRACK_WIDTH = 52;
@@ -37,7 +38,7 @@ const KilSwitch = ({
   const on = skin.actions.primary;
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="switch"
       accessibilityLabel={label}
       accessibilityState={{ checked: value, disabled }}
@@ -60,7 +61,7 @@ const KilSwitch = ({
           thumbStyle,
         ]}
       />
-    </Pressable>
+    </Press>
   );
 };
 

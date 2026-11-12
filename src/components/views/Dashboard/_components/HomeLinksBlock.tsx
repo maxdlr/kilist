@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import { ThemedText } from "@/components/themed-text";
 import useHomeLinks from "@/hooks/screens/useHomeLinks";
@@ -5,7 +6,7 @@ import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import type { Skin } from "@/skins/types";
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 const HomeLinksBlock = ({
   ink,
@@ -28,7 +29,7 @@ const HomeLinksBlock = ({
   return (
     <View style={[styles.block, style]}>
       {links.prizes.length === 0 ? (
-        <Pressable
+        <Press
           accessibilityRole="button"
           accessibilityLabel={T.prizesAria}
           onPress={links.openPrizes}
@@ -40,14 +41,14 @@ const HomeLinksBlock = ({
           <ThemedText size={skin.type.label} color={text}>
             {links.balanceLabel}
           </ThemedText>
-        </Pressable>
+        </Press>
       ) : (
         <View style={[styles.looks, { backgroundColor: fill ?? skin.colors.raised, borderColor: soft }]}>
           <View style={styles.looksHead}>
             <ThemedText size={skin.type.label} color={text} accessibilityRole="header">
               {caseFor(skin, links.prizesTitle)}
             </ThemedText>
-            <Pressable
+            <Press
               accessibilityRole="button"
               accessibilityLabel={T.prizesAria}
               hitSlop={8}
@@ -60,10 +61,10 @@ const HomeLinksBlock = ({
               <ThemedText size={skin.type.caption} color={text}>
                 {caseFor(skin, links.discoverLabel)}
               </ThemedText>
-            </Pressable>
+            </Press>
           </View>
           {links.prizes.map((prize) => (
-            <Pressable
+            <Press
               key={prize.id}
               accessibilityRole="button"
               accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
@@ -81,17 +82,17 @@ const HomeLinksBlock = ({
               <View style={[styles.track, { backgroundColor: soft }]}>
                 <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(prize.progress * 100)}%` }]} />
               </View>
-            </Pressable>
+            </Press>
           ))}
         </View>
       )}
 
       {links.notice && (
-        <Pressable accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
+        <Press accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
           <ThemedText size={skin.type.label} color={text} style={styles.noticeText}>
             {caseFor(skin, links.notice.label)}
           </ThemedText>
-        </Pressable>
+        </Press>
       )}
     </View>
   );

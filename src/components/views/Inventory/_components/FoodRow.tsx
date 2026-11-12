@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
@@ -6,7 +7,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 const FoodRow = ({
   food,
@@ -29,7 +30,7 @@ const FoodRow = ({
   const ink = skin.colors.onLevel;
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityState={isSelectMode ? { selected: isSelected } : undefined}
       accessibilityLabel={`${name}, ${label}`}
@@ -64,7 +65,7 @@ const FoodRow = ({
       <ThemedText size={skin.type.caption} color={ink}>
         {label}
       </ThemedText>
-    </Pressable>
+    </Press>
   );
 };
 

@@ -3,6 +3,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useReducedMotion } from "react-native-reanimated";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SWRConfig } from "swr";
 import fetcher, { onError } from "@/services/fetcher";
@@ -12,6 +13,7 @@ import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LanguageProvider, useLanguage } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";
+import { MarkProvider } from "@/providers/MarkProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 
 SplashScreen.preventAutoHideAsync();
@@ -19,6 +21,7 @@ SplashScreen.preventAutoHideAsync();
 const SkinnedApp = () => {
   const skin = useSkin();
   const { lang } = useLanguage();
+  const reduced = useReducedMotion();
   const navigationTheme = useMemo(
     () => ({
       ...DarkTheme,
@@ -36,9 +39,10 @@ const SkinnedApp = () => {
     <ThemeProvider value={navigationTheme}>
       <StatusBar style={skin.statusBarOnGround} />
       <ToastProvider>
+        <MarkProvider>
         <AnimatedSplashOverlay />
         <AuthProvider>
-          <Stack key={lang}>
+          <Stack key={lang} screenOptions={{ animation: reduced ? "fade" : "default" }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="[id]" options={{ title: "" }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -48,6 +52,7 @@ const SkinnedApp = () => {
           </Stack>
           <AuthGate />
         </AuthProvider>
+        </MarkProvider>
       </ToastProvider>
     </ThemeProvider>
   );

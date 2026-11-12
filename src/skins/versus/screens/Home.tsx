@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
 import SyncNote from "@/components/elements/SyncNote";
@@ -13,7 +14,7 @@ import type { Skin } from "@/skins/types";
 import { levelOf, THRESHOLDS } from "@/utils/scoreUtils";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { versusPalette as P } from "..";
 import { Avatar, Card, Kicker, memberColor, Screen, VButton, VText, WORD } from "./parts";
 import { VersusError, VersusLoading } from "./States";
@@ -57,7 +58,7 @@ const PeriodToggle = ({ period, onPick }: { period: "week" | "season"; onPick: (
       {(["week", "season"] as const).map((value) => {
         const on = value === period;
         return (
-          <Pressable
+          <Press
             key={value}
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
@@ -67,7 +68,7 @@ const PeriodToggle = ({ period, onPick }: { period: "week" | "season"; onPick: (
             <VText face="bold" size={skin.type.caption} color={on ? P.ink : P.soft}>
               {value === "week" ? V.home.week : V.home.season}
             </VText>
-          </Pressable>
+          </Press>
         );
       })}
     </View>

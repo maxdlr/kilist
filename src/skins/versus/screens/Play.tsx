@@ -1,3 +1,4 @@
+import StateFade from "@/components/elements/StateFade/StateFade";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import V from "../text";
@@ -420,29 +421,33 @@ const VersusPlay = () => {
   const game = useRaceGame();
   const suggestion = useDailySuggestion(game.screen === "done");
 
-  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
+  const body = () => {
+    if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
-  switch (game.screen) {
-    case "loading":
-      return <VersusLoading />;
-    case "play":
-      return <Arena game={game} />;
-    case "done":
-      return <Results game={game} />;
-    case "closed":
-      return <Closed game={game} />;
-    case "empty":
-      return (
-        <VersusEmpty
-          kicker={V.play.todaysRace}
-          title={V.play.nothingTitle}
-          line={V.play.nothingLine}
-          action={{ label: V.home.checkInventory, onPress: () => router.navigate("/inventory") }}
-        />
-      );
-    default:
-      return <Start game={game} />;
-  }
+    switch (game.screen) {
+      case "loading":
+        return <VersusLoading />;
+      case "play":
+        return <Arena game={game} />;
+      case "done":
+        return <Results game={game} />;
+      case "closed":
+        return <Closed game={game} />;
+      case "empty":
+        return (
+          <VersusEmpty
+            kicker={V.play.todaysRace}
+            title={V.play.nothingTitle}
+            line={V.play.nothingLine}
+            action={{ label: V.home.checkInventory, onPress: () => router.navigate("/inventory") }}
+          />
+        );
+      default:
+        return <Start game={game} />;
+    }
+  };
+
+  return <StateFade stateKey={suggestion.item ? "suggestion" : game.screen}>{body()}</StateFade>;
 };
 
 const createStyles = (s: Skin) =>

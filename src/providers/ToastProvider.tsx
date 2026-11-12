@@ -1,6 +1,7 @@
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import AnimationService from "@/services/animation";
 import { caseFor } from "@/skins";
 import { setToastTrigger } from "@/services/toastBridge";
 import React, { createContext, ReactNode, useEffect, useRef, useState } from "react";
@@ -50,10 +51,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setToast(next);
-    translateY.value = withTiming(0, { duration: ANIM_DURATION });
+    translateY.value = withTiming(0, { duration: ANIM_DURATION, easing: AnimationService.easeOut });
 
     setTimeout(() => {
-      translateY.value = withTiming(-HIDDEN_OFFSET, { duration: ANIM_DURATION }, () => {});
+      translateY.value = withTiming(-HIDDEN_OFFSET, { duration: ANIM_DURATION, easing: AnimationService.easeOut });
       setTimeout(processQueue, ANIM_DURATION);
     }, DISPLAY_DURATION);
   };

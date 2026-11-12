@@ -1,3 +1,6 @@
+import AnimationService from "@/services/animation";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import Press from "@/components/elements/Press";
 import T from "../text";
 import FormInput from "@/components/elements/FormInput";
 import FoodPanels from "@/components/views/Inventory/_components/FoodPanels";
@@ -7,12 +10,14 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading } from "./States";
+
+const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
 
 const FoodRow = ({
   food,
@@ -30,7 +35,7 @@ const FoodRow = ({
   const level = levelOf(food.inStockScore);
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityState={selecting ? { selected } : undefined}
       accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}`}
@@ -49,7 +54,7 @@ const FoodRow = ({
       <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>{food.name}</CText>
       <CText size={skin.type.caption} color={C.soft}>{skin.copy.levels[level]}</CText>
       <Dot color={skin.colors.levels[level]} />
-    </Pressable>
+    </Press>
   );
 };
 
@@ -109,7 +114,8 @@ const CalmInventory = () => {
             <CText size={skin.type.body} color={C.soft}>{T.inventory.emptyLine}</CText>
           </View>
         ) : (
-          <FlatList
+          <Animated.FlatList
+            itemLayoutAnimation={ROW_REFLOW}
             style={styles.flex}
             contentContainerStyle={styles.list}
             data={foods}

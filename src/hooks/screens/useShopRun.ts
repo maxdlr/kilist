@@ -3,6 +3,7 @@ import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import useShopList from "@/providers/ShopListProvider";
+import useMark from "@/providers/MarkProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { FoodType, ListType } from "@/types/model";
@@ -15,6 +16,7 @@ export type ShopAddAction = "buy" | "later" | "list";
 const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) => {
   const shop = useShopList();
   const { showToast } = useToast();
+  const { mark } = useMark();
   const { shopListId, startNewShopList, cancelShopList, setShopListId } = shop;
   const [handled, setHandled] = useState(0);
   const [bought, setBought] = useState(0);
@@ -140,6 +142,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
       if (action === "buy") await buy(food.id);
       else if (action === "later") await snooze(food.id);
       refreshPreview();
+      mark("added", common.marks.added(name));
       return true;
     } catch {
       showToast(common.addFailed);

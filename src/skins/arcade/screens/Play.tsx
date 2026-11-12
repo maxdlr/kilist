@@ -1,3 +1,5 @@
+import StateFade from "@/components/elements/StateFade/StateFade";
+import Press from "@/components/elements/Press";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
@@ -15,7 +17,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -281,7 +283,7 @@ const RoundButton = ({
 
   return (
     <View style={styles.roundSlot}>
-      <Pressable
+      <Press
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         onPress={() => game.fling(direction)}
@@ -309,7 +311,7 @@ const RoundButton = ({
             strokeLinejoin="round"
           />
         </Svg>
-      </Pressable>
+      </Press>
       <ThemedText size={skin.type.caption} color={P.white}>
         {label}
       </ThemedText>
@@ -560,29 +562,33 @@ const ArcadePlay = () => {
   const copy = skin.copy.swipe;
   const suggestion = useDailySuggestion(game.screen === "done");
 
-  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
+  const body = () => {
+    if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
-  switch (game.screen) {
-    case "loading":
-      return <ArcadeLoading />;
-    case "play":
-      return <Arena game={game} />;
-    case "done":
-      return <CashOut game={game} />;
-    case "closed":
-      return <Closed game={game} />;
-    case "empty":
-      return (
-        <OutOfOrder
-          sign={copy.emptyTitle}
-          title={copy.emptyLabel}
-          line={copy.emptyLine}
-          action={{ label: skin.copy.empty.refresh, onTouch: game.refreshFoods }}
-        />
-      );
-    default:
-      return <Booth game={game} />;
-  }
+    switch (game.screen) {
+      case "loading":
+        return <ArcadeLoading />;
+      case "play":
+        return <Arena game={game} />;
+      case "done":
+        return <CashOut game={game} />;
+      case "closed":
+        return <Closed game={game} />;
+      case "empty":
+        return (
+          <OutOfOrder
+            sign={copy.emptyTitle}
+            title={copy.emptyLabel}
+            line={copy.emptyLine}
+            action={{ label: skin.copy.empty.refresh, onTouch: game.refreshFoods }}
+          />
+        );
+      default:
+        return <Booth game={game} />;
+    }
+  };
+
+  return <StateFade stateKey={suggestion.item ? "suggestion" : game.screen}>{body()}</StateFade>;
 };
 
 const createStyles = (s: Skin) => {

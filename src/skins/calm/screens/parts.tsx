@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
@@ -6,7 +7,7 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { Href, router } from "expo-router";
 import { ReactNode, useMemo } from "react";
-import { Pressable, StyleProp, StyleSheet, Text, TextProps, TextStyle, View } from "react-native";
+import { StyleProp, StyleSheet, Text, TextProps, TextStyle, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { calmPalette as C } from "..";
@@ -55,8 +56,9 @@ export const CButton = ({
   }[variant];
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
+      scale={variant !== "text"}
       accessibilityLabel={accessibilityLabel ?? label}
       onPress={onPress ?? (href ? () => router.navigate(href) : undefined)}
       style={({ pressed }) => [
@@ -74,7 +76,7 @@ export const CButton = ({
       <CText weight={variant === "text" ? "regular" : "medium"} size={variant === "text" ? skin.type.label + 1 : skin.type.body} color={look.ink} numberOfLines={1}>
         {label}
       </CText>
-    </Pressable>
+    </Press>
   );
 };
 

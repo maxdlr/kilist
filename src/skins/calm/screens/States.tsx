@@ -1,4 +1,5 @@
 import T from "../text";
+import { DrawnMark, type MarkKind } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
@@ -62,16 +63,19 @@ export const CalmMessage = ({
   title,
   line,
   dock,
+  mark,
 }: {
   title: string;
   line: string;
   dock?: React.ReactNode;
+  mark?: MarkKind;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
     <Screen dock={dock}>
       <View style={styles.middle}>
+        {mark && <DrawnMark kind={mark} color={C.haveIt} />}
         <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{title}</CText>
         <CText size={skin.type.body} color={C.soft}>{line}</CText>
       </View>

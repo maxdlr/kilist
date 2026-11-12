@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
@@ -10,7 +11,7 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { arcadePalette as P } from "..";
@@ -47,7 +48,7 @@ const Tile = ({
   const label = skin.copy.levels[level];
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityLabel={`${food.name}, ${label}`}
       accessibilityState={selecting ? { selected } : undefined}
@@ -85,7 +86,7 @@ const Tile = ({
           )}
         </View>
       )}
-    </Pressable>
+    </Press>
   );
 };
 

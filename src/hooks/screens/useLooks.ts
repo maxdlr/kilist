@@ -88,10 +88,7 @@ const useLooks = () => {
 
   const buy = () => showToast(copy.storeSoon, "info");
   const earnMore = () => showToast(copy.earnHint, "info");
-  const preview = (look: Look) =>
-    needsAccount(look)
-      ? requireAccount("versus")
-      : router.navigate(`/look-preview?skin=${look.skin.id}` as Href);
+  const preview = (look: Look) => router.navigate(`/look-preview?skin=${look.skin.id}` as Href);
 
   return { balance, looks, busy, wear, unlock, buy, earnMore, preview, price: STORE_PRICE };
 };

@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import common from "@/i18n/common";
 import V from "../text";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
@@ -7,7 +8,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { versusPalette as P } from "..";
 import { Avatar, Card, memberColor, Screen, VButton, VText } from "./parts";
@@ -27,7 +28,7 @@ const MenuRow = ({ label, detail, onPress, first = false }: { label: string; det
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
@@ -35,7 +36,7 @@ const MenuRow = ({ label, detail, onPress, first = false }: { label: string; det
     >
       <VText size={skin.type.body}>{label}</VText>
       <VText size={skin.type.label} color={P.muted}>{detail ?? "›"}</VText>
-    </Pressable>
+    </Press>
   );
 };
 

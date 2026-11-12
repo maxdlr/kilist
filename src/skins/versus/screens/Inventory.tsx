@@ -1,3 +1,6 @@
+import AnimationService from "@/services/animation";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
@@ -12,7 +15,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { versusPalette as P } from "..";
@@ -20,6 +23,8 @@ import { ANSWER_FILL, Chip, initialOf, Kicker, memberColor, Screen, VButton, VTe
 import { VersusLoading } from "./States";
 
 type Vote = { userId: number; username: string; answer: RaceAnswer | null };
+
+const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
 
 const isClash = (votes: Vote[]) => {
   const cast = votes.map((vote) => vote.answer).filter((answer) => answer === "in" || answer === "out");
@@ -48,7 +53,7 @@ const FoodRow = ({
   const voteText = votes.map((vote) => V.said(vote.username, vote.answer ? WORD[vote.answer] : V.inventory.noVoteLower)).join(", ");
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityState={selecting ? { selected } : undefined}
       accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.inventory.clashAria : ""}. ${voteText}`}
@@ -91,7 +96,7 @@ const FoodRow = ({
           </View>
         ))}
       </View>
-    </Pressable>
+    </Press>
   );
 };
 
@@ -188,7 +193,8 @@ const VersusInventory = () => {
             <VText size={skin.type.body} color={P.soft}>{V.inventory.emptyLine}</VText>
           </View>
         ) : (
-          <FlatList
+          <Animated.FlatList
+            itemLayoutAnimation={ROW_REFLOW}
             style={styles.flex}
             contentContainerStyle={styles.list}
             data={foods}

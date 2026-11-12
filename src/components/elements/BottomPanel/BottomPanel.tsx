@@ -16,6 +16,8 @@ import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,7 +29,11 @@ const DRAG_START = 12;
 const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
-const SETTLE = { duration: 180 };
+
+const handoff: { owner: object | null; until: number } = { owner: null, until: 0 };
+
+const handoffWait = (self: object) =>
+  handoff.owner === self ? 0 : Math.max(0, handoff.until - Date.now());
 
 const BottomPanel = ({
   visible,
@@ -50,6 +56,7 @@ const BottomPanel = ({
   const drag = useSharedValue(0);
   const closing = useSharedValue(false);
   const latest = useRef({ visible, onClose });
+  const [self] = useState(() => ({}));
   const [isRendered, setIsRendered] = useState(visible);
 
   if (visible && !isRendered) {
@@ -70,27 +77,36 @@ const BottomPanel = ({
   );
 
   useEffect(() => {
-    backdropOpacity.set(withTiming(visible ? 1 : 0, AnimationService.config));
+    backdropOpacity.set(
+      withTiming(visible ? 1 : 0, visible ? AnimationService.config : AnimationService.panelClose),
+    );
 
     if (visible) {
       drag.set(0);
       closing.set(false);
-      const measured = contentHeight.get();
-      if (measured > 0) {
-        height.set(withTiming(measured, AnimationService.config));
-      }
-      return;
+      const open = setTimeout(() => {
+        const measured = contentHeight.get();
+        if (measured > 0) {
+          height.set(withDelay(handoffWait(self), withTiming(measured, AnimationService.config)));
+        }
+      }, 0);
+      return () => clearTimeout(open);
+    }
+
+    if (height.get() > 0) {
+      handoff.owner = self;
+      handoff.until = Date.now() + AnimationService.panelClose.duration;
     }
 
     height.set(
-      withTiming(0, AnimationService.config, (finished) => {
+      withTiming(0, AnimationService.panelClose, (finished) => {
         "worklet";
         if (finished) {
           scheduleOnRN(setIsRendered, false);
         }
       }),
     );
-  }, [visible, height, contentHeight, backdropOpacity, drag, closing]);
+  }, [visible, height, contentHeight, backdropOpacity, drag, closing, self]);
 
   const requestClose = useCallback(() => latest.current.onClose(), []);
 
@@ -108,10 +124,10 @@ const BottomPanel = ({
         scheduleOnRN(requestClose);
         return;
       }
-      drag.set(withTiming(0, SETTLE));
+      drag.set(withSpring(0, { ...AnimationService.snap, velocity: event.velocityY }));
     },
     onFinalize: () => {
-      if (!closing.value && drag.value > 0) drag.set(withTiming(0, SETTLE));
+      if (!closing.value && drag.value > 0) drag.set(withSpring(0, AnimationService.snap));
     },
   });
 
@@ -133,7 +149,7 @@ const BottomPanel = ({
     const measured = event.nativeEvent.layout.height;
     contentHeight.set(measured);
     if (visible) {
-      height.set(withTiming(measured, AnimationService.config));
+      height.set(withDelay(handoffWait(self), withTiming(measured, AnimationService.config)));
     }
   };
 

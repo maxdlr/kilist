@@ -3,6 +3,7 @@ import type { SwipeDeckFling, SwipeDirection } from "@/components/elements/Swipe
 import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";
+import useMark from "@/providers/MarkProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { caseFor } from "@/skins";
@@ -24,6 +25,7 @@ const useSwipeGame = () => {
   const tickets = useTickets();
   const skin = useSkin();
   const { showToast } = useToast();
+  const { mark } = useMark();
   const [removing, setRemoving] = useState<FoodType | null>(null);
   const [isReplay, setIsReplay] = useState(false);
   const {
@@ -140,6 +142,7 @@ const useSwipeGame = () => {
       showToast(common.unexpected);
       return;
     }
+    mark("removed", common.marks.removed(1));
     const isLast = foods?.length === 1;
     swipe(food.id);
     if (!isLast) return;

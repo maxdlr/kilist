@@ -1,9 +1,10 @@
+import Press from "@/components/elements/Press";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { ActionColors, ActionKind, Skin } from "@/skins/types";
 import { Href, router } from "expo-router";
 import { ReactNode } from "react";
-import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 
 const KilButton = ({
   label,
@@ -35,8 +36,9 @@ const KilButton = ({
   const { fill, ink, line } = colors ?? skin.actions[variant];
 
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
+      scale={skin.shape.shadow.offset === 0}
       accessibilityLabel={accessibilityLabel ?? label}
       onPress={onTouch ?? (href ? () => router.navigate(href) : undefined)}
       style={({ pressed }) => [
@@ -72,7 +74,7 @@ const KilButton = ({
       >
         {label}
       </ThemedText>
-    </Pressable>
+    </Press>
   );
 };
 

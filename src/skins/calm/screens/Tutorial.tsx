@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import T from "../text";
 import FoodIcon from "@/components/elements/FoodIcon";
@@ -15,7 +16,7 @@ import axios from "@/services/axios";
 import type { Skin } from "@/skins/types";
 import { FoodBankItemType, FoodType, HouseholdWithMembersType, ListType } from "@/types/model";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -174,7 +175,7 @@ const ProfilePick = ({
             {question.options.map((id) => {
               const on = picked[question.id].includes(id);
               return (
-                <Pressable
+                <Press
                   key={id}
                   accessibilityRole={question.single ? "radio" : "checkbox"}
                   accessibilityState={{ checked: on }}
@@ -184,7 +185,7 @@ const ProfilePick = ({
                   <CText weight="medium" size={skin.type.body} color={on ? C.ground : C.ink}>
                     {copy.answers[id] ?? id}
                   </CText>
-                </Pressable>
+                </Press>
               );
             })}
           </View>

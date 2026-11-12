@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import V from "../text";
@@ -14,7 +15,7 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { XMarkIcon } from "react-native-heroicons/outline";
 import Animated, {
   useAnimatedStyle,
@@ -331,7 +332,7 @@ const VersusShop = () => {
     >
       <View style={styles.hud}>
         <View style={styles.between}>
-          <Pressable
+          <Press
             accessibilityRole="button"
             accessibilityLabel={V.shop.stopAria}
             onPress={abandon}
@@ -339,7 +340,7 @@ const VersusShop = () => {
             style={withPressed(styles.close)}
           >
             <XMarkIcon size={skin.size.icon.action} color={P.muted} strokeWidth={2} />
-          </Pressable>
+          </Press>
           <VText face="pixel" size={skin.type.title - 2} color={P.you}>{mmss(elapsed)}</VText>
           <VText face="bold" size={skin.type.label} color={gap !== null && gap <= 0 ? P.agree : P.muted}>
             {!record ? V.shop.setRecord : gap === null ? V.shop.record(mmss(record.ms)) : gap <= 0 ? V.play.ahead(mmss(-gap), recordName ?? "") : V.play.behind(mmss(gap), recordName ?? "")}

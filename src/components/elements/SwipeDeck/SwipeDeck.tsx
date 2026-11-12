@@ -1,4 +1,5 @@
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import AnimationService, { projectFling } from "@/services/animation";
 import type { ActionColors, Skin } from "@/skins/types";
 import { ReactNode, RefObject, useEffect } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
@@ -13,6 +14,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -25,7 +27,8 @@ const COMMIT_X = 100;
 const COMMIT_UP = 90;
 const INTENT_AT = 24;
 const STAMP_FULL_AT = 80;
-const FLING_DURATION = 170;
+const FLICK_VELOCITY = 600;
+const BACK_SCALE = 0.95;
 
 export const deckButtonColors = (
   skin: Skin,
@@ -61,6 +64,15 @@ const DeckSheet = ({
   const x = useSharedValue(0);
   const y = useSharedValue(0);
   const flung = useSharedValue(false);
+  const startX = useSharedValue(0);
+  const startY = useSharedValue(0);
+  const speedX = useSharedValue(0);
+  const speedY = useSharedValue(0);
+  const rise = useSharedValue(isTop ? 1 : 0);
+
+  useEffect(() => {
+    if (isTop) rise.set(withTiming(1, AnimationService.enter));
+  }, [isTop, rise]);
   const lastIntent = useSharedValue<SwipeDirection | null>(null);
 
   const finish = (direction: SwipeDirection) => {
@@ -77,7 +89,7 @@ const DeckSheet = ({
       "worklet";
       scheduleOnRN(finish, direction);
     };
-    const timing = { duration: FLING_DURATION };
+    const timing = AnimationService.fling;
 
     if (direction === "up") {
       y.set(withTiming(-SCREEN_HEIGHT * 1.2, timing, done));
@@ -98,10 +110,18 @@ const DeckSheet = ({
 
   const pan = usePanGesture({
     enabled: isTop,
+    onActivate: () => {
+      startX.set(x.value);
+      startY.set(y.value);
+      speedX.set(0);
+      speedY.set(0);
+    },
     onUpdate: (event) => {
       if (flung.value) return;
-      x.set(event.translationX);
-      y.set(event.translationY);
+      x.set(startX.value + event.translationX);
+      y.set(startY.value + event.translationY);
+      speedX.set(event.velocityX);
+      speedY.set(event.velocityY);
 
       let next: SwipeDirection | null = null;
       if (allowUp && y.value < -INTENT_AT && -y.value > Math.abs(x.value)) {
@@ -120,15 +140,25 @@ const DeckSheet = ({
     onFinalize: () => {
       if (flung.value) return;
 
-      if (allowUp && y.value < -COMMIT_UP && -y.value > Math.abs(x.value)) {
+      const vx = speedX.value;
+      const vy = speedY.value;
+      speedX.set(0);
+      speedY.set(0);
+      const flickX =
+        Math.abs(vx) > FLICK_VELOCITY && Math.sign(vx) === Math.sign(x.value)
+          ? x.value + projectFling(vx)
+          : x.value;
+      const flickY = vy < -FLICK_VELOCITY && y.value < 0 ? y.value + projectFling(vy) : y.value;
+
+      if (allowUp && flickY < -COMMIT_UP && -y.value > Math.abs(x.value)) {
         fling("up");
-      } else if (x.value > COMMIT_X) {
+      } else if (flickX > COMMIT_X && x.value > INTENT_AT) {
         fling("right");
-      } else if (x.value < -COMMIT_X) {
+      } else if (flickX < -COMMIT_X && x.value < -INTENT_AT) {
         fling("left");
       } else {
-        x.set(withTiming(0, { duration: 200 }));
-        y.set(withTiming(0, { duration: 200 }));
+        x.set(withSpring(0, { ...AnimationService.settle, velocity: vx }));
+        y.set(withSpring(0, { ...AnimationService.settle, velocity: vy }));
         lastIntent.set(null);
         scheduleOnRN(onIntent, null);
       }
@@ -148,6 +178,7 @@ const DeckSheet = ({
       { translateX: x.value },
       { translateY: y.value },
       { rotateZ: `${x.value / 26}deg` },
+      { scale: interpolate(rise.value, [0, 1], [BACK_SCALE, 1]) },
     ],
   }));
 

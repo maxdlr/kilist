@@ -11,7 +11,10 @@ import { caseFor } from "@/skins";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import EditBadge from "./_components/EditBadge";
 import GuestCard from "./_components/GuestCard";
+import Press from "@/components/elements/Press";
+import withPressed from "@/utils/withPressed";
 import AccountPanels from "./_components/AccountPanels";
 
 const RoastAccount = () => {
@@ -32,9 +35,25 @@ const RoastAccount = () => {
         style={[styles.flex, { backgroundColor: skin.colors.ground }]}
       >
         <View style={[styles.hero, { paddingTop: insets.top + skin.spacing.top }]}>
-          <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
-            {copy.hello(caseFor(skin, user.username))}
-          </Title>
+          {account.isGuest ? (
+            <Press
+              accessibilityRole="button"
+              accessibilityLabel={`${user.username}, ${common.guestRename.action}`}
+              onPress={account.openGuestName}
+              style={withPressed(styles.nameRow)}
+            >
+              <View style={styles.flex}>
+                <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
+                  {copy.hello(caseFor(skin, user.username))}
+                </Title>
+              </View>
+              <EditBadge />
+            </Press>
+          ) : (
+            <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
+              {copy.hello(caseFor(skin, user.username))}
+            </Title>
+          )}
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
           </ThemedText>
@@ -147,6 +166,11 @@ const createStyles = (s: Skin) =>
   StyleSheet.create({
     flex: {
       flex: 1,
+    },
+    nameRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
     },
     hero: {
       gap: s.spacing.tight,

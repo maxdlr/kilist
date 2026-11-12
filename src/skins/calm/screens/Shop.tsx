@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import T from "../text";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
@@ -10,7 +11,7 @@ import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -153,6 +154,7 @@ const CalmShop = () => {
   if (result) {
     return (
       <CalmMessage
+        mark="done"
         title={T.done}
         line={T.shop.result(result.bought, result.left)}
         dock={<CButton label={T.shop.backToday} onPress={leave} />}
@@ -164,7 +166,7 @@ const CalmShop = () => {
 
   const dockWith = (label: string, onPress: () => void) => (
     <View style={styles.dockRow}>
-      <Pressable
+      <Press
         accessibilityRole="button"
         accessibilityLabel={common.shop.add}
         onPress={run.openAdd}
@@ -175,7 +177,7 @@ const CalmShop = () => {
           color={C.ink}
           strokeWidth={1.8}
         />
-      </Pressable>
+      </Press>
       <CButton flex={1} label={label} onPress={onPress} />
     </View>
   );
@@ -193,7 +195,7 @@ const CalmShop = () => {
                 >
                   {T.shop.title}
                 </CText>
-                <Pressable
+                <Press
                   accessibilityRole="button"
                   accessibilityLabel={T.shop.howAria}
                   accessibilityState={{ expanded: showHow }}
@@ -213,7 +215,7 @@ const CalmShop = () => {
                       strokeWidth={1.6}
                     />
                   )}
-                </Pressable>
+                </Press>
               </View>
               <StockBars
                 rows={[
@@ -334,7 +336,7 @@ const CalmShop = () => {
               <CText size={skin.type.label} color={C.soft}>
                 {T.shop.toBuy(remaining.length)}
               </CText>
-              <Pressable
+              <Press
                 accessibilityRole="button"
                 accessibilityLabel={common.stopShopping}
                 onPress={run.askStop}
@@ -346,7 +348,7 @@ const CalmShop = () => {
                   color={C.soft}
                   strokeWidth={1.6}
                 />
-              </Pressable>
+              </Press>
             </View>
           </View>
         </View>

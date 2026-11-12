@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
 import SyncNote from "@/components/elements/SyncNote";
@@ -20,7 +21,7 @@ import {
   SparklesIcon,
 } from "react-native-heroicons/outline";
 import { useCallback } from "react";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
 import { calmPalette as C } from "..";
 import { CButton, CText, Screen, StockBars, useCheckPending } from "./parts";
@@ -67,11 +68,11 @@ const CalmHome = () => {
       padded={false}
       dock={
         links.notice ? (
-          <Pressable accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
+          <Press accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
             <CText size={skin.type.label + 1} style={styles.noticeText}>
               {links.notice.label}
             </CText>
-          </Pressable>
+          </Press>
         ) : undefined
       }
     >
@@ -107,7 +108,7 @@ const CalmHome = () => {
         )}
 
         {pending && (
-          <Pressable
+          <Press
             accessibilityRole="button"
             accessibilityLabel={`${T.home.toCheck(toCheck)}. ${T.home.checkLine}`}
             onPress={() => router.navigate("/swipe")}
@@ -128,7 +129,7 @@ const CalmHome = () => {
               </View>
             </View>
             <ChevronRightIcon size={18} color={C.faint} strokeWidth={2} />
-          </Pressable>
+          </Press>
         )}
 
         {needed.length > 0 && (
@@ -145,17 +146,17 @@ const CalmHome = () => {
               <CText weight="medium" size={skin.type.label + 1} accessibilityRole="header" style={styles.flex}>
                 {links.prizesTitle}
               </CText>
-              <Pressable
+              <Press
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={links.openPrizes}
                 style={({ pressed }) => [styles.discover, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
               >
                 <CText size={skin.type.label}>{links.discoverLabel}</CText>
-              </Pressable>
+              </Press>
             </View>
             {links.prizes.map((prize) => (
-              <Pressable
+              <Press
                 key={prize.id}
                 accessibilityRole="button"
                 accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
@@ -173,7 +174,7 @@ const CalmHome = () => {
                 <View style={styles.track}>
                   <View style={[styles.trackFill, { width: `${Math.round(prize.progress * 100)}%` }]} />
                 </View>
-              </Pressable>
+              </Press>
             ))}
           </View>
         )}

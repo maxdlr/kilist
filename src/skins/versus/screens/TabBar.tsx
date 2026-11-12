@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import { A } from "@/admin/ui";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
@@ -9,7 +10,7 @@ import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { ComponentType, useEffect } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   HomeIcon,
   ListBulletIcon,
@@ -65,7 +66,7 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           const ink = isCurrent ? P.white : P.faint;
 
           return (
-            <Pressable
+            <Press
               key={route.key}
               accessibilityRole="tab"
               accessibilityLabel={tabAria(name)}
@@ -90,7 +91,7 @@ const VersusTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 {label}
               </VText>
               <View style={[styles.bar3, { backgroundColor: isCurrent && !isRace ? P.you : "transparent" }]} />
-            </Pressable>
+            </Press>
           );
         })}
       </View>

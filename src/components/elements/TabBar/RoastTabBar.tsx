@@ -1,3 +1,4 @@
+import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import common from "@/i18n/common";
 import type { TabBarProps } from "./types";
@@ -8,7 +9,7 @@ import { useSkin } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import { useEffect } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -47,7 +48,7 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
         const open = route.name === "swipe" && pending && !isCurrent;
 
         return (
-          <Pressable
+          <Press
             key={route.key}
             accessibilityRole="tab"
             accessibilityLabel={tabAria(name)}
@@ -77,7 +78,7 @@ const RoastTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
             >
               {label}
             </ThemedText>
-          </Pressable>
+          </Press>
         );
       })}
     </Animated.View>

@@ -1,7 +1,8 @@
+import Press from "@/components/elements/Press";
 import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 const ActionRow = ({
   label,
@@ -24,7 +25,7 @@ const ActionRow = ({
   const ink = destructive ? skin.colors.danger : surfaceInk;
 
   return (
-    <Pressable
+    <Press
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={detail ? `${label}, ${detail}` : label}
@@ -55,7 +56,7 @@ const ActionRow = ({
           {">"}
         </ThemedText>
       )}
-    </Pressable>
+    </Press>
   );
 };
 

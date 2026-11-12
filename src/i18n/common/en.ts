@@ -6,6 +6,11 @@ const en = {
   needsAccount: "You need an account for this.",
   notEnoughTickets: "Not enough tickets yet.",
   guestName: "Guest",
+  marks: {
+    added: (name: string) => `${name} added`,
+    removed: (count: number) => (count > 1 ? `${count} foods removed` : "Removed"),
+    saved: "Saved",
+  },
   guestRename: {
     action: "Choose your name",
     title: "What should we call you?",

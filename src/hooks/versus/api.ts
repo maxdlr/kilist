@@ -1,3 +1,4 @@
+import useAuth from "@/providers/AuthProvider";
 import axios from "@/services/axios";
 import { FoodType } from "@/types/model";
 import { useMemo } from "react";
@@ -111,24 +112,76 @@ export type HouseVotes = {
 
 const useTzOffset = () => useMemo(() => new Date().getTimezoneOffset(), []);
 
+const SOLO_RACE_ID = -1;
+
+const useSolo = () => {
+  const { isGuest, user } = useAuth();
+  const me = useMemo(() => ({ id: user?.id ?? 0, username: user?.username ?? "" }), [user?.id, user?.username]);
+  return { isGuest, me, day: new Date().toISOString().slice(0, 10) };
+};
+
 export const useRace = () => {
   const tzOffset = useTzOffset();
-  return useSWR<RaceView>({ url: "/versus/race", params: { tzOffset } });
+  const { isGuest, me, day } = useSolo();
+  const race = useSWR<RaceView>(isGuest ? null : { url: "/versus/race", params: { tzOffset } });
+  const deck = useSWR<FoodType[]>(isGuest ? { url: "foods/swipe/browse" } : null);
+  if (!isGuest) return race;
+
+  const solo: RaceView | undefined = deck.data && {
+    day,
+    level: 1,
+    raceId: deck.data.length ? SOLO_RACE_ID : null,
+    foods: deck.data,
+    members: [me],
+    runs: [],
+    target: null,
+    previousAnswers: {},
+  };
+  return { ...race, data: solo, isLoading: deck.isLoading };
 };
 
 export const useStandings = (period: "week" | "season") => {
   const tzOffset = useTzOffset();
-  return useSWR<Standings>({ url: "/versus/standings", params: { tzOffset, period } });
+  const { isGuest, me, day } = useSolo();
+  const standings = useSWR<Standings>(isGuest ? null : { url: "/versus/standings", params: { tzOffset, period } });
+  if (!isGuest) return standings;
+
+  const solo: Standings = {
+    period,
+    day,
+    members: [{ userId: me.id, username: me.username, wins: 0, plays: 0, avgMs: null, rightPct: null }],
+    today: [{ userId: me.id, username: me.username, played: false, totalMs: null }],
+    lastClash: null,
+  };
+  return { ...standings, data: solo, isLoading: false };
 };
+
+const SOLO_ME: VersusMe = {
+  headToHead: [],
+  personal: { bestRaceMs: null, bestShopMs: null, streak: 0, changedMindPct: null, newBests: 0, recent: [] },
+};
+
+const SOLO_SHOP: ShopRecords = { houseRecord: null, myBest: null, runsByMember: {} };
 
 export const useVersusMe = () => {
   const tzOffset = useTzOffset();
-  return useSWR<VersusMe>({ url: "/versus/me", params: { tzOffset } });
+  const { isGuest } = useSolo();
+  const stats = useSWR<VersusMe>(isGuest ? null : { url: "/versus/me", params: { tzOffset } });
+  return isGuest ? { ...stats, data: SOLO_ME, isLoading: false } : stats;
 };
 
-export const useShopRecords = () => useSWR<ShopRecords>({ url: "/versus/shop" });
+export const useShopRecords = () => {
+  const { isGuest } = useSolo();
+  const records = useSWR<ShopRecords>(isGuest ? null : { url: "/versus/shop" });
+  return isGuest ? { ...records, data: SOLO_SHOP, isLoading: false } : records;
+};
 
-export const useHouseVotes = () => useSWR<HouseVotes>({ url: "/versus/votes" });
+export const useHouseVotes = () => {
+  const { isGuest, me } = useSolo();
+  const votes = useSWR<HouseVotes>(isGuest ? null : { url: "/versus/votes" });
+  const solo = useMemo<HouseVotes>(() => ({ members: [me], votes: {} }), [me]);
+  return isGuest ? { ...votes, data: solo, isLoading: false } : votes;
+};
 
 export const postAnswer = async (
   raceId: number,

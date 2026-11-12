@@ -5,6 +5,7 @@ import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import common from "@/i18n/common";
 import useAuth from "@/providers/AuthProvider";
+import useMark from "@/providers/MarkProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
@@ -16,12 +17,14 @@ const GuestNameForm = ({ onClose }: { onClose: () => void }) => {
   const T = common.guestRename;
   const { guestName, renameGuest } = useAuth();
   const { showToast } = useToast();
+  const { mark } = useMark();
   const [name, setName] = useState(guestName);
 
   const save = async () => {
     try {
       await renameGuest(name.trim());
       onClose();
+      mark("saved", common.marks.saved);
     } catch {
       showToast(common.unexpected);
     }

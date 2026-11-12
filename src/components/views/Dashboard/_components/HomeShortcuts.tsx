@@ -1,8 +1,9 @@
+import Press from "@/components/elements/Press";
 import useHomeLinks from "@/hooks/screens/useHomeLinks";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
 const SIZE = 46;
@@ -38,7 +39,7 @@ const HomeShortcuts = ({
   return (
     <View style={[styles.row, style]}>
       {items.map((item) => (
-        <Pressable
+        <Press
           key={item.label}
           accessibilityRole="button"
           accessibilityLabel={item.label}
@@ -53,7 +54,7 @@ const HomeShortcuts = ({
             <Path d={item.path} />
             {item.dot && <Circle cx={12} cy={12} r={3} />}
           </Svg>
-        </Pressable>
+        </Press>
       ))}
     </View>
   );

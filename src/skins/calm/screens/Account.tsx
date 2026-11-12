@@ -1,12 +1,14 @@
+import Press from "@/components/elements/Press";
 import common from "@/i18n/common";
 import T from "../text";
+import EditBadge from "@/components/views/Account/_components/EditBadge";
 import GuestCard from "@/components/views/Account/_components/GuestCard";
 import AccountPanels from "@/components/views/Account/_components/AccountPanels";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { calmPalette as C } from "..";
 import { CText, Screen } from "./parts";
@@ -38,7 +40,7 @@ const Row = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
-    <Pressable
+    <Press
       accessibilityRole="button"
       accessibilityLabel={detail ? `${label}, ${detail}` : label}
       onPress={onPress}
@@ -48,7 +50,7 @@ const Row = ({
       <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
         {`${detail ?? ""}${chevron ? (detail ? " ›" : "›") : ""}`}
       </CText>
-    </Pressable>
+    </Press>
   );
 };
 
@@ -70,10 +72,22 @@ const CalmAccount = () => {
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
 
           <Group label={T.settings.account}>
-            <View style={styles.row}>
-              <CText size={skin.type.body}>{user.username}</CText>
-              <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
-            </View>
+            {account.isGuest ? (
+              <Press
+                accessibilityRole="button"
+                accessibilityLabel={`${user.username}, ${common.guestRename.action}`}
+                onPress={account.openGuestName}
+                style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.tint }]}
+              >
+                <CText size={skin.type.body} numberOfLines={1} style={styles.name}>{user.username}</CText>
+                <EditBadge />
+              </Press>
+            ) : (
+              <View style={styles.row}>
+                <CText size={skin.type.body}>{user.username}</CText>
+                <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
+              </View>
+            )}
           </Group>
 
           {account.isGuest ? (
@@ -135,6 +149,7 @@ const createStyles = (s: Skin) =>
       minHeight: s.size.row.list - 4,
     },
     detail: { flexShrink: 1, textAlign: "right" },
+    name: { flexShrink: 1 },
     guest: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
   });
 

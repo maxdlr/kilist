@@ -1,9 +1,11 @@
 import { useSkin } from "@/providers/SkinProvider";
 import { SkinTabBar } from "@/skins/screens";
 import { Tabs } from "expo-router";
+import { useReducedMotion } from "react-native-reanimated";
 
 export default function AppTabs() {
   const skin = useSkin();
+  const reduced = useReducedMotion();
 
   return (
     <Tabs
@@ -11,6 +13,7 @@ export default function AppTabs() {
       tabBar={(props) => <SkinTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        animation: reduced ? "none" : "fade",
         sceneStyle: { backgroundColor: skin.colors.ground },
       }}
     >

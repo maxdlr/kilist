@@ -1,3 +1,5 @@
+import StateFade from "@/components/elements/StateFade/StateFade";
+import Press from "@/components/elements/Press";
 import goBack from "@/utils/goBack";
 import withPressed from "@/utils/withPressed";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
@@ -7,11 +9,12 @@ import ActionPanel from "@/components/elements/ActionPanel";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useSwipeGame, { SwipeGame } from "@/hooks/screens/useSwipeGame";
+import { DrawnMark } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { useEffect } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
   ArrowPathIcon,
   ArrowsRightLeftIcon,
@@ -107,9 +110,10 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   const pad = (direction: SwipeDirection, label: string, aria: string) => {
     const on = game.intent === direction;
     return (
-      <Pressable
+      <Press
         key={direction}
         accessibilityRole="button"
+        scale
         accessibilityLabel={aria}
         onPress={() => game.fling(direction)}
         style={({ pressed }) => [
@@ -131,7 +135,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
           {label}
         </CText>
         {direction === "right" && <CheckIcon size={20} color={on ? C.ground : C.haveIt} strokeWidth={on ? 3 : 2} />}
-      </Pressable>
+      </Press>
     );
   };
 
@@ -139,9 +143,9 @@ const Checking = ({ game }: { game: SwipeGame }) => {
     <View style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }]}>
       <View style={styles.header}>
         <View style={styles.between}>
-          <Pressable accessibilityRole="button" accessibilityLabel={T.close} hitSlop={skin.spacing.small} onPress={goBack} style={withPressed(styles.close)}>
+          <Press accessibilityRole="button" accessibilityLabel={T.close} hitSlop={skin.spacing.small} onPress={goBack} style={withPressed(styles.close)}>
             <XMarkIcon size={skin.size.icon.action} color={C.soft} strokeWidth={1.8} />
-          </Pressable>
+          </Press>
           <CText size={skin.type.label} color={C.soft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
         </View>
         <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: total, now: game.position }} style={styles.track}>
@@ -166,14 +170,14 @@ const Checking = ({ game }: { game: SwipeGame }) => {
       </View>
       <View style={[styles.pads, { paddingBottom: skin.spacing.stack }]}>
         {pad("left", copy.out, T.play.ariaOut)}
-        <Pressable accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={withPressed(styles.unsure)}>
+        <Press accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={withPressed(styles.unsure)}>
           {game.intent === "up" ? (
             <QuestionMarkCircleSolid size={22} color={C.ink} />
           ) : (
             <QuestionMarkCircleIcon size={22} color={C.soft} strokeWidth={1.8} />
           )}
           <CText size={skin.type.caption} color={game.intent === "up" ? C.ink : C.soft}>{copy.unsure}</CText>
-        </Pressable>
+        </Press>
         {pad("right", copy.inStock, T.play.ariaIn)}
       </View>
       <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
@@ -201,6 +205,7 @@ const Done = ({ game }: { game: SwipeGame }) => {
     >
       <ScrollView contentContainerStyle={styles.doneContent}>
         <View style={styles.doneHead}>
+          <DrawnMark kind="done" color={C.haveIt} />
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{T.done}</CText>
           <CText size={skin.type.body} color={C.soft}>
             {added.length
@@ -283,28 +288,32 @@ const CalmPlay = () => {
     if (screen === "start") begin();
   }, [screen, begin]);
 
-  if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
+  const body = () => {
+    if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
-  switch (screen) {
-    case "play":
-      return <Checking game={game} />;
-    case "done":
-      return <Done game={game} />;
-    case "closed":
-      return (
-        <Sorted game={game} />
-      );
-    case "empty":
-      return (
-        <CalmMessage
-          title={copy.emptyTitle}
-          line={copy.emptyLine}
-          dock={<CButton variant="text" label={T.browseInventory} href="/inventory" />}
-        />
-      );
-    default:
-      return <CalmLoading />;
-  }
+    switch (screen) {
+      case "play":
+        return <Checking game={game} />;
+      case "done":
+        return <Done game={game} />;
+      case "closed":
+        return (
+          <Sorted game={game} />
+        );
+      case "empty":
+        return (
+          <CalmMessage
+            title={copy.emptyTitle}
+            line={copy.emptyLine}
+            dock={<CButton variant="text" label={T.browseInventory} href="/inventory" />}
+          />
+        );
+      default:
+        return <CalmLoading />;
+    }
+  };
+
+  return <StateFade stateKey={suggestion.item ? "suggestion" : screen === "start" ? "loading" : screen}>{body()}</StateFade>;
 };
 
 const createStyles = (s: Skin) =>
