@@ -4,15 +4,15 @@ import {
   calculateScore,
   isShopListDone,
   nextFoods,
-  normalizeName,
   suggestionKey,
-  SAME_TRIP_MS,
-  SNOOZE_MS,
   toLocalDay,
   attachProduct,
 } from "./domain";
+import { foodKey } from "./foodNames";
+import { rules } from "./rules";
 import type { LocalFood, LocalState, Op, Reward, Snapshot } from "./types";
 
+const USERNAME_LENGTH = 30;
 const NO_REWARD: Reward = { earned: 0, bonus: 0, balance: null };
 
 const time = (value?: string | null) => (value ? Date.parse(value) : 0);
@@ -126,7 +126,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         if (
           last &&
           last.foodId !== target.id &&
-          atMs - time(last.at) <= SAME_TRIP_MS
+          atMs - time(last.at) <= rules().shop.sameTripMinutes * 60000
         ) {
           const row = state.frequencies.find(
             (entry) => entry.foodId === last.foodId && entry.nextFoodId === target.id,
@@ -153,7 +153,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "shop.snooze": {
       const target = food(payload.foodId);
       if (!target) return [];
-      const until = atMs + SNOOZE_MS;
+      const until = atMs + rules().shop.snoozeHours * 3600000;
       if (time(target.snoozedUntil) < until) target.snoozedUntil = new Date(until).toISOString();
       return nextFoods(state, target.id, openListFor(state, payload.shopListId), atMs);
     }
@@ -166,7 +166,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "food.create": {
       const listId = payload.listId;
       const twin = state.foods.find(
-        (entry) => normalizeName(entry.name) === normalizeName(payload.name),
+        (entry) => foodKey(entry.name) === foodKey(payload.name),
       );
       if (twin) {
         state.localAliases[String(payload.tempId)] = twin.id;
@@ -180,7 +180,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         name: payload.name,
         description: payload.description,
         icon: payload.fromOnboarding ? (payload.icon ?? null) : null,
-        inStockScore: payload.fromOnboarding ? 0.5 : 1,
+        inStockScore: payload.fromOnboarding ? rules().swipe.onboardingScore : 1,
         snoozedUntil: null,
         lastBoughtAt: null,
         lists: [listId],
@@ -218,6 +218,15 @@ export const applyOp = (state: LocalState, op: Op): any => {
     case "me.language":
       state.user.language = payload.language ?? null;
       return state.user;
+
+    case "me.username": {
+      const username = String(payload.username ?? "").trim().slice(0, USERNAME_LENGTH);
+      state.user.username = username;
+      for (const member of state.household.members) {
+        if (member.id === state.user.id) member.username = username;
+      }
+      return state.user;
+    }
 
     case "me.notifications":
       state.user.notifications = { ...(state.user.notifications ?? {}), [payload.event]: payload.choice };

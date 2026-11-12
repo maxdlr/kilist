@@ -2,13 +2,16 @@ import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title/Title";
+import common from "@/i18n/common";
+import type { ScannedProduct } from "@/offline/domain";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-type FoodFormData = { name: string; description?: string };
+type FoodFormData = { name: string; description?: string; product?: ScannedProduct };
 
 const FoodForm = ({
   title,
@@ -17,10 +20,14 @@ const FoodForm = ({
   onSubmit,
   onRemove,
   onClose,
+  scannable,
+  startScanning,
 }: {
   title: string;
   initialName: string;
   initialDescription: string;
+  scannable: boolean;
+  startScanning: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
   onClose: () => void;
@@ -31,15 +38,30 @@ const FoodForm = ({
   const { showToast } = useToast();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [scanning, setScanning] = useState(startScanning);
+  const [product, setProduct] = useState<ScannedProduct | undefined>();
 
   const handleSubmit = async () => {
     if (!name.trim()) {
       showToast(skin.copy.errors.nameMissing);
       return;
     }
-    const success = await onSubmit({ name: name.trim(), description });
+    const success = await onSubmit({ name: name.trim(), description, ...(product && { product }) });
     if (success) onClose();
   };
+
+  if (scanning) {
+    return (
+      <ProductScanner
+        onFound={(result) => {
+          setName(result.name);
+          setProduct(result.product);
+          setScanning(false);
+        }}
+        onCancel={() => setScanning(false)}
+      />
+    );
+  }
 
   return (
     <>
@@ -47,6 +69,15 @@ const FoodForm = ({
         {title}
       </Title>
 
+      {scannable && (
+        <KilButton
+          height={skin.size.button.sm}
+          fontSize={skin.type.label}
+          variant={skin.panel.secondary}
+          label={common.shop.scan}
+          onTouch={() => setScanning(true)}
+        />
+      )}
       <FormInput
         label={copy.name}
         placeholder={skin.copy.placeholders.foodName}
@@ -102,8 +133,12 @@ const FoodFormModal = ({
   onSubmit,
   onRemove,
   onClose,
+  scannable = false,
+  startScanning = false,
 }: {
   visible: boolean;
+  scannable?: boolean;
+  startScanning?: boolean;
   title: string;
   formKey?: string | number;
   initialName?: string;
@@ -121,6 +156,8 @@ const FoodFormModal = ({
       onSubmit={onSubmit}
       onRemove={onRemove}
       onClose={onClose}
+      scannable={scannable}
+      startScanning={startScanning}
     />
   </BottomPanel>
 );

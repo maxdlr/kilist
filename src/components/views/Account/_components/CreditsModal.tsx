@@ -1,5 +1,4 @@
 import common from "@/i18n/common";
-import ActionRow from "@/components/elements/ActionRow";
 import BottomPanel from "@/components/elements/BottomPanel";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
@@ -32,7 +31,15 @@ const CreditsModal = ({
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>
           {copy.creditsIcons}
         </ThemedText>
-        <ActionRow label={common.creditsIcons} onPress={onOpenIcons} showChevron onPanel />
+        <ThemedText
+          accessibilityRole="link"
+          size={skin.type.body}
+          color={skin.panel.ink}
+          style={styles.link}
+          onPress={onOpenIcons}
+        >
+          {common.creditsIcons}
+        </ThemedText>
       </View>
       <View style={styles.group}>
         <ThemedText size={skin.type.caption} color={skin.panel.ink}>
@@ -67,6 +74,7 @@ const CreditsModal = ({
 const createStyles = (s: Skin) =>
   StyleSheet.create({
     group: { gap: s.spacing.small },
+    link: { textDecorationLine: "underline" },
   });
 
 export default CreditsModal;

@@ -2,10 +2,12 @@ import SuggestionStep from "@/components/views/SwipeFoods/_components/Suggestion
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
+import ActionPanel from "@/components/elements/ActionPanel";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import useSwipeGame, { SWIPE_TICKETS, SwipeGame } from "@/hooks/screens/useSwipeGame";
+import { rules } from "@/offline/rules";
+import useSwipeGame, { SwipeGame } from "@/hooks/screens/useSwipeGame";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { findSkin } from "@/skins";
 import type { Skin } from "@/skins/types";
@@ -163,7 +165,7 @@ const FoodTicket = ({ food }: { food: FoodType }) => {
             {T.admitOne}
           </ThemedText>
           <ThemedText size={skin.type.caption} color={P.navy}>
-            {skin.copy.tickets.cardTag(SWIPE_TICKETS)}
+            {skin.copy.tickets.cardTag(rules().tickets.perSwipe)}
           </ThemedText>
         </View>
         <View
@@ -356,6 +358,7 @@ const Arena = ({ game }: { game: SwipeGame }) => {
           flingRef={game.flingRef}
           onIntent={game.setIntent}
           onSwipe={game.handleSwipe}
+          onLongPress={game.askRemove}
           renderSheet={(food) => <FoodTicket food={food} />}
         />
         {game.bonusPop > 0 && (
@@ -368,6 +371,7 @@ const Arena = ({ game }: { game: SwipeGame }) => {
           </View>
         )}
       </View>
+      <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
     </Ground>
   );
 };

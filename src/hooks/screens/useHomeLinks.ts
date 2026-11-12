@@ -61,6 +61,7 @@ const useHomeLinks = () => {
         ? { label: T.confirmEmail, open: () => router.navigate("/account?panel=emailCode") }
         : null,
     openInventory: () => router.navigate("/inventory"),
+    openScan: () => router.navigate({ pathname: "/inventory", params: { scan: "1" } } as Href),
     openAccount: () => router.navigate("/account"),
     openAdmin: () => router.navigate("/admin"),
   };

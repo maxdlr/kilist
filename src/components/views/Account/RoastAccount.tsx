@@ -77,7 +77,7 @@ const RoastAccount = () => {
               <View style={styles.members}>
                 {members.map((member) => (
                   <ThemedText key={member.id} numberOfLines={1} size={skin.type.lead}>
-                    {caseFor(skin, member.username) +
+                    {caseFor(skin, member.id === user.id ? user.username : member.username) +
                       (member.id === user.id ? copy.you : "")}
                   </ThemedText>
                 ))}

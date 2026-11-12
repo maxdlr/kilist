@@ -3,6 +3,7 @@ import axios from "@/services/axios";
 import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import useToast from "@/providers/ToastProvider";
+import type { ScannedProduct } from "@/offline/domain";
 import { FoodType } from "@/types/model";
 import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
@@ -13,7 +14,7 @@ export type InventoryContextType = {
   mutateFood: () => void;
   search: string;
   setSearch: (search: string) => void;
-  createFood: (data: { name: string; description?: string }) => Promise<boolean>;
+  createFood: (data: { name: string; description?: string; product?: ScannedProduct }) => Promise<boolean>;
   editFood: (
     foodId: number,
     data: { name?: string; description?: string },
@@ -77,7 +78,7 @@ export const InventoryProvider = ({
     showToast(message || common.unexpected);
   };
 
-  const createFood = async (data: { name: string; description?: string }) => {
+  const createFood = async (data: { name: string; description?: string; product?: ScannedProduct }) => {
     const res = await postCreateFood({ ...data, listId: listIds?.[0] });
     if (res.error) {
       handleError(res.error.message);

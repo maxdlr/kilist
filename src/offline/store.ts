@@ -1,4 +1,6 @@
 import db from "./db";
+import { setFoodBanks } from "./foodNames";
+import { hasRules, setRules } from "./rules";
 import { exportGuestState, hasLearnedAnything, prizeEntries } from "./guest";
 import { applyOp, toState } from "./reducer";
 import { countStat, setStatsSource } from "./stats";
@@ -14,6 +16,7 @@ const KEY_GUEST = "guest";
 const KEY_GUEST_STATE = "guestState";
 const KEY_IMPORT_ID = "guestImportId";
 const KEY_INTRO = "introPending";
+const KEY_CATALOG = "catalog";
 const CACHE_PREFIX = "http:";
 
 const FIRST_TEMP_ID = -2;
@@ -45,13 +48,18 @@ const rebuild = () => {
     return;
   }
   const next = toState(base);
-  for (const op of ops) applyOp(next, op);
+  if (hasRules()) for (const op of ops) applyOp(next, op);
   state = next;
 };
 
 const load = () => {
   if (loaded) return;
   loaded = true;
+  const pack = db.loadValue<Catalog>(KEY_CATALOG);
+  if (pack) {
+    setFoodBanks(pack.foodBanks);
+    setRules(pack.rules);
+  }
   base = db.loadValue<Snapshot>(KEY_SNAPSHOT) ?? null;
   hash = db.loadValue<string>(KEY_HASH);
   aliases = db.loadValue<Record<string, number>>(KEY_ALIASES) ?? {};
@@ -121,6 +129,14 @@ export const startGuest = (snapshot: Snapshot) => {
 };
 
 export const applyCatalog = (catalog: Catalog) => {
+  load();
+  const hadRules = hasRules();
+  setFoodBanks(catalog.foodBanks);
+  setRules(catalog.rules);
+  if (!hadRules && hasRules() && !guest) {
+    rebuild();
+    notify();
+  }
   if (!isGuest()) return;
   state!.prizes.prizes = prizeEntries(catalog.prizes, state!.prizes.prizes);
   persistGuest();

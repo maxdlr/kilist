@@ -1,3 +1,4 @@
+import type { Rules } from "./rules";
 import type {
   EaterProfileType,
   FoodBankItemType,
@@ -60,6 +61,7 @@ export type Catalog = {
   foodBanks: Record<string, FoodBankItemType[]>;
   profiles?: EaterProfileType[];
   prizes: CatalogPrize[];
+  rules?: Rules;
   notifications?: { events: NotificationEvent[]; alwaysEmail: string[] };
 };
 
@@ -115,6 +117,7 @@ export type OpType =
   | "food.remove"
   | "me.skin"
   | "me.language"
+  | "me.username"
   | "prize.redeem"
   | "me.notifications"
   | "household.profiles"

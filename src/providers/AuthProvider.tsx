@@ -57,6 +57,8 @@ export type AuthContextType = {
   logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
   mutateUser: (data?: UserType) => unknown;
+  guestName: string;
+  renameGuest: (username: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -75,6 +77,8 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => false,
   deleteAccount: async () => false,
   mutateUser: () => {},
+  guestName: "",
+  renameGuest: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -114,10 +118,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isLoading || user || isSessionEnded()) return;
-    startGuest(makeGuestSnapshot(common.guestName, DEFAULT_SKIN_ID, getCatalog()?.prizes));
+    startGuest(makeGuestSnapshot("", DEFAULT_SKIN_ID, getCatalog()?.prizes));
     clearCache();
     mutateUser();
   }, [isLoading, user, clearCache, mutateUser]);
+
+  const renameGuest = async (username: string) => {
+    const { data } = await axios.put<UserType>("/me/username", { username });
+    await mutateUser(data, { revalidate: false });
+  };
 
   const enterAccount = async () => {
     wipe();
@@ -224,7 +233,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: isGuest && user && !user.username ? { ...user, username: common.guestName } : user,
+        guestName: isGuest ? (user?.username ?? "") : "",
+        renameGuest,
         isLoading,
         isGuest,
         sessionExpired,

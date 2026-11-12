@@ -7,6 +7,7 @@ import FoodIcon from "@/components/elements/FoodIcon";
 import KilButton from "@/components/elements/KilButton";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import Sheet from "@/components/elements/Sheet/Sheet";
+import ActionPanel from "@/components/elements/ActionPanel";
 import SwipeDeck, {
   deckButtonColors,
 } from "@/components/elements/SwipeDeck/SwipeDeck";
@@ -336,6 +337,7 @@ const SwipeFoodGame = () => {
             flingRef={game.flingRef}
             onIntent={game.setIntent}
             onSwipe={game.handleSwipe}
+          onLongPress={game.askRemove}
             renderSheet={(food, depth) => (
               <FoodSheet
                 food={food}
@@ -395,6 +397,7 @@ const SwipeFoodGame = () => {
             onTouch={() => game.fling("right")}
           />
         </Dock>
+        <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
       </View>
     );
   }

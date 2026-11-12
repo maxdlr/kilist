@@ -2,7 +2,12 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { ActionColors, Skin } from "@/skins/types";
 import { ReactNode, RefObject, useEffect } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
-import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
+import {
+  GestureDetector,
+  useLongPressGesture,
+  usePanGesture,
+  useSimultaneousGestures,
+} from "react-native-gesture-handler";
 import Animated, {
   clamp,
   interpolate,
@@ -39,8 +44,10 @@ const DeckSheet = ({
   flingRef,
   onIntent,
   onSwipe,
+  onLongPress,
   children,
 }: {
+  onLongPress?: () => void;
   isTop: boolean;
   allowUp: boolean;
   stamps: Partial<Record<SwipeDirection, string>>;
@@ -128,6 +135,14 @@ const DeckSheet = ({
     },
   });
 
+  const hold = useLongPressGesture({
+    enabled: isTop && onLongPress !== undefined,
+    onActivate: () => {
+      if (onLongPress && !flung.value) scheduleOnRN(onLongPress);
+    },
+  });
+  const gesture = useSimultaneousGestures(pan, hold);
+
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: x.value },
@@ -208,7 +223,7 @@ const DeckSheet = ({
   };
 
   return (
-    <GestureDetector gesture={pan}>
+    <GestureDetector gesture={gesture}>
       <Animated.View
         style={[StyleSheet.absoluteFill, sheetStyle]}
       >
@@ -230,8 +245,10 @@ const SwipeDeck = <T,>({
   flingRef,
   onIntent,
   onSwipe,
+  onLongPress,
   background,
 }: {
+  onLongPress?: (item: T) => void;
   background?: string;
   items: T[];
   keyOf: (item: T) => string | number;
@@ -258,6 +275,7 @@ const SwipeDeck = <T,>({
           flingRef={flingRef}
           onIntent={onIntent}
           onSwipe={(direction) => onSwipe(item, direction)}
+          onLongPress={onLongPress ? () => onLongPress(item) : undefined}
         >
           {renderSheet(item, depth)}
         </DeckSheet>

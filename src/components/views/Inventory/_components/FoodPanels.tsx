@@ -15,7 +15,9 @@ const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
 
       <FoodFormModal
         visible={shelf.isAddVisible}
-        formKey={`add-${shelf.addInitialName}`}
+        formKey={`add-${shelf.addKey}`}
+        scannable
+        startScanning={shelf.addWithScan}
         title={copy.addTitle}
         initialName={shelf.addInitialName}
         onSubmit={shelf.createFood}

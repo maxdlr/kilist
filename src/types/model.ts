@@ -35,6 +35,8 @@ export interface HouseholdMemberType {
 }
 
 export interface FoodBankItemType {
+  key?: string;
+  months?: number[];
   name: string;
   description?: string;
   icon?: string;

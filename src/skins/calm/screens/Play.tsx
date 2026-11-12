@@ -2,6 +2,7 @@ import withPressed from "@/utils/withPressed";
 import SuggestionStep from "@/components/views/SwipeFoods/_components/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import T from "../text";
+import ActionPanel from "@/components/elements/ActionPanel";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useSwipeGame, { SwipeGame } from "@/hooks/screens/useSwipeGame";
@@ -106,6 +107,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
           flingRef={game.flingRef}
           onIntent={game.setIntent}
           onSwipe={game.handleSwipe}
+          onLongPress={game.askRemove}
           renderSheet={(food, depth) => <CheckCard food={food} intent={depth === 0 ? game.intent : null} />}
         />
       </View>
@@ -116,6 +118,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
         </Pressable>
         {pad("right", copy.inStock, T.play.ariaIn)}
       </View>
+      <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
     </View>
   );
 };

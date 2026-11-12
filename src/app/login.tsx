@@ -48,7 +48,7 @@ const LoginScreen = () => {
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
   const insets = useSafeAreaInsets();
-  const { login, signup, completeJoin, isGuest, mergePending, resolveMerge } = useAuth();
+  const { login, signup, completeJoin, isGuest, mergePending, resolveMerge, guestName } = useAuth();
   const [joinStep, setJoinStep] = useState(false);
   const [emailCode, setEmailCode] = useState("");
   const guestCopy = skin.copy.guest;
@@ -61,7 +61,7 @@ const LoginScreen = () => {
     "create",
   );
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(params.mode === "signup" ? guestName : "");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

@@ -1,7 +1,13 @@
+import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import type { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
+import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";
-import { FoodType } from "@/types/model";
+import useToast from "@/providers/ToastProvider";
+import axios from "@/services/axios";
+import { caseFor } from "@/skins";
+import common from "@/i18n/common";
+import { FoodType, ListType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -12,12 +18,13 @@ const IN_STOCK: Record<SwipeDirection, boolean | null> = {
 };
 const BONUS_VISIBLE_MS = 700;
 
-export const SWIPE_TICKETS = 10;
-
 export type SwipeGameScreen = "loading" | "start" | "play" | "done" | "closed" | "empty";
 
 const useSwipeGame = () => {
   const tickets = useTickets();
+  const skin = useSkin();
+  const { showToast } = useToast();
+  const [removing, setRemoving] = useState<FoodType | null>(null);
   const {
     foods,
     game,
@@ -89,6 +96,14 @@ const useSwipeGame = () => {
     return reward;
   };
 
+  const finishRound = () => {
+    setFinishedAt(Date.now());
+    setPhase("done");
+    Promise.allSettled(pendingUpdates.current)
+      .then(completeSession)
+      .then(tickets.refresh);
+  };
+
   const handleSwipe = (food: FoodType, direction: SwipeDirection) => {
     const isLast = foods?.length === 1;
 
@@ -99,13 +114,33 @@ const useSwipeGame = () => {
       update({ foodId: food.id, isInStock: IN_STOCK[direction] }).then(collect),
     );
 
-    if (isLast) {
-      setFinishedAt(Date.now());
-      setPhase("done");
-      Promise.allSettled(pendingUpdates.current)
-        .then(completeSession)
-        .then(tickets.refresh);
+    if (isLast) finishRound();
+  };
+
+  const remove = async (food: FoodType) => {
+    try {
+      const { data: list } = await axios.get<ListType>("lists/read?main=true");
+      if (!list?.id) throw new Error("no list");
+      await axios.put(`lists/${list.id}/remove-foods`, { foodIds: [food.id] });
+    } catch {
+      showToast(common.unexpected);
+      return;
     }
+    const isLast = foods?.length === 1;
+    swipe(food.id);
+    if (!isLast) return;
+    if (swiped > 0) finishRound();
+    else {
+      setPhase("idle");
+      mutateFoods();
+    }
+  };
+
+  const removeRequest: ActionPanelRequest | null = removing && {
+    title: skin.copy.inventory.removeOne(caseFor(skin, removing.name)),
+    message: skin.copy.inventory.removeLine,
+    cancelLabel: skin.copy.common.keep,
+    actions: [{ label: skin.copy.common.remove, destructive: true, onPress: () => remove(removing) }],
   };
 
   const fling = (direction: SwipeDirection) => flingRef.current?.(direction);
@@ -145,6 +180,9 @@ const useSwipeGame = () => {
     fling,
     begin,
     handleSwipe,
+    askRemove: setRemoving,
+    removeRequest,
+    cancelRemove: () => setRemoving(null),
     reset: () => setPhase("idle"),
     refreshFoods: () => mutateFoods(),
   };

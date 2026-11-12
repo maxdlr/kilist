@@ -2,7 +2,6 @@ import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
-import useHousehold from "@/providers/HouseholdProvider";
 import useShopList from "@/providers/ShopListProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
@@ -13,12 +12,9 @@ import useSWR from "swr";
 
 export type ShopAddAction = "buy" | "later";
 
-export type ScanResult = { name: string; product: ScannedProduct; conflicts: string[] };
-
 const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) => {
   const shop = useShopList();
   const { showToast } = useToast();
-  const { household } = useHousehold();
   const { shopListId, startNewShopList, cancelShopList, setShopListId } = shop;
   const [handled, setHandled] = useState(0);
   const [bought, setBought] = useState(0);
@@ -128,29 +124,6 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     return data ?? null;
   };
 
-  const findProduct = async (barcode: string): Promise<ScanResult | null> => {
-    const { data: known } = await axios
-      .get<FoodType | null>("foods/find", { params: { barcode } })
-      .catch(() => ({ data: null }));
-    if (known?.name) return { name: known.name, product: { barcode }, conflicts: [] };
-
-    try {
-      const { data } = await axios.get<{ name: string; icon?: string; tags?: string[]; quantity?: string }>(
-        `products/${barcode}`,
-      );
-      if (!data?.name) throw new Error("no product");
-      const avoided = household?.eaterProfiles ?? [];
-      return {
-        name: data.name,
-        product: { barcode, icon: data.icon, quantity: data.quantity },
-        conflicts: (data.tags ?? []).filter((tag) => avoided.includes(tag)),
-      };
-    } catch (error: any) {
-      showToast(error?.response?.data?.message || common.shop.scanFailed);
-      return null;
-    }
-  };
-
   const addFood = async (name: string, action: ShopAddAction, product?: ScannedProduct | null) => {
     if (!mainList?.id) {
       showToast(common.inventoryNotReady);
@@ -204,7 +177,6 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     openAdd: () => setPanel("add"),
     closePanel: () => setPanel(null),
     findFood,
-    findProduct,
     addFood,
     refreshEmpty,
   };

@@ -12,6 +12,7 @@ const { applySyncResponse, getState, hasSession, pendingCount, pendingOps, reset
   await import("../store");
 const { GHOST_RACE_ID, matchLocal, offlineRaceView, queueRaceAnswer } = await import("../routes");
 const { calculateScore, nextSuggestion, starterFoods, swipeDeck, swipeGame } = await import("../domain");
+const { setFoodBanks, shownName } = await import("../foodNames");
 
 const food = (id: number, score = 0.5, extra = {}) => ({
   id,
@@ -460,6 +461,25 @@ describe("inventory without maintenance", () => {
   });
 });
 
+describe("rules pack", () => {
+  it("waits for the pack before replaying queued actions", async () => {
+    const { resetRulesForTests, setRules, rules } = await import("../rules");
+    const { applyCatalog } = await import("../store");
+    const pack = rules();
+    applySyncResponse({ acks: [], ids: {}, retry: false, serverTime: "", snapshot: snapshot({ foods: [food(1)] as any }) });
+    call("put", "foods/swipe/edit/1", { isInStock: false });
+
+    resetRulesForTests();
+    resetStoreForTests();
+    expect(getState()!.foods[0]!.histories).toHaveLength(0);
+    expect(pendingCount()).toBe(1);
+
+    applyCatalog({ foodBanks: {}, prizes: [], rules: pack });
+    expect(getState()!.foods[0]!.histories).toHaveLength(1);
+    setRules(pack);
+  });
+});
+
 describe("eater profiles and suggestions", () => {
   const bank = [
     { name: "Milk", staple: true, tags: ["dairy"] },
@@ -469,6 +489,7 @@ describe("eater profiles and suggestions", () => {
     { name: "Tofu" },
   ];
   const today = new Date("2026-11-10T12:00:00Z").getTime();
+  const rules = { everyDays: 2, retryDays: 30, maxDeclines: 2 };
 
   it("picks staples and the groups that apply, minus exclusions", () => {
     expect(starterFoods(bank, ["dairy", "cat"]).map((item) => item.name)).toEqual(["Rice", "Cat food"]);
@@ -482,8 +503,31 @@ describe("eater profiles and suggestions", () => {
     }) as any;
 
   it("suggests every other day, skipping known and excluded foods", () => {
-    expect(nextSuggestion(stateWith([]), bank, 0, today)).toBeNull();
-    expect(nextSuggestion(stateWith(["2026-11-09T10:00:00Z"]), bank, 0, today)?.name).toBe("Milk");
+    expect(nextSuggestion(stateWith([]), bank, rules, 0, today)).toBeNull();
+    expect(nextSuggestion(stateWith(["2026-11-09T10:00:00Z"]), bank, rules, 0, today)?.name).toBe("Milk");
+    expect(nextSuggestion(stateWith(["2026-11-09T10:00:00Z"]), bank, undefined, 0, today)).toBeNull();
+  });
+
+  it("leaves out foods that are out of season", () => {
+    const played = ["2026-11-09T10:00:00Z"];
+    const seasonal = [{ name: "Lettuce", months: [5, 6, 7] }, { name: "Oranges", months: [11, 12, 1] }];
+
+    expect(nextSuggestion(stateWith(played), seasonal, rules, 0, today)?.name).toBe("Oranges");
+  });
+
+  it("knows a food by any of its names", () => {
+    const en = [{ key: "pasta", name: "Pasta" }];
+    const fr = [{ key: "pasta", name: "Pâtes" }];
+    setFoodBanks({ en, fr });
+    const played = ["2026-11-09T10:00:00Z"];
+    const owned = { ...stateWith(played), foods: [food(1, 0.5, { name: "pasta" })] } as any;
+    const declinedTwice = { pasta: { at: "2026-09-01T00:00:00Z", count: 1 }, "pâtes": { at: "2026-09-02T00:00:00Z", count: 1 } };
+
+    expect(shownName("pasta", "fr")).toBe("Pâtes");
+    expect(shownName("Quinoa", "fr")).toBe("Quinoa");
+    expect(nextSuggestion(owned, fr, rules, 0, today)).toBeNull();
+    expect(nextSuggestion(stateWith(played, declinedTwice), fr, rules, 0, today)).toBeNull();
+    setFoodBanks(null);
   });
 
   it("offers a declined food once more after a month", () => {
@@ -492,8 +536,8 @@ describe("eater profiles and suggestions", () => {
     const old = { milk: { at: "2026-09-01T00:00:00Z", count: 1 } };
     const twice = { milk: { at: "2026-09-01T00:00:00Z", count: 2 } };
 
-    expect(nextSuggestion(stateWith(played, recent), bank, 0, today)?.name).toBe("Tofu");
-    expect(nextSuggestion(stateWith(played, old), bank, 0, today)?.name).toBe("Milk");
-    expect(nextSuggestion(stateWith(played, twice), bank, 0, today)?.name).toBe("Tofu");
+    expect(nextSuggestion(stateWith(played, recent), bank, rules, 0, today)?.name).toBe("Tofu");
+    expect(nextSuggestion(stateWith(played, old), bank, rules, 0, today)?.name).toBe("Milk");
+    expect(nextSuggestion(stateWith(played, twice), bank, rules, 0, today)?.name).toBe("Tofu");
   });
 });

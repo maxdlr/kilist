@@ -13,7 +13,7 @@ import { Linking, Share } from "react-native";
 
 const HIDDEN_CODE = "••••••";
 
-export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode";
+export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode" | "guestName";
 
 const useAccount = () => {
   const skin = useSkin();
@@ -127,6 +127,7 @@ const useAccount = () => {
     shareCode,
     openCredits: () => setOpenPanel("credits"),
     openLanguage: () => setOpenPanel("language"),
+    openGuestName: () => setOpenPanel("guestName"),
     openLooks: () => router.navigate("/looks"),
     looksLabel: skin.copy.prizes.sectionTitle,
     openNotifications: () => router.push("/notifications"),

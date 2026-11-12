@@ -1,22 +1,16 @@
 import type { FoodBankItemType } from "@/types/model";
+import { foodKey, namesOf, normalizeName } from "./foodNames";
+import { rules, type Rules } from "./rules";
 import type { HistoryEntry, LocalFood, LocalShopList, LocalState, RaceAnswer, Reward } from "./types";
 
+export { normalizeName };
+
 const DAY_MS = 24 * 3600000;
-const HISTORY_LIMIT = 8;
 const LEVELS = [0, 0.25, 0.5, 0.75, 1] as const;
 
-export const SWIPE_DECK_SIZE = 10;
-export const SWIPE_ELIGIBLE_BELOW = 0.75;
-export const SWIPE_TICKETS = 10;
-export const SPEED_BONUS_TICKETS = 5;
-export const SPEED_WINDOW_MS = 2000;
-export const PAID_SWIPES_PER_DAY = 10;
-export const SNOOZE_MS = DAY_MS;
-export const SAME_TRIP_MS = 30 * 60 * 1000;
+const HOUR_MS = 3600000;
 
 const time = (value?: string | null) => (value ? Date.parse(value) : 0);
-
-export const normalizeName = (name: string) => name.trim().toLowerCase();
 
 export const toLocalDay = (date: Date | string, tzOffset: number) =>
   new Date(new Date(date).getTime() - tzOffset * 60000).toISOString().slice(0, 10);
@@ -31,15 +25,10 @@ export const addHistory = (food: LocalFood, entry: HistoryEntry) => {
   if (time(food.lastBoughtAt) > time(entry.at)) return;
   food.histories = [...food.histories, entry]
     .sort((a, b) => time(a.at) - time(b.at))
-    .slice(-HISTORY_LIMIT);
+    .slice(-rules().swipe.historyLimit);
   food.inStockScore = calculateScore(food.histories);
 };
 
-export const STALE_DAYS = 7;
-export const BIG_PACK_STALE_DAYS = 10;
-const BIG_PACK = 1000;
-const MAX_BARCODES = 20;
-const QUANTITY_LENGTH = 40;
 const UNITS: Record<string, number> = { kg: 1000, g: 1, l: 1000, cl: 10, ml: 1 };
 const PACK = /(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|l|cl|ml)\b/i;
 
@@ -52,20 +41,23 @@ export const packSize = (quantity?: string | null): number | null => {
   return count * Number(match[2]!.replace(",", ".")) * UNITS[match[3]!.toLowerCase()]!;
 };
 
-export const staleDaysFor = (quantity?: string | null) =>
-  (packSize(quantity) ?? 0) >= BIG_PACK ? BIG_PACK_STALE_DAYS : STALE_DAYS;
+export const staleDaysFor = (quantity?: string | null) => {
+  const { bigPackSize, bigPackStaleDays, staleDays } = rules().swipe;
+  return (packSize(quantity) ?? 0) >= bigPackSize ? bigPackStaleDays : staleDays;
+};
 
 export const isBarcode = (value: unknown): value is string =>
   typeof value === "string" && /^\d{8,14}$/.test(value);
 
 export const attachProduct = (food: LocalFood, product?: ScannedProduct | null) => {
   if (!product || typeof product !== "object") return;
+  const { maxBarcodes, quantityLength } = rules().products;
   const barcodes = food.barcodes ?? [];
   if (isBarcode(product.barcode) && !barcodes.includes(product.barcode)) {
-    food.barcodes = [...barcodes, product.barcode].slice(-MAX_BARCODES);
+    food.barcodes = [...barcodes, product.barcode].slice(-maxBarcodes);
   }
   if (typeof product.quantity === "string" && product.quantity.trim()) {
-    food.quantity = product.quantity.trim().slice(0, QUANTITY_LENGTH);
+    food.quantity = product.quantity.trim().slice(0, quantityLength);
   }
   if (!food.icon && typeof product.icon === "string" && product.icon) food.icon = product.icon;
 };
@@ -74,19 +66,21 @@ const lastActivity = (food: LocalFood) =>
   Math.max(time(food.lastBoughtAt), ...food.histories.map((entry) => time(entry.at)));
 
 export const swipeDeck = (foods: LocalFood[], now: number) => {
+  const { deckSize, eligibleBelow, restHours } = rules().swipe;
   const eligible = foods.filter(
-    (food) => food.lists.length > 0 && !food.histories.some((entry) => time(entry.at) >= now - DAY_MS),
+    (food) =>
+      food.lists.length > 0 && !food.histories.some((entry) => time(entry.at) >= now - restHours * HOUR_MS),
   );
   const low = eligible
-    .filter((food) => food.inStockScore < SWIPE_ELIGIBLE_BELOW)
+    .filter((food) => food.inStockScore < eligibleBelow)
     .sort((a, b) => b.inStockScore - a.inStockScore);
   const stale = eligible
     .filter(
       (food) =>
-        food.inStockScore >= SWIPE_ELIGIBLE_BELOW && lastActivity(food) < now - staleDaysFor(food.quantity) * DAY_MS,
+        food.inStockScore >= eligibleBelow && lastActivity(food) < now - staleDaysFor(food.quantity) * DAY_MS,
     )
     .sort((a, b) => lastActivity(a) - lastActivity(b));
-  return [...low, ...stale].slice(0, SWIPE_DECK_SIZE);
+  return [...low, ...stale].slice(0, deckSize);
 };
 
 export const shopCandidates = (foods: LocalFood[], now: number) =>
@@ -160,17 +154,18 @@ export const swipeGame = (playedAt: string[], tzOffset: number, now: number) => 
 export const awardSwipe = (state: LocalState, foodId: number, at: string): Reward => {
   const atMs = time(at);
   const balance = state.prizes.balance;
+  const { perSwipe, speedBonus, speedWindowMs, paidSwipesPerDay, payWindowHours } = rules().tickets;
   const window = state.recentSwipes
-    .filter((entry) => Math.abs(time(entry.at) - atMs) <= DAY_MS)
+    .filter((entry) => Math.abs(time(entry.at) - atMs) <= payWindowHours * HOUR_MS)
     .sort((a, b) => time(b.at) - time(a.at));
 
-  if (window.some((entry) => entry.foodId === foodId) || window.length >= PAID_SWIPES_PER_DAY) {
+  if (window.some((entry) => entry.foodId === foodId) || window.length >= paidSwipesPerDay) {
     return { earned: 0, bonus: 0, balance };
   }
 
   const previous = window.find((entry) => time(entry.at) <= atMs);
-  const bonus = previous && atMs - time(previous.at) < SPEED_WINDOW_MS ? SPEED_BONUS_TICKETS : 0;
-  const earned = SWIPE_TICKETS + bonus;
+  const bonus = previous && atMs - time(previous.at) < speedWindowMs ? speedBonus : 0;
+  const earned = perSwipe + bonus;
 
   state.recentSwipes.push({ foodId, at });
   state.prizes.balance = balance + earned;
@@ -188,10 +183,6 @@ export const verdictOf = (answers: RaceAnswer[]) => {
   };
 };
 
-export const SUGGESTION_EVERY_DAYS = 2;
-export const SUGGESTION_RETRY_MS = 30 * DAY_MS;
-export const SUGGESTION_MAX_DECLINES = 2;
-
 export const suggestionKey = (name: string) => normalizeName(name).slice(0, 255);
 
 const fitsProfiles = (item: FoodBankItemType, profiles: string[]) =>
@@ -204,23 +195,32 @@ export const starterFoods = (bank: FoodBankItemType[], profiles: string[]) =>
 export const nextSuggestion = (
   state: LocalState,
   bank: FoodBankItemType[],
+  limits: Rules["suggestions"] | undefined,
   tzOffset: number,
   now: number,
 ) => {
+  if (!limits) return null;
+  const today = toLocalDay(new Date(now), tzOffset);
   const days = new Set(state.playedAt.map((at) => toLocalDay(at, tzOffset)));
-  days.add(toLocalDay(new Date(now), tzOffset));
-  if (days.size % SUGGESTION_EVERY_DAYS !== 0) return null;
+  days.add(today);
+  if (days.size % limits.everyDays !== 0) return null;
 
-  const known = new Set(state.foods.map((food) => normalizeName(food.name)));
+  const month = Number(today.slice(5, 7));
+  const known = new Set(state.foods.map((food) => foodKey(food.name)));
   const declined = state.household.declinedSuggestions ?? {};
   const profiles = state.household.eaterProfiles ?? [];
 
   return (
     bank.find((item) => {
-      if (known.has(normalizeName(item.name)) || !fitsProfiles(item, profiles)) return false;
-      const refusal = declined[suggestionKey(item.name)];
-      if (!refusal) return true;
-      return refusal.count < SUGGESTION_MAX_DECLINES && now - time(refusal.at) >= SUGGESTION_RETRY_MS;
+      if (known.has(foodKey(item.name)) || !fitsProfiles(item, profiles)) return false;
+      if (item.months && !item.months.includes(month)) return false;
+      const refusals = namesOf(item.name)
+        .map((name) => declined[suggestionKey(name)])
+        .filter((refusal) => refusal !== undefined);
+      if (refusals.length === 0) return true;
+      const count = refusals.reduce((total, refusal) => total + refusal.count, 0);
+      const last = Math.max(...refusals.map((refusal) => time(refusal.at)));
+      return count < limits.maxDeclines && now - last >= limits.retryDays * DAY_MS;
     }) ?? null
   );
 };

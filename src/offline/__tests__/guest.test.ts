@@ -46,6 +46,17 @@ describe("guest mode", () => {
     expect(store.getState()!.foods[0]!.histories).toHaveLength(1);
   });
 
+  it("keeps a name the guest chose, on the phone only", () => {
+    store.startGuest(makeGuestSnapshot("", "arcade", PRIZES));
+
+    call("put", "me/username", { username: "  Max  " });
+    store.resetStoreForTests();
+
+    expect(store.getState()!.user.username).toBe("Max");
+    expect(store.getState()!.household.members[0]!.username).toBe("Max");
+    expect(store.pendingCount()).toBe(0);
+  });
+
   it("survives a restart with everything it learned", () => {
     start();
     const food = call("post", "foods/create", { name: "Milk", listId: GUEST_LIST_ID });

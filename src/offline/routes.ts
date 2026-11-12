@@ -11,7 +11,7 @@ import {
 } from "./domain";
 import { getLang } from "@/i18n";
 import { getCatalog } from "./catalog";
-import { normalizeName } from "./domain";
+import { foodKey, shownName } from "./foodNames";
 import { resolveLocalId } from "./reducer";
 import {
   allocateTempId,
@@ -34,7 +34,7 @@ export type Request = {
   body: any;
 };
 
-const toFood = ({ histories: _histories, ...food }: LocalFood) => food;
+const toFood = ({ histories: _histories, ...food }: LocalFood) => ({ ...food, name: shownName(food.name, getLang()) });
 
 const state = () => getState() as LocalState;
 
@@ -75,7 +75,7 @@ const browseFoods = (query: Record<string, any>) => {
       (food) =>
         (!listIds || food.lists.some((id) => listIds.includes(id))) &&
         (!search ||
-          food.name.toLowerCase().includes(search) ||
+          shownName(food.name, getLang()).toLowerCase().includes(search) ||
           (food.description ?? "").toLowerCase().includes(search)),
     )
     .sort((a, b) => a.inStockScore - b.inStockScore)
@@ -115,7 +115,12 @@ const ghostFoods = (day: string) => {
   return deck;
 };
 
-export const overlayRace = (view: any) => {
+export const overlayRace = (raw: any) => {
+  const lang = getLang();
+  const view = {
+    ...raw,
+    foods: (raw.foods ?? []).map((food: { name: string }) => ({ ...food, name: shownName(food.name, lang) })),
+  };
   const { user, raceAnswers } = state();
   const mine = raceAnswers.filter((answer) => answer.raceId === view.raceId);
   if (mine.length === 0) return view;
@@ -317,12 +322,12 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
     "get",
     /^foods\/find$/,
     ({ query }) => {
-      const name = normalizeName(String(query.name ?? ""));
+      const name = String(query.name ?? "").trim();
       const barcode = String(query.barcode ?? "");
       const found = barcode
         ? state().foods.find((food) => food.lists.length > 0 && (food.barcodes ?? []).includes(barcode))
         : name
-          ? state().foods.find((food) => normalizeName(food.name) === name)
+          ? state().foods.find((food) => foodKey(food.name) === foodKey(name))
           : undefined;
       return found ? { ...toFood(found), onList: found.lists.length > 0 } : null;
     },
@@ -339,6 +344,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
       nextSuggestion(
         state(),
         getCatalog()?.foodBanks[getLang()] ?? [],
+        getCatalog()?.rules?.suggestions,
         Number(query.tzOffset) || 0,
         Date.now(),
       ),
@@ -385,6 +391,7 @@ export class LocalError extends Error {
 }
 
 const GUEST_ROUTES: [string, RegExp, Handler][] = [
+  ["put", /^me\/username$/, ({ body }) => enqueue("me.username", { username: body?.username ?? "" })],
   [
     "get",
     /^food-bank\/browse$/,
@@ -392,11 +399,11 @@ const GUEST_ROUTES: [string, RegExp, Handler][] = [
       const onList = new Set(
         state()
           .foods.filter((food) => food.lists.length > 0)
-          .map((food) => normalizeName(food.name)),
+          .map((food) => foodKey(food.name)),
       );
       const bank = getCatalog()?.foodBanks[getLang()];
       if (!bank) throw new LocalError(503, "catalog.missing");
-      return bank.filter((item) => !onList.has(normalizeName(item.name)));
+      return bank.filter((item) => !onList.has(foodKey(item.name)));
     },
   ],
   [

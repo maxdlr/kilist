@@ -4,6 +4,7 @@ import InviteQrModal from "./InviteQrModal";
 import CreditsModal from "./CreditsModal";
 import LanguageModal from "./LanguageModal";
 import EmailCodeModal from "./EmailCodeModal";
+import GuestNameModal from "./GuestNameModal";
 import SwitchHouseholdModal from "./SwitchHouseholdModal";
 
 const AccountPanels = ({ account }: { account: Account }) => {
@@ -22,6 +23,7 @@ const AccountPanels = ({ account }: { account: Account }) => {
       />
       <LanguageModal visible={openPanel === "language"} onClose={closePanel} />
       <EmailCodeModal visible={openPanel === "emailCode"} onClose={closePanel} />
+      <GuestNameModal visible={openPanel === "guestName"} onClose={closePanel} />
       <CreditsModal visible={openPanel === "credits"} onClose={closePanel} onOpenIcons={account.openIconsSite} />
       <SwitchHouseholdModal
         visible={openPanel === "switch"}

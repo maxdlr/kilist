@@ -8,6 +8,12 @@ const fr: CommonText = {
   needsAccount: "Il te faut un compte pour ça.",
   notEnoughTickets: "Pas encore assez de tickets.",
   guestName: "Invité",
+  guestRename: {
+    action: "Choisir ton nom",
+    title: "Comment t'appeler ?",
+    label: "Nom",
+    line: "Il reste sur ce téléphone et préremplit le formulaire si tu crées un compte.",
+  },
   passwordsDiffer: "Les mots de passe ne correspondent pas",
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
   inventoryNotReady: "Ton inventaire n'est pas encore prêt, réessaie dans un instant",

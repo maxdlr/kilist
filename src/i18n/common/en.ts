@@ -6,6 +6,12 @@ const en = {
   needsAccount: "You need an account for this.",
   notEnoughTickets: "Not enough tickets yet.",
   guestName: "Guest",
+  guestRename: {
+    action: "Choose your name",
+    title: "What should we call you?",
+    label: "Name",
+    line: "It stays on this phone, and fills in the form if you create an account.",
+  },
   passwordsDiffer: "Passwords do not match",
   householdCodeMissing: "Enter a household code to join",
   inventoryNotReady: "Your inventory isn't ready yet, try again in a moment",
