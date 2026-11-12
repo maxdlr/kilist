@@ -197,6 +197,26 @@ describe("shopping offline", () => {
     expect(call("get", `shop-list/${id}`).foods.map((entry: any) => entry.id).sort()).toEqual([2, 3]);
   });
 
+  it("suggests a needed food that is not on this shop list, and adds it", () => {
+    pull(
+      {},
+      snapshot({
+        foods: [food(1, 0.5), food(2, 1), food(3, 1)],
+        frequencies: [
+          { foodId: 1, nextFoodId: 2, count: 3 },
+          { foodId: 1, nextFoodId: 3, count: 1 },
+        ],
+      }),
+    );
+    const id = start();
+    const foods = getState()!.foods;
+    foods.find((entry) => entry.id === 2)!.inStockScore = 0.75;
+    foods.find((entry) => entry.id === 3)!.inStockScore = 0.5;
+
+    expect(call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 1 })).toEqual([3]);
+    expect(call("get", `shop-list/${id}`).foods.map((entry: any) => entry.id)).toEqual([3]);
+  });
+
   it("learns the store order while offline", () => {
     pull();
     const id = start();

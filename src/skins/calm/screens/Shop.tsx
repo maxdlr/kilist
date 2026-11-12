@@ -11,7 +11,17 @@ import { router } from "expo-router";
 import { useState } from "react";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, XMarkIcon } from "react-native-heroicons/outline";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ClockIcon,
+  InformationCircleIcon,
+  PlusIcon,
+  QuestionMarkCircleIcon,
+  ShoppingBagIcon,
+  XMarkIcon,
+} from "react-native-heroicons/outline";
+import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
 import Svg, { Path } from "react-native-svg";
 import { calmPalette as C } from "..";
 import { CButton, CText, Dot, Screen, StockBars } from "./parts";
@@ -118,6 +128,7 @@ const SwipeRow = ({
 const CalmShop = () => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const [showHow, setShowHow] = useState(false);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
@@ -150,43 +161,55 @@ const CalmShop = () => {
       <CalmMessage
         title={T.done}
         line={T.shop.result(result.bought, result.left)}
-        dock={<CButton label={T.close} onPress={leave} />}
+        dock={<CButton label={T.shop.backToday} onPress={leave} />}
       />
     );
   }
 
   if (run.isLoading) return <CalmLoading />;
 
-  const addRow = (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={common.shop.add}
-      onPress={run.openAdd}
-      style={({ pressed }) => [styles.add, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
-    >
-      <PlusIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
-      <CText weight="medium" size={skin.type.body}>
-        {common.shop.add}
-      </CText>
-    </Pressable>
+  const dockWith = (label: string, onPress: () => void) => (
+    <View style={styles.dockRow}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={common.shop.add}
+        onPress={run.openAdd}
+        style={withPressed(styles.addButton)}
+      >
+        <PlusIcon size={skin.size.icon.action} color={C.ink} strokeWidth={1.8} />
+      </Pressable>
+      <CButton flex={1} label={label} onPress={onPress} />
+    </View>
   );
-
   if (!run.isStarted && !run.isEmpty) {
     return (
       <View style={styles.flex}>
-      <Screen padded={false} dock={<CButton label={common.shop.start} onPress={run.start} />}>
+      <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
         <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
           <View style={styles.startHead}>
-            <CText size={skin.type.label} color={C.soft}>
-              {common.shop.startLabel}
-            </CText>
-            <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-              {T.shop.title}
-            </CText>
+            <View style={styles.titleRow}>
+              <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
+                {T.shop.title}
+              </CText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={T.shop.howAria}
+                accessibilityState={{ expanded: showHow }}
+                hitSlop={skin.spacing.small}
+                onPress={() => setShowHow((shown) => !shown)}
+                style={withPressed(styles.info)}
+              >
+                {showHow ? (
+                  <InformationCircleSolid size={skin.size.icon.action + 2} color={C.ink} />
+                ) : (
+                  <InformationCircleIcon size={skin.size.icon.action + 2} color={C.soft} strokeWidth={1.6} />
+                )}
+              </Pressable>
+            </View>
             <StockBars
               rows={[
-                { label: T.stock.sure, count: run.range.low, color: skin.colors.levels[1] },
-                { label: T.stock.maybe, count: run.range.high - run.range.low, color: skin.colors.levels[3] },
+                { label: T.stock.sure, count: run.range.low, color: skin.colors.levels[1], icon: <ShoppingBagIcon size={18} color={C.haveIt} strokeWidth={1.8} /> },
+                { label: T.stock.maybe, count: run.range.high - run.range.low, color: skin.colors.levels[3], icon: <QuestionMarkCircleIcon size={18} color={C.faint} strokeWidth={1.8} /> },
               ]}
             />
           </View>
@@ -203,24 +226,22 @@ const CalmShop = () => {
               {common.shop.more(run.preview.length - START_PREVIEW)}
             </CText>
           )}
-          {addRow}
-          <View style={styles.how}>
-            <CText size={skin.type.label} color={C.soft}>
-              {common.shop.startHow}
-            </CText>
-            <View style={styles.howRow}>
-              <ArrowRightIcon size={skin.size.icon.action - 4} color={C.haveIt} strokeWidth={1.8} />
-              <CText size={skin.type.label + 1} style={styles.flex}>
-                {common.shop.startRight}
-              </CText>
+          {showHow && (
+            <View style={styles.how}>
+              <View style={styles.howRow}>
+                <ArrowRightIcon size={skin.size.icon.action - 4} color={C.haveIt} strokeWidth={1.8} />
+                <CText size={skin.type.label + 1} style={styles.flex}>
+                  {common.shop.startRight}
+                </CText>
+              </View>
+              <View style={styles.howRow}>
+                <ArrowLeftIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
+                <CText size={skin.type.label + 1} style={styles.flex}>
+                  {common.shop.startLeft}
+                </CText>
+              </View>
             </View>
-            <View style={styles.howRow}>
-              <ArrowLeftIcon size={skin.size.icon.action - 4} color={C.ink} strokeWidth={1.8} />
-              <CText size={skin.type.label + 1} style={styles.flex}>
-                {common.shop.startLeft}
-              </CText>
-            </View>
-          </View>
+          )}
         </ScrollView>
       </Screen>
         <ShopPanels run={run} />
@@ -250,7 +271,7 @@ const CalmShop = () => {
     <View style={styles.flex}>
       <Screen
       padded={false}
-      dock={<CButton label={common.shop.finish} onPress={run.finish} />}
+      dock={dockWith(common.shop.finish, run.finish)}
     >
       <View style={styles.head}>
         <View style={styles.titleRow}>
@@ -279,9 +300,18 @@ const CalmShop = () => {
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
         {remaining.length > 0 && (
-          <CText size={skin.type.label} color={C.soft} style={styles.hint}>
-            {T.shop.hint}
-          </CText>
+          <View accessible accessibilityLabel={T.shop.hintAria} style={[styles.legend, styles.hint]}>
+            <View style={styles.legendItem}>
+              <ArrowLeftIcon size={16} color={C.soft} strokeWidth={1.8} />
+              <ClockIcon size={16} color={C.soft} strokeWidth={1.8} />
+              <CText size={skin.type.label} color={C.soft}>{T.shop.later}</CText>
+            </View>
+            <View style={styles.legendItem}>
+              <CText size={skin.type.label} color={C.soft}>{T.shop.legendBasket}</CText>
+              <ShoppingBagIcon size={16} color={C.haveIt} strokeWidth={1.8} />
+              <ArrowRightIcon size={16} color={C.haveIt} strokeWidth={1.8} />
+            </View>
+          </View>
         )}
         {run.suggestion && (
           <View style={styles.next}>
@@ -303,7 +333,6 @@ const CalmShop = () => {
             onLater={() => postpone(food)}
           />
         ))}
-        {addRow}
         {basket.length > 0 && (
           <>
             <CText
@@ -375,7 +404,20 @@ const createStyles = (s: Skin) =>
       minHeight: s.size.row.shop,
     },
     hint: { paddingBottom: s.spacing.small },
-    startHead: { gap: s.spacing.small, paddingBottom: s.spacing.section },
+    startHead: { gap: s.spacing.inline, paddingBottom: s.spacing.section },
+    info: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
+    legend: { flexDirection: "row", justifyContent: "space-between" },
+    legendItem: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight + 2 },
+    dockRow: { flexDirection: "row", gap: s.spacing.small },
+    addButton: {
+      alignItems: "center",
+      borderColor: C.field,
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      height: s.size.button.lg,
+      justifyContent: "center",
+      width: s.size.button.lg,
+    },
     more: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
     how: {
       backgroundColor: C.tint,
@@ -387,18 +429,6 @@ const createStyles = (s: Skin) =>
     howRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.small + 2 },
     headSide: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
     close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
-    add: {
-      alignItems: "center",
-      borderColor: C.ring,
-      borderRadius: s.shape.radius,
-      borderStyle: "dashed",
-      borderWidth: s.shape.border,
-      flexDirection: "row",
-      gap: s.spacing.small,
-      height: s.size.button.md,
-      justifyContent: "center",
-      marginTop: s.spacing.stack,
-    },
     next: { gap: s.spacing.tight, paddingBottom: s.spacing.inline },
     slot: {
       borderTopColor: C.hairline,

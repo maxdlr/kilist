@@ -10,7 +10,7 @@ import {
 } from "./domain";
 import { foodKey } from "./foodNames";
 import { rules } from "./rules";
-import type { LocalFood, LocalState, Op, Reward, Snapshot } from "./types";
+import type { LocalFood, LocalShopList, LocalState, Op, Reward, Snapshot } from "./types";
 
 const USERNAME_LENGTH = 30;
 const NO_REWARD: Reward = { earned: 0, bonus: 0, balance: null };
@@ -51,6 +51,13 @@ export const resolveLocalId = (state: LocalState, id: number) =>
 
 const openListFor = (state: LocalState, id: number) =>
   state.openShopList?.id === resolveLocalId(state, id) ? state.openShopList : null;
+
+const suggestNext = (state: LocalState, foodId: number, list: LocalShopList | null, now: number) => {
+  const suggested = nextFoods(state, foodId, list, now);
+  const next = suggested[0];
+  if (list && next !== undefined && !list.startFoodIds.includes(next)) list.startFoodIds.push(next);
+  return suggested;
+};
 
 export const applyOp = (state: LocalState, op: Op): any => {
   const { payload, at } = op;
@@ -146,7 +153,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       target.inStockScore = calculateScore(target.histories);
       if (time(target.lastBoughtAt) < atMs) target.lastBoughtAt = at;
 
-      const suggested = nextFoods(state, target.id, list, atMs);
+      const suggested = suggestNext(state, target.id, list, atMs);
       if (list && isShopListDone(list, state.foods)) closeShopList(state, at);
       return suggested;
     }
@@ -156,7 +163,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (!target) return [];
       const until = atMs + rules().shop.snoozeHours * 3600000;
       if (time(target.snoozedUntil) < until) target.snoozedUntil = new Date(until).toISOString();
-      return nextFoods(state, target.id, openListFor(state, payload.shopListId), atMs);
+      return suggestNext(state, target.id, openListFor(state, payload.shopListId), atMs);
     }
 
     case "shop.cancel": {

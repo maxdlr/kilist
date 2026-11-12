@@ -6,8 +6,7 @@ import useShopList from "@/providers/ShopListProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { FoodType, ListType } from "@/types/model";
-import goBack from "@/utils/goBack";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import useSWR from "swr";
 
@@ -73,7 +72,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
 
   const leave = () => {
     reset();
-    goBack();
+    router.navigate("/");
   };
 
   const start = async () => {

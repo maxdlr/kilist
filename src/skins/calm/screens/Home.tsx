@@ -8,15 +8,25 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType, ListType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
-import { useFocusEffect } from "expo-router";
+import { rules } from "@/offline/rules";
+import { router, useFocusEffect } from "expo-router";
+import {
+  CheckIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  PlayIcon,
+  QuestionMarkCircleIcon,
+  ShoppingBagIcon,
+  SparklesIcon,
+} from "react-native-heroicons/outline";
 import { useCallback } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
 import { calmPalette as C } from "..";
-import { CText, Dot, Screen, StockBars, useCheckPending } from "./parts";
+import { CButton, CText, Screen, StockBars, useCheckPending } from "./parts";
 import { CalmError, CalmLoading } from "./States";
 
-const PREVIEW = 6;
+const PREVIEW = 4;
 
 const CalmHome = () => {
   const skin = useSkin();
@@ -49,7 +59,8 @@ const CalmHome = () => {
     .filter((food) => levelOf(food.inStockScore) <= 2)
     .sort((a, b) => (a.inStockScore ?? 0) - (b.inStockScore ?? 0));
   const allSet = range.high === 0 && !pending;
-  const more = needed.length - PREVIEW;
+  const names = needed.slice(0, PREVIEW).map((food, index) => (index === 0 ? food.name : food.name.toLowerCase()));
+  const sentence = `${names.join(", ")}${needed.length > PREVIEW ? "…" : "."}`;
 
   return (
     <Screen
@@ -64,15 +75,16 @@ const CalmHome = () => {
         ) : undefined
       }
     >
+      <View style={styles.top}>
+        <CText size={skin.type.label} color={C.soft} style={styles.flex}>{T.date(new Date())}</CText>
+        <HomeShortcuts />
+      </View>
       <ScrollView
+        style={styles.flex}
         contentContainerStyle={styles.scroll}
         refreshControl={<RefreshControl refreshing={false} onRefresh={refresh} tintColor={C.soft} />}
       >
         <View style={styles.head}>
-          <View style={styles.top}>
-            <CText size={skin.type.label} color={C.soft} style={styles.flex}>{T.date(new Date())}</CText>
-            <HomeShortcuts />
-          </View>
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
             {range.high === 0 ? skin.copy.home.headline(0, 0) : T.home.ready}
           </CText>
@@ -87,38 +99,43 @@ const CalmHome = () => {
         {foods.length > 0 && (
           <StockBars
             rows={[
-              { label: T.stock.sure, count: range.low, color: skin.colors.levels[1] },
-              { label: T.stock.maybe, count: range.high - range.low, color: skin.colors.levels[3] },
-              { label: T.stock.stocked, count: Math.max(0, foods.length - range.high), color: skin.colors.levels[5] },
+              { label: T.stock.sure, count: range.low, color: skin.colors.levels[1], icon: <ShoppingBagIcon size={18} color={C.haveIt} strokeWidth={1.8} /> },
+              { label: T.stock.maybe, count: range.high - range.low, color: skin.colors.levels[3], icon: <QuestionMarkCircleIcon size={18} color={C.faint} strokeWidth={1.8} /> },
+              { label: T.stock.stocked, count: Math.max(0, foods.length - range.high), color: skin.colors.levels[5], icon: <CheckIcon size={18} color={C.soft} strokeWidth={2} /> },
             ]}
           />
         )}
 
         {pending && (
-          <View style={styles.card}>
-            <CText weight="medium" size={skin.type.body}>{T.home.toCheck(toCheck)}</CText>
-            <CText size={skin.type.label + 1} color={C.soft}>
-              {T.home.checkLine}
-            </CText>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${T.home.toCheck(toCheck)}. ${T.home.checkLine}`}
+            onPress={() => router.navigate("/swipe")}
+            style={withPressed(styles.card)}
+          >
+            <PlayIcon size={skin.size.icon.action + 2} color={C.haveIt} strokeWidth={1.8} />
+            <View style={styles.cardText}>
+              <CText weight="medium" size={skin.type.body}>{T.home.toCheck(toCheck)}</CText>
+              <View style={styles.cardFacts}>
+                <View style={styles.fact}>
+                  <ClockIcon size={14} color={C.soft} strokeWidth={1.8} />
+                  <CText size={skin.type.label} color={C.soft}>{T.home.sortTime}</CText>
+                </View>
+                <View style={styles.fact}>
+                  <SparklesIcon size={14} color={C.soft} strokeWidth={1.8} />
+                  <CText size={skin.type.label} color={C.soft}>{T.home.sortPoints(toCheck * rules().tickets.perSwipe)}</CText>
+                </View>
+              </View>
+            </View>
+            <ChevronRightIcon size={18} color={C.faint} strokeWidth={2} />
+          </Pressable>
         )}
 
         {needed.length > 0 && (
-          <View>
-            <CText size={skin.type.label} color={C.soft} style={styles.sectionLabel}>{T.home.onTheList}</CText>
-            {needed.slice(0, PREVIEW).map((food) => {
-              const level = levelOf(food.inStockScore);
-              return (
-                <View key={food.id} style={styles.row}>
-                  <Dot color={skin.colors.levels[level]} />
-                  <CText size={skin.type.body} style={styles.flex} numberOfLines={1}>{food.name}</CText>
-                  <CText size={skin.type.caption} color={C.soft}>{skin.copy.levels[level]}</CText>
-                </View>
-              );
-            })}
-            {more > 0 && (
-              <CText size={skin.type.label} color={C.soft} style={styles.more}>{T.home.more(more)}</CText>
-            )}
+          <View style={styles.onList}>
+            <CText size={skin.type.label} color={C.soft}>{T.home.onTheList}</CText>
+            <CText size={skin.type.lead}>{sentence}</CText>
+            <CButton label={T.home.goShop} href="/shop" icon={(color) => <ShoppingBagIcon size={20} color={color} strokeWidth={1.8} />} />
           </View>
         )}
 
@@ -170,15 +187,21 @@ const createStyles = (s: Skin) =>
     flex: { flex: 1, minWidth: 0 },
     scroll: { gap: s.spacing.section + 4, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },
     head: { gap: s.spacing.small },
-    top: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    top: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, paddingHorizontal: s.spacing.gutter },
+    onList: { gap: s.spacing.inline },
     card: {
+      alignItems: "center",
+      backgroundColor: C.white,
       borderColor: C.hairline,
       borderRadius: s.shape.radius + 2,
       borderWidth: s.shape.border,
-      gap: s.spacing.tight + 2,
-      padding: s.spacing.stack + 2,
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      padding: s.spacing.stack,
     },
-    sectionLabel: { paddingBottom: s.spacing.small },
+    cardText: { flex: 1, gap: 2, minWidth: 0 },
+    cardFacts: { flexDirection: "row", gap: s.spacing.inline },
+    fact: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight },
     prizes: {
       backgroundColor: C.tint,
       borderRadius: s.shape.radius + 2,
@@ -202,15 +225,6 @@ const createStyles = (s: Skin) =>
     trackFill: { backgroundColor: C.ink, borderRadius: 2, height: 4 },
     notice: { alignItems: "center", justifyContent: "center", minHeight: s.size.button.xs },
     noticeText: { textAlign: "center", textDecorationLine: "underline" },
-    row: {
-      alignItems: "center",
-      borderTopColor: C.hairline,
-      borderTopWidth: s.shape.divider,
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      minHeight: s.size.row.stripe,
-    },
-    more: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
   });
 
 export default CalmHome;

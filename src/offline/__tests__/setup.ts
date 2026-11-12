@@ -15,7 +15,7 @@ beforeEach(() => {
       onboardingScore: 0.5,
     },
     tickets: { perSwipe: 10, speedBonus: 5, speedWindowMs: 2000, paidSwipesPerDay: 10, payWindowHours: 24 },
-    shop: { snoozeHours: 24, sameTripMinutes: 30 },
+    shop: { snoozeHours: 24, sameTripMinutes: 30, suggestBelow: 0.625 },
     products: { maxBarcodes: 20, quantityLength: 40 },
   });
 });

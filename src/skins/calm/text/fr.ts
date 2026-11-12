@@ -27,6 +27,9 @@ const fr: CalmText = {
     onTheList: "Sur la liste",
     more: (count: number) => `et ${count} de plus`,
     ready: "Ta liste est prête.",
+    goShop: "Faire les courses",
+    sortTime: "30 s",
+    sortPoints: (points: number) => `+${points} points`,
   },
   stock: { sure: "À acheter", maybe: "Peut-être", stocked: "En stock" },
   play: {
@@ -39,6 +42,10 @@ const fr: CalmText = {
     points: "Points pour d'autres styles",
     pointsTotal: (earned: number, total: number) => `+${earned} · ${total} au total`,
     replay: "Rejouer la partie du jour",
+    sortedToday: "Trié pour aujourd'hui.",
+    replayTitle: "Une erreur ? Rejoue.",
+    replayReplaces: "Remplace tes réponses",
+    replayNoPoints: "0 point en plus",
     replayLine: "Rejouer remplace tes réponses d'aujourd'hui et ne rapporte pas de points en plus.",
   },
   shop: {
@@ -54,6 +61,8 @@ const fr: CalmText = {
     result: (bought: number, left: number) =>
       `${bought} ${bought <= 1 ? "acheté" : "achetés"}${left ? `, ${left} pour la prochaine fois` : ""}.`,
     backToday: "Retour à l'accueil",
+    legendBasket: "Au panier",
+    howAria: "Comment ça marche",
   },
   inventory: {
     clear: "Effacer",
@@ -135,15 +144,6 @@ const fr: CalmText = {
     ],
     doneNote: "C'était un entraînement, rien n'a été enregistré. Ta première vraie partie rapporte des points.",
     start: "Commencer ma première partie",
-    tourTitle: "Voici ton garde-manger.",
-    tourLine: "Tout ce que tu achètes est ici. Tu ne manges sûrement pas de balles de golf : touche-la.",
-    tourFood: "Balle de golf",
-    tourDeleteTitle: "Maintenant, retire-la.",
-    tourDeleteLine: "Retirer un aliment l'enlève de tes tris du jour et de ta liste.",
-    tourDelete: "Retirer la balle de golf",
-    tourDoneTitle: "C'est tout.",
-    tourDoneLine: "Les aliments s'ajoutent quand tu tries et fais tes courses, donc tu viendras rarement ici.",
-    tourClose: "Compris",
   },
   settings: {
     title: "Réglages",

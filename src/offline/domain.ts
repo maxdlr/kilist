@@ -123,23 +123,20 @@ export const isShopListDone = (list: LocalShopList, foods: LocalFood[]) => {
 
 export const nextFoods = (state: LocalState, foodId: number, list: LocalShopList | null, now: number) => {
   const byId = new Map(state.foods.map((food) => [food.id, food]));
-  const available = list
-    ? list.startFoodIds.filter(
-        (id) => id !== foodId && !list.boughtFoodIds.includes(id) && (byId.get(id)?.lists.length ?? 0) > 0,
-      )
-    : null;
-  if (available && available.length === 0) return [];
+  const { suggestBelow } = rules().shop;
+
+  const canSuggest = (next: LocalFood) => {
+    if (next.id === foodId || list?.boughtFoodIds.includes(next.id)) return false;
+    if (time(next.snoozedUntil) >= now) return false;
+    if (!list) return next.inStockScore !== 1;
+    if (next.lists.length === 0) return false;
+    return list.startFoodIds.includes(next.id) ? next.inStockScore !== 1 : next.inStockScore < suggestBelow;
+  };
 
   return state.frequencies
     .filter((row) => {
       const next = byId.get(row.nextFoodId);
-      return (
-        row.foodId === foodId &&
-        next !== undefined &&
-        next.inStockScore !== 1 &&
-        time(next.snoozedUntil) < now &&
-        (!available || available.includes(row.nextFoodId))
-      );
+      return row.foodId === foodId && next !== undefined && canSuggest(next);
     })
     .sort((a, b) => b.count - a.count || a.nextFoodId - b.nextFoodId)
     .slice(0, 1)

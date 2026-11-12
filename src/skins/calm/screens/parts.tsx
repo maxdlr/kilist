@@ -35,7 +35,9 @@ export const CButton = ({
   variant = "primary",
   flex,
   accessibilityLabel,
+  icon,
 }: {
+  icon?: (color: string) => ReactNode;
   label: string;
   onPress?: () => void;
   href?: Href;
@@ -68,6 +70,7 @@ export const CButton = ({
         flex !== undefined && { flex },
       ]}
     >
+      {icon?.(look.ink)}
       <CText weight={variant === "text" ? "regular" : "medium"} size={variant === "text" ? skin.type.label + 1 : skin.type.body} color={look.ink} numberOfLines={1}>
         {label}
       </CText>
@@ -117,7 +120,7 @@ export const Dot = ({ color, size = 8 }: { color: string; size?: number }) => (
   />
 );
 
-export const StockBars = ({ rows }: { rows: { label: string; count: number; color: string }[] }) => {
+export const StockBars = ({ rows }: { rows: { label: string; count: number; color: string; icon?: ReactNode }[] }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const total = rows.reduce((sum, row) => sum + row.count, 0);
@@ -127,7 +130,10 @@ export const StockBars = ({ rows }: { rows: { label: string; count: number; colo
       {rows.map((row) => (
         <View key={row.label} accessible accessibilityLabel={`${row.label}, ${row.count}`} style={styles.barRow}>
           <View style={styles.barHead}>
-            <CText size={skin.type.label + 1}>{row.label}</CText>
+            <View style={styles.barLabel}>
+              {row.icon}
+              <CText size={skin.type.label + 1}>{row.label}</CText>
+            </View>
             <CText size={skin.type.label + 1} color={C.soft}>{`${row.count}`}</CText>
           </View>
           <View style={styles.barTrack}>
@@ -160,6 +166,7 @@ const createStyles = (s: Skin) =>
     bars: { gap: s.spacing.inline },
     barRow: { gap: s.spacing.tight },
     barHead: { flexDirection: "row", justifyContent: "space-between" },
+    barLabel: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
     barTrack: { backgroundColor: C.hairline, borderRadius: 3, height: 6, overflow: "hidden" },
     barFill: { borderRadius: 3, height: 6 },
     dock: { gap: s.spacing.small + 2, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter, paddingTop: s.spacing.small },
@@ -167,6 +174,8 @@ const createStyles = (s: Skin) =>
       alignItems: "center",
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.small,
       justifyContent: "center",
       paddingHorizontal: s.spacing.stack,
     },

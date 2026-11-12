@@ -4,11 +4,11 @@ import FoodIcon from "@/components/elements/FoodIcon";
 import SwipeDeck, { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import Intro from "@/components/views/Onboarding/_components/Intro";
+import { ShopArt, SortArt } from "./IntroArt";
 import { getLang } from "@/i18n";
 import common from "@/i18n/common";
 import { getCatalog, refreshCatalog } from "@/offline/catalog";
 import { starterFoods } from "@/offline/domain";
-import { saveValue } from "@/offline/store";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
@@ -29,7 +29,6 @@ import { calmPalette as C } from "..";
 import { CButton, CText, Screen } from "./parts";
 import { CalmLoading } from "./States";
 
-export const INVENTORY_TOUR_KEY = "keep:inventoryTour";
 
 const PRACTICE_CARDS = 3;
 const NUDGE = 22;
@@ -38,6 +37,8 @@ const NUDGE_PAUSE_MS = 900;
 
 type Sample = { name: string; icon?: string | null };
 type Answer = Sample & { direction: SwipeDirection };
+const INTRO_ART = { 1: <SortArt />, 2: <ShopArt /> };
+
 type Step = "intro" | "profile" | "practice" | "shop" | "done";
 
 type QuestionId = "diet" | "avoid" | "drinks" | "home" | "baking";
@@ -480,12 +481,16 @@ const CalmTutorial = ({
     .slice(0, PRACTICE_CARDS);
 
   const finish = (startRound: boolean) => {
-    if (!foodsOnly) saveValue(INVENTORY_TOUR_KEY, "pending");
     onDone(startRound);
   };
 
   if (step === "intro") {
-    return <Intro onDone={() => setStep((inventory.length > 0 || joined) && !foodsOnly ? "practice" : "profile")} />;
+    return (
+      <Intro
+        art={INTRO_ART}
+        onDone={() => setStep((inventory.length > 0 || joined) && !foodsOnly ? "practice" : "profile")}
+      />
+    );
   }
 
   if (step === "profile") {
