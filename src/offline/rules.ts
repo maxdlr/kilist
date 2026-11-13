@@ -10,6 +10,7 @@ export type Rules = {
     historyLimit: number;
     onboardingScore: number;
   };
+  rhythm?: { minPurchases: number; keep: number; share: number; minDays: number; sameBuyHours: number };
   tickets: {
     perSwipe: number;
     speedBonus: number;

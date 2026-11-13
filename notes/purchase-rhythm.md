@@ -1,25 +1,24 @@
 # Learn purchase rhythm
 
-**Status:** pinned, not planned yet.
+**Status:** built on 2026-11-13 (deck wait only), not device-tested.
 
-## The idea
+## What it does
 
-Learn how often a household buys each food, such as "they buy milk every 6 days", and use it to make the app feel finely tuned after long use.
+Each food keeps its last 8 purchase dates. Once a food has 3 purchases, the wait before it returns to the daily deck is half its usual gap between purchases (the median gap), with a floor of 2 days. Below 3 purchases, the fixed 7 days (10 for big packs) still applies.
 
-## Why
+Example: milk bought every 6 days comes back after 3 days; rice bought every 2 months comes back after about a month.
 
-What the app learns is limited today:
+Two purchases less than 12 hours apart count as one.
 
-- **Scores:** each food keeps only its last 8 answers, and buying wipes them, so scores reflect recent answers rather than long-term habits.
-- **Store order:** this improves over time, but only the 99 most recent pairs are kept per food.
-- **Purchase rhythm:** nothing uses it yet.
+## Where
 
-## What it depends on
+- Rule values: `rhythm` in `kilist-api/src/api/catalog/rules.ts`.
+- API: `waitDaysFor` in `src/api/foods/helpers.ts`; dates stored in `foods.boughtDates`.
+- Phone: `waitDaysFor` in `src/offline/domain.ts`.
+- Guest signup uploads the dates, and the API also reads them from the uploaded shop runs.
 
-Purchase dates are already stored in each shop run's `buyLog`, for accounts. Guest mode should keep completed shop runs on the phone and upload them at signup. That way the history exists when this gets built, because it can't be recovered later.
+## Not done
 
-## Open questions
-
-- What should rhythm change: scores, the daily deck, shopping suggestions, or all of them?
-- How many purchases are needed before trusting a rhythm?
-- How should irregular purchases be handled, such as holidays or one-off buys?
+- Scores and shopping suggestions do not use the rhythm.
+- Foods bought before this shipped start with no purchase dates; a backfill from each shop run's `buyLog` is possible.
+- Half the gap and 3 purchases are starting guesses, to tune after real use.

@@ -1,4 +1,5 @@
 import type { AxiosInstance } from "axios";
+import { bundledCatalog } from "./bundledCatalog";
 import { isRules } from "./rules";
 import { applyCatalog, loadValue, saveValue } from "./store";
 import type { Catalog } from "./types";
@@ -8,7 +9,7 @@ const KEY_CATALOG = "catalog";
 let catalog: Catalog | null | undefined;
 
 export const getCatalog = () => {
-  if (catalog === undefined) catalog = loadValue<Catalog>(KEY_CATALOG) ?? null;
+  if (catalog === undefined) catalog = loadValue<Catalog>(KEY_CATALOG) ?? bundledCatalog();
   return catalog;
 };
 

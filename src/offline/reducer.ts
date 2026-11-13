@@ -1,4 +1,5 @@
 import {
+  addBoughtDate,
   addHistory,
   awardSwipe,
   calculateScore,
@@ -152,6 +153,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       target.histories = target.histories.filter((entry) => time(entry.at) > atMs);
       target.inStockScore = calculateScore(target.histories);
       if (time(target.lastBoughtAt) < atMs) target.lastBoughtAt = at;
+      target.boughtDates = addBoughtDate(target.boughtDates, at);
 
       const suggested = suggestNext(state, target.id, list, atMs);
       if (list && isShopListDone(list, state.foods)) closeShopList(state, at);

@@ -23,6 +23,7 @@ RELEASE_API_URL ?= https://kilist.maxdlr.com/api
 RELEASE_ABIS ?= arm64-v8a,armeabi-v7a
 RELEASE_DIR ?= $(HOME)/Desktop
 RELEASE_APK = android/app/build/outputs/apk/release/app-release.apk
+BUNDLED_CATALOG = src/offline/bundledCatalog.json
 IOS_BUNDLE_ID ?= com.maxdlr.kilist
 IOS_EXPORT_METHOD ?= release-testing
 IOS_BUILD_DIR = ios/build/release
@@ -33,7 +34,10 @@ release: ## Build a release APK against the production API
 	$(eval COMMIT := $(shell git rev-parse --short HEAD)$(shell git diff --quiet HEAD || echo -dirty))
 	echo "Building Kilist $(VERSION) ($(COMMIT)) for $(RELEASE_API_URL)"
 	CI=1 EXPO_NO_GIT_STATUS=1 npx expo prebuild -p android --no-install
-	cd android && EXPO_PUBLIC_API_URL=$(RELEASE_API_URL) NODE_ENV=production ./gradlew assembleRelease -PreactNativeArchitectures=$(RELEASE_ABIS) --console=plain
+	curl -fsS $(RELEASE_API_URL)/catalog -o $(BUNDLED_CATALOG) || { echo null > $(BUNDLED_CATALOG); echo "✘ Could not download the pack from $(RELEASE_API_URL)/catalog"; exit 1; }
+	node -e "const pack = require('./$(BUNDLED_CATALOG)'); if (!pack || !pack.foodBanks || !pack.rules || !Array.isArray(pack.prizes)) process.exit(1)" || { echo null > $(BUNDLED_CATALOG); echo "✘ The downloaded pack is not valid"; exit 1; }
+	(cd android && EXPO_PUBLIC_API_URL=$(RELEASE_API_URL) NODE_ENV=production ./gradlew assembleRelease -PreactNativeArchitectures=$(RELEASE_ABIS) --console=plain) || { echo null > $(BUNDLED_CATALOG); exit 1; }
+	echo null > $(BUNDLED_CATALOG)
 	unzip -p $(RELEASE_APK) assets/index.android.bundle | grep -aq '$(RELEASE_API_URL)' || { echo "✘ APK does not contain $(RELEASE_API_URL)"; exit 1; }
 	! unzip -p $(RELEASE_APK) assets/index.android.bundle | grep -aq '10\.0\.2\.2' || { echo "✘ APK still points at the emulator"; exit 1; }
 	mkdir -p $(RELEASE_DIR)
@@ -47,9 +51,12 @@ ios-release: ## Build a signed iPhone IPA against the production API (needs IOS_
 	$(eval COMMIT := $(shell git rev-parse --short HEAD)$(shell git diff --quiet HEAD || echo -dirty))
 	echo "Building Kilist $(VERSION) ($(COMMIT)) as $(IOS_BUNDLE_ID) for $(RELEASE_API_URL)"
 	CI=1 EXPO_NO_GIT_STATUS=1 npx expo prebuild -p ios
+	curl -fsS $(RELEASE_API_URL)/catalog -o $(BUNDLED_CATALOG) || { echo null > $(BUNDLED_CATALOG); echo "✘ Could not download the pack from $(RELEASE_API_URL)/catalog"; exit 1; }
+	node -e "const pack = require('./$(BUNDLED_CATALOG)'); if (!pack || !pack.foodBanks || !pack.rules || !Array.isArray(pack.prizes)) process.exit(1)" || { echo null > $(BUNDLED_CATALOG); echo "✘ The downloaded pack is not valid"; exit 1; }
 	rm -rf $(IOS_BUILD_DIR)
 	mkdir -p $(IOS_BUILD_DIR)
-	EXPO_PUBLIC_API_URL=$(RELEASE_API_URL) NODE_ENV=production xcodebuild archive -workspace ios/kilist.xcworkspace -scheme kilist -configuration Release -destination 'generic/platform=iOS' -archivePath $(IOS_ARCHIVE) -allowProvisioningUpdates DEVELOPMENT_TEAM=$(IOS_TEAM_ID) CODE_SIGN_STYLE=Automatic PRODUCT_BUNDLE_IDENTIFIER=$(IOS_BUNDLE_ID)
+	EXPO_PUBLIC_API_URL=$(RELEASE_API_URL) NODE_ENV=production xcodebuild archive -workspace ios/kilist.xcworkspace -scheme kilist -configuration Release -destination 'generic/platform=iOS' -archivePath $(IOS_ARCHIVE) -allowProvisioningUpdates DEVELOPMENT_TEAM=$(IOS_TEAM_ID) CODE_SIGN_STYLE=Automatic PRODUCT_BUNDLE_IDENTIFIER=$(IOS_BUNDLE_ID) || { echo null > $(BUNDLED_CATALOG); exit 1; }
+	echo null > $(BUNDLED_CATALOG)
 	grep -aq '$(RELEASE_API_URL)' $(IOS_ARCHIVE)/Products/Applications/kilist.app/main.jsbundle || { echo "✘ App does not contain $(RELEASE_API_URL)"; exit 1; }
 	! grep -aq '10\.0\.2\.2' $(IOS_ARCHIVE)/Products/Applications/kilist.app/main.jsbundle || { echo "✘ App still points at the emulator"; exit 1; }
 	printf '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>method</key><string>$(IOS_EXPORT_METHOD)</string><key>teamID</key><string>$(IOS_TEAM_ID)</string><key>signingStyle</key><string>automatic</string></dict></plist>' > $(IOS_BUILD_DIR)/ExportOptions.plist

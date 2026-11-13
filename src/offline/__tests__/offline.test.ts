@@ -308,6 +308,29 @@ describe("the inventory offline", () => {
     expect(swipeDeck([small, big], now).map((entry) => entry.id)).toEqual([1]);
   });
 
+  it("asks again sooner about a food that is bought often", async () => {
+    const { addBoughtDate, buyGapDays, waitDaysFor } = await import("../domain");
+    const now = Date.now();
+    const daysAgo = (days: number) => new Date(now - days * 24 * 3600000).toISOString();
+    const milk = { ...food(1, 1), lastBoughtAt: daysAgo(4), boughtDates: [daysAgo(16), daysAgo(10), daysAgo(4)] };
+    const rice = { ...food(2, 1), lastBoughtAt: daysAgo(20), boughtDates: [daysAgo(140), daysAgo(80), daysAgo(20)] };
+    const twice = { ...food(3, 1), lastBoughtAt: daysAgo(4), boughtDates: [daysAgo(10), daysAgo(4)] };
+
+    expect(buyGapDays(milk.boughtDates)).toBe(6);
+    expect(waitDaysFor(milk)).toBe(3);
+    expect(waitDaysFor(rice)).toBe(30);
+    expect(waitDaysFor(twice)).toBe(7);
+    expect(waitDaysFor({ boughtDates: [daysAgo(2), daysAgo(1), daysAgo(0)] })).toBe(2);
+    expect(buyGapDays([daysAgo(100), daysAgo(12), daysAgo(6), daysAgo(0)])).toBe(6);
+    expect(swipeDeck([milk, rice, twice], now).map((entry) => entry.id)).toEqual([1]);
+
+    const sameDay = addBoughtDate([daysAgo(6)], new Date(now - 6 * 24 * 3600000 + 3600000).toISOString());
+    expect(sameDay).toHaveLength(1);
+    const many = Array.from({ length: 12 }, (_, index) => daysAgo(index)).reduce<string[]>(addBoughtDate, []);
+    expect(many).toHaveLength(8);
+    expect(many[7]).toBe(daysAgo(0));
+  });
+
   it("adds a food under a temporary id and swaps it after sync", () => {
     pull();
 

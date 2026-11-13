@@ -20,6 +20,7 @@ export type LocalFood = {
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
+  boughtDates?: string[];
   lists: number[];
   histories: HistoryEntry[];
 };

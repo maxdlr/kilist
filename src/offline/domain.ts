@@ -50,6 +50,36 @@ export const staleDaysFor = (quantity?: string | null) => {
   return (packSize(quantity) ?? 0) >= bigPackSize ? bigPackStaleDays : staleDays;
 };
 
+export const addBoughtDate = (dates: string[] | undefined, at: string) => {
+  const rhythm = rules().rhythm;
+  if (!rhythm) return dates ?? [];
+  const sorted = [...(dates ?? []), at].map(time).sort((a, b) => a - b);
+  const kept: number[] = [];
+  for (const date of sorted) {
+    const previous = kept[kept.length - 1];
+    if (previous !== undefined && date - previous < rhythm.sameBuyHours * HOUR_MS) continue;
+    kept.push(date);
+  }
+  return kept.slice(-rhythm.keep).map((date) => new Date(date).toISOString());
+};
+
+export const buyGapDays = (dates?: string[]) => {
+  const rhythm = rules().rhythm;
+  const times = (dates ?? []).map(time).sort((a, b) => a - b);
+  if (!rhythm || times.length < rhythm.minPurchases) return null;
+  const gaps = times.slice(1).map((date, index) => date - times[index]!).sort((a, b) => a - b);
+  const middle = Math.floor(gaps.length / 2);
+  const median = gaps.length % 2 ? gaps[middle]! : (gaps[middle - 1]! + gaps[middle]!) / 2;
+  return median / DAY_MS;
+};
+
+export const waitDaysFor = (food: Pick<LocalFood, "quantity" | "boughtDates">) => {
+  const gap = buyGapDays(food.boughtDates);
+  return gap === null
+    ? staleDaysFor(food.quantity)
+    : Math.max(rules().rhythm!.minDays, gap * rules().rhythm!.share);
+};
+
 export const isBarcode = (value: unknown): value is string =>
   typeof value === "string" && /^\d{8,14}$/.test(value);
 
@@ -81,7 +111,7 @@ export const swipeDeck = (foods: LocalFood[], now: number) => {
   const stale = eligible
     .filter(
       (food) =>
-        food.inStockScore >= eligibleBelow && lastActivity(food) < now - staleDaysFor(food.quantity) * DAY_MS,
+        food.inStockScore >= eligibleBelow && lastActivity(food) < now - waitDaysFor(food) * DAY_MS,
     )
     .sort((a, b) => lastActivity(a) - lastActivity(b));
   return [...low, ...stale].slice(0, deckSize);

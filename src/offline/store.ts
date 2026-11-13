@@ -1,4 +1,5 @@
 import db from "./db";
+import { bundledCatalog } from "./bundledCatalog";
 import { setFoodBanks } from "./foodNames";
 import { hasRules, setRules } from "./rules";
 import { exportGuestState, hasLearnedAnything, prizeEntries } from "./guest";
@@ -55,7 +56,7 @@ const rebuild = () => {
 const load = () => {
   if (loaded) return;
   loaded = true;
-  const pack = db.loadValue<Catalog>(KEY_CATALOG);
+  const pack = db.loadValue<Catalog>(KEY_CATALOG) ?? bundledCatalog();
   if (pack) {
     setFoodBanks(pack.foodBanks);
     setRules(pack.rules);
