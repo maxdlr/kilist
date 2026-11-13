@@ -17,6 +17,7 @@ import {
   wipe,
 } from "@/offline/store";
 import axios from "@/services/axios";
+import { askGoogleIdToken } from "@/services/googleSignIn";
 import { DEFAULT_SKIN_ID } from "@/skins";
 import useToast from "@/providers/ToastProvider";
 import { UserType } from "@/types/model";
@@ -53,6 +54,7 @@ export type AuthContextType = {
   resolveMerge: (keep: boolean) => Promise<boolean>;
   login: (username: string, password: string) => Promise<boolean | "merge">;
   signup: (payload: SignupPayload) => Promise<boolean | "join">;
+  loginWithGoogle: () => Promise<boolean | "merge">;
   completeJoin: (join: { joinCode: string; code: string } | null) => Promise<boolean>;
   logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
@@ -73,6 +75,7 @@ const AuthContext = createContext<AuthContextType>({
   resolveMerge: async () => false,
   login: async () => false,
   signup: async () => false,
+  loginWithGoogle: async () => false,
   completeJoin: async () => false,
   logout: async () => false,
   deleteAccount: async () => false,
@@ -107,6 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const { postData: postLogin } = useAxios("/login");
   const { postData: postSignup } = useAxios("/signup");
+  const { postData: postGoogle } = useAxios("/login/google");
   const { postData: postLogout } = useAxios("/logout");
   const { deleteData: deleteUser } = useAxios("/users/delete");
 
@@ -173,6 +177,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     countSignup();
     setNeedsOnboarding(!guest);
     if (joining) return "join" as const;
+    await enterAccount();
+    return true;
+  };
+
+  const loginWithGoogle = async () => {
+    let idToken: string | null;
+    try {
+      idToken = await askGoogleIdToken();
+    } catch {
+      showToast(common.google.failed);
+      return false;
+    }
+    if (!idToken) return false;
+
+    const guest = isGuest && hasGuestData() ? exportGuest() : undefined;
+    const res = await postGoogle<{ created: boolean }>({ idToken, ...(guest && { guest }) });
+    if (res.error) {
+      showToast(res.error.message || common.unexpected);
+      return false;
+    }
+    if (res.data?.created) {
+      countSignup();
+      setNeedsOnboarding(!guest);
+    } else if (guest) {
+      setMergePending(true);
+      return "merge" as const;
+    }
     await enterAccount();
     return true;
   };
@@ -246,6 +277,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         resolveMerge,
         login,
         signup,
+        loginWithGoogle,
         completeJoin,
         logout,
         deleteAccount,

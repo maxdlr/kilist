@@ -439,7 +439,7 @@ const GUEST_ROUTES: [string, RegExp, Handler][] = [
   ],
 ];
 
-const GUEST_NETWORK = [/^login$/, /^signup$/, /^refresh$/, /^password\/(forgot|reset)$/, /^products\/\d+$/];
+const GUEST_NETWORK = [/^login$/, /^login\/google$/, /^signup$/, /^refresh$/, /^password\/(forgot|reset)$/, /^products\/\d+$/];
 
 export const matchGuest = ({ method, path }: Pick<Request, "method" | "path">) => {
   for (const [routeMethod, pattern, handler] of GUEST_ROUTES) {

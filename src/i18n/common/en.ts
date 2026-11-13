@@ -81,6 +81,10 @@ const en = {
     sent: "New code sent",
     done: "Email confirmed",
   },
+  google: {
+    action: "Continue with Google",
+    failed: "Google sign-in didn't work. Try again.",
+  },
   reset: {
     link: "Forgot password?",
     title: "New password",

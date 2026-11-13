@@ -5,6 +5,7 @@ import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
 import { ThemedText } from "@/components/themed-text";
 import axios from "@/services/axios";
+import { googleSignInAvailable } from "@/services/googleSignIn";
 import Dock from "@/components/elements/Dock/Dock";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
@@ -48,7 +49,7 @@ const LoginScreen = () => {
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
   const insets = useSafeAreaInsets();
-  const { login, signup, completeJoin, isGuest, mergePending, resolveMerge, guestName } = useAuth();
+  const { login, signup, loginWithGoogle, completeJoin, isGuest, mergePending, resolveMerge, guestName } = useAuth();
   const [joinStep, setJoinStep] = useState(false);
   const [emailCode, setEmailCode] = useState("");
   const guestCopy = skin.copy.guest;
@@ -132,6 +133,16 @@ const LoginScreen = () => {
     router.replace("/");
   };
 
+  const handleGoogle = async () => {
+    const result = await loginWithGoogle();
+    if (!result) return;
+    if (result === "merge") {
+      setMergeOpen(true);
+      return;
+    }
+    router.replace("/");
+  };
+
   const finishJoin = async (withCode: boolean) => {
     const done = await completeJoin(withCode ? { joinCode, code: emailCode } : null);
     if (done) setJoinStep(false);
@@ -154,6 +165,8 @@ const LoginScreen = () => {
 
   const signupSheet = skin.colors.signup ?? { fill: skin.colors.alert, ink: skin.colors.onAlert };
   const labelColor = isSignup ? skin.colors.onPaper : skin.colors.accent;
+
+  const googleVariant = isSignup ? "secondaryOnLight" : "secondary";
 
   const canLeave = isGuest && !mergePending && router.canGoBack();
 
@@ -286,11 +299,22 @@ const LoginScreen = () => {
         {!resetOpen && (
         <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
           <KilButton
-            height={isSignup ? 68 : 84}
-            fontSize={isSignup ? 34 : 42}
+            height={skin.size.button.lg}
+            fontSize={skin.type.title}
             label={isSignup ? copy.signupAction : copy.loginAction}
             onTouch={handleSubmit}
           />
+          {googleSignInAvailable && (
+            <KilButton
+              variant={googleVariant}
+              colors={{ ...skin.actions[googleVariant], line: skin.actions[googleVariant].ink }}
+              height={skin.size.button.lg}
+              fontSize={skin.type.lead}
+              label={common.google.action}
+              onTouch={handleGoogle}
+              style={styles.google}
+            />
+          )}
           <KilButton
             variant="ghost"
             height={skin.size.button.xs}
@@ -413,6 +437,10 @@ const createStyles = (s: Skin) =>
     },
     scanner: {
       gap: s.spacing.inline,
+    },
+    google: {
+      marginBottom: s.spacing.small,
+      marginTop: s.spacing.stack,
     },
     dock: {
       gap: s.spacing.hair,

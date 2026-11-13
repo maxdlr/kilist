@@ -83,6 +83,10 @@ const fr: CommonText = {
     sent: "Nouveau code envoyé",
     done: "E-mail confirmé",
   },
+  google: {
+    action: "Continuer avec Google",
+    failed: "La connexion avec Google n'a pas marché. Réessaie.",
+  },
   reset: {
     link: "Mot de passe oublié ?",
     title: "Nouveau mot de passe",
