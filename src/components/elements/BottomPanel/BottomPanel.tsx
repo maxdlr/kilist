@@ -53,7 +53,7 @@ const BottomPanel = ({
   const styles = useSkinStyles(createStyles);
   useHideTabBar(visible);
   const insets = useSafeAreaInsets();
-  const height = useSharedValue(0);
+  const offset = useSharedValue(SCREEN_HEIGHT);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
   const drag = useSharedValue(0);
@@ -91,12 +91,11 @@ const BottomPanel = ({
       drag.set(0);
       closing.set(false);
       const open = setTimeout(() => {
-        const measured = contentHeight.get();
-        if (measured > 0) {
-          height.set(
+        if (contentHeight.get() > 0) {
+          offset.set(
             withDelay(
               handoffWait(self),
-              withTiming(measured, AnimationService.config),
+              withTiming(0, AnimationService.config),
             ),
           );
         }
@@ -104,20 +103,20 @@ const BottomPanel = ({
       return () => clearTimeout(open);
     }
 
-    if (height.get() > 0) {
+    if (offset.get() < contentHeight.get()) {
       handoff.owner = self;
       handoff.until = Date.now() + AnimationService.panelClose.duration;
     }
 
-    height.set(
-      withTiming(0, AnimationService.panelClose, (finished) => {
+    offset.set(
+      withTiming(contentHeight.get() || SCREEN_HEIGHT, AnimationService.panelClose, (finished) => {
         "worklet";
         if (finished) {
           scheduleOnRN(setIsRendered, false);
         }
       }),
     );
-  }, [visible, height, contentHeight, backdropOpacity, drag, closing, self]);
+  }, [visible, offset, contentHeight, backdropOpacity, drag, closing, self]);
 
   const requestClose = useCallback(() => latest.current.onClose(), []);
 
@@ -164,20 +163,20 @@ const BottomPanel = ({
 
   const handleContentLayout = (event: LayoutChangeEvent) => {
     const measured = event.nativeEvent.layout.height;
+    const previous = contentHeight.get();
     contentHeight.set(measured);
-    if (visible) {
-      height.set(
-        withDelay(
-          handoffWait(self),
-          withTiming(measured, AnimationService.config),
-        ),
-      );
-    }
+    if (!visible || measured <= previous) return;
+    offset.set(previous === 0 ? measured : offset.get() + measured - previous);
+    offset.set(
+      withDelay(
+        handoffWait(self),
+        withTiming(0, AnimationService.config),
+      ),
+    );
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
-    height: height.value,
-    transform: [{ translateY: drag.value }],
+    transform: [{ translateY: offset.value + drag.value }],
   }));
   const backdropStyle = useAnimatedStyle(() => ({
     opacity:
@@ -248,13 +247,13 @@ const createStyles = (s: Skin) =>
       height: SCREEN_HEIGHT,
     },
     panel: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
       overflow: "hidden",
     },
     content: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
       borderTopWidth: s.shape.accentBorder,
       borderLeftWidth: s.panel.radius > 0 ? s.shape.border : 0,
       borderRightWidth: s.panel.radius > 0 ? s.shape.border : 0,

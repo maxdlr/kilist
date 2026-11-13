@@ -8,7 +8,7 @@ import type { CalmElements } from "../themes";
 export const name = { en: "Dark", fr: "Sombre" };
 
 const base = generateColorVariants("#312855");
-const foods = generateColorGradient("#1B76FF", "#49C67B");
+const foods = generateColorGradient("#C9DFFF", "#095527");
 const emphasis = generateColorVariants("#492AC6");
 // const accent = generateColorVariants("#FFB443");
 const accentToBaseGradient = generateColorGradient("#A1C7FF", base[50]);
@@ -38,7 +38,7 @@ export const elements: CalmElements = {
   statusBar: "light",
   ground: base[70],
   card: base[80],
-  tint: base[50],
+  tint: base[60],
   text: accentToBaseGradient[5],
   textSoft: accentToBaseGradient[30],
   textFaint: accentToBaseGradient[50],
