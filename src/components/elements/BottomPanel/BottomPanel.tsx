@@ -1,6 +1,6 @@
 import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
-import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { PanelSkin, useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useHideTabBar } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -30,7 +30,10 @@ const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
 
-const handoff: { owner: object | null; until: number } = { owner: null, until: 0 };
+const handoff: { owner: object | null; until: number } = {
+  owner: null,
+  until: 0,
+};
 
 const handoffWait = (self: object) =>
   handoff.owner === self ? 0 : Math.max(0, handoff.until - Date.now());
@@ -78,7 +81,10 @@ const BottomPanel = ({
 
   useEffect(() => {
     backdropOpacity.set(
-      withTiming(visible ? 1 : 0, visible ? AnimationService.config : AnimationService.panelClose),
+      withTiming(
+        visible ? 1 : 0,
+        visible ? AnimationService.config : AnimationService.panelClose,
+      ),
     );
 
     if (visible) {
@@ -87,7 +93,12 @@ const BottomPanel = ({
       const open = setTimeout(() => {
         const measured = contentHeight.get();
         if (measured > 0) {
-          height.set(withDelay(handoffWait(self), withTiming(measured, AnimationService.config)));
+          height.set(
+            withDelay(
+              handoffWait(self),
+              withTiming(measured, AnimationService.config),
+            ),
+          );
         }
       }, 0);
       return () => clearTimeout(open);
@@ -118,16 +129,22 @@ const BottomPanel = ({
       drag.set(Math.max(0, event.translationY));
     },
     onDeactivate: (event) => {
-      const limit = Math.min(DISMISS_DISTANCE, contentHeight.value * DISMISS_SHARE);
+      const limit = Math.min(
+        DISMISS_DISTANCE,
+        contentHeight.value * DISMISS_SHARE,
+      );
       if (event.translationY > limit || event.velocityY > DISMISS_VELOCITY) {
         closing.set(true);
         scheduleOnRN(requestClose);
         return;
       }
-      drag.set(withSpring(0, { ...AnimationService.snap, velocity: event.velocityY }));
+      drag.set(
+        withSpring(0, { ...AnimationService.snap, velocity: event.velocityY }),
+      );
     },
     onFinalize: () => {
-      if (!closing.value && drag.value > 0) drag.set(withSpring(0, AnimationService.snap));
+      if (!closing.value && drag.value > 0)
+        drag.set(withSpring(0, AnimationService.snap));
     },
   });
 
@@ -149,7 +166,12 @@ const BottomPanel = ({
     const measured = event.nativeEvent.layout.height;
     contentHeight.set(measured);
     if (visible) {
-      height.set(withDelay(handoffWait(self), withTiming(measured, AnimationService.config)));
+      height.set(
+        withDelay(
+          handoffWait(self),
+          withTiming(measured, AnimationService.config),
+        ),
+      );
     }
   };
 
@@ -205,7 +227,7 @@ const BottomPanel = ({
               importantForAccessibility="no-hide-descendants"
               style={[styles.grip, { backgroundColor: skin.panel.ink }]}
             />
-            {children}
+            <PanelSkin>{children}</PanelSkin>
           </View>
         </Animated.View>
       </GestureDetector>

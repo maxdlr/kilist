@@ -1,4 +1,5 @@
 import { DEFAULT_SKIN_ID, findSkin, Skin } from "@/skins";
+import { savedTheme, saveTheme } from "@/skins/themeChoice";
 import axios from "@/services/axios";
 import { useLanguage } from "./LanguageProvider";
 import { UserType } from "@/types/model";
@@ -14,11 +15,13 @@ import useSWR from "swr";
 type SkinContextType = {
   skin: Skin;
   setSkin: (id: string) => Promise<boolean>;
+  setTheme: (id: string) => void;
 };
 
 const SkinContext = createContext<SkinContextType>({
   skin: findSkin(DEFAULT_SKIN_ID),
   setSkin: async () => false,
+  setTheme: () => {},
 });
 
 export const SkinProvider = ({ children }: { children: ReactNode }) => {
@@ -29,7 +32,18 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const { lang } = useLanguage();
 
-  const skin = findSkin(pendingId ?? user?.skin, lang);
+  const [picked, setPicked] = useState<Record<string, string>>({});
+
+  const skinId = findSkin(pendingId ?? user?.skin, lang).id;
+  const skin = findSkin(skinId, lang, picked[skinId] ?? savedTheme(skinId));
+
+  const setTheme = useCallback(
+    (id: string) => {
+      saveTheme(skinId, id);
+      setPicked((current) => ({ ...current, [skinId]: id }));
+    },
+    [skinId],
+  );
 
   const setSkin = useCallback(
     async (id: string) => {
@@ -47,7 +61,7 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
     [mutate],
   );
 
-  const value = useMemo(() => ({ skin, setSkin }), [skin, setSkin]);
+  const value = useMemo(() => ({ skin, setSkin, setTheme }), [skin, setSkin, setTheme]);
 
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
 };
@@ -55,9 +69,24 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
 export const SkinOverride = ({ id, children }: { id: string; children: ReactNode }) => {
   const parent = React.useContext(SkinContext);
   const { lang } = useLanguage();
-  const value = useMemo(() => ({ ...parent, skin: findSkin(id, lang) }), [parent, id, lang]);
+  const value = useMemo(() => ({ ...parent, skin: findSkin(id, lang, savedTheme(id)) }), [parent, id, lang]);
 
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
+};
+
+export const PanelSkin = ({ children }: { children: ReactNode }) => {
+  const parent = React.useContext(SkinContext);
+  const value = useMemo(
+    () => (parent.skin.onPanel ? { ...parent, skin: parent.skin.onPanel } : parent),
+    [parent],
+  );
+
+  return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
+};
+
+export const usePanelSkin = () => {
+  const skin = React.useContext(SkinContext).skin;
+  return skin.onPanel ?? skin;
 };
 
 export const useSkinSwitch = () => React.useContext(SkinContext);

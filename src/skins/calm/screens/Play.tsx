@@ -30,15 +30,9 @@ import {
 } from "react-native-heroicons/solid";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
-
-const INTENT_COLOR: Record<SwipeDirection, string> = {
-  left: C.needIt,
-  up: C.soft,
-  right: C.haveIt,
-};
 
 const HINT_ROUNDS = 3;
 const EDGE = 22;
@@ -53,8 +47,10 @@ const CheckCard = ({
   showCues: boolean;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const hint = intent ? { text: T.intent[intent], color: INTENT_COLOR[intent] } : null;
+  const intentColor: Record<SwipeDirection, string> = { left: C.negative, up: C.textSoft, right: C.positive };
+  const hint = intent ? { text: T.intent[intent], color: intentColor[intent] } : null;
   const cues = showCues || intent !== null;
 
   return (
@@ -71,13 +67,13 @@ const CheckCard = ({
           <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={StyleSheet.absoluteFill}>
             <View style={styles.cueLeft}>
               {intent === "left" ? (
-                <ShoppingBagSolid size={EDGE + 4} color={C.ink} />
+                <ShoppingBagSolid size={EDGE + 4} color={C.text} />
               ) : (
                 <ShoppingBagIcon size={EDGE} color={C.ring} strokeWidth={1.6} />
               )}
             </View>
             <View style={styles.cueRight}>
-              <CheckIcon size={intent === "right" ? EDGE + 4 : EDGE} color={intent === "right" ? C.haveIt : C.ring} strokeWidth={intent === "right" ? 3 : 1.6} />
+              <CheckIcon size={intent === "right" ? EDGE + 4 : EDGE} color={intent === "right" ? C.positive : C.ring} strokeWidth={intent === "right" ? 3 : 1.6} />
             </View>
             {intent === "up" ? null : (
               <View style={styles.cueUp}>
@@ -91,7 +87,7 @@ const CheckCard = ({
           <CText weight="medium" size={skin.type.headline + 2} style={styles.center} numberOfLines={2}>
             {food.name}
           </CText>
-          <CText size={skin.type.body - 1} color={C.soft} style={styles.center}>
+          <CText size={skin.type.body - 1} color={C.textSoft} style={styles.center}>
             {T.play.question}
           </CText>
         </View>
@@ -102,6 +98,7 @@ const CheckCard = ({
 
 const Checking = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const copy = skin.copy.swipe;
@@ -119,22 +116,22 @@ const Checking = ({ game }: { game: SwipeGame }) => {
         style={({ pressed }) => [
           styles.pad,
           {
-            backgroundColor: on ? C.ink : "transparent",
-            borderColor: on ? C.ink : C.field,
+            backgroundColor: on ? C.fill : "transparent",
+            borderColor: on ? C.fill : C.fieldLine,
             opacity: pressed ? skin.shape.pressedOpacity : 1,
           },
         ]}
       >
         {direction === "left" &&
           (on ? (
-            <ShoppingBagSolid size={20} color={C.ground} />
+            <ShoppingBagSolid size={20} color={C.onFill} />
           ) : (
-            <ShoppingBagIcon size={20} color={C.ink} strokeWidth={1.8} />
+            <ShoppingBagIcon size={20} color={C.text} strokeWidth={1.8} />
           ))}
-        <CText weight="medium" size={skin.type.body} color={on ? C.ground : C.ink}>
+        <CText weight="medium" size={skin.type.body} color={on ? C.onFill : C.text}>
           {label}
         </CText>
-        {direction === "right" && <CheckIcon size={20} color={on ? C.ground : C.haveIt} strokeWidth={on ? 3 : 2} />}
+        {direction === "right" && <CheckIcon size={20} color={on ? C.onFill : C.positive} strokeWidth={on ? 3 : 2} />}
       </Press>
     );
   };
@@ -144,9 +141,9 @@ const Checking = ({ game }: { game: SwipeGame }) => {
       <View style={styles.header}>
         <View style={styles.between}>
           <Press accessibilityRole="button" accessibilityLabel={T.close} hitSlop={skin.spacing.small} onPress={goBack} style={withPressed(styles.close)}>
-            <XMarkIcon size={skin.size.icon.action} color={C.soft} strokeWidth={1.8} />
+            <XMarkIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
           </Press>
-          <CText size={skin.type.label} color={C.soft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
+          <CText size={skin.type.label} color={C.textSoft}>{T.play.position(Math.min(game.position + 1, game.total), game.total)}</CText>
         </View>
         <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: total, now: game.position }} style={styles.track}>
           <View style={[styles.fill, { width: `${(game.position / total) * 100}%` }]} />
@@ -172,11 +169,11 @@ const Checking = ({ game }: { game: SwipeGame }) => {
         {pad("left", copy.out, T.play.ariaOut)}
         <Press accessibilityRole="button" accessibilityLabel={T.intent.up} onPress={() => game.fling("up")} style={withPressed(styles.unsure)}>
           {game.intent === "up" ? (
-            <QuestionMarkCircleSolid size={22} color={C.ink} />
+            <QuestionMarkCircleSolid size={22} color={C.text} />
           ) : (
-            <QuestionMarkCircleIcon size={22} color={C.soft} strokeWidth={1.8} />
+            <QuestionMarkCircleIcon size={22} color={C.textSoft} strokeWidth={1.8} />
           )}
-          <CText size={skin.type.caption} color={game.intent === "up" ? C.ink : C.soft}>{copy.unsure}</CText>
+          <CText size={skin.type.caption} color={game.intent === "up" ? C.text : C.textSoft}>{copy.unsure}</CText>
         </Press>
         {pad("right", copy.inStock, T.play.ariaIn)}
       </View>
@@ -187,6 +184,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
 
 const Done = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const added = game.outFoods;
   const close = () => {
@@ -205,9 +203,9 @@ const Done = ({ game }: { game: SwipeGame }) => {
     >
       <ScrollView contentContainerStyle={styles.doneContent}>
         <View style={styles.doneHead}>
-          <DrawnMark kind="done" color={C.haveIt} />
+          <DrawnMark kind="done" color={C.positive} />
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{T.done}</CText>
-          <CText size={skin.type.body} color={C.soft}>
+          <CText size={skin.type.body} color={C.textSoft}>
             {added.length
               ? T.play.added(added.length)
               : T.play.nothingNew}
@@ -224,7 +222,7 @@ const Done = ({ game }: { game: SwipeGame }) => {
           </View>
         )}
         <View style={styles.points}>
-          <CText size={skin.type.label} color={C.soft} style={styles.flex}>{T.play.points}</CText>
+          <CText size={skin.type.label} color={C.textSoft} style={styles.flex}>{T.play.points}</CText>
           <CText weight="medium" size={skin.type.label + 1}>
             {game.balance !== undefined ? T.play.pointsTotal(game.earned, game.balance) : `+${game.earned}`}
           </CText>
@@ -236,6 +234,7 @@ const Done = ({ game }: { game: SwipeGame }) => {
 
 const Sorted = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.swipe;
 
@@ -250,24 +249,24 @@ const Sorted = ({ game }: { game: SwipeGame }) => {
       }
     >
       <View style={styles.sorted}>
-        <CheckIcon size={44} color={C.haveIt} strokeWidth={2.4} />
+        <CheckIcon size={44} color={C.positive} strokeWidth={2.4} />
         <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
           {T.play.sortedToday}
         </CText>
       </View>
       <View accessible accessibilityLabel={`${T.play.replayTitle} ${T.play.replayLine}`} style={styles.replay}>
         <View style={styles.replayHead}>
-          <ArrowPathIcon size={skin.size.icon.action} color={C.ink} strokeWidth={1.8} />
+          <ArrowPathIcon size={skin.size.icon.action} color={C.text} strokeWidth={1.8} />
           <CText weight="medium" size={skin.type.body}>{T.play.replayTitle}</CText>
         </View>
         <View style={styles.replayFacts}>
           <View style={styles.fact}>
-            <ArrowsRightLeftIcon size={15} color={C.soft} strokeWidth={1.8} />
-            <CText size={skin.type.label} color={C.soft}>{T.play.replayReplaces}</CText>
+            <ArrowsRightLeftIcon size={15} color={C.textSoft} strokeWidth={1.8} />
+            <CText size={skin.type.label} color={C.textSoft}>{T.play.replayReplaces}</CText>
           </View>
           <View style={styles.fact}>
-            <SparklesIcon size={15} color={C.soft} strokeWidth={1.8} />
-            <CText size={skin.type.label} color={C.soft}>{T.play.replayNoPoints}</CText>
+            <SparklesIcon size={15} color={C.textSoft} strokeWidth={1.8} />
+            <CText size={skin.type.label} color={C.textSoft}>{T.play.replayNoPoints}</CText>
           </View>
         </View>
         <CButton variant="secondary" label={T.play.replay} onPress={game.replay} />
@@ -316,7 +315,7 @@ const CalmPlay = () => {
   return <StateFade stateKey={suggestion.item ? "suggestion" : screen === "start" ? "loading" : screen}>{body()}</StateFade>;
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     root: { backgroundColor: C.ground, flex: 1 },
     flex: { flex: 1, minWidth: 0 },
@@ -324,13 +323,13 @@ const createStyles = (s: Skin) =>
     between: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
     header: { gap: s.spacing.dock - 2, paddingHorizontal: s.spacing.gutter, paddingBottom: s.spacing.small },
     close: { justifyContent: "center", minHeight: s.size.button.xs },
-    track: { backgroundColor: C.hairline, height: 2 },
-    fill: { backgroundColor: C.ink, height: "100%" },
+    track: { backgroundColor: C.line, height: 2 },
+    fill: { backgroundColor: C.fill, height: "100%" },
     cardSlot: { flex: 1, paddingHorizontal: s.spacing.gutter, paddingVertical: s.spacing.stack },
     card: {
       alignItems: "center",
-      backgroundColor: C.white,
-      borderColor: C.hairline,
+      backgroundColor: C.card,
+      borderColor: C.line,
       borderRadius: s.shape.radius + 6,
       borderWidth: s.shape.border,
       flex: 1,
@@ -357,8 +356,8 @@ const createStyles = (s: Skin) =>
     cueUp: { alignItems: "center", left: 0, position: "absolute", right: 0, top: s.spacing.gutter + s.spacing.section },
     sorted: { flex: 1, gap: s.spacing.stack, justifyContent: "center" },
     replay: {
-      backgroundColor: C.white,
-      borderColor: C.hairline,
+      backgroundColor: C.card,
+      borderColor: C.line,
       borderRadius: s.shape.radius + 2,
       borderWidth: s.shape.border,
       gap: s.spacing.inline,
@@ -371,7 +370,7 @@ const createStyles = (s: Skin) =>
     doneHead: { gap: s.spacing.small },
     row: {
       alignItems: "center",
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       flexDirection: "row",
       gap: s.spacing.inline,
@@ -379,7 +378,7 @@ const createStyles = (s: Skin) =>
     },
     points: {
       alignItems: "baseline",
-      borderColor: C.hairline,
+      borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
       flexDirection: "row",

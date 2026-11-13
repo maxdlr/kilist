@@ -13,7 +13,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading } from "./States";
 
@@ -31,6 +31,7 @@ const FoodRow = ({
   onPress: () => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const level = levelOf(food.inStockScore);
 
@@ -43,16 +44,16 @@ const FoodRow = ({
       style={({ pressed }) => [styles.row, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
     >
       {selecting && (
-        <View style={[styles.box, { backgroundColor: selected ? C.ink : "transparent", borderColor: selected ? C.ink : C.ring }]}>
+        <View style={[styles.box, { backgroundColor: selected ? C.fill : "transparent", borderColor: selected ? C.fill : C.ring }]}>
           {selected && (
             <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Path d="M5 12l4 4 10-10" stroke={C.ground} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M5 12l4 4 10-10" stroke={C.onFill} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           )}
         </View>
       )}
       <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>{food.name}</CText>
-      <CText size={skin.type.caption} color={C.soft}>{skin.copy.levels[level]}</CText>
+      <CText size={skin.type.caption} color={C.textSoft}>{skin.copy.levels[level]}</CText>
       <Dot color={skin.colors.levels[level]} />
     </Press>
   );
@@ -60,6 +61,7 @@ const FoodRow = ({
 
 const CalmInventory = () => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
@@ -100,18 +102,18 @@ const CalmInventory = () => {
       >
         <View style={styles.titleRow}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
-          <CText size={skin.type.label} color={C.soft}>{`${foods?.length ?? 0}`}</CText>
+          <CText size={skin.type.label} color={C.textSoft}>{`${foods?.length ?? 0}`}</CText>
         </View>
 
         {noResults ? (
           <View style={styles.message}>
             <CText weight="medium" size={skin.type.title}>{skin.copy.inventory.noResults(query)}</CText>
-            <CText size={skin.type.body} color={C.soft}>{T.inventory.noResultsLine}</CText>
+            <CText size={skin.type.body} color={C.textSoft}>{T.inventory.noResultsLine}</CText>
           </View>
         ) : isEmpty ? (
           <View style={styles.message}>
             <CText weight="medium" size={skin.type.title}>{skin.copy.inventory.emptyTitle}</CText>
-            <CText size={skin.type.body} color={C.soft}>{T.inventory.emptyLine}</CText>
+            <CText size={skin.type.body} color={C.textSoft}>{T.inventory.emptyLine}</CText>
           </View>
         ) : (
           <Animated.FlatList
@@ -139,14 +141,14 @@ const CalmInventory = () => {
   );
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     titleRow: { alignItems: "baseline", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: s.spacing.gutter },
     list: { paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },
     row: {
       alignItems: "center",
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       flexDirection: "row",
       gap: s.spacing.inline,

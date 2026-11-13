@@ -26,7 +26,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import useSWR from "swr";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Screen } from "./parts";
 import { CalmLoading } from "./States";
 
@@ -78,6 +78,7 @@ const ProfilePick = ({
   onDone: (added: Sample[]) => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const { showToast } = useToast();
@@ -144,7 +145,7 @@ const ProfilePick = ({
       dock={
         <>
           {isLast && (
-            <CText size={skin.type.label + 1} color={C.soft} style={styles.center}>
+            <CText size={skin.type.label + 1} color={C.textSoft} style={styles.center}>
               {profiles.length > 0 ? copy.profileCount(starters.length) : copy.profileOffline}
             </CText>
           )}
@@ -159,14 +160,14 @@ const ProfilePick = ({
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.head}>
           {profiles.length > 0 && (
-            <CText size={skin.type.label} color={C.soft}>
+            <CText size={skin.type.label} color={C.textSoft}>
               {copy.questionAt(at + 1, QUESTIONS.length)}
             </CText>
           )}
           <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
             {profiles.length > 0 ? text.title : copy.profileTitle}
           </CText>
-          <CText size={skin.type.body} color={C.soft}>
+          <CText size={skin.type.body} color={C.textSoft}>
             {profiles.length > 0 ? text.line : copy.profileLine}
           </CText>
         </View>
@@ -182,7 +183,7 @@ const ProfilePick = ({
                   onPress={() => pick(id)}
                   style={withPressed([styles.option, on && styles.optionOn])}
                 >
-                  <CText weight="medium" size={skin.type.body} color={on ? C.ground : C.ink}>
+                  <CText weight="medium" size={skin.type.body} color={on ? C.onFill : C.text}>
                     {copy.answers[id] ?? id}
                   </CText>
                 </Press>
@@ -197,6 +198,7 @@ const ProfilePick = ({
 
 const Caption = ({ title, line, prompt }: { title: string; line?: string; prompt?: string }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
 
   return (
@@ -205,7 +207,7 @@ const Caption = ({ title, line, prompt }: { title: string; line?: string; prompt
         {title}
       </CText>
       {line && (
-        <CText size={skin.type.body} color={C.soft}>
+        <CText size={skin.type.body} color={C.textSoft}>
           {line}
         </CText>
       )}
@@ -224,6 +226,7 @@ const Practice = ({
   onSkip: () => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const flingRef = useRef<SwipeDeckFling | null>(null);
@@ -263,7 +266,7 @@ const Practice = ({
       }
     >
       <View style={styles.topRow}>
-        <CText size={skin.type.label} color={C.soft}>
+        <CText size={skin.type.label} color={C.textSoft}>
           {copy.practiceLabel(Math.min(answers.length + 1, samples.length), samples.length)}
         </CText>
         <CButton variant="text" label={copy.skip} onPress={onSkip} />
@@ -307,6 +310,7 @@ const PracticeRow = ({
   onLater: () => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const [buying, setBuying] = useState(true);
   const nudge = useSharedValue(0);
@@ -338,10 +342,10 @@ const PracticeRow = ({
         { name: "later", label: T.shop.nextTime },
       ]}
       onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onBuy())}
-      style={[styles.slot, { backgroundColor: buying ? C.haveIt : C.tint }]}
+      style={[styles.slot, { backgroundColor: buying ? C.positive : C.tint }]}
     >
       <View style={[styles.behind, { justifyContent: buying ? "flex-start" : "flex-end" }]}>
-        <CText weight="medium" size={skin.type.label + 1} color={buying ? C.white : C.soft}>
+        <CText weight="medium" size={skin.type.label + 1} color={buying ? C.onPositive : C.textSoft}>
           {buying ? T.shop.inBasket : T.shop.later}
         </CText>
       </View>
@@ -367,6 +371,7 @@ const PracticeRow = ({
 
 const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => void }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const out = answers.filter((answer) => answer.direction === "left");
@@ -385,7 +390,7 @@ const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => vo
   return (
     <Screen dock={lastAction ? <CButton label={copy.shopNext} onPress={onDone} /> : undefined}>
       <View style={styles.head}>
-        <CText size={skin.type.label} color={C.soft}>
+        <CText size={skin.type.label} color={C.textSoft}>
           {copy.shopLabel}
         </CText>
         <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
@@ -417,6 +422,7 @@ const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => vo
 
 const Finished = ({ onStart }: { onStart: () => void }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
 
@@ -424,7 +430,7 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
     <Screen
       dock={
         <>
-          <CText size={skin.type.label + 1} color={C.soft} style={styles.center}>
+          <CText size={skin.type.label + 1} color={C.textSoft} style={styles.center}>
             {copy.doneNote}
           </CText>
           <CButton label={copy.start} onPress={onStart} />
@@ -432,7 +438,7 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
       }
     >
       <View style={styles.head}>
-        <CText size={skin.type.label} color={C.soft}>
+        <CText size={skin.type.label} color={C.textSoft}>
           {copy.doneLabel}
         </CText>
         <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
@@ -443,7 +449,7 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
         {copy.doneSteps.map((line, index) => (
           <View key={line} style={[styles.recapRow, index > 0 && styles.recapDivider]}>
             <View style={styles.number}>
-              <CText weight="medium" size={skin.type.label} color={C.ground}>
+              <CText weight="medium" size={skin.type.label} color={C.onFill}>
                 {String(index + 1)}
               </CText>
             </View>
@@ -525,7 +531,7 @@ const CalmTutorial = ({
   return <Finished onStart={() => finish(true)} />;
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     center: { textAlign: "center" },
@@ -533,22 +539,22 @@ const createStyles = (s: Skin) =>
     head: { gap: s.spacing.small },
     options: { gap: s.spacing.small + 2 },
     option: {
-      borderColor: C.field,
+      borderColor: C.fieldLine,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
       justifyContent: "center",
       minHeight: s.size.button.lg,
       paddingHorizontal: s.spacing.stack,
     },
-    optionOn: { backgroundColor: C.ink, borderColor: C.ink },
+    optionOn: { backgroundColor: C.fill, borderColor: C.fill },
     topRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
     deck: { flex: 1, minHeight: 0 },
     sheet: { alignItems: "center", backgroundColor: C.ground, flex: 1, justifyContent: "center" },
     card: {
       alignItems: "center",
       aspectRatio: 0.78,
-      backgroundColor: C.white,
-      borderColor: C.hairline,
+      backgroundColor: C.card,
+      borderColor: C.line,
       borderRadius: s.panel.radius,
       borderWidth: s.shape.border,
       gap: s.spacing.stack,
@@ -558,15 +564,15 @@ const createStyles = (s: Skin) =>
       width: "78%",
     },
     caption: {
-      backgroundColor: C.white,
-      borderColor: C.hairline,
+      backgroundColor: C.card,
+      borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
       gap: s.spacing.tight + 2,
       padding: s.spacing.stack,
     },
     dockRow: { flexDirection: "row", gap: s.spacing.inline },
-    slot: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, overflow: "hidden" },
+    slot: { borderTopColor: C.line, borderTopWidth: s.shape.divider, overflow: "hidden" },
     behind: {
       alignItems: "center",
       bottom: 0,
@@ -580,16 +586,16 @@ const createStyles = (s: Skin) =>
     swipeBox: { backgroundColor: C.ground },
     rowMain: { alignItems: "center", flexDirection: "row", minHeight: s.size.row.shop, paddingStart: s.spacing.stack },
     recap: {
-      backgroundColor: C.white,
-      borderColor: C.hairline,
+      backgroundColor: C.card,
+      borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
     },
     recapRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline + 2, padding: s.spacing.stack },
-    recapDivider: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider },
+    recapDivider: { borderTopColor: C.line, borderTopWidth: s.shape.divider },
     number: {
       alignItems: "center",
-      backgroundColor: C.ink,
+      backgroundColor: C.fill,
       borderRadius: s.spacing.inline + 2,
       height: (s.spacing.inline + 2) * 2,
       justifyContent: "center",

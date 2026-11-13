@@ -3,7 +3,7 @@ import BottomPanel from "@/components/elements/BottomPanel";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -21,7 +21,7 @@ const ActionPanel = ({
   request: ActionPanelRequest | null;
   onClose: () => void;
 }) => {
-  const skin = useSkin();
+  const skin = usePanelSkin();
   const styles = useSkinStyles(createStyles);
   const [shown, setShown] = useState(request);
 
@@ -38,7 +38,11 @@ const ActionPanel = ({
         <Title
           size={skin.type.display.sm}
           lines={2}
-          color={isDestructive && skin.panel.radius === 0 ? skin.colors.danger : skin.panel.title}
+          color={
+            isDestructive && skin.panel.radius === 0
+              ? skin.colors.danger
+              : skin.panel.title
+          }
         >
           {shown.title}
         </Title>
@@ -53,7 +57,13 @@ const ActionPanel = ({
               key={action.label}
               height={skin.size.button.md}
               fontSize={skin.type.lead}
-              variant={action.destructive ? "danger" : index === 0 ? "primary" : skin.panel.secondary}
+              variant={
+                action.destructive
+                  ? "danger"
+                  : index === 0
+                    ? "primary"
+                    : skin.panel.secondary
+              }
               label={action.label}
               onTouch={() => {
                 onClose();
@@ -71,30 +81,30 @@ const ActionPanel = ({
         </View>
       )}
       {!stacked && (
-      <View style={styles.actions}>
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
-          variant={skin.panel.secondary}
-          label={shown?.cancelLabel ?? skin.copy.common.cancel}
-          onTouch={onClose}
-        />
-        {shown?.actions.map((action) => (
+        <View style={styles.actions}>
           <KilButton
-            key={action.label}
             flex={1}
             height={skin.size.button.md}
             fontSize={skin.type.lead}
-            variant={action.destructive ? "danger" : "primary"}
-            label={action.label}
-            onTouch={() => {
-              onClose();
-              action.onPress();
-            }}
+            variant={skin.panel.secondary}
+            label={shown?.cancelLabel ?? skin.copy.common.cancel}
+            onTouch={onClose}
           />
-        ))}
-      </View>
+          {shown?.actions.map((action) => (
+            <KilButton
+              key={action.label}
+              flex={1}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant={action.destructive ? "danger" : "primary"}
+              label={action.label}
+              onTouch={() => {
+                onClose();
+                action.onPress();
+              }}
+            />
+          ))}
+        </View>
       )}
     </BottomPanel>
   );

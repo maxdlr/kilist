@@ -10,15 +10,16 @@ import type { Skin } from "@/skins/types";
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CText, Screen } from "./parts";
 
 const Group = ({ label, children }: { label: string; children: ReactNode }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   return (
     <View>
-      <CText size={skin.type.label} color={C.soft} style={styles.groupLabel}>{label}</CText>
+      <CText size={skin.type.label} color={C.textSoft} style={styles.groupLabel}>{label}</CText>
       {children}
     </View>
   );
@@ -28,7 +29,7 @@ const Row = ({
   label,
   detail,
   onPress,
-  color = C.ink,
+  color,
   chevron = true,
 }: {
   label: string;
@@ -38,6 +39,7 @@ const Row = ({
   chevron?: boolean;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   return (
     <Press
@@ -46,8 +48,8 @@ const Row = ({
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.tint }]}
     >
-      <CText size={skin.type.body} color={color}>{label}</CText>
-      <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
+      <CText size={skin.type.body} color={color ?? C.text}>{label}</CText>
+      <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.detail}>
         {`${detail ?? ""}${chevron ? (detail ? " ›" : "›") : ""}`}
       </CText>
     </Press>
@@ -56,6 +58,7 @@ const Row = ({
 
 const CalmAccount = () => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.account;
   const account = useAccount();
@@ -85,7 +88,7 @@ const CalmAccount = () => {
             ) : (
               <View style={styles.row}>
                 <CText size={skin.type.body}>{user.username}</CText>
-                <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
+                <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
               </View>
             )}
           </Group>
@@ -93,14 +96,14 @@ const CalmAccount = () => {
           {account.isGuest ? (
             <Group label={copy.household}>
               <View style={styles.guest}>
-                <GuestCard account={account} ink={C.ink} />
+                <GuestCard account={account} ink={C.text} />
               </View>
             </Group>
           ) : (
             <Group label={copy.household}>
               <View style={styles.row}>
                 <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
-                <CText size={skin.type.label} color={C.soft} numberOfLines={1} style={styles.detail}>
+                <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.detail}>
                   {others.length ? T.settings.with(others.map((member) => member.username)) : T.settings.justYou}
                 </CText>
               </View>
@@ -114,6 +117,7 @@ const CalmAccount = () => {
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
             <Row label={common.language} detail={account.languageName} onPress={account.openLanguage} />
             <Row label={account.looksLabel} onPress={account.openLooks} />
+            {account.hasThemes && <Row label={common.theme} detail={account.themeName} onPress={account.openTheme} />}
             <Row label={common.notifications.menu} onPress={account.openNotifications} />
             {account.needsEmailCode && <Row label={common.emailCode.menu} onPress={account.openEmailCode} />}
             <Row label={copy.credits} onPress={account.openCredits} />
@@ -134,14 +138,14 @@ const CalmAccount = () => {
   );
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     scroll: { gap: s.spacing.section + 4, paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
     groupLabel: { paddingBottom: s.spacing.small },
     row: {
       alignItems: "center",
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       flexDirection: "row",
       gap: s.spacing.inline,
@@ -150,7 +154,7 @@ const createStyles = (s: Skin) =>
     },
     detail: { flexShrink: 1, textAlign: "right" },
     name: { flexShrink: 1 },
-    guest: { borderTopColor: C.hairline, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
+    guest: { borderTopColor: C.line, borderTopWidth: s.shape.divider, paddingTop: s.spacing.inline },
   });
 
 export default CalmAccount;

@@ -124,8 +124,31 @@ export interface Skin {
   size: SkinSizes;
   type: SkinType;
   copy: SkinCopy;
+  themes: { id: string; name: string }[];
+  theme: SkinTheme | null;
+  onPanel: Skin | null;
 }
 
-export type SkinSource = Omit<Skin, "copy" | "tagline"> & {
+export type SkinTheme = { id: string; name: string; elements: unknown };
+
+export type SkinPaint = Pick<
+  Skin,
+  "statusBarOnGround" | "colors" | "actions"
+> & {
+  panel: Pick<Skin["panel"], "fill" | "ink" | "title" | "line">;
+  shadow: string;
+};
+
+export type SkinThemeSource = {
+  id: string;
+  name: Record<Lang, string>;
+  elements: unknown;
+  paint: SkinPaint;
+  panel?: { elements: unknown; paint: SkinPaint };
+};
+
+export type SkinSource = Omit<Skin, "copy" | "tagline" | "themes" | "theme" | "onPanel"> & {
   copies: Record<Lang, SkinCopy>;
+  themes?: SkinThemeSource[];
+  defaultTheme?: string;
 };

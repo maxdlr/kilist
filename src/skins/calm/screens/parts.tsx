@@ -7,25 +7,54 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { Href, router } from "expo-router";
 import { ReactNode, useMemo } from "react";
-import { StyleProp, StyleSheet, Text, TextProps, TextStyle, View } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextProps,
+  TextStyle,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 
 type Weight = "regular" | "medium" | "semibold";
 
 export const CText = ({
   weight = "regular",
   size,
-  color = C.ink,
+  color,
   style,
   ...rest
-}: TextProps & { weight?: Weight; size?: number; color?: string; style?: StyleProp<TextStyle> }) => {
+}: TextProps & {
+  weight?: Weight;
+  size?: number;
+  color?: string;
+  style?: StyleProp<TextStyle>;
+}) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const fontSize = size ?? skin.type.body;
-  const family = weight === "semibold" ? skin.fonts.body!.bold : weight === "medium" ? skin.fonts.body!.medium : skin.fonts.body!.regular;
+  const family =
+    weight === "semibold"
+      ? skin.fonts.body!.bold
+      : weight === "medium"
+        ? skin.fonts.body!.medium
+        : skin.fonts.body!.regular;
   return (
-    <Text style={[{ color, fontFamily: family, fontSize, lineHeight: Math.round(fontSize * 1.38) }, style]} {...rest} />
+    <Text
+      style={[
+        {
+          color: color ?? C.text,
+          fontFamily: family,
+          fontSize,
+          lineHeight: Math.round(fontSize * 1.38),
+        },
+        style,
+      ]}
+      {...rest}
+    />
   );
 };
 
@@ -47,12 +76,13 @@ export const CButton = ({
   accessibilityLabel?: string;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const look = {
-    primary: { fill: C.ink, ink: C.ground, line: C.ink },
-    secondary: { fill: "transparent", ink: C.ink, line: C.field },
-    text: { fill: "transparent", ink: C.soft, line: "transparent" },
-    danger: { fill: C.danger, ink: C.ground, line: C.danger },
+    primary: { fill: C.fill, ink: C.onFill, line: C.fill },
+    secondary: { fill: "transparent", ink: C.text, line: C.fieldLine },
+    text: { fill: "transparent", ink: C.textSoft, line: "transparent" },
+    danger: { fill: C.danger, ink: C.onFill, line: C.danger },
   }[variant];
 
   return (
@@ -66,14 +96,20 @@ export const CButton = ({
         {
           backgroundColor: look.fill,
           borderColor: look.line,
-          height: variant === "text" ? skin.size.button.xs : skin.size.button.lg,
+          height:
+            variant === "text" ? skin.size.button.xs : skin.size.button.lg,
           opacity: pressed ? skin.shape.pressedOpacity : 1,
         },
         flex !== undefined && { flex },
       ]}
     >
       {icon?.(look.ink)}
-      <CText weight={variant === "text" ? "regular" : "medium"} size={variant === "text" ? skin.type.label + 1 : skin.type.body} color={look.ink} numberOfLines={1}>
+      <CText
+        weight={variant === "text" ? "regular" : "medium"}
+        size={variant === "text" ? skin.type.label + 1 : skin.type.body}
+        color={look.ink}
+        numberOfLines={1}
+      >
         {label}
       </CText>
     </Press>
@@ -102,13 +138,25 @@ export const Screen = ({
           styles.content,
           padded && styles.padded,
           { paddingTop: insets.top + skin.spacing.page - skin.spacing.small },
-          !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
+          !dock &&
+            !insideTabs && {
+              paddingBottom: skin.spacing.stack + insets.bottom,
+            },
         ]}
       >
         {children}
       </View>
       {dock && (
-        <View style={[styles.dock, !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom }]}>{dock}</View>
+        <View
+          style={[
+            styles.dock,
+            !insideTabs && {
+              paddingBottom: skin.spacing.stack + insets.bottom,
+            },
+          ]}
+        >
+          {dock}
+        </View>
       )}
     </View>
   );
@@ -118,36 +166,61 @@ export const Dot = ({ color, size = 8 }: { color: string; size?: number }) => (
   <View
     accessibilityElementsHidden
     importantForAccessibility="no-hide-descendants"
-    style={{ backgroundColor: color, borderRadius: size / 2, height: size, width: size }}
+    style={{
+      backgroundColor: color,
+      borderRadius: size / 2,
+      height: size,
+      width: size,
+    }}
   />
 );
 
-export const StockBars = ({ rows }: { rows: { label: string; count: number; color: string; icon?: ReactNode }[] }) => {
+export const StockBars = ({
+  rows,
+}: {
+  rows: { label: string; count: number; color: string; icon?: ReactNode }[];
+}) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const total = rows.reduce((sum, row) => sum + row.count, 0);
 
   return (
     <View style={styles.bars}>
-      {rows.map((row) => (
-        <View key={row.label} accessible accessibilityLabel={`${row.label}, ${row.count}`} style={styles.barRow}>
-          <View style={styles.barHead}>
+      {rows
+        .filter(({ count }) => !!count)
+        .map((row) => (
+          <View
+            key={row.label}
+            accessible
+            accessibilityLabel={`${row.label}, ${row.count}`}
+            style={styles.barRow}
+          >
+            {/* <View style={styles.barHead}> */}
             <View style={styles.barLabel}>
               {row.icon}
-              <CText size={skin.type.label + 1}>{row.label}</CText>
+              {/* <CText size={skin.type.label + 1}>{row.label}</CText> */}
             </View>
-            <CText size={skin.type.label + 1} color={C.soft}>{`${row.count}`}</CText>
+            {/* </View> */}
+
+            <View style={styles.barTrack}>
+              <View
+                style={[
+                  styles.barFill,
+                  {
+                    backgroundColor: row.color,
+                    width: `${total ? Math.round((row.count / total) * 100) : 0}%`,
+                  },
+                ]}
+              />
+            </View>
+
+            <CText
+              size={skin.type.label + 1}
+              color={C.textSoft}
+            >{`${row.count}`}</CText>
           </View>
-          <View style={styles.barTrack}>
-            <View
-              style={[
-                styles.barFill,
-                { backgroundColor: row.color, width: `${total ? Math.round((row.count / total) * 100) : 0}%` },
-              ]}
-            />
-          </View>
-        </View>
-      ))}
+        ))}
     </View>
   );
 };
@@ -155,23 +228,48 @@ export const StockBars = ({ rows }: { rows: { label: string; count: number; colo
 export const useCheckPending = () => {
   const tzOffset = useMemo(() => new Date().getTimezoneOffset(), []);
   const { data: foods } = useSWR<FoodType[]>({ url: "foods/swipe/browse" });
-  const { data: game } = useSWR<SwipeGameType>({ url: "swipe-list/game", params: { tzOffset } });
+  const { data: game } = useSWR<SwipeGameType>({
+    url: "swipe-list/game",
+    params: { tzOffset },
+  });
   const count = foods?.length ?? 0;
   return { count, pending: count > 0 && game?.playedToday === false };
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     root: { backgroundColor: C.ground, flex: 1 },
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
     bars: { gap: s.spacing.inline },
-    barRow: { gap: s.spacing.tight },
+    barRow: {
+      gap: s.spacing.tight,
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%",
+    },
     barHead: { flexDirection: "row", justifyContent: "space-between" },
-    barLabel: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
-    barTrack: { backgroundColor: C.hairline, borderRadius: 3, height: 6, overflow: "hidden" },
+    barLabel: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.small,
+    },
+    barTrack: {
+      width: "80%",
+      backgroundColor: C.line,
+      borderRadius: 3,
+      height: 6,
+      overflow: "hidden",
+    },
     barFill: { borderRadius: 3, height: 6 },
-    dock: { gap: s.spacing.small + 2, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter, paddingTop: s.spacing.small },
+    dock: {
+      gap: s.spacing.small + 2,
+      paddingBottom: s.spacing.stack,
+      paddingHorizontal: s.spacing.gutter,
+      paddingTop: s.spacing.small,
+    },
     button: {
       alignItems: "center",
       borderRadius: s.shape.radius,

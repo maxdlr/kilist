@@ -3,7 +3,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useReducedMotion } from "react-native-reanimated";
+import { configureReanimatedLogger, ReanimatedLogLevel, useReducedMotion } from "react-native-reanimated";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SWRConfig } from "swr";
 import AnimationService from "@/services/animation";
@@ -16,6 +16,8 @@ import { LanguageProvider, useLanguage } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";
 import { MarkProvider } from "@/providers/MarkProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
+
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 SplashScreen.preventAutoHideAsync();
 

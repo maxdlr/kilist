@@ -31,6 +31,7 @@ const en = {
   creditsProductsLabel: "Product names",
   creditsProducts: "Open Food Facts · openfoodfacts.org",
   language: "Language",
+  theme: "Theme",
   languageAuto: (name: string) => `Phone setting (${name})`,
   notifications: {
     title: "Keep me posted",

@@ -24,7 +24,7 @@ import {
 } from "react-native-heroicons/outline";
 import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
 import Svg, { Path } from "react-native-svg";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Dot, Screen, StockBars } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
@@ -32,6 +32,7 @@ const START_PREVIEW = 6;
 
 const Circle = ({ done }: { done: boolean }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   return (
     <View
@@ -44,7 +45,7 @@ const Circle = ({ done }: { done: boolean }) => {
         <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
           <Path
             d="M5 12l4 4 10-10"
-            stroke={C.ground}
+            stroke={C.onFill}
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -66,6 +67,7 @@ const SwipeRow = ({
   onLater: () => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const [buying, setBuying] = useState(true);
   const level = levelOf(food.inStockScore);
@@ -82,7 +84,7 @@ const SwipeRow = ({
       onAccessibilityAction={(event) =>
         event.nativeEvent.actionName === "later" ? onLater() : onBuy()
       }
-      style={[styles.slot, { backgroundColor: buying ? C.ink : C.tint }]}
+      style={[styles.slot, { backgroundColor: buying ? C.fill : C.tint }]}
     >
       <View
         style={[
@@ -93,7 +95,7 @@ const SwipeRow = ({
         <CText
           weight="medium"
           size={skin.type.label + 1}
-          color={buying ? C.ground : C.soft}
+          color={buying ? C.onFill : C.textSoft}
         >
           {buying ? T.shop.inBasket : T.shop.later}
         </CText>
@@ -121,6 +123,7 @@ const SwipeRow = ({
 
 const CalmShop = () => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const [showHow, setShowHow] = useState(false);
   const [basket, setBasket] = useState<FoodType[]>([]);
@@ -174,7 +177,7 @@ const CalmShop = () => {
       >
         <PlusIcon
           size={skin.size.icon.action}
-          color={C.ink}
+          color={C.text}
           strokeWidth={1.8}
         />
       </Press>
@@ -206,12 +209,12 @@ const CalmShop = () => {
                   {showHow ? (
                     <InformationCircleSolid
                       size={skin.size.icon.action + 2}
-                      color={C.ink}
+                      color={C.text}
                     />
                   ) : (
                     <InformationCircleIcon
                       size={skin.size.icon.action + 2}
-                      color={C.soft}
+                      color={C.textSoft}
                       strokeWidth={1.6}
                     />
                   )}
@@ -226,7 +229,7 @@ const CalmShop = () => {
                     icon: (
                       <ShoppingBagIcon
                         size={18}
-                        color={C.haveIt}
+                        color={C.positive}
                         strokeWidth={1.8}
                       />
                     ),
@@ -234,11 +237,11 @@ const CalmShop = () => {
                   {
                     label: T.stock.maybe,
                     count: run.range.high - run.range.low,
-                    color: skin.colors.levels[3],
+                    color: C.barMaybe,
                     icon: (
                       <QuestionMarkCircleIcon
                         size={18}
-                        color={C.faint}
+                        color={C.textFaint}
                         strokeWidth={1.8}
                       />
                     ),
@@ -259,7 +262,7 @@ const CalmShop = () => {
               </View>
             ))}
             {run.preview.length > START_PREVIEW && (
-              <CText size={skin.type.label} color={C.soft} style={styles.more}>
+              <CText size={skin.type.label} color={C.textSoft} style={styles.more}>
                 {common.shop.more(run.preview.length - START_PREVIEW)}
               </CText>
             )}
@@ -268,7 +271,7 @@ const CalmShop = () => {
                 <View style={styles.howRow}>
                   <ArrowRightIcon
                     size={skin.size.icon.action - 4}
-                    color={C.haveIt}
+                    color={C.positive}
                     strokeWidth={1.8}
                   />
                   <CText size={skin.type.label + 1} style={styles.flex}>
@@ -278,7 +281,7 @@ const CalmShop = () => {
                 <View style={styles.howRow}>
                   <ArrowLeftIcon
                     size={skin.size.icon.action - 4}
-                    color={C.ink}
+                    color={C.text}
                     strokeWidth={1.8}
                   />
                   <CText size={skin.type.label + 1} style={styles.flex}>
@@ -333,7 +336,7 @@ const CalmShop = () => {
               {T.shop.title}
             </CText>
             <View style={styles.headSide}>
-              <CText size={skin.type.label} color={C.soft}>
+              <CText size={skin.type.label} color={C.textSoft}>
                 {T.shop.toBuy(remaining.length)}
               </CText>
               <Press
@@ -345,7 +348,7 @@ const CalmShop = () => {
               >
                 <XMarkIcon
                   size={skin.size.icon.action}
-                  color={C.soft}
+                  color={C.textSoft}
                   strokeWidth={1.6}
                 />
               </Press>
@@ -360,24 +363,24 @@ const CalmShop = () => {
               style={[styles.legend, styles.hint]}
             >
               <View style={styles.legendItem}>
-                <ArrowLeftIcon size={16} color={C.soft} strokeWidth={1.8} />
-                <ClockIcon size={16} color={C.soft} strokeWidth={1.8} />
-                <CText size={skin.type.label} color={C.soft}>
+                <ArrowLeftIcon size={16} color={C.textSoft} strokeWidth={1.8} />
+                <ClockIcon size={16} color={C.textSoft} strokeWidth={1.8} />
+                <CText size={skin.type.label} color={C.textSoft}>
                   {T.shop.later}
                 </CText>
               </View>
               <View style={styles.legendItem}>
-                <CText size={skin.type.label} color={C.soft}>
+                <CText size={skin.type.label} color={C.textSoft}>
                   {T.shop.legendBasket}
                 </CText>
-                <ShoppingBagIcon size={16} color={C.haveIt} strokeWidth={1.8} />
-                <ArrowRightIcon size={16} color={C.haveIt} strokeWidth={1.8} />
+                <ShoppingBagIcon size={16} color={C.positive} strokeWidth={1.8} />
+                <ArrowRightIcon size={16} color={C.positive} strokeWidth={1.8} />
               </View>
             </View>
           )}
           {run.suggestion && (
             <View style={styles.next}>
-              <CText size={skin.type.caption} color={C.soft}>
+              <CText size={skin.type.caption} color={C.textSoft}>
                 {T.shop.usuallyNext}
               </CText>
               <SwipeRow
@@ -399,7 +402,7 @@ const CalmShop = () => {
             <>
               <CText
                 size={skin.type.label}
-                color={C.soft}
+                color={C.textSoft}
                 style={styles.basketLabel}
               >
                 {T.shop.inBasket}
@@ -415,7 +418,7 @@ const CalmShop = () => {
                     <Circle done />
                     <CText
                       size={skin.type.lead}
-                      color={C.faint}
+                      color={C.textFaint}
                       style={[styles.flex, styles.struck]}
                       numberOfLines={1}
                     >
@@ -433,7 +436,7 @@ const CalmShop = () => {
   );
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     head: {
@@ -452,7 +455,7 @@ const createStyles = (s: Skin) =>
     },
     row: {
       alignItems: "center",
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       flexDirection: "row",
       gap: s.spacing.inline,
@@ -482,7 +485,7 @@ const createStyles = (s: Skin) =>
     dockRow: { flexDirection: "row", gap: s.spacing.small },
     addButton: {
       alignItems: "center",
-      borderColor: C.field,
+      borderColor: C.fieldLine,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
       height: s.size.button.lg,
@@ -490,7 +493,7 @@ const createStyles = (s: Skin) =>
       width: s.size.button.lg,
     },
     more: {
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       paddingTop: s.spacing.inline,
     },
@@ -519,7 +522,7 @@ const createStyles = (s: Skin) =>
     },
     next: { gap: s.spacing.tight, paddingBottom: s.spacing.inline },
     slot: {
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       overflow: "hidden",
     },
@@ -542,7 +545,7 @@ const createStyles = (s: Skin) =>
       justifyContent: "center",
       width: s.size.check,
     },
-    circleDone: { backgroundColor: C.ink, borderColor: C.ink },
+    circleDone: { backgroundColor: C.fill, borderColor: C.fill },
     basketLabel: {
       paddingBottom: s.spacing.small,
       paddingTop: s.spacing.gutter,

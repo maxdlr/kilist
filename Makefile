@@ -11,7 +11,7 @@ MAKEFLAGS += --no-print-directory -s
 # MAKEFLAGS += -s
 include .env
 export $(shell sed 's/=.*//' .env)
--include .env.release.local
+-include .release.env
 .DEFAULT_GOAL := help
 #.PHONY: all
 ARG=$(filter-out $@, $(MAKECMDGOALS))
@@ -36,7 +36,7 @@ IOS_ARCHIVE = $(IOS_BUILD_DIR)/kilist.xcarchive
 release: ## Build a release APK against the production API
 	$(eval VERSION := $(shell node -p "require('./app.json').expo.version"))
 	$(eval COMMIT := $(shell git rev-parse --short HEAD)$(shell git diff --quiet HEAD || echo -dirty))
-	[ -n "$(RELEASE_KEYSTORE)" ] && [ -f "$(RELEASE_KEYSTORE)" ] || { echo "✘ No release keystore. Set RELEASE_KEYSTORE, RELEASE_KEY_ALIAS and RELEASE_KEYSTORE_PASSWORD in .env.release.local"; exit 1; }
+	[ -n "$(RELEASE_KEYSTORE)" ] && [ -f "$(RELEASE_KEYSTORE)" ] || { echo "✘ No release keystore. Set RELEASE_KEYSTORE, RELEASE_KEY_ALIAS and RELEASE_KEYSTORE_PASSWORD in .release.env"; exit 1; }
 	[ -n "$(APKSIGNER)" ] || { echo "✘ apksigner not found in $(ANDROID_SDK)/build-tools"; exit 1; }
 	echo "Building Kilist $(VERSION) ($(COMMIT)) for $(RELEASE_API_URL)"
 	CI=1 EXPO_NO_GIT_STATUS=1 npx expo prebuild -p android --no-install

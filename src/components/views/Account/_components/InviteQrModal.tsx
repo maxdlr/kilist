@@ -3,7 +3,7 @@ import BottomPanel from "@/components/elements/BottomPanel";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
-import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
@@ -16,7 +16,7 @@ const InviteQrModal = ({
   joinCode: string;
   onClose: () => void;
 }) => {
-  const skin = useSkin();
+  const skin = usePanelSkin();
   const styles = useSkinStyles(createStyles);
 
   return (

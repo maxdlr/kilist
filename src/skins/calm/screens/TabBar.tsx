@@ -19,7 +19,7 @@ import {
 } from "react-native-heroicons/outline";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { calmPalette as C } from "..";
+import { calmColors, useCalmColors } from "./colors";
 import { CText, Dot, useCheckPending } from "./parts";
 
 const ORDER = MAIN_TABS;
@@ -35,6 +35,7 @@ const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeW
 
 const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const { isHidden } = useTabBarVisibility();
@@ -77,10 +78,10 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               style={withPressed(styles.tab)}
             >
               <View style={styles.iconWrap}>
-                <Icon size={skin.size.icon.action + 2} color={isCurrent ? C.ink : C.soft} strokeWidth={isCurrent ? 1.8 : 1.4} />
+                <Icon size={skin.size.icon.action + 2} color={isCurrent ? C.text : C.textSoft} strokeWidth={isCurrent ? 1.8 : 1.4} />
                 {badge && (
                   <View style={styles.badge}>
-                    <Dot color={C.pending} size={7} />
+                    <Dot color={C.pendingDot} size={7} />
                   </View>
                 )}
               </View>
@@ -88,7 +89,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 allowFontScaling={false}
                 weight={isCurrent ? "semibold" : "regular"}
                 size={skin.type.caption - 1}
-                color={isCurrent ? C.ink : C.soft}
+                color={isCurrent ? C.text : C.textSoft}
                 numberOfLines={1}
               >
                 {label}
@@ -101,11 +102,11 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   );
 };
 
-const createStyles = (s: Skin) =>
+const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     bar: {
       backgroundColor: C.ground,
-      borderTopColor: C.hairline,
+      borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
       overflow: "hidden",
     },

@@ -7,7 +7,7 @@ import KilToggleButton from "@/components/elements/KilToggleButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import Title from "@/components/elements/Title/Title";
 import { HouseholdChoice } from "@/providers/AuthProvider";
-import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -22,7 +22,7 @@ const SwitchHouseholdForm = ({
   onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
   onClose: () => void;
 }) => {
-  const skin = useSkin();
+  const skin = usePanelSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.account;
   const login = skin.copy.login;

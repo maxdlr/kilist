@@ -6,7 +6,10 @@ import type { Skin } from "@/skins/types";
 import { type Href, router } from "expo-router";
 import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
-import { SafeAreaInsetsContext, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaInsetsContext,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
 const TOUCH = 44;
@@ -31,16 +34,29 @@ const BackBar = ({
   const color = ink ?? skin.colors.onGround;
 
   return (
-    <View style={[styles.root, { backgroundColor: fill ?? skin.colors.ground }]}>
+    <View
+      style={[styles.root, { backgroundColor: fill ?? skin.colors.ground }]}
+    >
       <View style={[styles.bar, { paddingTop: insets.top }]}>
         <Press
           accessibilityRole="button"
           accessibilityLabel={label}
           hitSlop={8}
-          onPress={() => (router.canGoBack() ? router.back() : router.replace(fallback))}
+          onPress={() =>
+            router.canGoBack() ? router.back() : router.replace(fallback)
+          }
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}
         >
-          <Svg width={ICON} height={ICON} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <Svg
+            width={ICON}
+            height={ICON}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={color}
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <Path d="M15 5l-7 7 7 7" />
           </Svg>
           <ThemedText size={skin.type.body} color={color} numberOfLines={1}>
@@ -66,6 +82,7 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.tight,
       minHeight: TOUCH,
       paddingRight: s.spacing.inline,
+      paddingTop: s.spacing.gutter,
     },
     pressed: { opacity: 0.6 },
     body: { flex: 1, minHeight: 0 },

@@ -1,34 +1,19 @@
 import type { SkinSource } from "../types";
 import calmCopy from "./copy";
+import { CALM_THEMES, DEFAULT_CALM_THEME } from "./themes";
 
 const NARROW = new Set([..."iljtfrI1.,:;'!|()[]-"]);
 const WIDE = new Set([..."mwMW%@"]);
 
-const ground = "#F6F4EF";
-const ink = "#23221F";
-const white = "#FFFFFF";
-
-export const calmPalette = {
-  ground,
-  ink,
-  white,
-  soft: "#5F5D57",
-  faint: "#8B887F",
-  hairline: "#E4E0D7",
-  field: "#D6D1C6",
-  ring: "#A8A399",
-  tint: "#EFECE5",
-  danger: ink,
-  pending: "#5E8A63",
-  haveIt: "#3F6A47",
-  needIt: ink,
-};
+const paint = CALM_THEMES.find(
+  (theme) => theme.id === DEFAULT_CALM_THEME,
+)!.paint;
 
 const calm: SkinSource = {
   id: "calm",
   name: "Calm",
   premium: false,
-  statusBarOnGround: "dark",
+  statusBarOnGround: paint.statusBarOnGround,
   textCase: "none",
   splash: "centered",
   game: {
@@ -48,56 +33,15 @@ const calm: SkinSource = {
       },
     },
     mono: "Inter-Regular",
-    body: { regular: "Inter-Regular", medium: "Inter-Medium", bold: "Inter-SemiBold" },
-  },
-  colors: {
-    ground,
-    onGround: ink,
-    accent: ink,
-    muted: "#5F5D57",
-    raised: "#EFECE5",
-    paper: white,
-    onPaper: ink,
-    fieldLine: "#D6D1C6",
-    signup: { fill: ground, ink },
-    toast: { fill: ink, ink: ground },
-    placeholder: "#8B887F",
-    scrim: "rgba(35,34,31,0.32)",
-    danger: ink,
-    alert: ink,
-    onAlert: ground,
-    success: "#5E8A63",
-    levels: {
-      1: "#7FA982",
-      2: "#B9D1B2",
-      3: "#D8D2C4",
-      4: "#E3C3AE",
-      5: "#D49A8F",
+    body: {
+      regular: "Inter-Regular",
+      medium: "Inter-Medium",
+      bold: "Inter-SemiBold",
     },
-    onLevel: ink,
-    sheets: [
-      { fill: ground, ink },
-      { fill: white, ink },
-      { fill: "#EFECE5", ink },
-      { fill: white, ink },
-    ],
   },
-  actions: {
-    primary: { fill: ink, ink: ground, line: ink },
-    secondary: { fill: "transparent", ink, line: "#D6D1C6" },
-    secondaryOnLight: { fill: "transparent", ink, line: "#D6D1C6" },
-    danger: { fill: "transparent", ink, line: ink },
-    ghost: { fill: "transparent", ink: "#5F5D57", line: "transparent" },
-    attached: { fill: white, ink, line: "#D6D1C6" },
-  },
-  panel: {
-    fill: white,
-    ink,
-    title: ink,
-    line: "#E4E0D7",
-    radius: 20,
-    secondary: "secondaryOnLight",
-  },
+  colors: paint.colors,
+  actions: paint.actions,
+  panel: { ...paint.panel, radius: 20, secondary: "secondaryOnLight" },
   shape: {
     border: 1,
     divider: 1,
@@ -106,7 +50,7 @@ const calm: SkinSource = {
     pressedOpacity: 0.7,
     stampShadow: 0,
     fieldBorder: 1,
-    shadow: { offset: 0, color: ink },
+    shadow: { offset: 0, color: paint.shadow },
   },
   spacing: {
     hair: 2,
@@ -145,6 +89,8 @@ const calm: SkinSource = {
     display: { sm: 28, md: 32, lg: 32, xl: 40, stamp: 16 },
   },
   copies: calmCopy,
+  themes: CALM_THEMES,
+  defaultTheme: DEFAULT_CALM_THEME,
 };
 
 export default calm;

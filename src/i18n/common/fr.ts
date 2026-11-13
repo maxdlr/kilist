@@ -33,6 +33,7 @@ const fr: CommonText = {
   creditsProductsLabel: "Noms des produits",
   creditsProducts: "Open Food Facts · openfoodfacts.org",
   language: "Langue",
+  theme: "Thème",
   languageAuto: (name: string) => `Réglage du téléphone (${name})`,
   notifications: {
     title: "Me tenir au courant",
