@@ -3,8 +3,11 @@
 const fs = require("fs");
 const path = require("path");
 
-const file = path.join(process.cwd(), "app.json");
-const config = JSON.parse(fs.readFileSync(file, "utf8"));
+const read = (name) => JSON.parse(fs.readFileSync(path.join(process.cwd(), name), "utf8"));
+const write = (name, data) =>
+  fs.writeFileSync(path.join(process.cwd(), name), JSON.stringify(data, null, 2) + "\n");
+
+const config = read("app.json");
 const current = config.expo.version;
 const wanted = process.argv[2];
 
@@ -17,6 +20,17 @@ if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/.test(next) || next === current) {
 
 config.expo.version = next;
 config.expo.android.versionCode = (config.expo.android.versionCode || 0) + 1;
+write("app.json", config);
 
-fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");
+const pkg = read("package.json");
+pkg.version = next;
+write("package.json", pkg);
+
+if (fs.existsSync(path.join(process.cwd(), "package-lock.json"))) {
+  const lock = read("package-lock.json");
+  lock.version = next;
+  if (lock.packages && lock.packages[""]) lock.packages[""].version = next;
+  write("package-lock.json", lock);
+}
+
 console.log(`✔ ${current} → ${next} (versionCode ${config.expo.android.versionCode})`);

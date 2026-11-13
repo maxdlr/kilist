@@ -51,7 +51,7 @@ release: ## Build a release APK against the production API
 	cp $(RELEASE_APK) $(RELEASE_DIR)/kilist-$(VERSION)-$(COMMIT).apk
 	echo "✔ $(RELEASE_DIR)/kilist-$(VERSION)-$(COMMIT).apk"
 
-bump: ## Bump the version and versionCode in app.json (optional: make bump 0.1.0-beta.1)
+bump: ## Bump the version in app.json, package.json and package-lock.json, and the versionCode (optional: make bump 0.1.0-beta.1)
 	node scripts/bump-version.js $(ARG)
 
 publish: ## Build the release APK and publish it as a GitHub release for testers
