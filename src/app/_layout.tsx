@@ -1,12 +1,13 @@
-import { DarkTheme, Stack, ThemeProvider } from "expo-router";
+import { DarkTheme, ThemeProvider } from "expo-router";
+import { Stack } from "expo-router/js-stack";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { configureReanimatedLogger, ReanimatedLogLevel, useReducedMotion } from "react-native-reanimated";
+import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SWRConfig } from "swr";
-import AnimationService from "@/services/animation";
+import { useSlideStackOptions } from "@/services/screenSlide";
 import fetcher, { onError } from "@/services/fetcher";
 
 import AuthGate from "@/components/AuthGate";
@@ -24,7 +25,7 @@ SplashScreen.preventAutoHideAsync();
 const SkinnedApp = () => {
   const skin = useSkin();
   const { lang } = useLanguage();
-  const reduced = useReducedMotion();
+  const slideOptions = useSlideStackOptions();
   const navigationTheme = useMemo(
     () => ({
       ...DarkTheme,
@@ -45,10 +46,7 @@ const SkinnedApp = () => {
         <MarkProvider>
         <AnimatedSplashOverlay />
         <AuthProvider>
-          <Stack key={lang} screenOptions={{
-              animation: reduced ? "fade" : "slide_from_right",
-              animationDuration: AnimationService.screen.duration,
-            }}>
+          <Stack key={lang} screenOptions={slideOptions}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="[id]" options={{ title: "" }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />

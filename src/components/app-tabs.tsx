@@ -1,13 +1,10 @@
 import { useSkin } from "@/providers/SkinProvider";
-import AnimationService from "@/services/animation";
+import { SLIDE } from "@/services/screenSlide";
 import { SkinTabBar } from "@/skins/screens";
 import { Tabs } from "expo-router";
 import { useMemo } from "react";
-import { Animated, Easing, useWindowDimensions } from "react-native";
+import { Animated, useWindowDimensions } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
-
-const { duration, curve } = AnimationService.screen;
-const SLIDE = { animation: "timing", config: { duration, easing: Easing.bezier(...curve) } } as const;
 
 export default function AppTabs() {
   const skin = useSkin();
