@@ -49,6 +49,7 @@ const en = {
     replayLine: "Replaying replaces today's answers and earns no extra points.",
   },
   shop: {
+    otherAisle: "Other",
     title: "List",
     toBuy: (count: number) => `${count} to buy`,
     hint: "Swipe right when it's in the basket, left for next time.",

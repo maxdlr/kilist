@@ -19,14 +19,14 @@ const useProductScan = () => {
     if (known?.name) return { name: known.name, product: { barcode }, conflicts: [] };
 
     try {
-      const { data } = await axios.get<{ name: string; icon?: string; tags?: string[]; quantity?: string }>(
+      const { data } = await axios.get<{ name: string; icon?: string; tags?: string[]; quantity?: string; aisle?: string }>(
         `products/${barcode}`,
       );
       if (!data?.name) throw new Error("no product");
       const avoided = household?.eaterProfiles ?? [];
       return {
         name: data.name,
-        product: { barcode, icon: data.icon, quantity: data.quantity },
+        product: { barcode, icon: data.icon, quantity: data.quantity, aisle: data.aisle },
         conflicts: (data.tags ?? []).filter((tag) => avoided.includes(tag)),
       };
     } catch (error: any) {

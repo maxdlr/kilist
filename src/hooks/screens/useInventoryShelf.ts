@@ -18,9 +18,8 @@ const useInventoryShelf = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isAddVisible, setIsAddVisible] = useState(false);
   const [addInitialName, setAddInitialName] = useState("");
-  const [addWithScan, setAddWithScan] = useState(false);
   const [addKey, setAddKey] = useState(0);
-  const { scan: scanRequested } = useLocalSearchParams<{ scan?: string }>();
+  const { add: addRequested } = useLocalSearchParams<{ add?: string }>();
   const [editingFood, setEditingFood] = useState<FoodType | null>(null);
   const [actionRequest, setActionRequest] = useState<ActionPanelRequest | null>(
     null,
@@ -49,24 +48,23 @@ const useInventoryShelf = () => {
   const closeAdd = useCallback(() => setIsAddVisible(false), []);
   const closeEdit = useCallback(() => setEditingFood(null), []);
 
-  const openAdd = (initialName = "", withScan = false) => {
+  const openAdd = (initialName = "") => {
     setEditingFood(null);
     setAddInitialName(initialName);
-    setAddWithScan(withScan);
     setAddKey((key) => key + 1);
     setIsAddVisible(true);
   };
 
-  const [handledScan, setHandledScan] = useState<string | undefined>();
+  const [handledAdd, setHandledAdd] = useState<string | undefined>();
 
-  if (scanRequested !== handledScan) {
-    setHandledScan(scanRequested);
-    if (scanRequested) openAdd("", true);
+  if (addRequested !== handledAdd) {
+    setHandledAdd(addRequested);
+    if (addRequested) openAdd();
   }
 
   useEffect(() => {
-    if (scanRequested) router.setParams({ scan: undefined });
-  }, [scanRequested]);
+    if (addRequested) router.setParams({ add: undefined });
+  }, [addRequested]);
 
   const askRemove = (ids: number[], title: string) => {
     setActionRequest({
@@ -138,7 +136,6 @@ const useInventoryShelf = () => {
     editSelected,
     isAddVisible,
     addInitialName,
-    addWithScan,
     addKey,
     openAdd,
     closeAdd,

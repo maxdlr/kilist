@@ -55,13 +55,14 @@ const useHomeLinks = () => {
     discoverLabel: common.looks.discover,
     balanceLabel: /\D/.test(skin.copy.tickets.balance(balance)) ? skin.copy.tickets.balance(balance) : skin.copy.prizes.balance(balance),
     openPrizes: () => router.navigate("/looks"),
+    isGuest,
     notice: isGuest
       ? { label: T.createAccount, open: () => router.push("/login?mode=signup") }
       : needsEmailCode
         ? { label: T.confirmEmail, open: () => router.navigate("/account?panel=emailCode") }
         : null,
     openInventory: () => router.navigate("/inventory"),
-    openScan: () => router.navigate({ pathname: "/inventory", params: { scan: "1" } } as Href),
+    openAdd: () => router.navigate({ pathname: "/inventory", params: { add: "1" } } as Href),
     openAccount: () => router.navigate("/account"),
     openAdmin: () => router.navigate("/admin"),
   };

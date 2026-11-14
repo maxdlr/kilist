@@ -1,11 +1,5 @@
 import type { Rules } from "./rules";
-import type {
-  EaterProfileType,
-  FoodBankItemType,
-  HouseholdWithMembersType,
-  ListType,
-  UserType,
-} from "@/types/model";
+import type { AisleType, EaterProfileType, FoodBankItemType, HouseholdWithMembersType, ListType, UserType } from "@/types/model";
 
 export type HistoryEntry = { isInStock: boolean | null; at: string };
 
@@ -17,6 +11,7 @@ export type LocalFood = {
   icon?: string | null;
   barcodes?: string[];
   quantity?: string | null;
+  aisle?: string | null;
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
@@ -60,6 +55,8 @@ export type NotificationEvent = {
 
 export type Catalog = {
   foodBanks: Record<string, FoodBankItemType[]>;
+  foodNames?: Record<string, Record<string, string[]>>;
+  aisles?: AisleType[];
   profiles?: EaterProfileType[];
   prizes: CatalogPrize[];
   rules?: Rules;

@@ -36,7 +36,7 @@ export const addHistory = (food: LocalFood, entry: HistoryEntry, replace = false
 const UNITS: Record<string, number> = { kg: 1000, g: 1, l: 1000, cl: 10, ml: 1 };
 const PACK = /(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|l|cl|ml)\b/i;
 
-export type ScannedProduct = { barcode?: string; icon?: string; quantity?: string };
+export type ScannedProduct = { barcode?: string; icon?: string; quantity?: string; aisle?: string };
 
 export const packSize = (quantity?: string | null): number | null => {
   const match = quantity?.match(PACK);
@@ -94,6 +94,7 @@ export const attachProduct = (food: LocalFood, product?: ScannedProduct | null) 
     food.quantity = product.quantity.trim().slice(0, quantityLength);
   }
   if (!food.icon && typeof product.icon === "string" && product.icon) food.icon = product.icon;
+  if (!food.aisle && typeof product.aisle === "string" && product.aisle) food.aisle = product.aisle;
 };
 
 const lastActivity = (food: LocalFood) =>

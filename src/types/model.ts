@@ -14,6 +14,7 @@ export interface FoodType {
   icon?: string | null;
   barcodes?: string[];
   quantity?: string | null;
+  aisle?: string | null;
   lists: ListType[] | number[];
   description?: string;
   inStockScore: number;
@@ -38,12 +39,15 @@ export interface FoodBankItemType {
   key?: string;
   months?: number[];
   name: string;
+  aisle?: string;
   description?: string;
   icon?: string;
   staple?: boolean;
   tags?: string[];
   group?: string;
 }
+
+export type AisleType = { id: string; names: Record<string, string> };
 
 export type EaterProfileType = { id: string; kind: "exclude" | "include"; ask?: string };
 

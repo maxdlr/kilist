@@ -2,6 +2,7 @@ import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
@@ -85,6 +86,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
         value={name}
         onChangeText={setName}
       />
+      <NameSuggestions query={name} onPick={setName} />
       {!run.isStarted ? (
         <>
           <ThemedText color={skin.panel.ink}>{T.addListLine}</ThemedText>

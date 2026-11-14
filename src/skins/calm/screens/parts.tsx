@@ -185,13 +185,15 @@ export const Dot = ({ color, size = 8 }: { color: string; size?: number }) => (
 
 export const StockBars = ({
   rows,
+  total: outOf,
 }: {
   rows: { label: string; count: number; color: string; icon?: ReactNode }[];
+  total?: number;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const total = rows.reduce((sum, row) => sum + row.count, 0);
+  const total = outOf ?? rows.reduce((sum, row) => sum + row.count, 0);
 
   return (
     <View style={styles.bars}>
@@ -204,12 +206,7 @@ export const StockBars = ({
             accessibilityLabel={`${row.label}, ${row.count}`}
             style={styles.barRow}
           >
-            {/* <View style={styles.barHead}> */}
-            <View style={styles.barLabel}>
-              {row.icon}
-              {/* <CText size={skin.type.label + 1}>{row.label}</CText> */}
-            </View>
-            {/* </View> */}
+            <View style={styles.barLabel}>{row.icon}</View>
 
             <View style={styles.barTrack}>
               <View
@@ -223,10 +220,9 @@ export const StockBars = ({
               />
             </View>
 
-            <CText
-              size={skin.type.label + 1}
-              color={C.textSoft}
-            >{`${row.count}`}</CText>
+            <CText size={skin.type.label + 1} color={C.textSoft}>
+              {String(row.count)}
+            </CText>
           </View>
         ))}
     </View>
@@ -344,21 +340,17 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     },
     bars: { gap: s.spacing.inline },
     barRow: {
-      gap: s.spacing.tight,
-      display: "flex",
-      flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
-      width: "100%",
+      flexDirection: "row",
+      gap: s.spacing.small,
     },
-    barHead: { flexDirection: "row", justifyContent: "space-between" },
     barLabel: {
       alignItems: "center",
       flexDirection: "row",
       gap: s.spacing.small,
     },
     barTrack: {
-      width: "80%",
+      flex: 1,
       backgroundColor: C.line,
       borderRadius: 3,
       height: 6,

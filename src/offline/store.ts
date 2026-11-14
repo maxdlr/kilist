@@ -58,7 +58,7 @@ const load = () => {
   loaded = true;
   const pack = db.loadValue<Catalog>(KEY_CATALOG) ?? bundledCatalog();
   if (pack) {
-    setFoodBanks(pack.foodBanks);
+    setFoodBanks(pack.foodBanks, pack.foodNames, pack.aisles);
     setRules(pack.rules);
   }
   base = db.loadValue<Snapshot>(KEY_SNAPSHOT) ?? null;
@@ -132,7 +132,7 @@ export const startGuest = (snapshot: Snapshot) => {
 export const applyCatalog = (catalog: Catalog) => {
   load();
   const hadRules = hasRules();
-  setFoodBanks(catalog.foodBanks);
+  setFoodBanks(catalog.foodBanks, catalog.foodNames, catalog.aisles);
   setRules(catalog.rules);
   if (!hadRules && hasRules() && !guest) {
     rebuild();

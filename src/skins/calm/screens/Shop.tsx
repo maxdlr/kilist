@@ -2,7 +2,9 @@ import Press from "@/components/elements/Press";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
+import { getLang } from "@/i18n";
 import common from "@/i18n/common";
+import { aisleList, aisleOf } from "@/offline/foodNames";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
@@ -35,6 +37,7 @@ import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
 const TAGS_HEIGHT = 0.7;
+const OTHER_AISLE = "other";
 const IDLE_MS = 2000;
 const NUDGE = 150;
 const NUDGE_PAUSE_MS = 900;
@@ -236,6 +239,30 @@ const CalmShop = () => {
     </View>
   );
   if (!run.isStarted && !run.isEmpty) {
+    const lang = getLang();
+    const byAisle = new Map<string, FoodType[]>();
+    for (const food of run.preview) {
+      const aisle = aisleOf(food) ?? OTHER_AISLE;
+      byAisle.set(aisle, [...(byAisle.get(aisle) ?? []), food]);
+    }
+    const known = aisleList().filter((aisle) => byAisle.has(aisle.id));
+    const rest = [...byAisle.keys()].filter((id) => !known.some((aisle) => aisle.id === id));
+    const sections = [
+      ...known.map((aisle) => ({
+        id: aisle.id,
+        label: aisle.names[lang] ?? aisle.names.en ?? aisle.id,
+        foods: byAisle.get(aisle.id)!,
+      })),
+      ...(rest.length > 0
+        ? [
+            {
+              id: OTHER_AISLE,
+              label: known.length > 0 ? T.shop.otherAisle : null,
+              foods: rest.flatMap((id) => byAisle.get(id)!),
+            },
+          ]
+        : []),
+    ];
     return (
       <View style={styles.flex}>
         <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
@@ -274,13 +301,28 @@ const CalmShop = () => {
             </View>
             <ScrollView
               style={[styles.tagScroll, { maxHeight: height * TAGS_HEIGHT }]}
-              contentContainerStyle={styles.tags}
+              contentContainerStyle={styles.sections}
             >
-              {run.preview.map((food) => (
-                <View key={food.id} style={styles.tag}>
-                  <CText size={skin.type.body} numberOfLines={1}>
-                    {food.name}
-                  </CText>
+              {sections.map((section) => (
+                <View key={section.id} style={styles.section}>
+                  {section.label && (
+                    <CText
+                      size={skin.type.label}
+                      color={C.textSoft}
+                      accessibilityRole="header"
+                    >
+                      {section.label}
+                    </CText>
+                  )}
+                  <View style={styles.tags}>
+                    {section.foods.map((food) => (
+                      <View key={food.id} style={styles.tag}>
+                        <CText size={skin.type.body} numberOfLines={1}>
+                          {food.name}
+                        </CText>
+                      </View>
+                    ))}
+                  </View>
                 </View>
               ))}
             </ScrollView>
@@ -494,6 +536,8 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       width: s.size.button.lg,
     },
     tagScroll: { flexGrow: 0, flexShrink: 1 },
+    sections: { gap: s.spacing.section },
+    section: { gap: s.spacing.small },
     tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     tag: {
       backgroundColor: C.tint,

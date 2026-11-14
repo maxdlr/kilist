@@ -35,7 +35,10 @@ const HomeLinksBlock = ({
           onPress={links.openPrizes}
           style={({ pressed }) => [
             styles.prize,
-            { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+            {
+              backgroundColor: fill ?? skin.colors.raised,
+              opacity: pressed ? skin.shape.pressedOpacity : 1,
+            },
           ]}
         >
           <ThemedText size={skin.type.label} color={text}>
@@ -43,9 +46,18 @@ const HomeLinksBlock = ({
           </ThemedText>
         </Press>
       ) : (
-        <View style={[styles.looks, { backgroundColor: fill ?? skin.colors.raised, borderColor: soft }]}>
+        <View
+          style={[
+            styles.looks,
+            { backgroundColor: fill ?? skin.colors.raised, borderColor: soft },
+          ]}
+        >
           <View style={styles.looksHead}>
-            <ThemedText size={skin.type.label} color={text} accessibilityRole="header">
+            <ThemedText
+              size={skin.type.label}
+              color={text}
+              accessibilityRole="header"
+            >
               {caseFor(skin, links.prizesTitle)}
             </ThemedText>
             <Press
@@ -55,7 +67,10 @@ const HomeLinksBlock = ({
               onPress={links.openPrizes}
               style={({ pressed }) => [
                 styles.discover,
-                { borderColor: text, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+                {
+                  borderColor: text,
+                  opacity: pressed ? skin.shape.pressedOpacity : 1,
+                },
               ]}
             >
               <ThemedText size={skin.type.caption} color={text}>
@@ -69,18 +84,39 @@ const HomeLinksBlock = ({
               accessibilityRole="button"
               accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
               onPress={prize.open}
-              style={({ pressed }) => [styles.prizeRow, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
+              style={({ pressed }) => [
+                styles.prizeRow,
+                { opacity: pressed ? skin.shape.pressedOpacity : 1 },
+              ]}
             >
               <View style={styles.prizeText}>
-                <ThemedText size={skin.type.label} color={text} numberOfLines={1} style={styles.prizeName}>
+                <ThemedText
+                  size={skin.type.label}
+                  color={text}
+                  numberOfLines={1}
+                  style={styles.prizeName}
+                >
                   {caseFor(skin, prize.name)}
                 </ThemedText>
-                <ThemedText size={skin.type.label} color={soft} numberOfLines={1} style={styles.detail}>
+                <ThemedText
+                  size={skin.type.label}
+                  color={soft}
+                  numberOfLines={1}
+                  style={styles.detail}
+                >
                   {caseFor(skin, prize.away)}
                 </ThemedText>
               </View>
               <View style={[styles.track, { backgroundColor: soft }]}>
-                <View style={[styles.fill, { backgroundColor: text, width: `${Math.round(prize.progress * 100)}%` }]} />
+                <View
+                  style={[
+                    styles.fill,
+                    {
+                      backgroundColor: text,
+                      width: `${Math.round(prize.progress * 100)}%`,
+                    },
+                  ]}
+                />
               </View>
             </Press>
           ))}
@@ -88,8 +124,16 @@ const HomeLinksBlock = ({
       )}
 
       {links.notice && (
-        <Press accessibilityRole="button" onPress={links.notice.open} style={withPressed(styles.notice)}>
-          <ThemedText size={skin.type.label} color={text} style={styles.noticeText}>
+        <Press
+          accessibilityRole="button"
+          onPress={links.notice.open}
+          style={withPressed(styles.notice)}
+        >
+          <ThemedText
+            size={skin.type.label}
+            color={text}
+            style={styles.noticeText}
+          >
             {caseFor(skin, links.notice.label)}
           </ThemedText>
         </Press>
@@ -108,7 +152,12 @@ const createStyles = (s: Skin) =>
       marginTop: s.spacing.stack,
       padding: s.spacing.stack,
     },
-    looksHead: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
+    looksHead: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      justifyContent: "space-between",
+    },
     discover: {
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
@@ -123,11 +172,19 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.stack,
       paddingVertical: s.spacing.inline,
     },
-    prizeText: { flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
+    prizeText: {
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      justifyContent: "space-between",
+    },
     detail: { flexShrink: 1, textAlign: "right" },
     track: { borderRadius: 2, height: 4, overflow: "hidden" },
     fill: { borderRadius: 2, height: 4 },
-    notice: { alignItems: "center", justifyContent: "center", minHeight: s.size.button.xs },
+    notice: {
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: s.size.button.xs,
+    },
     noticeText: { textAlign: "center", textDecorationLine: "underline" },
   });
 

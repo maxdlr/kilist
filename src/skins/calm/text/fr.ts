@@ -60,6 +60,7 @@ const fr: CalmText = {
       "Rejouer remplace tes réponses d'aujourd'hui et ne rapporte pas de points en plus.",
   },
   shop: {
+    otherAisle: "Autres",
     title: "Liste",
     toBuy: (count: number) => `${count} à acheter`,
     hint: "Glisse à droite quand c'est dans le panier, à gauche pour la prochaine fois.",

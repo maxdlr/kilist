@@ -12,11 +12,9 @@ import { levelOf } from "@/utils/scoreUtils";
 import { rules } from "@/offline/rules";
 import { router, useFocusEffect } from "expo-router";
 import {
-  CheckIcon,
   ChevronRightIcon,
   ClockIcon,
   PlayIcon,
-  QuestionMarkCircleIcon,
   ShoppingCartIcon,
   SparklesIcon,
 } from "react-native-heroicons/outline";
@@ -73,28 +71,8 @@ const CalmHome = () => {
   const sentence = `${names.join(", ")}${needed.length > PREVIEW ? "…" : "."}`;
 
   return (
-    <Screen
-      padded={false}
-      dock={
-        links.notice ? (
-          <Press
-            accessibilityRole="button"
-            onPress={links.notice.open}
-            style={withPressed(styles.notice)}
-          >
-            <CText size={skin.type.label + 1} style={styles.noticeText}>
-              {links.notice.label}
-            </CText>
-          </Press>
-        ) : undefined
-      }
-    >
-      <View style={styles.top}>
-        <CText size={skin.type.label} color={C.textSoft} style={styles.flex}>
-          {T.date(new Date())}
-        </CText>
-        <HomeShortcuts />
-      </View>
+    <Screen padded={false}>
+
       <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.scroll}
@@ -124,6 +102,7 @@ const CalmHome = () => {
 
         {foods.length > 0 && (
           <StockBars
+            total={foods.length}
             rows={[
               {
                 label: T.stock.sure,
@@ -135,27 +114,6 @@ const CalmHome = () => {
                     color={C.positive}
                     strokeWidth={1.8}
                   />
-                ),
-              },
-              {
-                label: T.stock.maybe,
-                count: range.high - range.low,
-                color: C.barMaybe,
-                icon: (
-                  <QuestionMarkCircleIcon
-                    size={18}
-                    color={C.textFaint}
-                    strokeWidth={1.8}
-                  />
-                ),
-              },
-
-              {
-                label: T.stock.stocked,
-                count: Math.max(0, foods.length - range.high),
-                color: skin.colors.levels[5],
-                icon: (
-                  <CheckIcon size={18} color={C.textSoft} strokeWidth={2} />
                 ),
               },
             ]}
@@ -230,12 +188,9 @@ const CalmHome = () => {
               </CText>
               <Press
                 accessibilityRole="button"
-                hitSlop={8}
+                hitSlop={skin.spacing.small}
                 onPress={links.openPrizes}
-                style={({ pressed }) => [
-                  styles.discover,
-                  { opacity: pressed ? skin.shape.pressedOpacity : 1 },
-                ]}
+                style={withPressed(styles.discover)}
               >
                 <CText size={skin.type.label}>{links.discoverLabel}</CText>
               </Press>
@@ -246,10 +201,7 @@ const CalmHome = () => {
                 accessibilityRole="button"
                 accessibilityLabel={`${prize.name}. ${prize.away}. ${prize.line}`}
                 onPress={prize.open}
-                style={({ pressed }) => [
-                  styles.prize,
-                  { opacity: pressed ? skin.shape.pressedOpacity : 1 },
-                ]}
+                style={withPressed(styles.prize)}
               >
                 <View style={styles.prizeText}>
                   <CText
@@ -282,6 +234,10 @@ const CalmHome = () => {
           </View>
         )}
       </ScrollView>
+
+      <View style={styles.footer}>
+        <HomeShortcuts withNotice />
+      </View>
     </Screen>
   );
 };
@@ -295,12 +251,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingHorizontal: s.spacing.gutter,
     },
     head: { gap: s.spacing.small },
-    top: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      paddingHorizontal: s.spacing.gutter,
-    },
+    footer: { alignItems: "center", padding: s.spacing.gutter },
     onList: { gap: s.spacing.inline },
     card: {
       alignItems: "center",
@@ -312,7 +263,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       gap: s.spacing.inline,
       padding: s.spacing.stack,
     },
-    cardText: { flex: 1, gap: 2, minWidth: 0 },
+    cardText: { flex: 1, gap: s.spacing.hair, minWidth: 0 },
     cardFacts: { flexDirection: "row", gap: s.spacing.inline },
     fact: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight },
     prizes: {
@@ -344,17 +295,11 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     prizeDetail: { flexShrink: 1, textAlign: "right" },
     track: {
       backgroundColor: C.fieldLine,
-      borderRadius: 2,
-      height: 4,
+      borderRadius: s.spacing.hair,
+      height: s.spacing.tight,
       overflow: "hidden",
     },
-    trackFill: { backgroundColor: C.fill, borderRadius: 2, height: 4 },
-    notice: {
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: s.size.button.xs,
-    },
-    noticeText: { textAlign: "center", textDecorationLine: "underline" },
+    trackFill: { backgroundColor: C.fill, borderRadius: s.spacing.hair, height: s.spacing.tight },
   });
 
 export default CalmHome;

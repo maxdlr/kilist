@@ -2,6 +2,7 @@ import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title/Title";
 import common from "@/i18n/common";
@@ -21,13 +22,11 @@ const FoodForm = ({
   onRemove,
   onClose,
   scannable,
-  startScanning,
 }: {
   title: string;
   initialName: string;
   initialDescription: string;
   scannable: boolean;
-  startScanning: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
   onClose: () => void;
@@ -38,7 +37,7 @@ const FoodForm = ({
   const { showToast } = useToast();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
-  const [scanning, setScanning] = useState(startScanning);
+  const [scanning, setScanning] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
 
   const handleSubmit = async () => {
@@ -85,6 +84,7 @@ const FoodForm = ({
         value={name}
         onChangeText={setName}
       />
+      {!onRemove && <NameSuggestions query={name} onPick={setName} />}
       <FormInput
         label={copy.description}
         placeholder={skin.copy.placeholders.foodDescription}
@@ -134,11 +134,9 @@ const FoodFormModal = ({
   onRemove,
   onClose,
   scannable = false,
-  startScanning = false,
 }: {
   visible: boolean;
   scannable?: boolean;
-  startScanning?: boolean;
   title: string;
   formKey?: string | number;
   initialName?: string;
@@ -157,7 +155,6 @@ const FoodFormModal = ({
       onRemove={onRemove}
       onClose={onClose}
       scannable={scannable}
-      startScanning={startScanning}
     />
   </BottomPanel>
 );

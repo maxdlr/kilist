@@ -12,7 +12,7 @@ const { applySyncResponse, getState, hasSession, pendingCount, pendingOps, reset
   await import("../store");
 const { GHOST_RACE_ID, matchLocal, offlineRaceView, queueRaceAnswer } = await import("../routes");
 const { calculateScore, nextSuggestion, starterFoods, swipeDeck, swipeGame } = await import("../domain");
-const { setFoodBanks, shownName } = await import("../foodNames");
+const { aisleOf, setFoodBanks, shownName, suggestNames } = await import("../foodNames");
 
 const food = (id: number, score = 0.5, extra = {}) => ({
   id,
@@ -541,6 +541,28 @@ describe("rules pack", () => {
     applyCatalog({ foodBanks: {}, prizes: [], rules: pack });
     expect(getState()!.foods[0]!.histories).toHaveLength(1);
     setRules(pack);
+  });
+});
+
+describe("aisles and name suggestions", () => {
+  it("files foods by aisle and suggests names as they are typed", () => {
+    setFoodBanks(
+      { en: [{ key: "milk", name: "Milk", aisle: "dairy" }], fr: [{ key: "milk", name: "Lait", aisle: "dairy" }] },
+      { en: { dairy: ["Yogurt drinks", "Yogurts"], drinks: ["Oat milk drinks"] }, fr: { dairy: ["Crèmes dessert"] } },
+      [{ id: "dairy", names: { en: "Dairy", fr: "Crèmerie" } }],
+    );
+
+    expect(aisleOf({ name: "lait" })).toBe("dairy");
+    expect(aisleOf({ name: " yogurts " })).toBe("dairy");
+    expect(aisleOf({ name: "Yogurt" })).toBe("dairy");
+    expect(aisleOf({ name: "Yogurt drink" })).toBe("dairy");
+    expect(aisleOf({ name: "Golf ball" })).toBeNull();
+    expect(aisleOf({ name: "Golf ball", aisle: "household" })).toBe("household");
+    expect(suggestNames("yo", "en", 5)).toEqual(["Yogurts", "Yogurt drinks"]);
+    expect(suggestNames("milk", "en", 5)).toEqual(["Oat milk drinks"]);
+    expect(suggestNames("creme", "fr", 5)).toEqual(["Crèmes dessert"]);
+    expect(suggestNames("y", "en", 5)).toEqual([]);
+    setFoodBanks(null);
   });
 });
 
