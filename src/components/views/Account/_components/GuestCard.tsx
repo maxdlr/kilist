@@ -30,12 +30,14 @@ const GuestCard = ({
       </ThemedText>
       <View style={styles.actions}>
         <KilButton
+          flex={1}
           height={skin.size.button.sm}
           fontSize={skin.type.label}
           label={copy.create}
           onTouch={account.createAccount}
         />
         <KilButton
+          flex={1}
           height={skin.size.button.sm}
           fontSize={skin.type.label}
           variant={secondary}
@@ -50,7 +52,12 @@ const GuestCard = ({
 const createStyles = (s: Skin) =>
   StyleSheet.create({
     card: { gap: s.spacing.inline },
-    actions: { gap: s.spacing.inline },
+    actions: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: s.spacing.inline,
+      justifyContent: "center",
+    },
   });
 
 export default GuestCard;

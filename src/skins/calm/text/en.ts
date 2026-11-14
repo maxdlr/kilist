@@ -69,7 +69,7 @@ const en = {
   },
   inventory: {
     editOne: "Edit",
-    clear: "Clear",
+    closeSearch: "Close search",
     addQuery: (query: string) => `Add “${query}”`,
     noResultsLine: "Add it and Kilist will start keeping track of it.",
     emptyLine:

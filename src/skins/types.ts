@@ -119,7 +119,7 @@ export interface Skin {
     stampShadow: number;
     fieldBorder: number;
     shadow: { offset: number; color: string };
-    button?: "pill";
+    pill?: boolean;
   };
   spacing: SkinSpacing;
   size: SkinSizes;

@@ -48,7 +48,8 @@ const FormInput = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const isPassword = type === "password";
   const attached = skin.actions.attached;
-  const radius = skin.shape.radius;
+  const pill = skin.shape.pill === true;
+  const radius = pill ? skin.size.input / 2 : skin.shape.radius;
 
   const sideAction =
     action ??
@@ -85,6 +86,7 @@ const FormInput = ({
               color: skin.colors.onPaper,
               fontFamily: skin.fonts.mono,
             },
+            pill && styles.pillInput,
             style,
           ]}
           {...typeProps[type]}
@@ -109,6 +111,7 @@ const FormInput = ({
                 borderBottomRightRadius: radius,
                 borderTopRightRadius: radius,
               },
+              pill && styles.pillAction,
             ])}
             accessibilityRole="button"
             accessibilityLabel={
@@ -154,6 +157,8 @@ const createStyles = (s: Skin) =>
       justifyContent: "center",
       paddingHorizontal: s.spacing.inline,
     },
+    pillInput: { paddingHorizontal: s.spacing.stack + 2 },
+    pillAction: { paddingLeft: s.spacing.inline, paddingRight: s.spacing.stack + 2 },
   });
 
 export default FormInput;

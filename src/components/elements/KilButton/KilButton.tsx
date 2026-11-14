@@ -38,7 +38,7 @@ const KilButton = ({
   const override = useContext(ButtonKindOverride);
   const kind = override && variant !== "danger" ? override : variant;
   const { fill, ink, line } = colors ?? skin.actions[kind];
-  const pill = skin.shape.button === "pill";
+  const pill = skin.shape.pill === true;
 
   return (
     <Press

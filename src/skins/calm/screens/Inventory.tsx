@@ -10,7 +10,9 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, XMarkIcon } from "react-native-heroicons/outline";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { calmColors, useCalmColors } from "./colors";
@@ -65,7 +67,28 @@ const CalmInventory = () => {
   const styles = useSkinStyles(createStyles);
   const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
+  const [searching, setSearching] = useState(false);
   if (shelf.isLoading) return <CalmLoading />;
+
+  const canSearch = !isEmpty && !isSelectMode;
+  const searchOpen = canSearch && (searching || shelf.search !== "");
+  const toggleSearch = () => {
+    if (searchOpen) {
+      shelf.setSearch("");
+      setSearching(false);
+    } else {
+      setSearching(true);
+    }
+  };
+  const iconButton = (label: string, Icon: typeof XMarkIcon, onPress: () => void) => (
+    <CButton
+      key={label}
+      variant="secondary"
+      accessibilityLabel={label}
+      onPress={onPress}
+      icon={(color) => <Icon size={skin.size.icon.action} color={color} strokeWidth={1.8} />}
+    />
+  );
 
   const half = (label: string, onPress: () => void, variant: "primary" | "secondary" | "danger" = "primary") => (
     <CButton key={label} label={label} variant={variant} onPress={onPress} />
@@ -76,31 +99,37 @@ const CalmInventory = () => {
         ...(selectedIds.length === 1 ? [half(T.inventory.editOne, shelf.editSelected, "secondary")] : []),
         half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "danger"),
       ]
-    : noResults
-      ? [half(T.inventory.clear, () => shelf.setSearch(""), "secondary"), half(T.inventory.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
-      : isEmpty
-        ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.inventory.addSuggested, () => router.push("/onboarding"))]
-        : [half(skin.copy.inventory.select, shelf.startSelect, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
+    : isEmpty
+      ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.inventory.addSuggested, () => router.push("/onboarding"))]
+      : [
+          iconButton(skin.copy.inventory.select, PencilSquareIcon, shelf.startSelect),
+          iconButton(skin.copy.inventory.add, PlusIcon, () => shelf.openAdd()),
+          iconButton(skin.copy.inventory.search, MagnifyingGlassIcon, toggleSearch),
+        ];
+
+  const searchRow = (
+    <View style={styles.searchRow}>
+      <View style={styles.flex}>
+        <FormInput
+          autoFocus={searching}
+          accessibilityLabel={skin.copy.inventory.search}
+          placeholder={skin.copy.inventory.search}
+          value={shelf.search}
+          onChangeText={shelf.setSearch}
+        />
+      </View>
+      {noResults
+        ? iconButton(T.inventory.addQuery(query), PlusIcon, () => shelf.openAdd(shelf.search.trim()))
+        : iconButton(skin.copy.inventory.select, PencilSquareIcon, shelf.startSelect)}
+      {iconButton(T.inventory.closeSearch, XMarkIcon, toggleSearch)}
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <Screen
         padded={false}
-        dock={
-          <>
-            {!isEmpty && !isSelectMode && (
-              <View style={styles.search}>
-              <FormInput
-                accessibilityLabel={skin.copy.inventory.search}
-                placeholder={skin.copy.inventory.search}
-                value={shelf.search}
-                onChangeText={shelf.setSearch}
-              />
-              </View>
-            )}
-            {actions}
-          </>
-        }
+        dock={searchOpen ? searchRow : actions}
       >
         <View style={styles.titleRow}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
@@ -165,7 +194,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       width: s.size.check,
     },
     message: { flex: 1, gap: s.spacing.small, justifyContent: "center", paddingHorizontal: s.spacing.gutter },
-    search: { width: "100%" },
+    searchRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.small + 2, width: "100%" },
   });
 
 export default CalmInventory;
