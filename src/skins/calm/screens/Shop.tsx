@@ -13,7 +13,12 @@ import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -222,21 +227,17 @@ const CalmShop = () => {
   if (run.isLoading) return <CalmLoading />;
 
   const dockWith = (label: string, onPress: () => void) => (
-    <View style={styles.dockRow}>
-      <Press
-        accessibilityRole="button"
+    <>
+      <CButton
+        variant="secondary"
         accessibilityLabel={common.shop.add}
         onPress={run.openAdd}
-        style={withPressed(styles.addButton)}
-      >
-        <PlusIcon
-          size={skin.size.icon.action}
-          color={C.text}
-          strokeWidth={1.8}
-        />
-      </Press>
-      <CButton flex={1} label={label} onPress={onPress} />
-    </View>
+        icon={(color) => (
+          <PlusIcon size={skin.size.icon.action} color={color} strokeWidth={1.8} />
+        )}
+      />
+      <CButton label={label} onPress={onPress} />
+    </>
   );
   if (!run.isStarted && !run.isEmpty) {
     const lang = getLang();
@@ -246,7 +247,9 @@ const CalmShop = () => {
       byAisle.set(aisle, [...(byAisle.get(aisle) ?? []), food]);
     }
     const known = aisleList().filter((aisle) => byAisle.has(aisle.id));
-    const rest = [...byAisle.keys()].filter((id) => !known.some((aisle) => aisle.id === id));
+    const rest = [...byAisle.keys()].filter(
+      (id) => !known.some((aisle) => aisle.id === id),
+    );
     const sections = [
       ...known.map((aisle) => ({
         id: aisle.id,
@@ -525,7 +528,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       flexDirection: "row",
       gap: s.spacing.tight + 2,
     },
-    dockRow: { flexDirection: "row", gap: s.spacing.small },
     addButton: {
       alignItems: "center",
       borderColor: C.fieldLine,

@@ -51,6 +51,7 @@ const calm: SkinSource = {
     stampShadow: 0,
     fieldBorder: 1,
     shadow: { offset: 0, color: paint.shadow },
+    button: "pill",
   },
   spacing: {
     hair: 2,

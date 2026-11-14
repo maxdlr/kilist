@@ -19,9 +19,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
   ArrowPathIcon,
-  CheckIcon,
   InformationCircleIcon,
-  ShoppingCartIcon,
   XMarkIcon,
 } from "react-native-heroicons/outline";
 import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
@@ -195,38 +193,50 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   );
 };
 
-const Done = ({ game }: { game: SwipeGame }) => {
+const Recap = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const added = game.outFoods;
-  const close = () => {
-    game.reset();
-    goBack();
-  };
+  const recap = game.recap;
+  const added = recap?.added ?? [];
 
   return (
     <Screen
       dock={
-        <>
-          <CButton label={T.openList} href="/shop" />
-          <CButton variant="text" label={T.close} onPress={close} />
-        </>
+        <CButton
+          accessibilityLabel={T.play.replay}
+          onPress={game.replay}
+          icon={(color) => (
+            <ArrowPathIcon
+              size={skin.size.icon.action}
+              color={color}
+              strokeWidth={1.8}
+            />
+          )}
+        />
       }
     >
       <ScrollView contentContainerStyle={styles.doneContent}>
-        <View style={styles.doneHead}>
-          <DrawnMark kind="done" color={C.positive} />
-          <CText
-            weight="medium"
-            size={skin.type.display.md}
-            accessibilityRole="header"
-          >
-            {T.done}
-          </CText>
-          <CText size={skin.type.body} color={C.textSoft}>
-            {added.length ? T.play.added(added.length) : T.play.nothingNew}
-          </CText>
+        <View style={styles.doneText}>
+          <View style={styles.doneHead}>
+            <DrawnMark kind="done" color={C.positive} />
+            <CText
+              weight="medium"
+              size={skin.type.display.md}
+              accessibilityRole="header"
+            >
+              {T.play.sorted}
+            </CText>
+          </View>
+          {recap ? (
+            <CText size={skin.type.body} color={C.textSoft}>
+              {added.length ? T.play.added(added.length) : T.play.nothingNew}
+            </CText>
+          ) : (
+            <CText size={skin.type.body} color={C.textSoft}>
+              {T.play.today}
+            </CText>
+          )}
         </View>
         {added.length > 0 && (
           <View>
@@ -238,61 +248,7 @@ const Done = ({ game }: { game: SwipeGame }) => {
             ))}
           </View>
         )}
-        <View style={styles.points}>
-          <CText size={skin.type.label} color={C.textSoft} style={styles.flex}>
-            {T.play.points}
-          </CText>
-          <CText weight="medium" size={skin.type.label + 1}>
-            {game.balance !== undefined
-              ? T.play.pointsTotal(game.earned, game.balance)
-              : `+${game.earned}`}
-          </CText>
-        </View>
       </ScrollView>
-    </Screen>
-  );
-};
-
-const Sorted = ({ game }: { game: SwipeGame }) => {
-  const skin = useSkin();
-  const C = useCalmColors();
-  const styles = useSkinStyles(createStyles);
-  const copy = skin.copy.swipe;
-
-  return (
-    <Screen
-      dock={
-        <CButton
-          label={copy.tomorrowAction}
-          href="/shop"
-          icon={(color) => (
-            <ShoppingCartIcon size={20} color={color} strokeWidth={1.8} />
-          )}
-        />
-      }
-    >
-      <View style={styles.sorted}>
-        <CheckIcon size={44} color={C.positive} strokeWidth={2.4} />
-        <CText
-          weight="medium"
-          size={skin.type.display.md}
-          accessibilityRole="header"
-        >
-          {T.play.sortedToday}
-        </CText>
-      </View>
-      <CButton
-        variant="secondary"
-        label={T.play.replay}
-        onPress={game.replay}
-        icon={() => (
-          <ArrowPathIcon
-            size={skin.size.icon.action}
-            color={C.text}
-            strokeWidth={1.8}
-          />
-        )}
-      />
     </Screen>
   );
 };
@@ -316,9 +272,8 @@ const CalmPlay = () => {
       case "play":
         return <Checking game={game} />;
       case "done":
-        return <Done game={game} />;
       case "closed":
-        return <Sorted game={game} />;
+        return <Recap game={game} />;
       case "empty":
         return (
           <CalmMessage
@@ -341,7 +296,13 @@ const CalmPlay = () => {
   return (
     <StateFade
       stateKey={
-        suggestion.item ? "suggestion" : screen === "start" ? "loading" : screen
+        suggestion.item
+          ? "suggestion"
+          : screen === "start"
+            ? "loading"
+            : screen === "closed"
+              ? "done"
+              : screen
       }
     >
       {body()}
@@ -405,36 +366,13 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       top: s.spacing.gutter,
     },
     cardText: { alignItems: "center", gap: s.spacing.tight + 2 },
-    sorted: { flex: 1, gap: s.spacing.stack, justifyContent: "center" },
-    replay: {
-      backgroundColor: C.card,
-      borderColor: C.line,
-      borderRadius: s.shape.radius + 2,
-      borderWidth: s.shape.border,
-      gap: s.spacing.inline,
-      padding: s.spacing.stack,
-    },
-    replayHead: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.small,
-    },
-    replayFacts: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: s.spacing.stack,
-    },
-    fact: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.tight + 2,
-    },
     doneContent: {
       flexGrow: 1,
       gap: s.spacing.section,
       justifyContent: "center",
     },
-    doneHead: { gap: s.spacing.small },
+    doneText: { gap: s.spacing.small },
+    doneHead: { flexDirection: "row" },
     row: {
       alignItems: "center",
       borderTopColor: C.line,
@@ -442,16 +380,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       flexDirection: "row",
       gap: s.spacing.inline,
       minHeight: s.size.row.stripe,
-    },
-    points: {
-      alignItems: "baseline",
-      borderColor: C.line,
-      borderRadius: s.shape.radius,
-      borderWidth: s.shape.border,
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      paddingHorizontal: s.spacing.stack,
-      paddingVertical: s.spacing.dock - 2,
     },
   });
 

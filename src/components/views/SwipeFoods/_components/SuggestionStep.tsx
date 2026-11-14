@@ -121,7 +121,12 @@ const createStyles = (s: Skin) =>
       position: "absolute",
       top: s.spacing.stack,
     },
-    buttons: { flexDirection: "row", gap: s.spacing.inline },
+    buttons: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: s.spacing.inline,
+      justifyContent: "center",
+    },
     center: { textAlign: "center" },
   });
 

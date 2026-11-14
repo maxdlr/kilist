@@ -10,7 +10,8 @@ const fr: CommonText = {
   guestName: "Invité",
   marks: {
     added: (name: string) => `${name} ajouté`,
-    removed: (count: number) => (count > 1 ? `${count} aliments retirés` : "Retiré"),
+    removed: (count: number) =>
+      count > 1 ? `${count} aliments retirés` : "Retiré",
     saved: "Enregistré",
   },
   guestRename: {
@@ -21,9 +22,11 @@ const fr: CommonText = {
   },
   passwordsDiffer: "Les mots de passe ne correspondent pas",
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
-  inventoryNotReady: "Ton inventaire n'est pas encore prêt, réessaie dans un instant",
+  inventoryNotReady:
+    "Ton inventaire n'est pas encore prêt, réessaie dans un instant",
   addFailed: "Impossible d'ajouter cet aliment",
-  shareMessage: (code: string) => `Rejoins mon foyer sur Kilist avec ce code : ${code}`,
+  shareMessage: (code: string) =>
+    `Rejoins mon foyer sur Kilist avec ce code : ${code}`,
   shareFailed: "Impossible d'ouvrir le partage",
   linkFailed: "Impossible d'ouvrir le lien",
   householdSwitched: "Foyer changé",
@@ -51,20 +54,25 @@ const fr: CommonText = {
       push: "Notification",
       both: "E-mail et notification",
     } as Record<string, string>,
-    always: "Les réinitialisations de mot de passe, la confirmation d'e-mail, la suppression du compte et les reçus arrivent toujours par e-mail.",
+    always:
+      "Les réinitialisations de mot de passe, la confirmation d'e-mail, la suppression du compte et les reçus arrivent toujours par e-mail.",
     line: "Choisis comment Kilist te tient au courant.",
     email: "E-mail",
     push: "Push",
     yourChoice: "À toi de choisir",
     alwaysTitle: "Toujours par e-mail",
-    reminder: { title: "Tes 10 du jour t'attendent", body: "Trie dix aliments et garde ta liste à jour." },
+    reminder: {
+      title: "Tes 10 du jour t'attendent",
+      body: "Trie dix aliments et garde ta liste à jour.",
+    },
     ask: {
       title: "Un petit rappel ?",
       line: "Kilist peut te rappeler de jouer tes 10 du jour et te prévenir quand ton foyer change.",
       yes: "Activer",
       later: "Plus tard",
     },
-    denied: "Les notifications sont coupées pour Kilist. Active-les dans les réglages du téléphone.",
+    denied:
+      "Les notifications sont coupées pour Kilist. Active-les dans les réglages du téléphone.",
     required: {
       passwordReset: "Mot de passe oublié",
       signupConfirm: "Confirmation d'e-mail",
@@ -94,7 +102,8 @@ const fr: CommonText = {
     emailLine: "Entre l'e-mail de ton compte. On t'envoie un code.",
     email: "E-mail",
     send: "Envoyer le code",
-    codeLine: (email: string) => `Si ${email} a un compte, un code arrive. Entre-le avec ton nouveau mot de passe.`,
+    codeLine: (email: string) =>
+      `Si ${email} a un compte, un code arrive. Entre-le avec ton nouveau mot de passe.`,
     code: "Code",
     password: "Nouveau mot de passe",
     save: "Enregistrer",
@@ -110,12 +119,13 @@ const fr: CommonText = {
     admin: "Admin",
   },
   shop: {
-    startTitle: (low: number, high: number) => `${countRange(low, high)} ${high === 1 ? "chose" : "choses"} à acheter`,
+    startTitle: (low: number, high: number) =>
+      `${countRange(low, high)} ${high === 1 ? "chose" : "choses"} à acheter`,
     startLabel: "Ta liste",
     startHow: "Une fois au magasin",
     startRight: "Glisse à droite quand c'est dans ton panier.",
     startLeft: "Glisse à gauche pour le garder pour la prochaine fois.",
-    start: "Commencer les courses",
+    start: "Commencer",
     finish: "Terminer",
     stopTitle: "Arrêter les courses ?",
     stopLine: (bought: number, total: number) =>
@@ -126,8 +136,10 @@ const fr: CommonText = {
     add: "Ajouter un aliment",
     addTitle: "Ajouter un aliment",
     addName: "Nom",
-    addLine: "Il est enregistré dans ton inventaire. Tu l'as acheté aujourd'hui ?",
-    addExists: (name: string) => `${name} est déjà dans ton inventaire. Tu l'as acheté aujourd'hui ?`,
+    addLine:
+      "Il est enregistré dans ton inventaire. Tu l'as acheté aujourd'hui ?",
+    addExists: (name: string) =>
+      `${name} est déjà dans ton inventaire. Tu l'as acheté aujourd'hui ?`,
     addBought: "Acheté",
     addToList: "Ajouter à la liste",
     addListLine: "Il est enregistré dans ton inventaire et ajouté à ta liste.",
@@ -138,7 +150,8 @@ const fr: CommonText = {
     scanCancel: "Taper plutôt le nom",
     scanSearching: "Recherche…",
     scanFailed: "Produit introuvable. Tape plutôt son nom.",
-    scanCamera: "L'accès à la caméra est nécessaire pour scanner un code-barres.",
+    scanCamera:
+      "L'accès à la caméra est nécessaire pour scanner un code-barres.",
     scanWarnTitle: (name: string) => `Attention : ${name}`,
     scanWarnLine: (tags: string[]) =>
       `Ce produit semble contenir : ${tags.join(", ")}. Ton foyer a dit qu'il n'en achète pas.`,
@@ -174,7 +187,9 @@ const fr: CommonText = {
     admin: "Admin",
     createAccount: "Crée un compte pour synchroniser et partager",
     confirmEmail: "Confirme ton e-mail pour partager ton foyer",
-    teasers: { versus: "Fais la course avec ton foyer sur les 10 mêmes aliments." } as Record<string, string>,
+    teasers: {
+      versus: "Fais la course avec ton foyer sur les 10 mêmes aliments.",
+    } as Record<string, string>,
     prizesAria: "Ouvrir le comptoir des lots",
   },
   looks: {
@@ -182,17 +197,20 @@ const fr: CommonText = {
     preview: "Aperçu",
     previewAria: (name: string) => `Aperçu de ${name} avec tes données`,
     slides: { Home: "Accueil", Play: "Jeu", Shop: "Courses" },
-    slideOf: (label: string, position: number, total: number) => `${label} · ${position}/${total}`,
+    slideOf: (label: string, position: number, total: number) =>
+      `${label} · ${position}/${total}`,
   },
   emailGate: {
     title: "Confirme d'abord ton e-mail",
     joinTitle: "Une dernière étape",
-    joinLine: (email: string) => `Entre le code à 6 chiffres envoyé à ${email} pour rejoindre le foyer.`,
+    joinLine: (email: string) =>
+      `Entre le code à 6 chiffres envoyé à ${email} pour rejoindre le foyer.`,
     joinSkip: "Rejoindre plus tard",
   },
   rowMore: "Plus",
   checkFood: (name: string, level: string) => `${name}, ${level}`,
-  cameraNeeded: "L'accès à la caméra est nécessaire pour scanner un code de foyer.",
+  cameraNeeded:
+    "L'accès à la caméra est nécessaire pour scanner un code de foyer.",
   code: (code: string) => `Code : ${code}`,
   shareHouseholdAria: "Partager le code du foyer",
   qrHouseholdAria: "Afficher le QR code du foyer",

@@ -40,7 +40,11 @@ const useSwipeGame = () => {
     loadReplay,
     completeSession,
     freezeDeck,
+    roundRecap,
+    setRoundRecap,
   } = useSwipeFoods();
+  const today = new Date().toDateString();
+  const recap = roundRecap?.day === today ? roundRecap : undefined;
 
   const [phase, setPhase] = useState<"idle" | "play" | "done">("idle");
   const [swiped, setSwiped] = useState(0);
@@ -52,6 +56,7 @@ const useSwipeGame = () => {
   const [startedAt, setStartedAt] = useState(0);
   const [finishedAt, setFinishedAt] = useState(0);
   const flingRef = useRef<SwipeDeckFling | null>(null);
+  const outRef = useRef<FoodType[]>([]);
   const pendingUpdates = useRef<Promise<SwipeReward | null>[]>([]);
   const bonusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -90,6 +95,7 @@ const useSwipeGame = () => {
 
   const start = () => {
     setSwiped(0);
+    outRef.current = [];
     setOutFoods([]);
     setEarned(0);
     setBonus(0);
@@ -112,9 +118,10 @@ const useSwipeGame = () => {
     return reward;
   };
 
-  const finishRound = () => {
+  const finishRound = (added: FoodType[]) => {
     setFinishedAt(Date.now());
     setPhase("done");
+    setRoundRecap({ day: today, added });
     Promise.allSettled(pendingUpdates.current)
       .then(completeSession)
       .then(tickets.refresh);
@@ -123,14 +130,16 @@ const useSwipeGame = () => {
   const handleSwipe = (food: FoodType, direction: SwipeDirection) => {
     const isLast = foods?.length === 1;
 
+    if (direction === "left") outRef.current = [...outRef.current, food];
+    const added = outRef.current;
     setSwiped((count) => count + 1);
-    if (direction === "left") setOutFoods((out) => [...out, food]);
+    setOutFoods(added);
     swipe(food.id);
     pendingUpdates.current.push(
       update({ foodId: food.id, isInStock: IN_STOCK[direction], ...(isReplay && { replay: true }) }).then(collect),
     );
 
-    if (isLast) finishRound();
+    if (isLast) finishRound(added);
   };
 
   const remove = async (food: FoodType) => {
@@ -146,7 +155,7 @@ const useSwipeGame = () => {
     const isLast = foods?.length === 1;
     swipe(food.id);
     if (!isLast) return;
-    if (swiped > 0) finishRound();
+    if (swiped > 0) finishRound(outRef.current);
     else {
       setPhase("idle");
       mutateFoods();
@@ -198,6 +207,7 @@ const useSwipeGame = () => {
     begin,
     replay,
     isReplay,
+    recap,
     handleSwipe,
     askRemove: setRemoving,
     removeRequest,

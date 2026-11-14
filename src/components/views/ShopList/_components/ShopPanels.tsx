@@ -138,7 +138,9 @@ const createStyles = (s: Skin) =>
   StyleSheet.create({
     actions: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: s.spacing.inline,
+      justifyContent: "center",
     },
   });
 

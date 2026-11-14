@@ -5,7 +5,9 @@ import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import KilButton from "@/components/elements/KilButton";
 import ActionPanel from "@/components/elements/ActionPanel";
-import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
+import SwipeDeck, {
+  SwipeDirection,
+} from "@/components/elements/SwipeDeck/SwipeDeck";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import { rules } from "@/offline/rules";
@@ -52,7 +54,10 @@ const Swatch = ({ look }: { look: Skin }) => {
   return (
     <View style={styles.swatch}>
       {colors.map((color, index) => (
-        <View key={index} style={[styles.swatchCell, { backgroundColor: color }]} />
+        <View
+          key={index}
+          style={[styles.swatchCell, { backgroundColor: color }]}
+        />
       ))}
     </View>
   );
@@ -161,7 +166,12 @@ const FoodTicket = ({ food }: { food: FoodType }) => {
 
   return (
     <View style={styles.ticketSlot}>
-      <View style={[styles.ticket, { backgroundColor: tint, boxShadow: shadowOf(skin, 3) }]}>
+      <View
+        style={[
+          styles.ticket,
+          { backgroundColor: tint, boxShadow: shadowOf(skin, 3) },
+        ]}
+      >
         <View style={styles.ticketTop}>
           <ThemedText size={skin.type.caption} color={P.navy}>
             {T.admitOne}
@@ -180,7 +190,12 @@ const FoodTicket = ({ food }: { food: FoodType }) => {
           {hero > 0 && <FoodPicture food={food} size={hero} />}
         </View>
         <View style={styles.stub}>
-          <Title size={skin.type.display.sm} lines={1} color={P.navy} style={styles.flex}>
+          <Title
+            size={skin.type.display.sm}
+            lines={1}
+            color={P.navy}
+            style={styles.flex}
+          >
             {food.name}
           </Title>
           <View style={[styles.levelChip, { backgroundColor: tint }]}>
@@ -212,7 +227,13 @@ const Clock = ({ startedAt }: { startedAt: number }) => {
   );
 };
 
-const Counter = ({ game, startedAt }: { game: SwipeGame; startedAt: number }) => {
+const Counter = ({
+  game,
+  startedAt,
+}: {
+  game: SwipeGame;
+  startedAt: number;
+}) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const strip = Math.min(
@@ -222,7 +243,12 @@ const Counter = ({ game, startedAt }: { game: SwipeGame; startedAt: number }) =>
 
   return (
     <View style={styles.counterWrap}>
-      <View style={[styles.counter, { boxShadow: shadowOf(skin, 0, P.plankShadow) }]}>
+      <View
+        style={[
+          styles.counter,
+          { boxShadow: shadowOf(skin, 0, P.plankShadow) },
+        ]}
+      >
         <View style={styles.counterMain}>
           <ThemedText size={skin.type.caption} color={P.softNavy}>
             {T.ticketsToday}
@@ -278,8 +304,12 @@ const RoundButton = ({
   const { intent } = game;
   const idle = small ? P.white : P.yellow;
   const fill = intent ? (intent === direction ? P.yellow : P.white) : idle;
-  const size = small ? skin.size.button.sm + skin.spacing.tight : skin.size.button.lg;
-  const icon = small ? skin.size.icon.action - skin.spacing.tight : skin.size.icon.action - 2;
+  const size = small
+    ? skin.size.button.sm + skin.spacing.tight
+    : skin.size.button.lg;
+  const icon = small
+    ? skin.size.icon.action - skin.spacing.tight
+    : skin.size.icon.action - 2;
 
   return (
     <View style={styles.roundSlot}>
@@ -337,16 +367,35 @@ const Arena = ({ game }: { game: SwipeGame }) => {
       style={styles.arena}
       dock={
         <View style={styles.roundRow}>
-          <RoundButton direction="left" label={copy.out} accessibilityLabel={T.ariaOut} game={game} />
-          <RoundButton direction="up" label={copy.unsure} accessibilityLabel={T.ariaUnsure} game={game} small />
-          <RoundButton direction="right" label={copy.inStock} accessibilityLabel={T.ariaIn} game={game} />
+          <RoundButton
+            direction="left"
+            label={copy.out}
+            accessibilityLabel={T.ariaOut}
+            game={game}
+          />
+          <RoundButton
+            direction="up"
+            label={copy.unsure}
+            accessibilityLabel={T.ariaUnsure}
+            game={game}
+            small
+          />
+          <RoundButton
+            direction="right"
+            label={copy.inStock}
+            accessibilityLabel={T.ariaIn}
+            game={game}
+          />
         </View>
       }
     >
       {game.intent && (
         <View
           pointerEvents="none"
-          style={[StyleSheet.absoluteFill, { backgroundColor: INTENT_TINT[game.intent] }]}
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: INTENT_TINT[game.intent] },
+          ]}
         />
       )}
       <Counter game={game} startedAt={startedAt} />
@@ -356,7 +405,11 @@ const Arena = ({ game }: { game: SwipeGame }) => {
           keyOf={(food) => food.id}
           allowUp
           background="transparent"
-          stamps={{ right: copy.stampIn, left: copy.stampOut, up: copy.stampUnsure }}
+          stamps={{
+            right: copy.stampIn,
+            left: copy.stampOut,
+            up: copy.stampUnsure,
+          }}
           flingRef={game.flingRef}
           onIntent={game.setIntent}
           onSwipe={game.handleSwipe}
@@ -366,7 +419,11 @@ const Arena = ({ game }: { game: SwipeGame }) => {
         {game.bonusPop > 0 && (
           <View pointerEvents="none" style={styles.bonusWrap}>
             <View style={[styles.bonus, { boxShadow: shadowOf(skin) }]}>
-              <ThemedText accessibilityLiveRegion="polite" size={skin.type.lead} color={P.navy}>
+              <ThemedText
+                accessibilityLiveRegion="polite"
+                size={skin.type.lead}
+                color={P.navy}
+              >
                 {skin.copy.tickets.bonus(game.bonusPop)}
               </ThemedText>
             </View>
@@ -386,21 +443,30 @@ const ConfettiBit = ({ index }: { index: number }) => {
     fall.set(
       withDelay(
         60,
-        withTiming(1, { duration: 1500 + (index % 5) * 220, easing: Easing.in(Easing.quad) }),
+        withTiming(1, {
+          duration: 1500 + (index % 5) * 220,
+          easing: Easing.in(Easing.quad),
+        }),
       ),
     );
   }, [fall, index]);
 
   const style = useAnimatedStyle(() => ({
     transform: [
-      { translateY: -40 - (index % 6) * 44 + fall.value * (SCREEN_HEIGHT + 300) },
+      {
+        translateY: -40 - (index % 6) * 44 + fall.value * (SCREEN_HEIGHT + 300),
+      },
       { rotateZ: `${fall.value * (200 + index * 70)}deg` },
     ],
   }));
 
   return (
     <Animated.View
-      style={[styles.confetti, { left: `${((index * 53 + 13) % 360) / 3.9}%` }, style]}
+      style={[
+        styles.confetti,
+        { left: `${((index * 53 + 13) % 360) / 3.9}%` },
+        style,
+      ]}
     />
   );
 };
@@ -417,7 +483,9 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
     : balance >= prize.price
       ? copy.canAfford(prizeName)
       : copy.nextPrize(prize.price - balance, prizeName);
-  const progress = prize ? Math.min(100, Math.round((balance / prize.price) * 100)) : 100;
+  const progress = prize
+    ? Math.min(100, Math.round((balance / prize.price) * 100))
+    : 100;
 
   return (
     <Ground
@@ -449,7 +517,12 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
         <ThemedText size={skin.type.body} color={P.white}>
           {T.cashedOut}
         </ThemedText>
-        <Title size={skin.type.display.xl} lines={1} color={P.white} textStyle={styles.centerText}>
+        <Title
+          size={skin.type.display.xl}
+          lines={1}
+          color={P.white}
+          textStyle={styles.centerText}
+        >
           {copy.cashOut(game.earned)}
         </Title>
         <ThemedText size={skin.type.label} color={P.white}>
@@ -457,10 +530,22 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
         </ThemedText>
       </View>
       <ArcadeCard lift={1} style={styles.breakdown}>
-        <Row left={copy.rowSwipes(game.position)} right={`+${game.earned - game.bonus}`} size={skin.type.label} />
-        <Row left={copy.rowBonus} right={`+${game.bonus}`} size={skin.type.label} />
+        <Row
+          left={copy.rowSwipes(game.position)}
+          right={`+${game.earned - game.bonus}`}
+          size={skin.type.label}
+        />
+        <Row
+          left={copy.rowBonus}
+          right={`+${game.bonus}`}
+          size={skin.type.label}
+        />
         <Rule />
-        <Row left={copy.rowBalance} right={String(balance)} size={skin.type.body} />
+        <Row
+          left={copy.rowBalance}
+          right={String(balance)}
+          size={skin.type.body}
+        />
         <View accessible accessibilityLabel={goal} style={styles.goal}>
           <View style={styles.goalTrack}>
             <View style={[styles.goalFill, { width: `${progress}%` }]} />
@@ -472,8 +557,11 @@ const CashOut = ({ game }: { game: SwipeGame }) => {
       </ArcadeCard>
       <View style={styles.added}>
         <ThemedText size={skin.type.label} color={P.white}>
-          {game.outFoods.length ? T.wentOnList(game.outFoods.length) : skin.copy.swipe.overNothing}
+          {game.outFoods.length
+            ? T.wentOnList(game.outFoods.length)
+            : skin.copy.swipe.overNothing}
         </ThemedText>
+
         <View style={styles.chips}>
           {game.outFoods.map((food) => (
             <View key={food.id} style={styles.foodChip}>
@@ -517,7 +605,9 @@ const Closed = ({ game }: { game: SwipeGame }) => {
       <ThemedText size={skin.type.lead} color={P.white}>
         {T.booth}
       </ThemedText>
-      <View style={[styles.booth, { boxShadow: shadowOf(skin, 3, P.plankShadow) }]}>
+      <View
+        style={[styles.booth, { boxShadow: shadowOf(skin, 3, P.plankShadow) }]}
+      >
         <View style={styles.closedSign}>
           <ThemedText size={skin.type.lead} color={P.white}>
             {T.closed}
@@ -528,7 +618,11 @@ const Closed = ({ game }: { game: SwipeGame }) => {
             <View key={index} style={styles.slat} />
           ))}
         </View>
-        <ThemedText size={skin.type.label} color={P.white} style={styles.centerText}>
+        <ThemedText
+          size={skin.type.label}
+          color={P.white}
+          style={styles.centerText}
+        >
           {T.opensTomorrow(game.level + 1)}
         </ThemedText>
       </View>
@@ -544,7 +638,11 @@ const Closed = ({ game }: { game: SwipeGame }) => {
           </ThemedText>
         </View>
         {game.earned > 0 && (
-          <ThemedText size={skin.type.caption} color={P.navy} style={styles.rightText}>
+          <ThemedText
+            size={skin.type.caption}
+            color={P.navy}
+            style={styles.rightText}
+          >
             {`${T.balance}\n${game.balance ?? 0}`}
           </ThemedText>
         )}
@@ -580,7 +678,10 @@ const ArcadePlay = () => {
             sign={copy.emptyTitle}
             title={copy.emptyLabel}
             line={copy.emptyLine}
-            action={{ label: skin.copy.empty.refresh, onTouch: game.refreshFoods }}
+            action={{
+              label: skin.copy.empty.refresh,
+              onTouch: game.refreshFoods,
+            }}
           />
         );
       default:
@@ -588,7 +689,11 @@ const ArcadePlay = () => {
     }
   };
 
-  return <StateFade stateKey={suggestion.item ? "suggestion" : game.screen}>{body()}</StateFade>;
+  return (
+    <StateFade stateKey={suggestion.item ? "suggestion" : game.screen}>
+      {body()}
+    </StateFade>
+  );
 };
 
 const createStyles = (s: Skin) => {

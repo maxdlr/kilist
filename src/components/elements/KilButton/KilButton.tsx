@@ -3,8 +3,10 @@ import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { ActionColors, ActionKind, Skin } from "@/skins/types";
 import { Href, router } from "expo-router";
-import { ReactNode } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+
+export const ButtonKindOverride = createContext<ActionKind | null>(null);
 
 const KilButton = ({
   label,
@@ -33,7 +35,10 @@ const KilButton = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const { fill, ink, line } = colors ?? skin.actions[variant];
+  const override = useContext(ButtonKindOverride);
+  const kind = override && variant !== "danger" ? override : variant;
+  const { fill, ink, line } = colors ?? skin.actions[kind];
+  const pill = skin.shape.button === "pill";
 
   return (
     <Press
@@ -50,6 +55,7 @@ const KilButton = ({
           borderWidth: skin.shape.border,
           height: height ?? skin.size.button.lg,
         },
+        pill && styles.pill,
         skin.shape.shadow.offset > 0 &&
           line !== "transparent" && {
             boxShadow: `0 ${pressed ? 1 : skin.shape.shadow.offset}px 0 ${skin.shape.shadow.color}`,
@@ -57,7 +63,7 @@ const KilButton = ({
               { translateY: pressed ? skin.shape.shadow.offset - 1 : 0 },
             ],
           },
-        flex !== undefined && { flex },
+        flex !== undefined && !pill && { flex },
         pressed && skin.shape.shadow.offset === 0 && styles.pressed,
         style,
       ]}
@@ -68,7 +74,7 @@ const KilButton = ({
         allowFontScaling={false}
         minimumFontScale={0.5}
         numberOfLines={1}
-        size={fontSize ?? skin.type.title}
+        size={pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
         color={ink}
         style={styles.label}
       >
@@ -86,6 +92,13 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.inline,
       justifyContent: "center",
       paddingHorizontal: s.spacing.small,
+    },
+    pill: {
+      alignSelf: "center",
+      borderRadius: s.size.button.xs / 2,
+      gap: s.spacing.tight + 2,
+      height: s.size.button.xs,
+      paddingHorizontal: s.spacing.stack,
     },
     pressed: {
       opacity: s.shape.pressedOpacity,

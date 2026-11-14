@@ -14,7 +14,6 @@ const fr: CalmText = {
     const text = dateFormat.format(date);
     return text.charAt(0).toUpperCase() + text.slice(1);
   },
-  openList: "Ouvrir la liste",
   browseInventory: "Ouvrir le garde-manger",
   close: "Fermer",
   done: "C'est fait.",
@@ -48,16 +47,9 @@ const fr: CalmText = {
     added: (count: number) =>
       `${foods(count)} ${count <= 1 ? "ajouté" : "ajoutés"} à ta liste.`,
     nothingNew: "Rien de nouveau à acheter. La liste est à jour.",
-    points: "Points pour d'autres styles",
-    pointsTotal: (earned: number, total: number) =>
-      `+${earned} · ${total} au total`,
     replay: "Rejouer la partie du jour",
-    sortedToday: "Trié pour aujourd'hui.",
-    replayTitle: "Une erreur ?",
-    replayReplaces: "Remplace tes réponses",
-    replayNoPoints: "0 point en plus",
-    replayLine:
-      "Rejouer remplace tes réponses d'aujourd'hui et ne rapporte pas de points en plus.",
+    sorted: "Trié",
+    today: "Pour aujourd'hui.",
   },
   shop: {
     otherAisle: "Autres",

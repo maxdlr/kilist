@@ -24,7 +24,14 @@ export type SwipeReward = {
   balance: number | null;
 };
 
+export type SwipeRoundRecap = {
+  day: string;
+  added: FoodType[];
+};
+
 export type SwipeFoodsContextType = {
+  roundRecap?: SwipeRoundRecap;
+  setRoundRecap: (recap: SwipeRoundRecap) => void;
   game?: SwipeGameType;
   isGameLoading: boolean;
   mutateGame: () => void;
@@ -45,6 +52,8 @@ export type SwipeFoodsContextType = {
 };
 
 const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
+  roundRecap: undefined,
+  setRoundRecap: () => {},
   game: undefined,
   isGameLoading: false,
   mutateGame: () => {},
@@ -62,6 +71,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
 
 export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
   const { showToast } = useToast();
+  const [roundRecap, setRoundRecap] = useState<SwipeRoundRecap>();
 
   const {
     data,
@@ -167,6 +177,8 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SwipeFoodsContext.Provider
       value={{
+        roundRecap,
+        setRoundRecap,
         game,
         isGameLoading,
         mutateGame,

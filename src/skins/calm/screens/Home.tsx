@@ -1,16 +1,17 @@
 import Press from "@/components/elements/Press";
-import withPressed from "@/utils/withPressed";
-import HomeShortcuts from "@/components/views/Dashboard/_components/HomeShortcuts";
 import SyncNote from "@/components/elements/SyncNote";
-import T from "../text";
+import { useHomeShortcuts } from "@/components/views/Dashboard/_components/HomeShortcuts";
 import useBuyRange from "@/hooks/screens/useBuyRange";
 import useHomeLinks from "@/hooks/screens/useHomeLinks";
+import { rules } from "@/offline/rules";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType, ListType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
-import { rules } from "@/offline/rules";
+import withPressed from "@/utils/withPressed";
 import { router, useFocusEffect } from "expo-router";
+import { useCallback } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import {
   ChevronRightIcon,
   ClockIcon,
@@ -18,14 +19,13 @@ import {
   ShoppingCartIcon,
   SparklesIcon,
 } from "react-native-heroicons/outline";
-import { useCallback } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
+import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Screen, StockBars, useCheckPending } from "./parts";
 import { CalmError, CalmLoading } from "./States";
 
-const PREVIEW = 4;
+const PREVIEW = 12;
 
 const CalmHome = () => {
   const skin = useSkin();
@@ -45,6 +45,7 @@ const CalmHome = () => {
   });
   const { count: toCheck, pending } = useCheckPending();
   const links = useHomeLinks();
+  const shortcuts = useHomeShortcuts(true);
   const range = useBuyRange();
 
   useFocusEffect(
@@ -71,8 +72,18 @@ const CalmHome = () => {
   const sentence = `${names.join(", ")}${needed.length > PREVIEW ? "…" : "."}`;
 
   return (
-    <Screen padded={false}>
-
+    <Screen
+      padded={false}
+      dock={shortcuts.map((item) => (
+        <CButton
+          key={item.label}
+          variant="secondary"
+          accessibilityLabel={item.label}
+          onPress={item.open}
+          icon={item.icon}
+        />
+      ))}
+    >
       <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.scroll}
@@ -165,13 +176,6 @@ const CalmHome = () => {
               {T.home.onTheList}
             </CText>
             <CText size={skin.type.lead}>{sentence}</CText>
-            <CButton
-              label={T.home.goShop}
-              href="/shop"
-              icon={(color) => (
-                <ShoppingCartIcon size={20} color={color} strokeWidth={1.8} />
-              )}
-            />
           </View>
         )}
 
@@ -234,10 +238,6 @@ const CalmHome = () => {
           </View>
         )}
       </ScrollView>
-
-      <View style={styles.footer}>
-        <HomeShortcuts withNotice />
-      </View>
     </Screen>
   );
 };
@@ -251,7 +251,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingHorizontal: s.spacing.gutter,
     },
     head: { gap: s.spacing.small },
-    footer: { alignItems: "center", padding: s.spacing.gutter },
     onList: { gap: s.spacing.inline },
     card: {
       alignItems: "center",
@@ -299,7 +298,11 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       height: s.spacing.tight,
       overflow: "hidden",
     },
-    trackFill: { backgroundColor: C.fill, borderRadius: s.spacing.hair, height: s.spacing.tight },
+    trackFill: {
+      backgroundColor: C.fill,
+      borderRadius: s.spacing.hair,
+      height: s.spacing.tight,
+    },
   });
 
 export default CalmHome;

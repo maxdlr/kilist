@@ -266,7 +266,12 @@ const createStyles = (s: Skin) =>
     track: { borderRadius: 2, height: 4, overflow: "hidden" },
     fill: { borderRadius: 2, height: 4 },
     actions: { gap: s.spacing.small },
-    actionRow: { flexDirection: "row", gap: s.spacing.small },
+    actionRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: s.spacing.small,
+      justifyContent: "center",
+    },
   });
 
 export default LooksShowcase;

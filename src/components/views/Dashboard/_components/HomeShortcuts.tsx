@@ -17,6 +17,68 @@ const LIST = "M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01";
 const PLUS = "M12 5v14M5 12h14";
 const SHIELD = "M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z";
 
+export type HomeShortcut = {
+  label: string;
+  open: () => void;
+  icon: (color: string) => ReactNode;
+};
+
+const drawIcon = (path: string, dot: boolean, color: string) => (
+  <Svg
+    width={ICON}
+    height={ICON}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Path d={path} />
+    {dot && <Circle cx={12} cy={12} r={3} />}
+  </Svg>
+);
+
+const drawn =
+  (path: string, dot = false) =>
+  (color: string) =>
+    drawIcon(path, dot, color);
+
+export const useHomeShortcuts = (withNotice = false): HomeShortcut[] => {
+  const skin = useSkin();
+  const links = useHomeLinks();
+  const notice = withNotice ? links.notice : null;
+  const NoticeIcon = links.isGuest ? UserPlusIcon : EnvelopeIcon;
+
+  return [
+    ...(notice
+      ? [
+          {
+            label: notice.label,
+            open: notice.open,
+            icon: (color: string) => (
+              <NoticeIcon size={ICON} color={color} strokeWidth={1.8} />
+            ),
+          },
+        ]
+      : []),
+    { label: common.shop.add, open: links.openAdd, icon: drawn(PLUS) },
+    {
+      label: skin.copy.tabs.inventory,
+      open: links.openInventory,
+      icon: drawn(LIST),
+    },
+    {
+      label: skin.copy.tabs.account,
+      open: links.openAccount,
+      icon: drawn(GEAR, true),
+    },
+    ...(links.isAdmin
+      ? [{ label: common.home.admin, open: links.openAdmin, icon: drawn(SHIELD) }]
+      : []),
+  ];
+};
+
 const HomeShortcuts = ({
   ink,
   fill,
@@ -30,25 +92,8 @@ const HomeShortcuts = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const links = useHomeLinks();
+  const items = useHomeShortcuts(withNotice);
   const color = ink ?? skin.colors.onGround;
-
-  const drawn = (path: string, dot = false) => (
-    <Svg width={ICON} height={ICON} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <Path d={path} />
-      {dot && <Circle cx={12} cy={12} r={3} />}
-    </Svg>
-  );
-  const notice = withNotice ? links.notice : null;
-  const NoticeIcon = links.isGuest ? UserPlusIcon : EnvelopeIcon;
-
-  const items: { label: string; open: () => void; icon: ReactNode }[] = [
-    ...(notice ? [{ label: notice.label, open: notice.open, icon: <NoticeIcon size={ICON} color={color} strokeWidth={1.8} /> }] : []),
-    { label: common.shop.add, open: links.openAdd, icon: drawn(PLUS) },
-    { label: skin.copy.tabs.inventory, open: links.openInventory, icon: drawn(LIST) },
-    { label: skin.copy.tabs.account, open: links.openAccount, icon: drawn(GEAR, true) },
-    ...(links.isAdmin ? [{ label: common.home.admin, open: links.openAdmin, icon: drawn(SHIELD) }] : []),
-  ];
 
   return (
     <View style={[styles.row, style]}>
@@ -61,10 +106,13 @@ const HomeShortcuts = ({
           onPress={item.open}
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: fill ?? skin.colors.raised, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+            {
+              backgroundColor: fill ?? skin.colors.raised,
+              opacity: pressed ? skin.shape.pressedOpacity : 1,
+            },
           ]}
         >
-          {item.icon}
+          {item.icon(color)}
         </Press>
       ))}
     </View>

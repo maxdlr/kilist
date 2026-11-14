@@ -1,6 +1,5 @@
 import Press from "@/components/elements/Press";
 import type { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
-import withPressed from "@/utils/withPressed";
 import T from "../text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
@@ -18,7 +17,11 @@ import {
   TextStyle,
   View,
 } from "react-native";
-import { CheckIcon, QuestionMarkCircleIcon, ShoppingCartIcon } from "react-native-heroicons/outline";
+import {
+  CheckIcon,
+  QuestionMarkCircleIcon,
+  ShoppingCartIcon,
+} from "react-native-heroicons/outline";
 import {
   QuestionMarkCircleIcon as QuestionMarkCircleSolid,
   ShoppingCartIcon as ShoppingCartSolid,
@@ -71,16 +74,14 @@ export const CButton = ({
   onPress,
   href,
   variant = "primary",
-  flex,
   accessibilityLabel,
   icon,
 }: {
   icon?: (color: string) => ReactNode;
-  label: string;
+  label?: string;
   onPress?: () => void;
   href?: Href;
   variant?: "primary" | "secondary" | "text" | "danger";
-  flex?: number;
   accessibilityLabel?: string;
 }) => {
   const skin = useSkin();
@@ -92,6 +93,7 @@ export const CButton = ({
     text: { fill: "transparent", ink: C.textSoft, line: "transparent" },
     danger: { fill: C.danger, ink: C.onFill, line: C.danger },
   }[variant];
+  const round = !label;
 
   return (
     <Press
@@ -101,25 +103,25 @@ export const CButton = ({
       onPress={onPress ?? (href ? () => router.navigate(href) : undefined)}
       style={({ pressed }) => [
         styles.button,
+        round ? styles.round : styles.pill,
         {
           backgroundColor: look.fill,
           borderColor: look.line,
-          height:
-            variant === "text" ? skin.size.button.xs : skin.size.button.lg,
           opacity: pressed ? skin.shape.pressedOpacity : 1,
         },
-        flex !== undefined && { flex },
       ]}
     >
       {icon?.(look.ink)}
-      <CText
-        weight={variant === "text" ? "regular" : "medium"}
-        size={variant === "text" ? skin.type.label + 1 : skin.type.body}
-        color={look.ink}
-        numberOfLines={1}
-      >
-        {label}
-      </CText>
+      {label && (
+        <CText
+          weight={variant === "text" ? "regular" : "medium"}
+          size={skin.type.label + 1}
+          color={look.ink}
+          numberOfLines={1}
+        >
+          {label}
+        </CText>
+      )}
     </Press>
   );
 };
@@ -157,6 +159,7 @@ export const Screen = ({
       {dock && (
         <View
           style={[
+            styles.actionRow,
             styles.dock,
             !insideTabs && {
               paddingBottom: skin.spacing.stack + insets.bottom,
@@ -246,6 +249,7 @@ export const CardPads = ({
 
   const pad = (direction: "left" | "right", label: string, aria: string) => {
     const on = intent === direction;
+    const ink = on ? C.onFill : C.text;
     return (
       <Press
         accessibilityRole="button"
@@ -254,47 +258,88 @@ export const CardPads = ({
         disabled={!live}
         onPress={() => onFling?.(direction)}
         style={({ pressed }) => [
-          styles.pad,
-          { backgroundColor: on ? C.fill : C.tint, opacity: pressed ? skin.shape.pressedOpacity : 1 },
+          styles.button,
+          labels ? styles.pill : styles.round,
+          {
+            backgroundColor: on ? C.fill : C.tint,
+            borderColor: on ? C.fill : C.tint,
+            opacity: pressed ? skin.shape.pressedOpacity : 1,
+          },
         ]}
       >
         {direction === "left" &&
           (on ? (
-            <ShoppingCartSolid size={20} color={C.onFill} />
+            <ShoppingCartSolid size={skin.size.icon.action} color={ink} />
           ) : (
-            <ShoppingCartIcon size={20} color={C.text} strokeWidth={1.8} />
+            <ShoppingCartIcon
+              size={skin.size.icon.action}
+              color={ink}
+              strokeWidth={1.8}
+            />
           ))}
         {labels && (
-          <CText weight="medium" size={skin.type.body} color={on ? C.onFill : C.text} numberOfLines={1}>
+          <CText
+            weight="medium"
+            size={skin.type.label + 1}
+            color={ink}
+            numberOfLines={1}
+          >
             {label}
           </CText>
         )}
-        {direction === "right" && <CheckIcon size={20} color={on ? C.onFill : C.positive} strokeWidth={on ? 3 : 2} />}
+        {direction === "right" && (
+          <CheckIcon
+            size={skin.size.icon.action}
+            color={on ? C.onFill : C.positive}
+            strokeWidth={on ? 3 : 2}
+          />
+        )}
       </Press>
     );
   };
+  const unsureOn = intent === "up";
 
   return (
     <View
       accessibilityElementsHidden={!live}
       importantForAccessibility={live ? "auto" : "no-hide-descendants"}
-      style={styles.pads}
+      style={[styles.actionRow, styles.pads]}
     >
       {pad("left", copy.out, T.play.ariaOut)}
       <Press
         accessibilityRole="button"
         accessibilityLabel={T.intent.up}
+        scale
         disabled={!live}
         onPress={() => onFling?.("up")}
-        style={withPressed(styles.unsure)}
+        style={({ pressed }) => [
+          styles.button,
+          labels ? styles.pill : styles.round,
+          {
+            backgroundColor: "transparent",
+            borderColor: unsureOn ? C.text : C.fieldLine,
+            opacity: pressed ? skin.shape.pressedOpacity : 1,
+          },
+        ]}
       >
-        {intent === "up" ? (
-          <QuestionMarkCircleSolid size={22} color={C.text} />
+        {unsureOn ? (
+          <QuestionMarkCircleSolid
+            size={skin.size.icon.action}
+            color={C.text}
+          />
         ) : (
-          <QuestionMarkCircleIcon size={22} color={C.textSoft} strokeWidth={1.8} />
+          <QuestionMarkCircleIcon
+            size={skin.size.icon.action}
+            color={C.textSoft}
+            strokeWidth={1.8}
+          />
         )}
         {labels && (
-          <CText size={skin.type.caption} color={intent === "up" ? C.text : C.textSoft}>
+          <CText
+            size={skin.type.label + 1}
+            color={unsureOn ? C.text : C.textSoft}
+            numberOfLines={1}
+          >
             {copy.unsure}
           </CText>
         )}
@@ -320,24 +365,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     root: { backgroundColor: C.ground, flex: 1 },
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
-    pads: { alignItems: "center", flexDirection: "row", gap: s.spacing.small, padding: s.spacing.inline },
-    pad: {
-      alignItems: "center",
-      borderRadius: s.size.button.lg / 2,
-      flex: 1,
-      flexDirection: "row",
-      gap: s.spacing.small,
-      height: s.size.button.lg,
-      justifyContent: "center",
-      paddingHorizontal: s.spacing.inline,
-    },
-    unsure: {
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: s.size.button.xs,
-      minWidth: s.size.button.xs,
-      paddingHorizontal: s.spacing.tight,
-    },
+    pads: { padding: s.spacing.stack },
     bars: { gap: s.spacing.inline },
     barRow: {
       alignItems: "center",
@@ -357,19 +385,27 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       overflow: "hidden",
     },
     barFill: { borderRadius: 3, height: 6 },
-    dock: {
+    actionRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: s.spacing.small + 2,
-      paddingBottom: s.spacing.stack,
+      justifyContent: "center",
+    },
+    dock: {
+      paddingBottom: s.spacing.gutter,
       paddingHorizontal: s.spacing.gutter,
-      paddingTop: s.spacing.small,
     },
     button: {
       alignItems: "center",
-      borderRadius: s.shape.radius,
+      alignSelf: "center",
+      borderRadius: s.size.button.md / 2,
       borderWidth: s.shape.border,
       flexDirection: "row",
-      gap: s.spacing.small,
+      gap: s.spacing.tight + 2,
+      height: s.size.button.md,
       justifyContent: "center",
-      paddingHorizontal: s.spacing.stack,
     },
+    pill: { paddingHorizontal: s.spacing.stack },
+    round: { width: s.size.button.md },
   });

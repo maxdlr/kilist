@@ -1,14 +1,18 @@
-const dateFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
 
 const foods = (count: number) => `${count} ${count === 1 ? "food" : "foods"}`;
 
 const en = {
   date: (date: Date) => {
     const parts = dateFormat.formatToParts(date);
-    const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? "";
+    const part = (type: string) =>
+      parts.find((entry) => entry.type === type)?.value ?? "";
     return `${part("weekday")}, ${part("day")} ${part("month")}`;
   },
-  openList: "Open the list",
   browseInventory: "Open the pantry",
   close: "Close",
   done: "Done.",
@@ -20,9 +24,11 @@ const en = {
   tabWaiting: (tab: string) => `${tab}, a sort is waiting`,
   intent: { left: "Need it", up: "Not sure", right: "Have it" },
   home: {
-    allSetLine: "Nothing to sort and nothing to buy. Kilist will ask when something might be running low.",
+    allSetLine:
+      "Nothing to sort and nothing to buy. Kilist will ask when something might be running low.",
     toCheck: (count: number) => `${foods(count)} to sort`,
-    checkLine: "About half a minute. It keeps the list right, and each answer earns points toward other looks.",
+    checkLine:
+      "About half a minute. It keeps the list right, and each answer earns points toward other looks.",
     onTheList: "On the list",
     more: (count: number) => `and ${count} more`,
     ready: "Your list is ready.",
@@ -39,27 +45,24 @@ const en = {
     ariaIn: "In stock",
     added: (count: number) => `${foods(count)} added to your list.`,
     nothingNew: "Nothing new to buy. The list is up to date.",
-    points: "Points toward other looks",
-    pointsTotal: (earned: number, total: number) => `+${earned} · ${total} in total`,
     replay: "Replay today's round",
-    sortedToday: "Sorted for today.",
-    replayTitle: "Made a mistake? Replay.",
-    replayReplaces: "Replaces your answers",
-    replayNoPoints: "No extra points",
-    replayLine: "Replaying replaces today's answers and earns no extra points.",
+    sorted: "Sorted",
+    today: "For today.",
   },
   shop: {
     otherAisle: "Other",
     title: "List",
     toBuy: (count: number) => `${count} to buy`,
     hint: "Swipe right when it's in the basket, left for next time.",
-    hintAria: "Swipe right when it's in the basket, left to keep it for next time",
+    hintAria:
+      "Swipe right when it's in the basket, left to keep it for next time",
     inBasket: "In the basket",
     inBasketAria: (name: string) => `${name}, in the basket`,
     nextTime: "Next time",
     later: "Later",
     usuallyNext: "Usually next",
-    result: (bought: number, left: number) => `${bought} bought${left ? `, ${left} left for next time` : ""}.`,
+    result: (bought: number, left: number) =>
+      `${bought} bought${left ? `, ${left} left for next time` : ""}.`,
     backToday: "Back home",
     legendBasket: "In the basket",
     howAria: "How it works",
@@ -69,7 +72,8 @@ const en = {
     clear: "Clear",
     addQuery: (query: string) => `Add “${query}”`,
     noResultsLine: "Add it and Kilist will start keeping track of it.",
-    emptyLine: "Add the foods you usually buy, and Kilist keeps the list for you.",
+    emptyLine:
+      "Add the foods you usually buy, and Kilist keeps the list for you.",
   },
   tutorial: {
     skip: "Skip",
@@ -79,10 +83,22 @@ const en = {
     questionNext: "Next",
     questionBack: "Back",
     questions: {
-      diet: { title: "How does your household eat?", line: "Pick the closest one." },
-      avoid: { title: "Anything you leave out?", line: "Pick all that apply, or none." },
-      drinks: { title: "Which of these do you buy?", line: "Pick all that apply, or none." },
-      home: { title: "Who else lives at home?", line: "Pick all that apply, or none." },
+      diet: {
+        title: "How does your household eat?",
+        line: "Pick the closest one.",
+      },
+      avoid: {
+        title: "Anything you leave out?",
+        line: "Pick all that apply, or none.",
+      },
+      drinks: {
+        title: "Which of these do you buy?",
+        line: "Pick all that apply, or none.",
+      },
+      home: {
+        title: "Who else lives at home?",
+        line: "Pick all that apply, or none.",
+      },
       baking: { title: "Do you bake?", line: "Flour, sugar and the like." },
     },
     answers: {
@@ -106,25 +122,36 @@ const en = {
       yes: "Yes",
       no: "No",
     } as Record<string, string>,
-    profileCount: (count: number) => `${foods(count)} will be added to your inventory.`,
+    profileCount: (count: number) =>
+      `${foods(count)} will be added to your inventory.`,
     reviewTitle: "Your first foods",
     reviewLine: "Picked from your answers. Tap any food to add or remove it.",
     refineTitle: "Your foods",
-    refineLine: "The foods you already have are selected. Tap any food to add or remove it.",
+    refineLine:
+      "The foods you already have are selected. Tap any food to add or remove it.",
     refineCount: (add: number, remove: number) =>
-      add + remove === 0 ? "No changes yet." : [add > 0 && `${add} to add`, remove > 0 && `${remove} to remove`].filter(Boolean).join(", ") + ".",
-    profileOffline: "The food list isn't downloaded yet. You can add your foods later from the inventory.",
+      add + remove === 0
+        ? "No changes yet."
+        : [add > 0 && `${add} to add`, remove > 0 && `${remove} to remove`]
+            .filter(Boolean)
+            .join(", ") + ".",
+    profileOffline:
+      "The food list isn't downloaded yet. You can add your foods later from the inventory.",
     profileDone: "Done",
     profileAdding: "Adding…",
     samples: ["Bananas", "Milk", "Rice"],
-    practiceLabel: (at: number, total: number) => `Practice · ${at} of ${total}`,
+    practiceLabel: (at: number, total: number) =>
+      `Practice · ${at} of ${total}`,
     stamps: { left: "Out", right: "Have it", up: "Not sure" },
     promptFirst: (name: string) => `Do you still have ${name.toLowerCase()}?`,
     promptFirstLine: "Try it: swipe the card left, as if you were out.",
-    promptRight: (name: string) => `Now ${name.toLowerCase()}. Swipe right if you still have some.`,
-    promptFree: (name: string) => `Last one: ${name.toLowerCase()}. Left, right, or up if you're not sure.`,
+    promptRight: (name: string) =>
+      `Now ${name.toLowerCase()}. Swipe right if you still have some.`,
+    promptFree: (name: string) =>
+      `Last one: ${name.toLowerCase()}. Left, right, or up if you're not sure.`,
     saidOut: (name: string) => `You're out of ${name.toLowerCase()}.`,
-    saidOutLine: "So it goes on your shopping list. You never write it yourself.",
+    saidOutLine:
+      "So it goes on your shopping list. You never write it yourself.",
     saidIn: (name: string) => `You still have ${name.toLowerCase()}.`,
     saidInLine: "Nothing to buy. It stays off your list.",
     saidUnsure: (name: string) => `Not sure about ${name.toLowerCase()}.`,
@@ -135,7 +162,8 @@ const en = {
     shopCaption: "Here is your list.",
     shopCaptionLine: (name: string) =>
       `${name} is on it because you said you're out. Swipe the row right once it's in your basket.`,
-    shopPretend: (name: string) => `Let's say you were out of ${name.toLowerCase()}. Swipe the row right once it's in your basket.`,
+    shopPretend: (name: string) =>
+      `Let's say you were out of ${name.toLowerCase()}. Swipe the row right once it's in your basket.`,
     shopBought: "Bought. It's back in stock.",
     shopLater: "Kept for next time. It comes back on your next shop.",
     shopNext: "Continue",
@@ -146,7 +174,8 @@ const en = {
       "What you're out of lands on your list.",
       "In the store, swipe each row as you buy it.",
     ],
-    doneNote: "That was practice, nothing was saved. Your first real round earns points.",
+    doneNote:
+      "That was practice, nothing was saved. Your first real round earns points.",
     start: "Start my first round",
   },
   settings: {

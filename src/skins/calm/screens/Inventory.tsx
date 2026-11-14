@@ -68,7 +68,7 @@ const CalmInventory = () => {
   if (shelf.isLoading) return <CalmLoading />;
 
   const half = (label: string, onPress: () => void, variant: "primary" | "secondary" | "danger" = "primary") => (
-    <CButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
+    <CButton key={label} label={label} variant={variant} onPress={onPress} />
   );
   const actions = isSelectMode
     ? [
@@ -89,14 +89,16 @@ const CalmInventory = () => {
         dock={
           <>
             {!isEmpty && !isSelectMode && (
+              <View style={styles.search}>
               <FormInput
                 accessibilityLabel={skin.copy.inventory.search}
                 placeholder={skin.copy.inventory.search}
                 value={shelf.search}
                 onChangeText={shelf.setSearch}
               />
+              </View>
             )}
-            <View style={styles.actions}>{actions}</View>
+            {actions}
           </>
         }
       >
@@ -163,7 +165,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       width: s.size.check,
     },
     message: { flex: 1, gap: s.spacing.small, justifyContent: "center", paddingHorizontal: s.spacing.gutter },
-    actions: { flexDirection: "row", gap: s.spacing.small + 2 },
+    search: { width: "100%" },
   });
 
 export default CalmInventory;
