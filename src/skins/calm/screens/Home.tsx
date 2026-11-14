@@ -266,11 +266,12 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     cardFacts: { flexDirection: "row", gap: s.spacing.inline },
     fact: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight },
     prizes: {
-      backgroundColor: C.tint,
-      borderRadius: s.shape.radius + 2,
+      borderColor: C.em?.textFaint,
+      borderWidth: s.shape.border,
+      borderRadius: s.shape.radius * 2,
       gap: s.spacing.stack,
       marginTop: s.spacing.small,
-      padding: s.spacing.stack + 2,
+      padding: s.spacing.gutter,
     },
     prizesHead: {
       alignItems: "center",

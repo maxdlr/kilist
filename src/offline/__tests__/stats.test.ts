@@ -26,7 +26,7 @@ const sent = () => {
 beforeEach(() => {
   memory.db = createMemoryDb();
   store.resetStoreForTests();
-  store.startGuest(makeGuestSnapshot("Guest", "arcade", []));
+  store.startGuest(makeGuestSnapshot("Guest", "calm", []));
 });
 
 const today = () => memory.db.loadValue("keep:statsDays")?.at(-1);
@@ -45,7 +45,7 @@ describe("anonymous stats", () => {
     call("put", `shop-list/edit/${run}`, { action: "buy", foodId: milk.id });
     call("put", `shop-list/edit/${run}`, { action: "buy", foodId: eggs.id });
 
-    expect(today()).toMatchObject({ cards: 2, rounds: 1, runs: 1, suggestionsTaken: 1, foods: 2, guest: true, skin: "arcade" });
+    expect(today()).toMatchObject({ cards: 2, rounds: 1, runs: 1, suggestionsTaken: 1, foods: 2, guest: true, skin: "calm" });
   });
 
   it("keeps the install id and pending days across logout", async () => {

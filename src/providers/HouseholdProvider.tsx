@@ -2,6 +2,7 @@ import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
 import useAuth, { HouseholdChoice } from "@/providers/AuthProvider";
 import useToast from "@/providers/ToastProvider";
+import axios from "@/services/axios";
 import { HouseholdWithMembersType } from "@/types/model";
 import React, { createContext, ReactNode } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -11,6 +12,7 @@ export type HouseholdContextType = {
   isLoading: boolean;
   mutateHousehold: () => void;
   switchHousehold: (choice: HouseholdChoice) => Promise<boolean>;
+  renameHousehold: (name: string) => Promise<void>;
 };
 
 const HouseholdContext = createContext<HouseholdContextType>({
@@ -18,6 +20,7 @@ const HouseholdContext = createContext<HouseholdContextType>({
   isLoading: true,
   mutateHousehold: () => {},
   switchHousehold: async () => false,
+  renameHousehold: async () => {},
 });
 
 export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
@@ -63,9 +66,20 @@ export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
+  const renameHousehold = async (name: string) => {
+    await axios.put("/households/name", { name });
+    await Promise.all([mutateHousehold(), mutateUser()]);
+  };
+
   return (
     <HouseholdContext.Provider
-      value={{ household, isLoading, mutateHousehold, switchHousehold }}
+      value={{
+        household,
+        isLoading,
+        mutateHousehold,
+        switchHousehold,
+        renameHousehold,
+      }}
     >
       {children}
     </HouseholdContext.Provider>

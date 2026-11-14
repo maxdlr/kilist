@@ -13,7 +13,7 @@ import { Linking, Share } from "react-native";
 
 const HIDDEN_CODE = "••••••";
 
-export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode" | "guestName" | "theme";
+export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode" | "name" | "householdName" | "theme";
 
 const useAccount = () => {
   const skin = useSkin();
@@ -30,7 +30,7 @@ const useAccount = () => {
     setPanel("emailCode");
   };
   const setOpenPanel = (panel: AccountPanel | null) => {
-    if (isGuest && (panel === "qr" || panel === "switch")) {
+    if (isGuest && (panel === "qr" || panel === "switch" || panel === "householdName")) {
       requireAccount("household");
       return;
     }
@@ -130,7 +130,8 @@ const useAccount = () => {
     hasThemes: skin.themes.length > 1,
     themeName: skin.theme?.name,
     openTheme: () => setOpenPanel("theme"),
-    openGuestName: () => setOpenPanel("guestName"),
+    openName: () => setOpenPanel("name"),
+    openHouseholdName: () => setOpenPanel("householdName"),
     openLooks: () => router.navigate("/looks"),
     looksLabel: skin.copy.prizes.sectionTitle,
     openNotifications: () => router.push("/notifications"),

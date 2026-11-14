@@ -377,6 +377,8 @@ const ONLINE_ACTIONS = [
   /^logout$/,
   /^users\/delete$/,
   /^households\/switch$/,
+  /^households\/name$/,
+  /^me\/username$/,
   /^prizes\/[^/]+\/redeem$/,
 ];
 

@@ -60,8 +60,13 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   };
 
   const refreshEmpty = async () => {
+    if (shopListId !== undefined && handled === 0 && !shop.foods?.length) {
+      await cancelShopList();
+      reset();
+      return;
+    }
     await refreshPreview();
-    if (shopListId) await shop.mutateFood();
+    if (shopListId !== undefined) await shop.mutateFood();
   };
 
   const reset = () => {

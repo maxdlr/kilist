@@ -77,20 +77,18 @@ const CalmAccount = () => {
             <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
 
             <Group label={T.settings.account}>
-              {account.isGuest ? (
-                <Press
-                  accessibilityRole="button"
-                  accessibilityLabel={`${user.username}, ${common.guestRename.action}`}
-                  onPress={account.openGuestName}
-                  style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.tint }]}
-                >
-                  <CText size={skin.type.body} numberOfLines={1} style={styles.name}>{user.username}</CText>
-                  <EditBadge />
-                </Press>
-              ) : (
+              <Press
+                accessibilityRole="button"
+                accessibilityLabel={`${user.username}, ${account.isGuest ? common.guestRename.action : common.guestRename.accountAction}`}
+                onPress={account.openName}
+                style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.tint }]}
+              >
+                <CText size={skin.type.body} numberOfLines={1} style={styles.name}>{user.username}</CText>
+                <EditBadge />
+              </Press>
+              {!account.isGuest && (
                 <View style={styles.row}>
-                  <CText size={skin.type.body}>{user.username}</CText>
-                  <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.detail}>{user.email}</CText>
+                  <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.name}>{user.email}</CText>
                 </View>
               )}
             </Group>
@@ -103,9 +101,19 @@ const CalmAccount = () => {
               </Group>
             ) : (
               <Group label={copy.household}>
+                <Press
+                  accessibilityRole="button"
+                  accessibilityLabel={`${account.householdName || copy.householdFallback}, ${common.householdRename.action}`}
+                  onPress={account.openHouseholdName}
+                  style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.tint }]}
+                >
+                  <CText size={skin.type.body} numberOfLines={1} style={styles.name}>
+                    {account.householdName || copy.householdFallback}
+                  </CText>
+                  <EditBadge />
+                </Press>
                 <View style={styles.row}>
-                  <CText size={skin.type.body}>{account.householdName || copy.householdFallback}</CText>
-                  <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.detail}>
+                  <CText size={skin.type.label} color={C.textSoft} numberOfLines={1} style={styles.name}>
                     {others.length ? T.settings.with(others.map((member) => member.username)) : T.settings.justYou}
                   </CText>
                 </View>

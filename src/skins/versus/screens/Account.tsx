@@ -158,7 +158,9 @@ const VersusAccount = () => {
           </Card>
 
           <Card style={styles.menu}>
-            <MenuRow first label={solo ? V.account.joinHouse : copy.switch} onPress={() => setOpenPanel("switch")} />
+            <MenuRow first label={common.guestRename.accountAction} detail={`${user.username} ›`} onPress={account.openName} />
+            <MenuRow label={common.householdRename.action} onPress={account.openHouseholdName} />
+            <MenuRow label={solo ? V.account.joinHouse : copy.switch} onPress={() => setOpenPanel("switch")} />
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
             <MenuRow label={copy.refine} onPress={account.refineFoods} />
             <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />

@@ -3,7 +3,7 @@ import { DrawnMark, type MarkKind } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { calmColors, useCalmColors } from "./colors";
 import { CButton, CText, Screen } from "./parts";
@@ -66,22 +66,36 @@ export const CalmMessage = ({
   line,
   dock,
   mark,
+  onRefresh,
 }: {
   title: string;
   line: string;
   dock?: React.ReactNode;
   mark?: MarkKind;
+  onRefresh?: () => void | Promise<void>;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
+  const body = (
+    <View style={styles.middle}>
+      {mark && <DrawnMark kind={mark} color={C.positive} />}
+      <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{title}</CText>
+      <CText size={skin.type.body} color={C.textSoft}>{line}</CText>
+    </View>
+  );
   return (
     <Screen dock={dock}>
-      <View style={styles.middle}>
-        {mark && <DrawnMark kind={mark} color={C.positive} />}
-        <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{title}</CText>
-        <CText size={skin.type.body} color={C.textSoft}>{line}</CText>
-      </View>
+      {onRefresh ? (
+        <ScrollView
+          contentContainerStyle={styles.grow}
+          refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={C.textSoft} />}
+        >
+          {body}
+        </ScrollView>
+      ) : (
+        body
+      )}
     </Screen>
   );
 };
@@ -92,4 +106,5 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     track: { backgroundColor: C.line, height: 2, overflow: "hidden", width: BAR },
     slider: { backgroundColor: C.fill, height: "100%", width: SLIDER },
     middle: { flex: 1, gap: s.spacing.small, justifyContent: "center" },
+    grow: { flexGrow: 1 },
   });

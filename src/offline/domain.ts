@@ -128,11 +128,15 @@ export const replayDeck = (foods: LocalFood[], now: number) => {
     .slice(0, deckSize);
 };
 
-export const shopCandidates = (foods: LocalFood[], now: number) =>
-  foods.filter(
+export const shopCandidates = (foods: LocalFood[], now: number) => {
+  const buyBelow = rules().shop.buyBelow ?? 1;
+  return foods.filter(
     (food) =>
-      food.lists.length > 0 && food.inStockScore < 1 && time(food.snoozedUntil) < now,
+      food.lists.length > 0 &&
+      food.inStockScore < buyBelow &&
+      time(food.snoozedUntil) < now,
   );
+};
 
 export const remainingShopFoods = (foods: LocalFood[], list: LocalShopList, now: number) => {
   const byId = new Map(foods.map((food) => [food.id, food]));

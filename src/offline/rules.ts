@@ -18,7 +18,7 @@ export type Rules = {
     paidSwipesPerDay: number;
     payWindowHours: number;
   };
-  shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number };
+  shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number; buyBelow?: number };
   products: { maxBarcodes: number; quantityLength: number };
 };
 

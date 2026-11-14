@@ -7,7 +7,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
 
-const FONTS = ["Anton", "Bungee", "Inter", "Madimi One", "Press Start 2P", "Space Grotesk", "Space Mono"];
+const FONTS = ["Anton", "Bungee", "Inter", "Press Start 2P", "Space Grotesk", "Space Mono"];
 
 const CreditsModal = ({
   visible,

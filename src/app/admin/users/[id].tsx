@@ -110,7 +110,7 @@ const UserScreen = () => {
                       onPress={() =>
                         setConfirm({
                           title: `Take ${skin.name} back?`,
-                          line: `${user.username} loses ${skin.name}${wearing ? " and goes back to Arcade" : ""}. Their points don't change.`,
+                          line: `${user.username} loses ${skin.name}${wearing ? " and goes back to Calm" : ""}. Their points don't change.`,
                           action: "Take it back",
                           onConfirm: () => run("delete", `/unlocks/${skin.prizeId}`, undefined, `${skin.name} taken back`),
                         })

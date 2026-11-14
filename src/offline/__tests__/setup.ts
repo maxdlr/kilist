@@ -16,7 +16,7 @@ beforeEach(() => {
     },
     rhythm: { minPurchases: 3, keep: 8, share: 0.5, minDays: 2, sameBuyHours: 12 },
     tickets: { perSwipe: 10, speedBonus: 5, speedWindowMs: 2000, paidSwipesPerDay: 10, payWindowHours: 24 },
-    shop: { snoozeHours: 24, sameTripMinutes: 30, suggestBelow: 0.625 },
+    shop: { snoozeHours: 24, sameTripMinutes: 30, suggestBelow: 0.625, buyBelow: 0.375 },
     products: { maxBarcodes: 20, quantityLength: 40 },
   });
 });

@@ -35,25 +35,19 @@ const RoastAccount = () => {
         style={[styles.flex, { backgroundColor: skin.colors.ground }]}
       >
         <View style={[styles.hero, { paddingTop: insets.top + skin.spacing.top }]}>
-          {account.isGuest ? (
-            <Press
-              accessibilityRole="button"
-              accessibilityLabel={`${user.username}, ${common.guestRename.action}`}
-              onPress={account.openGuestName}
-              style={withPressed(styles.nameRow)}
-            >
-              <View style={styles.flex}>
-                <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
-                  {copy.hello(caseFor(skin, user.username))}
-                </Title>
-              </View>
-              <EditBadge />
-            </Press>
-          ) : (
-            <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
-              {copy.hello(caseFor(skin, user.username))}
-            </Title>
-          )}
+          <Press
+            accessibilityRole="button"
+            accessibilityLabel={`${user.username}, ${account.isGuest ? common.guestRename.action : common.guestRename.accountAction}`}
+            onPress={account.openName}
+            style={withPressed(styles.nameRow)}
+          >
+            <View style={styles.flex}>
+              <Title size={skin.type.display.sm} lines={2} color={skin.colors.onGround}>
+                {copy.hello(caseFor(skin, user.username))}
+              </Title>
+            </View>
+            <EditBadge />
+          </Press>
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
           </ThemedText>
@@ -69,9 +63,19 @@ const RoastAccount = () => {
               style={[styles.household, { backgroundColor: skin.colors.accent }]}
             >
               <ThemedText size={skin.type.label}>{copy.household}</ThemedText>
-              <Title size={skin.type.headline} lines={1} header={false}>
-                {caseFor(skin, householdName || copy.householdFallback)}
-              </Title>
+              <Press
+                accessibilityRole="button"
+                accessibilityLabel={`${householdName || copy.householdFallback}, ${common.householdRename.action}`}
+                onPress={account.openHouseholdName}
+                style={withPressed(styles.nameRow)}
+              >
+                <View style={styles.flex}>
+                  <Title size={skin.type.headline} lines={1} header={false}>
+                    {caseFor(skin, householdName || copy.householdFallback)}
+                  </Title>
+                </View>
+                <EditBadge />
+              </Press>
               <View style={styles.codeRow}>
                 <ThemedText mono size={skin.type.mono} style={styles.flex}>
                   {common.code(joinCode)}

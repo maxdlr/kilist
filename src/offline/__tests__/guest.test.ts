@@ -13,7 +13,7 @@ const { GUEST_LIST_ID, makeGuestSnapshot } = await import("../guest");
 const catalog = await import("../catalog");
 
 const PRIZES = [
-  { id: "skin:arcade", kind: "skin" as const, skin: "arcade", price: 0 },
+  { id: "skin:calm", kind: "skin" as const, skin: "calm", price: 0 },
   { id: "skin:roast", kind: "skin" as const, skin: "roast", price: 1000 },
   { id: "skin:versus", kind: "skin" as const, skin: "versus", price: 1000, accountOnly: true },
 ];
@@ -25,7 +25,7 @@ const call = (method: string, path: string, body: unknown = {}, query: Record<st
   return route.handler(request, route.match);
 };
 
-const start = (prizes = PRIZES) => store.startGuest(makeGuestSnapshot("Guest", "arcade", prizes));
+const start = (prizes = PRIZES) => store.startGuest(makeGuestSnapshot("Guest", "calm", prizes));
 
 beforeEach(() => {
   memory.db = createMemoryDb();
@@ -47,7 +47,7 @@ describe("guest mode", () => {
   });
 
   it("keeps a name the guest chose, on the phone only", () => {
-    store.startGuest(makeGuestSnapshot("", "arcade", PRIZES));
+    store.startGuest(makeGuestSnapshot("", "calm", PRIZES));
 
     call("put", "me/username", { username: "  Max  " });
     store.resetStoreForTests();
@@ -169,7 +169,7 @@ describe("guest mode", () => {
 
     store.applyCatalog({ foodBanks: {}, prizes: PRIZES });
 
-    expect(store.getState()!.prizes.prizes.map((prize) => prize.id)).toEqual(["skin:arcade", "skin:roast", "skin:versus"]);
+    expect(store.getState()!.prizes.prizes.map((prize) => prize.id)).toEqual(["skin:calm", "skin:roast", "skin:versus"]);
   });
 
   it("asks for the intro once", () => {

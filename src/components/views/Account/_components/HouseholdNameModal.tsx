@@ -4,29 +4,29 @@ import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import common from "@/i18n/common";
-import useAuth from "@/providers/AuthProvider";
+import useHousehold from "@/providers/HouseholdProvider";
 import useMark from "@/providers/MarkProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 
-const NAME_LENGTH = 30;
+const NAME_LENGTH = 40;
 
-const GuestNameForm = ({ onClose }: { onClose: () => void }) => {
+const HouseholdNameForm = ({ current, onClose }: { current: string; onClose: () => void }) => {
   const skin = useSkin();
-  const T = common.guestRename;
-  const { guestName, renameGuest } = useAuth();
+  const T = common.householdRename;
+  const { renameHousehold } = useHousehold();
   const { showToast } = useToast();
   const { mark } = useMark();
-  const [name, setName] = useState(guestName);
+  const [name, setName] = useState(current);
 
   const save = async () => {
     try {
-      await renameGuest(name.trim());
+      await renameHousehold(name.trim());
       onClose();
       mark("saved", common.marks.saved);
-    } catch {
-      showToast(common.unexpected);
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || common.unexpected);
     }
   };
 
@@ -40,7 +40,7 @@ const GuestNameForm = ({ onClose }: { onClose: () => void }) => {
       </ThemedText>
       <FormInput
         label={T.label}
-        placeholder={skin.copy.placeholders.username}
+        placeholder={skin.copy.account.householdFallback}
         labelColor={skin.panel.ink}
         maxLength={NAME_LENGTH}
         value={name}
@@ -51,10 +51,18 @@ const GuestNameForm = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const GuestNameModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => (
+const HouseholdNameModal = ({
+  visible,
+  current,
+  onClose,
+}: {
+  visible: boolean;
+  current: string;
+  onClose: () => void;
+}) => (
   <BottomPanel visible={visible} onClose={onClose} dismissible>
-    {visible && <GuestNameForm onClose={onClose} />}
+    {visible && <HouseholdNameForm current={current} onClose={onClose} />}
   </BottomPanel>
 );
 
-export default GuestNameModal;
+export default HouseholdNameModal;

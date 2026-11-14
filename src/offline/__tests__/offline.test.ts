@@ -14,7 +14,7 @@ const { GHOST_RACE_ID, matchLocal, offlineRaceView, queueRaceAnswer } = await im
 const { calculateScore, nextSuggestion, starterFoods, swipeDeck, swipeGame } = await import("../domain");
 const { aisleOf, setFoodBanks, shownName, suggestNames } = await import("../foodNames");
 
-const food = (id: number, score = 0.5, extra = {}) => ({
+const food = (id: number, score = 0.25, extra = {}) => ({
   id,
   name: `Food ${id}`,
   inStockScore: score,
@@ -28,7 +28,7 @@ const snapshot = (overrides: Partial<Snapshot> = {}): Snapshot =>
     user: { id: 7, username: "me", email: "me@x.y", type: "user", household: { id: 1, joinCode: "ABC" } },
     household: { id: 1, joinCode: "ABC", members: [{ id: 7, username: "me", type: "user" }] },
     mainList: { id: 1, title: "Main", isMain: true },
-    foods: [food(1), food(2), food(3, 0.25)],
+    foods: [food(1), food(2), food(3, 0)],
     frequencies: [],
     playedAt: [],
     openShopList: null,
@@ -180,7 +180,7 @@ describe("shopping offline", () => {
       {},
       snapshot({
         foods: [
-          food(1, 0.5, { histories: [{ isInStock: false, at: "2020-01-01T00:00:00.000Z" }] }),
+          food(1, 0.25, { histories: [{ isInStock: false, at: "2020-01-01T00:00:00.000Z" }] }),
           food(2),
           food(3),
         ],
@@ -201,7 +201,7 @@ describe("shopping offline", () => {
     pull(
       {},
       snapshot({
-        foods: [food(1, 0.5), food(2, 1), food(3, 1)],
+        foods: [food(1, 0.25), food(2, 1), food(3, 1)],
         frequencies: [
           { foodId: 1, nextFoodId: 2, count: 3 },
           { foodId: 1, nextFoodId: 3, count: 1 },
@@ -501,6 +501,20 @@ describe("inventory without maintenance", () => {
 
     expect(preview.map((entry: { id: number }) => entry.id)).toEqual([3, 1, 2]);
     expect(getState()!.openShopList).toBeNull();
+  });
+
+  it("shops only for foods marked to buy, not maybe", () => {
+    pull({}, snapshot({ foods: [food(1, 0), food(2, 0.25), food(3, 0.5), food(4, 0.75)] }));
+
+    expect(call("get", "shop-list/preview").map((entry: { id: number }) => entry.id)).toEqual([1, 2]);
+  });
+
+  it("shops for everything below plenty when the API sends no buy threshold yet", async () => {
+    const { rules, setRules } = await import("../rules");
+    setRules({ ...rules(), shop: { ...rules().shop, buyBelow: undefined } });
+    pull({}, snapshot({ foods: [food(1, 0), food(2, 0.5), food(3, 1)] }));
+
+    expect(call("get", "shop-list/preview").map((entry: { id: number }) => entry.id)).toEqual([1, 2]);
   });
 });
 

@@ -5,7 +5,8 @@ import CreditsModal from "./CreditsModal";
 import LanguageModal from "./LanguageModal";
 import ThemeModal from "./ThemeModal";
 import EmailCodeModal from "./EmailCodeModal";
-import GuestNameModal from "./GuestNameModal";
+import HouseholdNameModal from "./HouseholdNameModal";
+import NameModal from "./NameModal";
 import SwitchHouseholdModal from "./SwitchHouseholdModal";
 
 const AccountPanels = ({ account }: { account: Account }) => {
@@ -25,7 +26,12 @@ const AccountPanels = ({ account }: { account: Account }) => {
       <LanguageModal visible={openPanel === "language"} onClose={closePanel} />
       <ThemeModal visible={openPanel === "theme"} onClose={closePanel} />
       <EmailCodeModal visible={openPanel === "emailCode"} onClose={closePanel} />
-      <GuestNameModal visible={openPanel === "guestName"} onClose={closePanel} />
+      <NameModal visible={openPanel === "name"} onClose={closePanel} />
+      <HouseholdNameModal
+        visible={openPanel === "householdName"}
+        current={account.householdName ?? ""}
+        onClose={closePanel}
+      />
       <CreditsModal visible={openPanel === "credits"} onClose={closePanel} onOpenIcons={account.openIconsSite} />
       <SwitchHouseholdModal
         visible={openPanel === "switch"}

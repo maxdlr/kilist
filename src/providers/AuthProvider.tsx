@@ -60,7 +60,7 @@ export type AuthContextType = {
   deleteAccount: () => Promise<boolean>;
   mutateUser: (data?: UserType) => unknown;
   guestName: string;
-  renameGuest: (username: string) => Promise<void>;
+  rename: (username: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -81,7 +81,7 @@ const AuthContext = createContext<AuthContextType>({
   deleteAccount: async () => false,
   mutateUser: () => {},
   guestName: "",
-  renameGuest: async () => {},
+  rename: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     mutateUser();
   }, [isLoading, user, clearCache, mutateUser]);
 
-  const renameGuest = async (username: string) => {
+  const rename = async (username: string) => {
     const { data } = await axios.put<UserType>("/me/username", { username });
     await mutateUser(data, { revalidate: false });
   };
@@ -268,7 +268,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user: isGuest && user && !user.username ? { ...user, username: common.guestName } : user,
         guestName: isGuest ? (user?.username ?? "") : "",
-        renameGuest,
+        rename,
         isLoading,
         isGuest,
         sessionExpired,

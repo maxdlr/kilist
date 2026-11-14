@@ -11,9 +11,9 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
@@ -226,6 +226,14 @@ const CalmShop = () => {
 
   if (run.isLoading) return <CalmLoading />;
 
+  const refresher = (
+    <RefreshControl
+      refreshing={false}
+      onRefresh={run.refreshEmpty}
+      tintColor={C.textSoft}
+    />
+  );
+
   const dockWith = (label: string, onPress: () => void) => (
     <>
       <CButton
@@ -233,7 +241,11 @@ const CalmShop = () => {
         accessibilityLabel={common.shop.add}
         onPress={run.openAdd}
         icon={(color) => (
-          <PlusIcon size={skin.size.icon.action} color={color} strokeWidth={1.8} />
+          <PlusIcon
+            size={skin.size.icon.action}
+            color={color}
+            strokeWidth={1.8}
+          />
         )}
       />
       <CButton label={label} onPress={onPress} />
@@ -305,6 +317,7 @@ const CalmShop = () => {
             <ScrollView
               style={[styles.tagScroll, { maxHeight: height * TAGS_HEIGHT }]}
               contentContainerStyle={styles.sections}
+              refreshControl={refresher}
             >
               {sections.map((section) => (
                 <View key={section.id} style={styles.section}>
@@ -366,20 +379,7 @@ const CalmShop = () => {
         <CalmMessage
           title={skin.copy.shop.emptyTitle}
           line={skin.copy.shop.emptyLine}
-          dock={
-            <>
-              <CButton
-                variant="secondary"
-                label={common.shop.add}
-                onPress={run.openAdd}
-              />
-              <CButton
-                variant="text"
-                label={T.shop.backToday}
-                onPress={() => router.navigate("/")}
-              />
-            </>
-          }
+          onRefresh={run.refreshEmpty}
         />
         <ShopPanels run={run} />
       </View>
@@ -421,7 +421,11 @@ const CalmShop = () => {
             </View>
           </View>
         </View>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.list}
+          refreshControl={refresher}
+        >
           {run.suggestion && (
             <View style={styles.next}>
               <CText size={skin.type.caption} color={C.textSoft}>

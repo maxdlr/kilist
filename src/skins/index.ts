@@ -1,5 +1,4 @@
 import { getLang, type Lang } from "@/i18n";
-import arcade from "./arcade";
 import calm from "./calm";
 import roast from "./roast";
 import versus from "./versus";
@@ -7,7 +6,7 @@ import type { Skin, SkinPaint, SkinSource } from "./types";
 
 export const DEFAULT_SKIN_ID = "calm";
 
-export const SKINS: SkinSource[] = [roast, arcade, versus, calm];
+export const SKINS: SkinSource[] = [roast, versus, calm];
 
 const localized = new Map<string, Skin>();
 
