@@ -1,7 +1,7 @@
 {
   "name": "kilist",
   "main": "expo-router/entry",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "dependencies": {
     "@expo/ui": "~58.0.27",
     "@react-native-community/netinfo": "12.0.1",
