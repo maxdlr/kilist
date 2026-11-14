@@ -1,7 +1,7 @@
 import AnimationService, { projectFling } from "@/services/animation";
 import { Dimensions } from "react-native";
 import { usePanGesture } from "react-native-gesture-handler";
-import { useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { SharedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
 const DEFAULT_SWIPE_THRESHOLD = 80;
@@ -15,14 +15,17 @@ export const useSwipeGesture = ({
   onSwipingLeft,
   onSwipingRight,
   swipeThreshold = DEFAULT_SWIPE_THRESHOLD,
+  translation,
 }: {
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
   onSwipingLeft?: (value: number) => void;
   onSwipingRight?: (value: number) => void;
   swipeThreshold?: number;
+  translation?: SharedValue<number>;
 }) => {
-  const translationX = useSharedValue(0);
+  const ownTranslation = useSharedValue(0);
+  const translationX = translation ?? ownTranslation;
   const side = useSharedValue(0);
   const leaving = useSharedValue(false);
   const speed = useSharedValue(0);

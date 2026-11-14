@@ -221,6 +221,7 @@ const fr: SkinCopy = {
     you: " (toi)",
     switch: "Changer de foyer",
     suggested: "Revoir l'introduction",
+    refine: "Affiner tes aliments avec notre banque",
     logout: "Se déconnecter",
     credits: "Crédits",
     creditsTitle: "Crédits",

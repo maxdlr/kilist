@@ -221,6 +221,7 @@ const calmCopy: RoastCopy = {
     you: " (you)",
     switch: "Switch household",
     suggested: "See the introduction again",
+    refine: "Refine your foods from our bank",
     logout: "Log out",
     credits: "Credits",
     creditsTitle: "Credits",

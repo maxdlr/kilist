@@ -231,6 +231,7 @@ const roastCopy = {
     you: " (YOU, SADLY)",
     switch: "SWITCH HOUSEHOLD",
     suggested: "EXPLAIN IT AGAIN. SLOWLY.",
+    refine: "FIX YOUR FOODS. USE OUR BANK.",
     logout: "LOG OUT. COWARD.",
     credits: "CREDITS",
     creditsTitle: "CREDIT WHERE IT'S DUE.",

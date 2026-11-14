@@ -7,13 +7,15 @@ import type { Href } from "expo-router";
 const Onboarding = ({
   onDone,
   intro = false,
+  refine = false,
   backTo,
 }: {
   onDone: (startRound: boolean) => void;
   intro?: boolean;
+  refine?: boolean;
   backTo?: Href;
 }) => {
-  const tutorial = <CalmTutorial withIntro={intro} foodsOnly={!intro} onDone={onDone} />;
+  const tutorial = <CalmTutorial withIntro={intro} foodsOnly={!intro} refine={refine} onDone={onDone} />;
 
   return (
     <SkinOverride id={DEFAULT_SKIN_ID}>

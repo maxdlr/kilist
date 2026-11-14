@@ -115,6 +115,7 @@ const CalmAccount = () => {
 
           <Group label={T.settings.app}>
             <Row label={copy.suggested} onPress={account.replayOnboarding} />
+            <Row label={copy.refine} onPress={account.refineFoods} />
             <Row label={common.language} detail={account.languageName} onPress={account.openLanguage} />
             <Row label={account.looksLabel} onPress={account.openLooks} />
             {account.hasThemes && <Row label={common.theme} detail={account.themeName} onPress={account.openTheme} />}

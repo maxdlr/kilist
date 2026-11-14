@@ -220,6 +220,7 @@ const arcadeCopy: RoastCopy = {
     you: " (you)",
     switch: "Switch household",
     suggested: "Replay the intro",
+    refine: "Refine your foods",
     logout: "Log out",
     credits: "Credits",
     creditsTitle: "Credits",

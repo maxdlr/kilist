@@ -116,7 +116,6 @@ const fr: CommonText = {
     startRight: "Glisse à droite quand c'est dans ton panier.",
     startLeft: "Glisse à gauche pour le garder pour la prochaine fois.",
     start: "Commencer les courses",
-    more: (count: number) => `+${count} de plus`,
     finish: "Terminer",
     stopTitle: "Arrêter les courses ?",
     stopLine: (bought: number, total: number) =>

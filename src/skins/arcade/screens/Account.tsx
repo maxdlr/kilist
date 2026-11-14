@@ -197,6 +197,7 @@ const ArcadeAccount = () => {
           <View style={styles.menu}>
             {!account.isGuest && <MenuRow label={T.switchTeam} onPress={() => setOpenPanel("switch")} />}
             <MenuRow label={copy.suggested} onPress={account.replayOnboarding} />
+            <MenuRow label={copy.refine} onPress={account.refineFoods} />
             <MenuRow label={common.language} detail={`${account.languageName} ›`} onPress={account.openLanguage} />
             <MenuRow label={account.looksLabel} onPress={account.openLooks} />
             <MenuRow label={common.notifications.menu} onPress={account.openNotifications} />

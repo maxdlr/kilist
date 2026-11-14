@@ -14,7 +14,7 @@ import { StyleSheet, View } from "react-native";
 import {
   HomeIcon,
   ListBulletIcon,
-  ShoppingBagIcon,
+  ShoppingCartIcon,
   UserIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
@@ -28,7 +28,7 @@ const ORDER = MAIN_TABS;
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
   inventory: ListBulletIcon,
-  shop: ShoppingBagIcon,
+  shop: ShoppingCartIcon,
   account: UserIcon,
   admin: WrenchIcon,
 };

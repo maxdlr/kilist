@@ -120,6 +120,11 @@ const RoastAccount = () => {
             showChevron
           />
           <ActionRow
+            label={copy.refine}
+            onPress={account.refineFoods}
+            showChevron
+          />
+          <ActionRow
             label={`${common.language} · ${account.languageName}`.toUpperCase()}
             onPress={account.openLanguage}
             showChevron

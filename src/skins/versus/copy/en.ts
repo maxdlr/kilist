@@ -220,6 +220,7 @@ const versusCopy: RoastCopy = {
     you: " (you)",
     switch: "Switch house",
     suggested: "Replay the intro",
+    refine: "Refine your foods",
     logout: "Log out",
     credits: "Credits",
     creditsTitle: "Credits",

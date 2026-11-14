@@ -1,34 +1,43 @@
 import Press from "@/components/elements/Press";
-import withPressed from "@/utils/withPressed";
-import T from "../text";
+import SwipeGesture from "@/components/gestures/SwipeGesture";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
+import withPressed from "@/utils/withPressed";
 import { router } from "expo-router";
-import { useState } from "react";
-import SwipeGesture from "@/components/gestures/SwipeGesture";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  ClockIcon,
   InformationCircleIcon,
   PlusIcon,
-  QuestionMarkCircleIcon,
-  ShoppingBagIcon,
   XMarkIcon,
 } from "react-native-heroicons/outline";
 import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
+import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
-import { CButton, CText, Dot, Screen, StockBars } from "./parts";
+import { CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
-const START_PREVIEW = 6;
+const TAGS_HEIGHT = 0.7;
+const IDLE_MS = 2000;
+const NUDGE = 150;
+const NUDGE_PAUSE_MS = 900;
 
 const Circle = ({ done }: { done: boolean }) => {
   const skin = useSkin();
@@ -59,18 +68,47 @@ const Circle = ({ done }: { done: boolean }) => {
 
 const SwipeRow = ({
   food,
+  nudging = false,
   onBuy,
   onLater,
 }: {
   food: FoodType;
+  nudging?: boolean;
   onBuy: () => void;
   onLater: () => void;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const [buying, setBuying] = useState(true);
   const level = levelOf(food.inStockScore);
+  const nudge = useSharedValue(0);
+  const drag = useSharedValue(0);
+
+  useEffect(() => {
+    if (!nudging) {
+      nudge.set(withTiming(0, AnimationService.config));
+      return;
+    }
+    nudge.set(
+      withRepeat(
+        withSequence(
+          withTiming(NUDGE, AnimationService.config),
+          withTiming(0, AnimationService.config),
+          withTiming(-NUDGE, AnimationService.config),
+          withTiming(0, AnimationService.config),
+          withDelay(NUDGE_PAUSE_MS, withTiming(0, { duration: 0 })),
+        ),
+        -1,
+      ),
+    );
+  }, [nudging, nudge]);
+
+  const nudgeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: nudge.value }],
+  }));
+  const laterStyle = useAnimatedStyle(() => ({
+    opacity: drag.value + nudge.value < 0 ? 1 : 0,
+  }));
 
   return (
     <View
@@ -84,39 +122,40 @@ const SwipeRow = ({
       onAccessibilityAction={(event) =>
         event.nativeEvent.actionName === "later" ? onLater() : onBuy()
       }
-      style={[styles.slot, { backgroundColor: buying ? C.fill : C.tint }]}
+      style={styles.slot}
     >
-      <View
-        style={[
-          styles.behind,
-          { justifyContent: buying ? "flex-start" : "flex-end" },
-        ]}
-      >
-        <CText
-          weight="medium"
-          size={skin.type.label + 1}
-          color={buying ? C.onFill : C.textSoft}
-        >
-          {buying ? T.shop.inBasket : T.shop.later}
+      <View style={[styles.behind, styles.behindBuy]}>
+        <CText weight="medium" size={skin.type.label + 1} color={C.onFill}>
+          {T.shop.inBasket}
         </CText>
       </View>
-      <SwipeGesture
-        onSwipeRight={onBuy}
-        onSwipeLeft={onLater}
-        onSwipingRight={() => setBuying(true)}
-        onSwipingLeft={() => setBuying(false)}
-        swipeThreshold={100}
-        styles={{ box: styles.swipeBox }}
-      >
-        <View
-          style={[styles.rowMain, { paddingHorizontal: skin.spacing.stack }]}
+      <Animated.View style={[styles.behind, styles.behindLater, laterStyle]}>
+        <CText weight="medium" size={skin.type.label + 1} color={C.textSoft}>
+          {T.shop.later}
+        </CText>
+      </Animated.View>
+      <Animated.View style={nudgeStyle}>
+        <SwipeGesture
+          onSwipeRight={onBuy}
+          onSwipeLeft={onLater}
+          translation={drag}
+          swipeThreshold={100}
+          styles={{ box: styles.swipeBox }}
         >
-          <CText size={skin.type.lead} style={[styles.flex]} numberOfLines={1}>
-            {food.name}
-          </CText>
-          <Dot color={skin.colors.levels[level]} />
-        </View>
-      </SwipeGesture>
+          <View
+            style={[styles.rowMain, { paddingHorizontal: skin.spacing.stack }]}
+          >
+            <CText
+              size={skin.type.lead}
+              style={[styles.flex]}
+              numberOfLines={1}
+            >
+              {food.name}
+            </CText>
+            <Dot color={skin.colors.levels[level]} />
+          </View>
+        </SwipeGesture>
+      </Animated.View>
     </View>
   );
 };
@@ -125,6 +164,7 @@ const CalmShop = () => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
+  const { height } = useWindowDimensions();
   const [showHow, setShowHow] = useState(false);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
@@ -136,6 +176,17 @@ const CalmShop = () => {
       setResult({ bought, left: Math.max(0, run.total - bought) }),
   });
   const remaining = run.foods ?? [];
+  const [touches, setTouches] = useState(0);
+  const [idleFor, setIdleFor] = useState<string | null>(null);
+  const canNudge = run.isStarted && run.handled === 0 && remaining.length > 0;
+  const activity = `${touches}:${run.panel}`;
+  const nudging = canNudge && !run.panel && idleFor === activity;
+
+  useEffect(() => {
+    if (!canNudge) return;
+    const timer = setTimeout(() => setIdleFor(activity), IDLE_MS);
+    return () => clearTimeout(timer);
+  }, [canNudge, activity]);
 
   const tick = (food: FoodType) => {
     setBasket((list) => [...list, food]);
@@ -188,7 +239,7 @@ const CalmShop = () => {
     return (
       <View style={styles.flex}>
         <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
-          <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+          <View style={[styles.flex, styles.list]}>
             <View style={styles.startHead}>
               <View style={styles.titleRow}>
                 <CText
@@ -220,52 +271,19 @@ const CalmShop = () => {
                   )}
                 </Press>
               </View>
-              <StockBars
-                rows={[
-                  {
-                    label: T.stock.sure,
-                    count: run.range.low,
-                    color: skin.colors.levels[1],
-                    icon: (
-                      <ShoppingBagIcon
-                        size={18}
-                        color={C.positive}
-                        strokeWidth={1.8}
-                      />
-                    ),
-                  },
-                  {
-                    label: T.stock.maybe,
-                    count: run.range.high - run.range.low,
-                    color: C.barMaybe,
-                    icon: (
-                      <QuestionMarkCircleIcon
-                        size={18}
-                        color={C.textFaint}
-                        strokeWidth={1.8}
-                      />
-                    ),
-                  },
-                ]}
-              />
             </View>
-            {run.preview.slice(0, START_PREVIEW).map((food) => (
-              <View key={food.id} style={styles.row}>
-                <Dot color={skin.colors.levels[levelOf(food.inStockScore)]} />
-                <CText
-                  size={skin.type.lead}
-                  style={styles.flex}
-                  numberOfLines={1}
-                >
-                  {food.name}
-                </CText>
-              </View>
-            ))}
-            {run.preview.length > START_PREVIEW && (
-              <CText size={skin.type.label} color={C.textSoft} style={styles.more}>
-                {common.shop.more(run.preview.length - START_PREVIEW)}
-              </CText>
-            )}
+            <ScrollView
+              style={[styles.tagScroll, { maxHeight: height * TAGS_HEIGHT }]}
+              contentContainerStyle={styles.tags}
+            >
+              {run.preview.map((food) => (
+                <View key={food.id} style={styles.tag}>
+                  <CText size={skin.type.body} numberOfLines={1}>
+                    {food.name}
+                  </CText>
+                </View>
+              ))}
+            </ScrollView>
             {showHow && (
               <View style={styles.how}>
                 <View style={styles.howRow}>
@@ -290,7 +308,7 @@ const CalmShop = () => {
                 </View>
               </View>
             )}
-          </ScrollView>
+          </View>
         </Screen>
         <ShopPanels run={run} />
       </View>
@@ -324,7 +342,10 @@ const CalmShop = () => {
   }
 
   return (
-    <View style={styles.flex}>
+    <View
+      style={styles.flex}
+      onTouchStart={() => setTouches((count) => count + 1)}
+    >
       <Screen padded={false} dock={dockWith(common.shop.finish, run.finish)}>
         <View style={styles.head}>
           <View style={styles.titleRow}>
@@ -356,28 +377,6 @@ const CalmShop = () => {
           </View>
         </View>
         <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
-          {remaining.length > 0 && (
-            <View
-              accessible
-              accessibilityLabel={T.shop.hintAria}
-              style={[styles.legend, styles.hint]}
-            >
-              <View style={styles.legendItem}>
-                <ArrowLeftIcon size={16} color={C.textSoft} strokeWidth={1.8} />
-                <ClockIcon size={16} color={C.textSoft} strokeWidth={1.8} />
-                <CText size={skin.type.label} color={C.textSoft}>
-                  {T.shop.later}
-                </CText>
-              </View>
-              <View style={styles.legendItem}>
-                <CText size={skin.type.label} color={C.textSoft}>
-                  {T.shop.legendBasket}
-                </CText>
-                <ShoppingBagIcon size={16} color={C.positive} strokeWidth={1.8} />
-                <ArrowRightIcon size={16} color={C.positive} strokeWidth={1.8} />
-              </View>
-            </View>
-          )}
           {run.suggestion && (
             <View style={styles.next}>
               <CText size={skin.type.caption} color={C.textSoft}>
@@ -385,15 +384,17 @@ const CalmShop = () => {
               </CText>
               <SwipeRow
                 food={run.suggestion}
+                nudging={nudging}
                 onBuy={() => tick(run.suggestion!)}
                 onLater={() => postpone(run.suggestion!)}
               />
             </View>
           )}
-          {run.rows.map((food) => (
+          {run.rows.map((food, index) => (
             <SwipeRow
               key={food.id}
               food={food}
+              nudging={nudging && !run.suggestion && index === 0}
               onBuy={() => tick(food)}
               onLater={() => postpone(food)}
             />
@@ -492,10 +493,13 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       justifyContent: "center",
       width: s.size.button.lg,
     },
-    more: {
-      borderTopColor: C.line,
-      borderTopWidth: s.shape.divider,
-      paddingTop: s.spacing.inline,
+    tagScroll: { flexGrow: 0, flexShrink: 1 },
+    tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
+    tag: {
+      backgroundColor: C.tint,
+      borderRadius: s.size.toggle / 2,
+      paddingHorizontal: s.spacing.inline + 2,
+      paddingVertical: s.spacing.small,
     },
     how: {
       backgroundColor: C.tint,
@@ -536,6 +540,8 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       right: 0,
       top: 0,
     },
+    behindBuy: { backgroundColor: C.fill, justifyContent: "flex-start" },
+    behindLater: { backgroundColor: C.tint, justifyContent: "flex-end" },
     swipeBox: { backgroundColor: C.ground },
     circle: {
       alignItems: "center",

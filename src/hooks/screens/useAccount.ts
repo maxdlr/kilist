@@ -140,6 +140,7 @@ const useAccount = () => {
     openIconsSite,
     switchTo,
     replayOnboarding: () => router.push("/onboarding?intro=1&replay=1"),
+    refineFoods: () => router.push("/onboarding?refine=1"),
   };
 };
 

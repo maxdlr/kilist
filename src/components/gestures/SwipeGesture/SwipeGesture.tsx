@@ -7,6 +7,7 @@ import {
 } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
+  SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSwipeGesture } from "./useSwipeGesture";
@@ -22,6 +23,7 @@ const SwipeGesture = ({
   onSwipingRight,
   swipeThreshold,
   animatedStyles,
+  translation,
 }: {
   children: ReactNode;
   styles: {
@@ -34,6 +36,7 @@ const SwipeGesture = ({
   onSwipingRight?: (value: number) => void;
   swipeThreshold?: number;
   animatedStyles?: AnimatedStyle<ViewStyle>;
+  translation?: SharedValue<number>;
 }) => {
   const { translationX, pan } = useSwipeGesture({
     onSwipeLeft,
@@ -41,6 +44,7 @@ const SwipeGesture = ({
     onSwipingLeft,
     onSwipingRight,
     swipeThreshold,
+    translation,
   });
 
   const swipeStyle = useAnimatedStyle(() => ({

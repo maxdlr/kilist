@@ -114,7 +114,6 @@ const en = {
     startRight: "Swipe right when it's in your basket.",
     startLeft: "Swipe left to keep it for next time.",
     start: "Start shopping",
-    more: (count: number) => `+${count} more`,
     finish: "Finish",
     stopTitle: "Stop shopping?",
     stopLine: (bought: number, total: number) =>

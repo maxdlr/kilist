@@ -13,7 +13,7 @@ import {
   Cog6ToothIcon,
   ListBulletIcon,
   PlayIcon,
-  ShoppingBagIcon,
+  ShoppingCartIcon,
   HomeIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
@@ -27,7 +27,7 @@ const ORDER = MAIN_TABS;
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
   swipe: PlayIcon,
-  shop: ShoppingBagIcon,
+  shop: ShoppingCartIcon,
   inventory: ListBulletIcon,
   account: Cog6ToothIcon,
   admin: WrenchIcon,

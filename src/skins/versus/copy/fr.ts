@@ -220,6 +220,7 @@ const fr: SkinCopy = {
     you: " (toi)",
     switch: "Changer de maison",
     suggested: "Revoir l'intro",
+    refine: "Affiner tes aliments",
     logout: "Se déconnecter",
     credits: "Crédits",
     creditsTitle: "Crédits",

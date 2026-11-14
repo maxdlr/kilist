@@ -12,8 +12,12 @@ import {
 import Animated, {
   clamp,
   interpolate,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -29,6 +33,9 @@ const INTENT_AT = 24;
 const STAMP_FULL_AT = 80;
 const FLICK_VELOCITY = 600;
 const BACK_SCALE = 0.95;
+const NUDGE = 100;
+const NUDGE_PAUSE_MS = 900;
+const NUDGE_SETTLE_MS = 150;
 
 export const deckButtonColors = (
   skin: Skin,
@@ -42,6 +49,7 @@ export const deckButtonColors = (
 
 const DeckSheet = ({
   isTop,
+  nudging,
   allowUp,
   stamps,
   flingRef,
@@ -52,6 +60,7 @@ const DeckSheet = ({
 }: {
   onLongPress?: () => void;
   isTop: boolean;
+  nudging: boolean;
   allowUp: boolean;
   stamps: Partial<Record<SwipeDirection, string>>;
   flingRef: RefObject<SwipeDeckFling | null>;
@@ -74,6 +83,39 @@ const DeckSheet = ({
     if (isTop) rise.set(withTiming(1, AnimationService.enter));
   }, [isTop, rise]);
   const lastIntent = useSharedValue<SwipeDirection | null>(null);
+  const nudge = useSharedValue(0);
+
+  useEffect(() => {
+    if (!nudging) {
+      nudge.set(withTiming(0, { duration: NUDGE_SETTLE_MS }));
+      return;
+    }
+    nudge.set(
+      withRepeat(
+        withSequence(
+          withTiming(-NUDGE, AnimationService.config),
+          withTiming(0, AnimationService.config),
+          withTiming(NUDGE, AnimationService.config),
+          withTiming(0, AnimationService.config),
+          withDelay(NUDGE_PAUSE_MS, withTiming(0, { duration: 0 })),
+        ),
+        -1,
+      ),
+    );
+  }, [nudging, nudge]);
+
+  useAnimatedReaction(
+    () =>
+      nudge.value > INTENT_AT
+        ? "right"
+        : nudge.value < -INTENT_AT
+          ? "left"
+          : null,
+    (next, previous) => {
+      if (previous !== undefined && next !== previous)
+        scheduleOnRN(onIntent, next);
+    },
+  );
 
   const finish = (direction: SwipeDirection) => {
     onIntent(null);
@@ -96,7 +138,11 @@ const DeckSheet = ({
       return;
     }
     x.set(
-      withTiming((direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6, timing, done),
+      withTiming(
+        (direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6,
+        timing,
+        done,
+      ),
     );
   };
 
@@ -148,7 +194,10 @@ const DeckSheet = ({
         Math.abs(vx) > FLICK_VELOCITY && Math.sign(vx) === Math.sign(x.value)
           ? x.value + projectFling(vx)
           : x.value;
-      const flickY = vy < -FLICK_VELOCITY && y.value < 0 ? y.value + projectFling(vy) : y.value;
+      const flickY =
+        vy < -FLICK_VELOCITY && y.value < 0
+          ? y.value + projectFling(vy)
+          : y.value;
 
       if (allowUp && flickY < -COMMIT_UP && -y.value > Math.abs(x.value)) {
         fling("up");
@@ -175,21 +224,33 @@ const DeckSheet = ({
 
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: x.value },
+      { translateX: x.value + nudge.value },
       { translateY: y.value },
-      { rotateZ: `${x.value / 26}deg` },
+      { rotateZ: `${(x.value + nudge.value) / 26}deg` },
       { scale: interpolate(rise.value, [0, 1], [BACK_SCALE, 1]) },
     ],
   }));
 
   const rightStamp = useAnimatedStyle(() => ({
-    opacity: clamp(interpolate(x.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]), 0, 1),
+    opacity: clamp(
+      interpolate(x.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]),
+      0,
+      1,
+    ),
   }));
   const leftStamp = useAnimatedStyle(() => ({
-    opacity: clamp(interpolate(-x.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]), 0, 1),
+    opacity: clamp(
+      interpolate(-x.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]),
+      0,
+      1,
+    ),
   }));
   const upStamp = useAnimatedStyle(() => ({
-    opacity: clamp(interpolate(-y.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]), 0, 1),
+    opacity: clamp(
+      interpolate(-y.value, [INTENT_AT, STAMP_FULL_AT], [0, 1]),
+      0,
+      1,
+    ),
   }));
 
   const isSticker = skin.game.stamp === "sticker";
@@ -255,9 +316,7 @@ const DeckSheet = ({
 
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View
-        style={[StyleSheet.absoluteFill, sheetStyle]}
-      >
+      <Animated.View style={[StyleSheet.absoluteFill, sheetStyle]}>
         {children}
         {renderStamp("right")}
         {renderStamp("left")}
@@ -278,9 +337,11 @@ const SwipeDeck = <T,>({
   onSwipe,
   onLongPress,
   background,
+  nudging = false,
 }: {
   onLongPress?: (item: T) => void;
   background?: string;
+  nudging?: boolean;
   items: T[];
   keyOf: (item: T) => string | number;
   renderSheet: (item: T, depth: number) => ReactNode;
@@ -294,22 +355,28 @@ const SwipeDeck = <T,>({
   const styles = useSkinStyles(createStyles);
 
   return (
-    <View style={[styles.deck, { backgroundColor: background ?? skin.colors.ground }]}>
+    <View
+      style={[
+        styles.deck,
+        { backgroundColor: background ?? skin.colors.ground },
+      ]}
+    >
       {items
         .slice(0, 2)
         .map((item, depth) => (
-        <DeckSheet
-          key={keyOf(item)}
-          isTop={depth === 0}
-          allowUp={allowUp}
-          stamps={stamps}
-          flingRef={flingRef}
-          onIntent={onIntent}
-          onSwipe={(direction) => onSwipe(item, direction)}
-          onLongPress={onLongPress ? () => onLongPress(item) : undefined}
-        >
-          {renderSheet(item, depth)}
-        </DeckSheet>
+          <DeckSheet
+            key={keyOf(item)}
+            isTop={depth === 0}
+            nudging={nudging && depth === 0}
+            allowUp={allowUp}
+            stamps={stamps}
+            flingRef={flingRef}
+            onIntent={onIntent}
+            onSwipe={(direction) => onSwipe(item, direction)}
+            onLongPress={onLongPress ? () => onLongPress(item) : undefined}
+          >
+            {renderSheet(item, depth)}
+          </DeckSheet>
         ))
         .reverse()}
     </View>

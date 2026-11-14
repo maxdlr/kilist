@@ -6,7 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 
 const OnboardingScreen = () => {
-  const { intro, replay } = useLocalSearchParams<{ intro?: string; replay?: string }>();
+  const { intro, replay, refine } = useLocalSearchParams<{ intro?: string; replay?: string; refine?: string }>();
   const [asking, setAsking] = useState(false);
   const T = common.notifications.ask;
 
@@ -28,7 +28,8 @@ const OnboardingScreen = () => {
     <>
       <Onboarding
         intro={intro === "1"}
-        backTo={replay === "1" ? "/account" : intro !== "1" ? "/inventory" : undefined}
+        refine={refine === "1"}
+        backTo={replay === "1" || refine === "1" ? "/account" : intro !== "1" ? "/inventory" : undefined}
         onDone={done}
       />
       <ActionPanel

@@ -233,6 +233,7 @@ const fr: SkinCopy = {
     you: " (TOI, HÉLAS)",
     switch: "CHANGER DE FOYER",
     suggested: "RÉEXPLIQUE. LENTEMENT.",
+    refine: "CORRIGE TES ALIMENTS. AVEC NOTRE BANQUE.",
     logout: "DÉCONNEXION. LÂCHE.",
     credits: "CRÉDITS",
     creditsTitle: "RENDONS À CÉSAR.",

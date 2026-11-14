@@ -17,7 +17,7 @@ import {
   ClockIcon,
   PlayIcon,
   QuestionMarkCircleIcon,
-  ShoppingBagIcon,
+  ShoppingCartIcon,
   SparklesIcon,
 } from "react-native-heroicons/outline";
 import { useCallback } from "react";
@@ -130,7 +130,7 @@ const CalmHome = () => {
                 count: range.low,
                 color: skin.colors.levels[1],
                 icon: (
-                  <ShoppingBagIcon
+                  <ShoppingCartIcon
                     size={18}
                     color={C.positive}
                     strokeWidth={1.8}
@@ -211,7 +211,7 @@ const CalmHome = () => {
               label={T.home.goShop}
               href="/shop"
               icon={(color) => (
-                <ShoppingBagIcon size={20} color={color} strokeWidth={1.8} />
+                <ShoppingCartIcon size={20} color={color} strokeWidth={1.8} />
               )}
             />
           </View>

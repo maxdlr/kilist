@@ -3,7 +3,7 @@ import type { Skin } from "@/skins/types";
 import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, ClockIcon } from "react-native-heroicons/outline";
-import { CheckIcon, ShoppingBagIcon } from "react-native-heroicons/solid";
+import { CheckIcon, ShoppingCartIcon } from "react-native-heroicons/solid";
 import { calmColors, useCalmColors } from "./colors";
 import T from "../text";
 import { CText } from "./parts";
@@ -68,7 +68,7 @@ export const ShopArt = () => {
           <CText weight="medium" size={skin.type.lead}>{current}</CText>
         </View>
         <ArrowRightIcon size={ICON - 10} color={C.positive} strokeWidth={1.8} />
-        <Cue icon={<ShoppingBagIcon size={ICON} color={C.positive} />} label={T.shop.legendBasket} active />
+        <Cue icon={<ShoppingCartIcon size={ICON} color={C.positive} />} label={T.shop.legendBasket} active />
       </View>
       <View style={[styles.listRow, styles.lastRow]}>
         <CText size={skin.type.lead}>{next}</CText>
