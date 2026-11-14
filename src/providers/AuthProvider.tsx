@@ -185,8 +185,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let idToken: string | null;
     try {
       idToken = await askGoogleIdToken();
-    } catch {
-      showToast(common.google.failed);
+    } catch (error) {
+      const code = (error as { code?: string | number } | null)?.code;
+      console.warn("Google sign-in failed", error);
+      showToast(code ? `${common.google.failed} (${code})` : common.google.failed);
       return false;
     }
     if (!idToken) return false;
