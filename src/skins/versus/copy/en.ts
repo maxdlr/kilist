@@ -65,7 +65,7 @@ const versusCopy: RoastCopy = {
     cardTitle: "No rivals yet",
     cardLine: "You're playing alone on this phone. Create an account to race your household and keep your stats if you change phones.",
     create: "Create an account",
-    login: "I already have an account",
+    login: "Log in",
     later: "Not now",
     householdTitle: "Bring your rivals",
     householdLine: "Sharing a list needs an account. Your foods and stats come with you.",

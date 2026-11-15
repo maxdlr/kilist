@@ -47,12 +47,14 @@ export const fitFontSize = ({
   maxLines: number;
   font: SkinDisplayFont;
 }) => {
-  const words = text.split(/[ \t\n]+/).filter(Boolean);
+  const paragraphs = text.split("\n").map((line) => line.split(/[ \t]+/).filter(Boolean));
+  const words = paragraphs.flat();
   if (!words.length || width <= 0) return maxSize;
 
   for (let size = maxSize; size > minSize; size -= 2) {
     const longest = Math.max(...words.map((word) => measure(word, size, font)));
-    if (longest <= width && countLines(words, size, width, font) <= maxLines) {
+    const lines = paragraphs.reduce((sum, line) => sum + countLines(line, size, width, font), 0);
+    if (longest <= width && lines <= maxLines) {
       return size;
     }
   }

@@ -65,7 +65,7 @@ const calmCopy: RoastCopy = {
     cardTitle: "Just you, on this phone",
     cardLine: "Everything stays on this device. An account lets you share the list with your household and keeps it safe if you change phones.",
     create: "Create an account",
-    login: "I already have an account",
+    login: "Log in",
     later: "Not now",
     householdTitle: "Sharing needs an account",
     householdLine: "To share your list with your household, create an account. Everything you've done so far is kept.",
@@ -196,11 +196,11 @@ const calmCopy: RoastCopy = {
     steps: [
       { title: "Kilist keeps your shopping list up to date.", line: "You never write it." },
       {
-        title: "Every day, sort 10 foods.",
+        title: "Every day,\nsort 10 foods.",
         line: "Swipe right if you still have some, left if you're out, up if you're not sure.",
       },
       {
-        title: "In the store, swipe each food as you buy it.",
+        title: "In the store,\nswipe each food as you buy it.",
         line: "Right when it's in your basket, left to keep it for next time.",
       },
       {
@@ -209,7 +209,7 @@ const calmCopy: RoastCopy = {
       },
     ],
     next: "Next",
-    start: "Continue",
+    start: "Get started",
     skip: "Skip",
   },
   account: {

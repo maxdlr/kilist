@@ -65,7 +65,7 @@ const fr: SkinCopy = {
     cardTitle: "Juste toi, sur ce téléphone",
     cardLine: "Tout reste sur cet appareil. Un compte te permet de partager la liste avec ton foyer et la garde si tu changes de téléphone.",
     create: "Créer un compte",
-    login: "J'ai déjà un compte",
+    login: "Se connecter",
     later: "Pas maintenant",
     householdTitle: "Partager demande un compte",
     householdLine: "Pour partager ta liste avec ton foyer, crée un compte. Tout ce que tu as fait est conservé.",
@@ -196,11 +196,11 @@ const fr: SkinCopy = {
     steps: [
       { title: "Kilist tient ta liste de courses à jour.", line: "Tu ne l'écris jamais." },
       {
-        title: "Chaque jour, trie 10 aliments.",
+        title: "Chaque jour,\ntrie 10 aliments.",
         line: "Glisse à droite s'il t'en reste, à gauche s'il n'y en a plus, en haut si tu ne sais pas.",
       },
       {
-        title: "Au magasin, glisse chaque aliment quand tu l'achètes.",
+        title: "Au magasin,\nglisse chaque aliment quand tu l'achètes.",
         line: "À droite quand il est dans ton panier, à gauche pour le garder pour la prochaine fois.",
       },
       {
@@ -209,7 +209,7 @@ const fr: SkinCopy = {
       },
     ],
     next: "Suivant",
-    start: "Continuer",
+    start: "C'est parti",
     skip: "Passer",
   },
   account: {

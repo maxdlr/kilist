@@ -87,20 +87,25 @@ const fr: CalmText = {
     questionBack: "Retour",
     questions: {
       diet: {
-        title: "Comment mange ton foyer ?",
+        title: "Tu manges quoi ?",
         line: "Choisis ce qui s'en rapproche le plus.",
       },
       avoid: {
-        title: "Quelque chose que tu évites ?",
+        title: "Qu'est-ce que tu ne manges pas ?",
         line: "Choisis tout ce qui s'applique, ou rien.",
       },
       drinks: {
-        title: "Lesquels achètes-tu ?",
+        title: "Tu bois quoi ?",
         line: "Choisis tout ce qui s'applique, ou rien.",
       },
       home: {
-        title: "Qui d'autre vit à la maison ?",
+        title: "Des animaux ?",
         line: "Choisis tout ce qui s'applique, ou rien.",
+      },
+      kids: { title: "Des enfants ?", line: "Des enfants qui vivent avec toi." },
+      extras: {
+        title: "Tu achètes autre chose ?",
+        line: "Pas que de la nourriture. Choisis tout ce qui s'applique, ou rien.",
       },
       baking: {
         title: "Tu fais de la pâtisserie ?",
@@ -120,17 +125,26 @@ const fr: CalmText = {
       nuts: "Les fruits à coque",
       soy: "Le soja",
       coffee: "Du café",
+      tea: "Du thé",
       soda: "Des sodas",
-      alcohol: "De l'alcool",
-      baby: "Un bébé",
+      beer: "De la bière",
+      wine: "Du vin",
+      spirits: "Des spiritueux",
       cat: "Un chat",
       dog: "Un chien",
+      bird: "Un oiseau",
+      rabbit: "Un lapin",
+      rodent: "Un hamster ou un cochon d'Inde",
+      aquarium: "Des poissons",
+      bathroom: "Salle de bain",
+      cleaning: "Produits ménagers",
+      dishwasher: "Lave-vaisselle",
       yes: "Oui",
       no: "Non",
     } as Record<string, string>,
     profileCount: (count: number) =>
       `${foods(count)} dans ton inventaire au départ.`,
-    reviewTitle: "Tes premiers aliments",
+    reviewTitle: "Affine ta sélection",
     reviewLine:
       "Choisis d'après tes réponses. Touche un aliment pour l'ajouter ou le retirer.",
     refineTitle: "Tes aliments",
@@ -151,8 +165,6 @@ const fr: CalmText = {
       `Entraînement · ${at} sur ${total}`,
     stamps: { left: "Plus de", right: "J'en ai", up: "Pas sûr" },
     promptFirst: (name: string) => `Il te reste : ${name.toLowerCase()} ?`,
-    promptFirstLine:
-      "Essaie : glisse la carte à gauche, comme s'il n'y en avait plus.",
     promptRight: (name: string) =>
       `Maintenant : ${name.toLowerCase()}. Glisse à droite s'il t'en reste.`,
     promptFree: (name: string) =>

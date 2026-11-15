@@ -299,53 +299,58 @@ export const CardPads = ({
   };
   const unsureOn = intent === "up";
 
+  const hidden = {
+    accessibilityElementsHidden: !live,
+    importantForAccessibility: live ? ("auto" as const) : ("no-hide-descendants" as const),
+  };
+
   return (
-    <View
-      accessibilityElementsHidden={!live}
-      importantForAccessibility={live ? "auto" : "no-hide-descendants"}
-      style={[styles.actionRow, styles.pads]}
-    >
-      {pad("left", copy.out, T.play.ariaOut)}
-      <Press
-        accessibilityRole="button"
-        accessibilityLabel={T.intent.up}
-        scale
-        disabled={!live}
-        onPress={() => onFling?.("up")}
-        style={({ pressed }) => [
-          styles.button,
-          labels ? styles.pill : styles.round,
-          {
-            backgroundColor: "transparent",
-            borderColor: unsureOn ? C.text : C.fieldLine,
-            opacity: pressed ? skin.shape.pressedOpacity : 1,
-          },
-        ]}
-      >
-        {unsureOn ? (
-          <QuestionMarkCircleSolid
-            size={skin.size.icon.action}
-            color={C.text}
-          />
-        ) : (
-          <QuestionMarkCircleIcon
-            size={skin.size.icon.action}
-            color={C.textSoft}
-            strokeWidth={1.8}
-          />
-        )}
-        {labels && (
-          <CText
-            size={skin.type.label + 1}
-            color={unsureOn ? C.text : C.textSoft}
-            numberOfLines={1}
-          >
-            {copy.unsure}
-          </CText>
-        )}
-      </Press>
-      {pad("right", copy.inStock, T.play.ariaIn)}
-    </View>
+    <>
+      <View {...hidden} style={[styles.actionRow, styles.pads]}>
+        {pad("left", copy.out, T.play.ariaOut)}
+        {pad("right", copy.inStock, T.play.ariaIn)}
+      </View>
+      <View {...hidden} pointerEvents="box-none" style={[styles.unsureSlot, styles.pads]}>
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={T.intent.up}
+          scale
+          disabled={!live}
+          onPress={() => onFling?.("up")}
+          style={({ pressed }) => [
+            styles.button,
+            labels ? styles.pill : styles.round,
+            {
+              backgroundColor: "transparent",
+              borderColor: unsureOn ? C.text : C.fieldLine,
+              opacity: pressed ? skin.shape.pressedOpacity : 1,
+            },
+          ]}
+        >
+          {unsureOn ? (
+            <QuestionMarkCircleSolid
+              size={skin.size.icon.action}
+              color={C.text}
+            />
+          ) : (
+            <QuestionMarkCircleIcon
+              size={skin.size.icon.action}
+              color={C.textSoft}
+              strokeWidth={1.8}
+            />
+          )}
+          {labels && (
+            <CText
+              size={skin.type.label + 1}
+              color={unsureOn ? C.text : C.textSoft}
+              numberOfLines={1}
+            >
+              {copy.unsure}
+            </CText>
+          )}
+        </Press>
+      </View>
+    </>
   );
 };
 
@@ -366,6 +371,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
     pads: { padding: s.spacing.stack },
+    unsureSlot: { alignItems: "center", left: 0, position: "absolute", right: 0, top: 0 },
     bars: { gap: s.spacing.inline },
     barRow: {
       alignItems: "center",

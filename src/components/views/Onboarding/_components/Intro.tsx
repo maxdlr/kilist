@@ -8,70 +8,125 @@ import { router } from "expo-router";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import AnimationService from "@/services/animation";
-import { type ComponentRef, type ReactNode, useEffect, useRef, useState } from "react";
-import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { type ReactNode, useEffect, useState } from "react";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  type SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const Intro = ({ onDone, art = {} }: { onDone: () => void; art?: Record<number, ReactNode> }) => {
+const Dot = ({
+  index,
+  progress,
+}: {
+  index: number;
+  progress: SharedValue<number>;
+}) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const dotStyle = useAnimatedStyle(() => {
+    const near = interpolate(
+      Math.abs(progress.value - index),
+      [0, 1],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+    return {
+      opacity: 0.3 + 0.7 * near,
+      width:
+        skin.spacing.small + (skin.spacing.section - skin.spacing.small) * near,
+    };
+  });
+  return (
+    <Animated.View
+      style={[styles.dot, { backgroundColor: skin.colors.onGround }, dotStyle]}
+    />
+  );
+};
+
+const Intro = ({
+  onDone,
+  art = {},
+}: {
+  onDone: () => void;
+  art?: Record<number, ReactNode>;
+}) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.intro;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const pager = useRef<ComponentRef<typeof ScrollView>>(null);
+  const progress = useSharedValue(0);
   const [step, setStep] = useState(0);
   const last = copy.steps.length - 1;
-  const sheets = skin.colors.sheets;
-  const sheet = sheets[step % sheets.length]!;
-  const skipShown = useSharedValue(1);
+  const { ground: fill, onGround: ink } = skin.colors;
+  const onLast = useSharedValue(0);
   const { isGuest } = useAuth();
 
   useEffect(() => {
-    skipShown.set(withTiming(step < last ? 1 : 0, AnimationService.config));
-  }, [step, last, skipShown]);
+    onLast.set(withTiming(step < last ? 0 : 1, AnimationService.config));
+  }, [step, last, onLast]);
 
-  const skipStyle = useAnimatedStyle(() => ({
-    height: skin.size.button.xs * skipShown.value,
-    marginTop: -skin.spacing.inline * (1 - skipShown.value),
-    opacity: skipShown.value,
+  const skipStyle = useAnimatedStyle(() => ({ opacity: 1 - onLast.value }));
+  const startStyle = useAnimatedStyle(() => ({
+    height: skin.size.button.lg * onLast.value,
+    marginTop: -skin.spacing.inline * (1 - onLast.value),
+    opacity: onLast.value,
+    transform: [{ translateY: skin.spacing.stack * (1 - onLast.value) }],
   }));
 
-  useStatusBarStyle(sheet.fill === skin.colors.ground ? skin.statusBarOnGround : "dark");
+  const onPagerScroll = useAnimatedScrollHandler((event) => {
+    progress.set(event.contentOffset.x / width);
+  });
+
+  useStatusBarStyle(
+    skin.statusBarOnGround,
+  );
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const next = Math.round(event.nativeEvent.contentOffset.x / width);
     if (next !== step) setStep(Math.max(0, Math.min(last, next)));
   };
 
-  const next = () => {
-    if (step >= last) return onDone();
-    pager.current?.scrollTo({ x: width * (step + 1), animated: true });
-    setStep(step + 1);
-  };
-
   return (
     <View style={[styles.flex, { backgroundColor: skin.colors.ground }]}>
-      <ScrollView
-        ref={pager}
+      <Animated.ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        onScroll={onPagerScroll}
+        scrollEventThrottle={16}
         onMomentumScrollEnd={onScroll}
         style={styles.flex}
       >
         {copy.steps.map((item, index) => {
-          const { fill, ink } = sheets[index % sheets.length]!;
           return (
             <View
               key={item.title}
               accessible
               accessibilityLabel={`Step ${index + 1} of ${copy.steps.length}. ${item.title} ${item.line}`}
-              style={[styles.page, { backgroundColor: fill, paddingTop: insets.top + skin.spacing.top, width }]}
+              style={[
+                styles.page,
+                {
+                  backgroundColor: fill,
+                  paddingTop: insets.top + skin.spacing.top,
+                  width,
+                },
+              ]}
             >
-              <ThemedText size={skin.type.label} color={ink}>
-                {`${index + 1}/${copy.steps.length}`}
-              </ThemedText>
+              <View style={styles.topLine} />
               <View style={styles.body}>
                 {art[index]}
                 <Title size={skin.type.display.lg} lines={4} color={ink}>
@@ -86,36 +141,42 @@ const Intro = ({ onDone, art = {} }: { onDone: () => void; art?: Record<number, 
             </View>
           );
         })}
-      </ScrollView>
+      </Animated.ScrollView>
+
+      <Animated.View
+        style={[styles.skip, { top: insets.top + skin.spacing.top }, skipStyle]}
+        pointerEvents={step < last ? "auto" : "none"}
+        accessibilityElementsHidden={step >= last}
+        importantForAccessibility={step < last ? "auto" : "no-hide-descendants"}
+      >
+        <KilButton
+          variant="ghost"
+          height={skin.size.button.xs}
+          fontSize={skin.type.label}
+          label={copy.skip}
+          onTouch={onDone}
+        />
+      </Animated.View>
 
       <Dock>
-        <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <View
+          style={styles.dots}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           {copy.steps.map((item, index) => (
-            <View
-              key={item.title}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor: skin.colors.onGround,
-                  opacity: index === step ? 1 : 0.3,
-                  width: index === step ? skin.spacing.section : skin.spacing.small,
-                },
-              ]}
-            />
+            <Dot key={item.title} index={index} progress={progress} />
           ))}
         </View>
-        <KilButton height={skin.size.button.lg} label={step >= last ? copy.start : copy.next} onTouch={next} />
         <Animated.View
-          style={[styles.skip, skipStyle]}
-          pointerEvents={step < last ? "auto" : "none"}
-          accessibilityElementsHidden={step >= last}
-          importantForAccessibility={step < last ? "auto" : "no-hide-descendants"}
+          style={[styles.start, startStyle]}
+          pointerEvents={step >= last ? "auto" : "none"}
+          accessibilityElementsHidden={step < last}
+          importantForAccessibility={step >= last ? "auto" : "no-hide-descendants"}
         >
           <KilButton
-            variant="ghost"
-            height={skin.size.button.xs}
-            fontSize={skin.type.label}
-            label={copy.skip}
+            height={skin.size.button.lg}
+            label={copy.start}
             onTouch={onDone}
           />
         </Animated.View>
@@ -136,10 +197,20 @@ const Intro = ({ onDone, art = {} }: { onDone: () => void; art?: Record<number, 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
     flex: { flex: 1 },
-    page: { paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
+    page: {
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
     body: { flex: 1, gap: s.spacing.inline, justifyContent: "center" },
-    skip: { overflow: "hidden" },
-    dots: { alignSelf: "center", flexDirection: "row", gap: s.spacing.small - 2, paddingBottom: s.spacing.small },
+    topLine: { height: s.size.button.xs, justifyContent: "center" },
+    start: { overflow: "hidden" },
+    skip: { position: "absolute", right: Math.max(0, s.spacing.gutter - s.spacing.stack) },
+    dots: {
+      alignSelf: "center",
+      flexDirection: "row",
+      gap: s.spacing.small - 2,
+      paddingBottom: s.spacing.small,
+    },
     dot: { borderRadius: s.spacing.tight, height: s.spacing.small },
   });
 

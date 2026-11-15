@@ -1,49 +1,106 @@
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
-import { ReactNode } from "react";
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, ClockIcon } from "react-native-heroicons/outline";
-import { CheckIcon, ShoppingCartIcon } from "react-native-heroicons/solid";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { calmColors, useCalmColors } from "./colors";
 import T from "../text";
 import { CText } from "./parts";
 
-const ICON = 28;
+const SORT_LOOP_MS = 7200;
+const SHOP_LOOP_MS = 5200;
+const CARD_PUSH = 64;
+const CARD_LIFT = 48;
+const ROW_PUSH = 120;
+const FINGER = 36;
+const SORT_RAISE = 24;
 
-const Cue = ({ icon, label, active = false }: { icon: ReactNode; label: string; active?: boolean }) => {
-  const skin = useSkin();
-  const C = useCalmColors();
-  const styles = useSkinStyles(createStyles);
-  return (
-    <View style={styles.cue}>
-      {icon}
-      <CText
-        weight={active ? "semibold" : "regular"}
-        size={skin.type.label}
-        color={active ? C.positive : C.textSoft}
-        style={styles.center}
-      >
-        {label}
-      </CText>
-    </View>
-  );
+const SORT_AT = [0, 0.06, 0.16, 0.26, 0.33, 0.39, 0.49, 0.59, 0.66, 0.72, 0.82, 0.92, 1];
+const SORT_X = [0, 0, 1, 1, 0, 0, -1, -1, 0, 0, 0, 0, 0];
+const SORT_Y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0];
+
+const SHOP_AT = [0, 0.08, 0.22, 0.38, 0.5, 0.58, 0.72, 0.88, 1];
+const SHOP_X = [0, 0, 1, 1, 0, 0, -1, -1, 0];
+
+const useKeyframes = (duration: number, at: number[], values: number[]) => {
+  const reduced = useReducedMotion();
+  const value = useSharedValue(values[0] ?? 0);
+
+  useEffect(() => {
+    if (reduced) return;
+    const steps = values
+      .slice(1)
+      .map((target, index) =>
+        withTiming(target, { duration: (at[index + 1]! - at[index]!) * duration, easing: AnimationService.config.easing }),
+      );
+    value.set(withRepeat(withSequence(...steps), -1));
+  }, [reduced, duration, at, values, value]);
+
+  return value;
 };
 
 export const SortArt = () => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const labels = T.tutorial.stamps;
+  const stamps = T.tutorial.stamps;
+  const [behind, front] = T.tutorial.samples;
+  const x = useKeyframes(SORT_LOOP_MS, SORT_AT, SORT_X);
+  const y = useKeyframes(SORT_LOOP_MS, SORT_AT, SORT_Y);
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: x.value * CARD_PUSH },
+      { translateY: y.value * CARD_LIFT },
+      { rotateZ: `${x.value * 8}deg` },
+    ],
+  }));
+  const rightStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, x.value) }));
+  const leftStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, -x.value) }));
+  const upStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, -y.value) }));
+  const fingerStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(1, Math.abs(x.value) + Math.abs(y.value)) * 0.25,
+  }));
 
   return (
-    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.art}>
-      <Cue icon={<ArrowUpIcon size={ICON} color={C.textSoft} strokeWidth={1.6} />} label={labels.up} />
-      <View style={styles.line}>
-        <Cue icon={<ArrowLeftIcon size={ICON} color={C.textSoft} strokeWidth={1.6} />} label={labels.left} />
-        <View style={styles.card}>
-          <CText weight="medium" size={skin.type.title}>{T.tutorial.samples[1]}</CText>
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={[styles.art, styles.sortArt]}>
+      <View style={styles.stage}>
+        <View style={[styles.card, styles.cardBehind]}>
+          <CText weight="medium" size={skin.type.title} color={C.textFaint}>
+            {behind}
+          </CText>
         </View>
-        <Cue icon={<ArrowRightIcon size={ICON} color={C.positive} strokeWidth={3} />} label={labels.right} active />
+        <Animated.View style={[styles.card, cardStyle]}>
+          <View style={styles.stamp}>
+            <Animated.View style={[styles.stampLabel, rightStyle]}>
+              <CText weight="semibold" size={skin.type.label} color={C.positive}>
+                {stamps.right}
+              </CText>
+            </Animated.View>
+            <Animated.View style={[styles.stampLabel, leftStyle]}>
+              <CText weight="semibold" size={skin.type.label} color={C.negative}>
+                {stamps.left}
+              </CText>
+            </Animated.View>
+            <Animated.View style={[styles.stampLabel, upStyle]}>
+              <CText weight="semibold" size={skin.type.label} color={C.textSoft}>
+                {stamps.up}
+              </CText>
+            </Animated.View>
+          </View>
+          <CText weight="medium" size={skin.type.title}>
+            {front}
+          </CText>
+          <Animated.View style={[styles.finger, styles.cardFinger, fingerStyle]} />
+        </Animated.View>
       </View>
     </View>
   );
@@ -53,25 +110,31 @@ export const ShopArt = () => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const [bought, current, next] = T.tutorial.samples;
+  const name = T.tutorial.samples[1];
+  const x = useKeyframes(SHOP_LOOP_MS, SHOP_AT, SHOP_X);
+
+  const rowStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.value * ROW_PUSH }] }));
+  const buyStyle = useAnimatedStyle(() => ({ opacity: x.value > 0 ? 1 : 0 }));
+  const laterStyle = useAnimatedStyle(() => ({ opacity: x.value < 0 ? 1 : 0 }));
+  const fingerStyle = useAnimatedStyle(() => ({ opacity: Math.abs(x.value) * 0.25 }));
 
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.art}>
-      <View style={styles.listRow}>
-        <CheckIcon size={ICON - 8} color={C.positive} />
-        <CText size={skin.type.lead} color={C.textFaint} style={styles.struck}>{bought}</CText>
-      </View>
-      <View style={styles.line}>
-        <Cue icon={<ClockIcon size={ICON} color={C.textSoft} strokeWidth={1.6} />} label={T.shop.later} />
-        <ArrowLeftIcon size={ICON - 10} color={C.ring} strokeWidth={1.8} />
-        <View style={styles.swipeRow}>
-          <CText weight="medium" size={skin.type.lead}>{current}</CText>
-        </View>
-        <ArrowRightIcon size={ICON - 10} color={C.positive} strokeWidth={1.8} />
-        <Cue icon={<ShoppingCartIcon size={ICON} color={C.positive} />} label={T.shop.legendBasket} active />
-      </View>
-      <View style={[styles.listRow, styles.lastRow]}>
-        <CText size={skin.type.lead}>{next}</CText>
+      <View style={styles.slot}>
+        <Animated.View style={[styles.behind, styles.behindBuy, buyStyle]}>
+          <CText weight="medium" size={skin.type.label + 1} color={C.onPositive}>
+            {T.shop.inBasket}
+          </CText>
+        </Animated.View>
+        <Animated.View style={[styles.behind, styles.behindLater, laterStyle]}>
+          <CText weight="medium" size={skin.type.label + 1} color={C.textSoft}>
+            {T.shop.later}
+          </CText>
+        </Animated.View>
+        <Animated.View style={[styles.row, rowStyle]}>
+          <CText size={skin.type.lead}>{name}</CText>
+          <Animated.View style={[styles.finger, styles.rowFinger, fingerStyle]} />
+        </Animated.View>
       </View>
     </View>
   );
@@ -79,10 +142,9 @@ export const ShopArt = () => {
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
-    art: { alignItems: "center", gap: s.spacing.inline, paddingBottom: s.spacing.section },
-    center: { textAlign: "center" },
-    line: { alignItems: "center", alignSelf: "stretch", flexDirection: "row", gap: s.spacing.small, justifyContent: "center" },
-    cue: { alignItems: "center", gap: s.spacing.tight, width: 68 },
+    art: { alignItems: "center", alignSelf: "stretch", paddingBottom: s.spacing.section },
+    sortArt: { marginTop: -SORT_RAISE * 2 },
+    stage: { alignItems: "center", height: 230, justifyContent: "center", width: 240 },
     card: {
       alignItems: "center",
       backgroundColor: C.card,
@@ -91,28 +153,41 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       borderWidth: s.shape.border,
       height: 190,
       justifyContent: "center",
-      transform: [{ rotateZ: "4deg" }],
+      position: "absolute",
       width: 140,
     },
-    listRow: {
-      alignItems: "center",
-      alignSelf: "stretch",
-      borderTopColor: C.line,
-      borderTopWidth: s.shape.divider,
-      flexDirection: "row",
-      gap: s.spacing.inline,
-      minHeight: s.size.row.stripe,
+    cardBehind: { backgroundColor: C.tint, borderColor: C.tint, transform: [{ translateY: 10 }, { scale: 0.94 }] },
+    stamp: { height: s.spacing.section, left: 0, position: "absolute", right: 0, top: s.spacing.inline },
+    stampLabel: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
+    finger: {
+      backgroundColor: C.text,
+      borderRadius: FINGER / 2,
+      height: FINGER,
+      position: "absolute",
+      width: FINGER,
     },
-    lastRow: { borderBottomColor: C.line, borderBottomWidth: s.shape.divider },
-    struck: { textDecorationLine: "line-through" },
-    swipeRow: {
-      backgroundColor: C.card,
+    slot: {
+      alignSelf: "stretch",
       borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
-      flex: 1,
-      justifyContent: "center",
-      minHeight: s.size.button.lg,
+      overflow: "hidden",
+    },
+    behind: {
+      ...StyleSheet.absoluteFill,
+      alignItems: "center",
+      flexDirection: "row",
       paddingHorizontal: s.spacing.stack,
     },
+    behindBuy: { backgroundColor: C.positive, justifyContent: "flex-start" },
+    behindLater: { backgroundColor: C.tint, justifyContent: "flex-end" },
+    row: {
+      alignItems: "center",
+      backgroundColor: C.card,
+      flexDirection: "row",
+      minHeight: s.size.row.shop,
+      paddingHorizontal: s.spacing.stack,
+    },
+    cardFinger: { bottom: s.spacing.stack },
+    rowFinger: { left: "50%", marginLeft: -FINGER / 2, marginTop: -FINGER / 2, top: "50%" },
   });

@@ -84,20 +84,25 @@ const en = {
     questionBack: "Back",
     questions: {
       diet: {
-        title: "How does your household eat?",
+        title: "What do you eat?",
         line: "Pick the closest one.",
       },
       avoid: {
-        title: "Anything you leave out?",
+        title: "What don't you eat?",
         line: "Pick all that apply, or none.",
       },
       drinks: {
-        title: "Which of these do you buy?",
+        title: "What do you drink?",
         line: "Pick all that apply, or none.",
       },
       home: {
-        title: "Who else lives at home?",
+        title: "Any pets?",
         line: "Pick all that apply, or none.",
+      },
+      kids: { title: "Kids?", line: "Children who live with you." },
+      extras: {
+        title: "Anything else you buy?",
+        line: "Not just food. Pick all that apply, or none.",
       },
       baking: { title: "Do you bake?", line: "Flour, sugar and the like." },
     },
@@ -114,17 +119,26 @@ const en = {
       nuts: "Tree nuts",
       soy: "Soy",
       coffee: "Coffee",
+      tea: "Tea",
       soda: "Soda",
-      alcohol: "Alcohol",
-      baby: "A baby",
+      beer: "Beer",
+      wine: "Wine",
+      spirits: "Spirits",
       cat: "A cat",
       dog: "A dog",
+      bird: "A bird",
+      rabbit: "A rabbit",
+      rodent: "A hamster or guinea pig",
+      aquarium: "Fish",
+      bathroom: "Bathroom",
+      cleaning: "Cleaning products",
+      dishwasher: "Dishwasher",
       yes: "Yes",
       no: "No",
     } as Record<string, string>,
     profileCount: (count: number) =>
       `${foods(count)} will be added to your inventory.`,
-    reviewTitle: "Your first foods",
+    reviewTitle: "Refine your selection",
     reviewLine: "Picked from your answers. Tap any food to add or remove it.",
     refineTitle: "Your foods",
     refineLine:
@@ -144,7 +158,6 @@ const en = {
       `Practice · ${at} of ${total}`,
     stamps: { left: "Out", right: "Have it", up: "Not sure" },
     promptFirst: (name: string) => `Do you still have ${name.toLowerCase()}?`,
-    promptFirstLine: "Try it: swipe the card left, as if you were out.",
     promptRight: (name: string) =>
       `Now ${name.toLowerCase()}. Swipe right if you still have some.`,
     promptFree: (name: string) =>

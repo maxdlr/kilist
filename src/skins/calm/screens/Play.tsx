@@ -17,6 +17,7 @@ import goBack from "@/utils/goBack";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import Animated from "react-native-reanimated";
 import {
   ArrowPathIcon,
   InformationCircleIcon,
@@ -26,6 +27,7 @@ import { InformationCircleIcon as InformationCircleSolid } from "react-native-he
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
+import { useDeckCardLook } from "./deckCard";
 import { CardPads, CButton, CText, Dot, Screen } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
@@ -35,16 +37,19 @@ const CheckCard = ({
   food,
   intent,
   labels,
+  behind,
   onFling,
 }: {
   food: FoodType;
   intent: SwipeDirection | null;
   labels: boolean;
+  behind: boolean;
   onFling?: (direction: SwipeDirection) => void;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
+  const look = useDeckCardLook(behind);
   const intentColor: Record<SwipeDirection, string> = {
     left: C.negative,
     up: C.textSoft,
@@ -56,36 +61,38 @@ const CheckCard = ({
 
   return (
     <View style={styles.cardSlot}>
-      <View style={styles.card}>
-        <View style={styles.cardBody}>
-          <View style={styles.hint}>
-            {hint && (
-              <CText weight="medium" size={skin.type.label} color={hint.color}>
-                {hint.text}
+      <Animated.View style={[styles.card, look.cardStyle]}>
+        <Animated.View style={[styles.cardFace, look.contentStyle]}>
+          <View style={styles.cardBody}>
+            <View style={styles.hint}>
+              {hint && (
+                <CText weight="medium" size={skin.type.label} color={hint.color}>
+                  {hint.text}
+                </CText>
+              )}
+            </View>
+            <FoodPicture food={food} size={skin.size.icon.card} />
+            <View style={styles.cardText}>
+              <CText
+                weight="medium"
+                size={skin.type.headline + 2}
+                style={styles.center}
+                numberOfLines={2}
+              >
+                {food.name}
               </CText>
-            )}
+              <CText
+                size={skin.type.body - 1}
+                color={C.textSoft}
+                style={styles.center}
+              >
+                {T.play.question}
+              </CText>
+            </View>
           </View>
-          <FoodPicture food={food} size={skin.size.icon.card} />
-          <View style={styles.cardText}>
-            <CText
-              weight="medium"
-              size={skin.type.headline + 2}
-              style={styles.center}
-              numberOfLines={2}
-            >
-              {food.name}
-            </CText>
-            <CText
-              size={skin.type.body - 1}
-              color={C.textSoft}
-              style={styles.center}
-            >
-              {T.play.question}
-            </CText>
-          </View>
-        </View>
-        <CardPads intent={intent} labels={labels} onFling={onFling} />
-      </View>
+          <CardPads intent={intent} labels={labels} onFling={onFling} />
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -183,6 +190,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
               food={food}
               intent={depth === 0 ? game.intent : null}
               labels={labels}
+              behind={depth > 0}
               onFling={depth === 0 ? game.fling : undefined}
             />
           )}
@@ -350,6 +358,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       borderWidth: s.shape.border,
       flex: 1,
     },
+    cardFace: { flex: 1 },
     cardBody: {
       alignItems: "center",
       flex: 1,
@@ -363,7 +372,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       left: 0,
       position: "absolute",
       right: 0,
-      top: s.spacing.gutter,
+      top: s.spacing.stack + s.size.button.md + s.spacing.small,
     },
     cardText: { alignItems: "center", gap: s.spacing.tight + 2 },
     doneContent: {

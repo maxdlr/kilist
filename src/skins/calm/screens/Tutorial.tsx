@@ -2,7 +2,10 @@ import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import T from "../text";
 import FoodIcon from "@/components/elements/FoodIcon";
-import SwipeDeck, { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
+import SwipeDeck, {
+  SwipeDeckFling,
+  SwipeDirection,
+} from "@/components/elements/SwipeDeck/SwipeDeck";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
 import Intro from "@/components/views/Onboarding/_components/Intro";
 import { ShopArt, SortArt } from "./IntroArt";
@@ -15,10 +18,26 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import type { Skin } from "@/skins/types";
-import { FoodBankItemType, FoodType, HouseholdWithMembersType, ListType } from "@/types/model";
+import {
+  FoodBankItemType,
+  FoodType,
+  HouseholdWithMembersType,
+  ListType,
+} from "@/types/model";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import AnimationService from "@/services/animation";
 import Animated, {
+  type SharedValue,
+  useAnimatedRef,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -30,7 +49,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { calmColors, useCalmColors } from "./colors";
 import { CardPads, CButton, CText, Screen } from "./parts";
 import { CalmLoading } from "./States";
-
+import { useDeckCardLook } from "./deckCard";
 
 const PRACTICE_CARDS = 3;
 const NUDGE = 22;
@@ -43,15 +62,23 @@ const INTRO_ART = { 1: <SortArt />, 2: <ShopArt /> };
 
 type Step = "intro" | "profile" | "practice" | "shop" | "done";
 
-type QuestionId = "diet" | "avoid" | "drinks" | "home" | "baking";
+type QuestionId = "diet" | "avoid" | "drinks" | "home" | "kids" | "baking" | "extras";
 
 const QUESTIONS: { id: QuestionId; single?: boolean; options: string[] }[] = [
-  { id: "diet", single: true, options: ["everything", "noPork", "noMeat", "veggie"] },
+  {
+    id: "diet",
+    single: true,
+    options: ["everything", "noPork", "noMeat", "veggie"],
+  },
   { id: "avoid", options: [] },
-  { id: "drinks", options: ["coffee", "soda", "alcohol"] },
-  { id: "home", options: ["baby", "cat", "dog"] },
+  { id: "drinks", options: ["coffee", "tea", "soda", "beer", "wine", "spirits"] },
+  { id: "home", options: ["cat", "dog", "bird", "rabbit", "rodent", "aquarium"] },
+  { id: "kids", single: true, options: ["yes", "no"] },
   { id: "baking", single: true, options: ["yes", "no"] },
+  { id: "extras", options: ["bathroom", "cleaning", "dishwasher"] },
 ];
+
+const ALCOHOL = ["beer", "wine", "spirits"];
 
 const DIETS: Record<string, string[]> = {
   everything: [],
@@ -64,12 +91,44 @@ const profilesFrom = (picked: Record<QuestionId, string[]>) => [
   ...new Set([
     ...(DIETS[picked.diet[0] ?? "everything"] ?? []),
     ...picked.avoid,
-    ...["soda", "alcohol"].filter((drink) => !picked.drinks.includes(drink)),
-    ...picked.drinks.filter((drink) => drink === "coffee"),
+    ...(picked.drinks.includes("soda") ? [] : ["soda"]),
+    ...(ALCOHOL.some((drink) => picked.drinks.includes(drink)) ? [] : ["alcohol"]),
+    ...picked.drinks.filter((drink) => drink !== "soda"),
     ...picked.home,
+    ...(picked.kids[0] === "yes" ? ["kids"] : []),
     ...(picked.baking[0] === "yes" ? ["baking"] : []),
+    ...picked.extras,
   ]),
 ];
+
+const StepBar = ({
+  progress,
+  label,
+  now,
+  max,
+}: {
+  progress: SharedValue<number>;
+  label: string;
+  now: number;
+  max: number;
+}) => {
+  const styles = useSkinStyles(createStyles);
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${Math.max(0, Math.min(1, progress.value)) * 100}%`,
+  }));
+
+  return (
+    <View
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={label}
+      accessibilityValue={{ min: 0, max, now }}
+      style={styles.barTrack}
+    >
+      <Animated.View style={[styles.barFill, fillStyle]} />
+    </View>
+  );
+};
 
 const ProfilePick = ({
   listId,
@@ -94,13 +153,17 @@ const ProfilePick = ({
     avoid: [],
     drinks: [],
     home: [],
-    baking: ["no"],
+    kids: [],
+    baking: [],
+    extras: [],
   });
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
+  const pager = useAnimatedRef<Animated.ScrollView>();
+  const filled = useSharedValue(0);
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
-    if (catalog?.profiles) return;
     let active = true;
     refreshCatalog(axios).then(() => {
       if (active) setCatalog(getCatalog());
@@ -108,34 +171,86 @@ const ProfilePick = ({
     return () => {
       active = false;
     };
-  }, [catalog]);
+  }, []);
 
   const profiles = catalog?.profiles ?? [];
   const bank: FoodBankItemType[] = catalog?.foodBanks[getLang()] ?? [];
   const chosen = profilesFrom(picked);
-  const ownedByKey = new Map((owned ?? []).map((food) => [foodKey(food.name), food]));
-  const ownedOf = (item: FoodBankItemType) => ownedByKey.get(foodKey(item.name));
-  const suggested = new Set(
-    (refine ? bank.filter(ownedOf) : profiles.length > 0 ? starterFoods(bank, chosen) : []).map((item) => item.name),
+  const ownedByKey = new Map(
+    (owned ?? []).map((food) => [foodKey(food.name), food]),
   );
-  const isOn = (item: FoodBankItemType) => overrides[item.name] ?? suggested.has(item.name);
+  const ownedOf = (item: FoodBankItemType) =>
+    ownedByKey.get(foodKey(item.name));
+  const suggested = new Set(
+    (refine
+      ? bank.filter(ownedOf)
+      : profiles.length > 0
+        ? starterFoods(bank, chosen)
+        : []
+    ).map((item) => item.name),
+  );
+  const isOn = (item: FoodBankItemType) =>
+    overrides[item.name] ?? suggested.has(item.name);
   const selected = bank.filter(isOn);
   const toAdd = selected.filter((item) => !ownedOf(item));
-  const toRemove = bank.filter((item) => !isOn(item)).flatMap((item) => ownedOf(item) ?? []);
-  const reviewing = profiles.length > 0 && at === QUESTIONS.length;
-  const asked = QUESTIONS[Math.min(at, QUESTIONS.length - 1)]!;
-  const question =
-    asked.id === "avoid"
-      ? { ...asked, options: profiles.filter((profile) => profile.ask === "avoid").map((profile) => profile.id) }
-      : asked;
-  const text = copy.questions[question.id];
-  const isLast = reviewing || profiles.length === 0;
+  const toRemove = bank
+    .filter((item) => !isOn(item))
+    .flatMap((item) => ownedOf(item) ?? []);
+  const online = profiles.length > 0;
+  const pages = refine
+    ? [QUESTIONS.length]
+    : online
+      ? [...QUESTIONS.keys(), QUESTIONS.length]
+      : [0];
+  const page = Math.max(0, pages.indexOf(at));
+  const isLast = page === pages.length - 1;
+  const canBack = page > 0 && !busy;
+  const paged = pages.length > 1;
 
-  const pick = (id: string) =>
+  useEffect(() => {
+    filled.set((page + 1) / pages.length);
+  }, [filled, page, pages.length]);
+
+  const onPagerScroll = useAnimatedScrollHandler(
+    (event) => {
+      filled.set((event.contentOffset.x / width + 1) / pages.length);
+    },
+    [width, pages.length],
+  );
+
+  const questionAt = (index: number) => {
+    const asked = QUESTIONS[Math.min(index, QUESTIONS.length - 1)]!;
+    return asked.id === "avoid"
+      ? {
+          ...asked,
+          options: profiles
+            .filter((profile) => profile.ask === "avoid")
+            .map((profile) => profile.id),
+        }
+      : asked;
+  };
+
+  const goTo = (target: number) => {
+    const next = Math.max(0, Math.min(pages.length - 1, target));
+    pager.current?.scrollTo({ x: width * next, animated: true });
+    setAt(pages[next]!);
+  };
+
+  const onPageEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const next = Math.round(event.nativeEvent.contentOffset.x / width);
+    const target = pages[Math.max(0, Math.min(pages.length - 1, next))]!;
+    if (target !== at) setAt(target);
+  };
+
+  const pick = (questionId: QuestionId, single: boolean | undefined, id: string) =>
     setPicked((all) => {
-      const current = all[question.id];
-      const next = question.single ? [id] : current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id];
-      return { ...all, [question.id]: next };
+      const current = all[questionId];
+      const next = single
+        ? [id]
+        : current.includes(id)
+          ? current.filter((entry) => entry !== id)
+          : [...current, id];
+      return { ...all, [questionId]: next };
     });
 
   const finish = async () => {
@@ -145,10 +260,17 @@ const ProfilePick = ({
     try {
       if (!refine) await axios.put("households/profiles", { profiles: chosen });
       for (const item of toAdd) {
-        await axios.post("foods/create", { name: item.name, icon: item.icon, listId, fromOnboarding: true });
+        await axios.post("foods/create", {
+          name: item.name,
+          icon: item.icon,
+          listId,
+          fromOnboarding: true,
+        });
       }
       if (toRemove.length > 0) {
-        await axios.put(`lists/${listId}/remove-foods`, { foodIds: toRemove.map((food) => food.id) });
+        await axios.put(`lists/${listId}/remove-foods`, {
+          foodIds: toRemove.map((food) => food.id),
+        });
       }
       if (refine) await mutate(() => true);
       onDone(selected);
@@ -158,40 +280,35 @@ const ProfilePick = ({
     }
   };
 
-  return (
-    <Screen
-      padded={false}
-      dock={
-        <>
-          {isLast && (
-            <CText size={skin.type.label + 1} color={C.textSoft} style={styles.center}>
-              {profiles.length === 0
-                ? copy.profileOffline
-                : refine
-                  ? copy.refineCount(toAdd.length, toRemove.length)
-                  : copy.profileCount(selected.length)}
-            </CText>
-          )}
-          <CButton
-            label={!isLast ? copy.questionNext : busy ? copy.profileAdding : copy.profileDone}
-            onPress={isLast ? finish : () => setAt(at + 1)}
-          />
-          {at > 0 && !busy && !refine && <CButton variant="text" label={copy.questionBack} onPress={() => setAt(at - 1)} />}
-        </>
-      }
-    >
-      <ScrollView key={reviewing ? "review" : "questions"} contentContainerStyle={styles.scroll}>
+  const renderPage = (index: number) => {
+    const reviewing = online && index === QUESTIONS.length;
+    const question = questionAt(index);
+    const text = copy.questions[question.id];
+
+    return (
+      <ScrollView key={index} style={{ width }} contentContainerStyle={styles.scroll}>
         <View style={styles.head}>
-          {profiles.length > 0 && !reviewing && (
-            <CText size={skin.type.label} color={C.textSoft}>
-              {copy.questionAt(at + 1, QUESTIONS.length)}
-            </CText>
-          )}
-          <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
-            {refine ? copy.refineTitle : reviewing ? copy.reviewTitle : profiles.length > 0 ? text.title : copy.profileTitle}
+          <CText
+            weight="medium"
+            size={skin.type.display.md}
+            accessibilityRole="header"
+          >
+            {refine
+              ? copy.refineTitle
+              : reviewing
+                ? copy.reviewTitle
+                : online
+                  ? text.title
+                  : copy.profileTitle}
           </CText>
           <CText size={skin.type.body} color={C.textSoft}>
-            {refine && reviewing ? copy.refineLine : reviewing ? copy.reviewLine : profiles.length > 0 ? text.line : copy.profileLine}
+            {refine && reviewing
+              ? copy.refineLine
+              : reviewing
+                ? copy.reviewLine
+                : online
+                  ? text.line
+                  : copy.profileLine}
           </CText>
         </View>
         {reviewing && (
@@ -204,10 +321,16 @@ const ProfilePick = ({
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on }}
                   disabled={busy}
-                  onPress={() => setOverrides((all) => ({ ...all, [item.name]: !on }))}
+                  onPress={() =>
+                    setOverrides((all) => ({ ...all, [item.name]: !on }))
+                  }
                   style={withPressed([styles.chip, on && styles.optionOn])}
                 >
-                  <CText weight="medium" size={skin.type.body} color={on ? C.onFill : C.text}>
+                  <CText
+                    weight="medium"
+                    size={skin.type.body}
+                    color={on ? C.onFill : C.text}
+                  >
                     {item.name}
                   </CText>
                 </Press>
@@ -215,7 +338,7 @@ const ProfilePick = ({
             })}
           </View>
         )}
-        {profiles.length > 0 && !reviewing && (
+        {online && !reviewing && (
           <View style={styles.options}>
             {question.options.map((id) => {
               const on = picked[question.id].includes(id);
@@ -224,10 +347,14 @@ const ProfilePick = ({
                   key={id}
                   accessibilityRole={question.single ? "radio" : "checkbox"}
                   accessibilityState={{ checked: on }}
-                  onPress={() => pick(id)}
+                  onPress={() => pick(question.id, question.single, id)}
                   style={withPressed([styles.option, on && styles.optionOn])}
                 >
-                  <CText weight="medium" size={skin.type.body} color={on ? C.onFill : C.text}>
+                  <CText
+                    weight="medium"
+                    size={skin.type.body}
+                    color={on ? C.onFill : C.text}
+                  >
                     {copy.answers[id] ?? id}
                   </CText>
                 </Press>
@@ -236,26 +363,141 @@ const ProfilePick = ({
           </View>
         )}
       </ScrollView>
+    );
+  };
+
+  return (
+    <Screen
+      padded={false}
+      dock={
+        <>
+          {isLast && (
+            <CText
+              size={skin.type.label + 1}
+              color={C.textSoft}
+              style={[styles.center, styles.full]}
+            >
+              {profiles.length === 0
+                ? copy.profileOffline
+                : refine
+                  ? copy.refineCount(toAdd.length, toRemove.length)
+                  : copy.profileCount(selected.length)}
+            </CText>
+          )}
+          <View style={styles.pageActions}>
+            {canBack ? (
+              <CButton
+                variant="text"
+                label={copy.questionBack}
+                onPress={() => goTo(page - 1)}
+              />
+            ) : (
+              <View />
+            )}
+            <CButton
+              label={
+                !isLast
+                  ? copy.questionNext
+                  : busy
+                    ? copy.profileAdding
+                    : copy.profileDone
+              }
+              onPress={isLast ? finish : () => goTo(page + 1)}
+            />
+          </View>
+        </>
+      }
+    >
+      {paged && (
+        <View style={styles.barRow}>
+          <StepBar
+            progress={filled}
+            label={copy.questionAt(Math.min(page + 1, QUESTIONS.length), QUESTIONS.length)}
+            now={page + 1}
+            max={pages.length}
+          />
+        </View>
+      )}
+      <Animated.ScrollView
+        ref={pager}
+        horizontal
+        pagingEnabled
+        scrollEnabled={!busy && paged}
+        showsHorizontalScrollIndicator={false}
+        onScroll={onPagerScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onPageEnd}
+        style={styles.flex}
+      >
+        {pages.map(renderPage)}
+      </Animated.ScrollView>
     </Screen>
   );
 };
 
-const Caption = ({ title, line, prompt }: { title: string; line?: string; prompt?: string }) => {
+const Caption = ({
+  title,
+  line,
+  prompt,
+}: {
+  title: string;
+  line?: string;
+  prompt?: string;
+}) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
 
   return (
     <View accessibilityLiveRegion="polite" style={styles.caption}>
-      <CText weight="medium" size={skin.type.lead}>
+      <CText weight="medium" size={skin.type.lead} style={styles.center}>
         {title}
       </CText>
       {line && (
-        <CText size={skin.type.body} color={C.textSoft}>
+        <CText size={skin.type.body} color={C.textSoft} style={styles.center}>
           {line}
         </CText>
       )}
-      {prompt && <CText size={skin.type.body}>{prompt}</CText>}
+      {prompt && (
+        <CText size={skin.type.body} style={styles.center}>
+          {prompt}
+        </CText>
+      )}
+    </View>
+  );
+};
+
+const PracticeCard = ({
+  item,
+  behind,
+  intent,
+  onFling,
+}: {
+  item: Sample;
+  behind: boolean;
+  intent: SwipeDirection | null;
+  onFling?: (direction: SwipeDirection) => void;
+}) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const look = useDeckCardLook(behind);
+
+  return (
+    <View style={styles.sheet}>
+      <Animated.View style={[styles.card, look.cardStyle]}>
+        <Animated.View style={[styles.flex, look.contentStyle]}>
+          <View style={styles.cardBody}>
+            <FoodIcon
+              name={item.icon ?? undefined}
+              size={skin.size.icon.card}
+            />
+            <CText weight="medium" size={skin.type.title} style={styles.center}>
+              {item.name}
+            </CText>
+          </View>
+          <CardPads labels intent={intent} onFling={onFling} />
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -269,13 +511,17 @@ const Practice = ({
   onDone: (answers: Answer[]) => void;
   onSkip: () => void;
 }) => {
-  const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const flingRef = useRef<SwipeDeckFling | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [intent, setIntent] = useState<SwipeDirection | null>(null);
+  const practiced = useSharedValue(0);
+
+  useEffect(() => {
+    practiced.set(withTiming(answers.length / Math.max(1, samples.length), AnimationService.config));
+  }, [practiced, answers.length, samples.length]);
 
   const remaining = samples.slice(answers.length);
   const current = remaining[0];
@@ -288,7 +534,7 @@ const Practice = ({
         ? { title: copy.saidIn(last.name), line: copy.saidInLine }
         : { title: copy.saidUnsure(last.name), line: copy.saidUnsureLine }
     : current
-      ? { title: copy.promptFirst(current.name), line: copy.promptFirstLine }
+      ? { title: copy.promptFirst(current.name), line: undefined }
       : { title: "", line: "" };
   const prompt =
     last && current
@@ -299,44 +545,52 @@ const Practice = ({
 
   return (
     <Screen
-      dock={current ? undefined : <CButton label={copy.seeList} onPress={() => onDone(answers)} />}
+      dock={
+        current ? undefined : (
+          <CButton label={copy.seeList} onPress={() => onDone(answers)} />
+        )
+      }
     >
-      <View style={styles.topRow}>
-        <CText size={skin.type.label} color={C.textSoft}>
-          {copy.practiceLabel(Math.min(answers.length + 1, samples.length), samples.length)}
-        </CText>
-        <CButton variant="text" label={copy.skip} onPress={onSkip} />
+      <View style={styles.practice}>
+        <View style={styles.topRow}>
+          <View style={styles.flex}>
+            <StepBar
+              progress={practiced}
+              label={copy.practiceLabel(Math.min(answers.length + 1, samples.length), samples.length)}
+              now={answers.length}
+              max={samples.length}
+            />
+          </View>
+          <CButton variant="text" label={copy.skip} onPress={onSkip} />
+        </View>
+        <Caption title={feedback.title} line={feedback.line} prompt={prompt} />
+        <View style={styles.deck}>
+          <SwipeDeck
+            items={remaining}
+            keyOf={(item) => item.name}
+            stamps={copy.stamps}
+            allowUp
+            flingRef={flingRef}
+            onIntent={setIntent}
+            onSwipe={(item, direction) =>
+              setAnswers((list) => [...list, { ...item, direction }])
+            }
+            background={C.ground}
+            renderSheet={(item, depth) => (
+              <PracticeCard
+                item={item}
+                behind={depth > 0}
+                intent={depth === 0 ? intent : null}
+                onFling={
+                  depth === 0
+                    ? (direction) => flingRef.current?.(direction)
+                    : undefined
+                }
+              />
+            )}
+          />
+        </View>
       </View>
-      <View style={styles.deck}>
-        <SwipeDeck
-          items={remaining}
-          keyOf={(item) => item.name}
-          stamps={copy.stamps}
-          allowUp
-          flingRef={flingRef}
-          onIntent={setIntent}
-          onSwipe={(item, direction) => setAnswers((list) => [...list, { ...item, direction }])}
-          background={C.ground}
-          renderSheet={(item, depth) => (
-            <View style={styles.sheet}>
-              <View style={styles.card}>
-                <View style={styles.cardBody}>
-                  <FoodIcon name={item.icon ?? undefined} size={skin.size.icon.card} />
-                  <CText weight="medium" size={skin.type.title} style={styles.center}>
-                    {item.name}
-                  </CText>
-                </View>
-                <CardPads
-                  labels
-                  intent={depth === 0 ? intent : null}
-                  onFling={depth === 0 ? (direction) => flingRef.current?.(direction) : undefined}
-                />
-              </View>
-            </View>
-          )}
-        />
-      </View>
-      <Caption title={feedback.title} line={feedback.line} prompt={prompt} />
     </Screen>
   );
 };
@@ -374,8 +628,12 @@ const PracticeRow = ({
     );
   }, [nudging, nudge]);
 
-  const nudgeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: nudge.value }] }));
-  const laterStyle = useAnimatedStyle(() => ({ opacity: drag.value + nudge.value < 0 ? 1 : 0 }));
+  const nudgeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: nudge.value }],
+  }));
+  const laterStyle = useAnimatedStyle(() => ({
+    opacity: drag.value + nudge.value < 0 ? 1 : 0,
+  }));
 
   return (
     <View
@@ -385,7 +643,9 @@ const PracticeRow = ({
         { name: "activate", label: T.shop.inBasket },
         { name: "later", label: T.shop.nextTime },
       ]}
-      onAccessibilityAction={(event) => (event.nativeEvent.actionName === "later" ? onLater() : onBuy())}
+      onAccessibilityAction={(event) =>
+        event.nativeEvent.actionName === "later" ? onLater() : onBuy()
+      }
       style={styles.slot}
     >
       <View style={[styles.behind, styles.behindBuy]}>
@@ -417,7 +677,13 @@ const PracticeRow = ({
   );
 };
 
-const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => void }) => {
+const PracticeShop = ({
+  answers,
+  onDone,
+}: {
+  answers: Answer[];
+  onDone: () => void;
+}) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
@@ -425,7 +691,9 @@ const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => vo
   const out = answers.filter((answer) => answer.direction === "left");
   const pretend = out.length === 0;
   const rows = pretend ? answers.slice(0, 1) : out;
-  const [handled, setHandled] = useState<Record<string, "bought" | "later">>({});
+  const [handled, setHandled] = useState<Record<string, "bought" | "later">>(
+    {},
+  );
   const [lastAction, setLastAction] = useState<"bought" | "later" | null>(null);
   const open = rows.filter((row) => !handled[row.name]);
   const first = rows[0];
@@ -436,12 +704,22 @@ const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => vo
   };
 
   return (
-    <Screen dock={lastAction ? <CButton label={copy.shopNext} onPress={onDone} /> : undefined}>
+    <Screen
+      dock={
+        lastAction ? (
+          <CButton label={copy.shopNext} onPress={onDone} />
+        ) : undefined
+      }
+    >
       <View style={styles.head}>
         <CText size={skin.type.label} color={C.textSoft}>
           {copy.shopLabel}
         </CText>
-        <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
+        <CText
+          weight="medium"
+          size={skin.type.display.md}
+          accessibilityRole="header"
+        >
           {copy.shopTitle(open.length)}
         </CText>
       </View>
@@ -457,11 +735,19 @@ const PracticeShop = ({ answers, onDone }: { answers: Answer[]; onDone: () => vo
         ))}
       </View>
       {lastAction ? (
-        <Caption title={lastAction === "bought" ? copy.shopBought : copy.shopLater} />
+        <Caption
+          title={lastAction === "bought" ? copy.shopBought : copy.shopLater}
+        />
       ) : (
         <Caption
           title={copy.shopCaption}
-          line={first ? (pretend ? copy.shopPretend(first.name) : copy.shopCaptionLine(first.name)) : undefined}
+          line={
+            first
+              ? pretend
+                ? copy.shopPretend(first.name)
+                : copy.shopCaptionLine(first.name)
+              : undefined
+          }
         />
       )}
     </Screen>
@@ -478,7 +764,11 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
     <Screen
       dock={
         <>
-          <CText size={skin.type.label + 1} color={C.textSoft} style={styles.center}>
+          <CText
+            size={skin.type.label + 1}
+            color={C.textSoft}
+            style={styles.center}
+          >
             {copy.doneNote}
           </CText>
           <CButton label={copy.start} onPress={onStart} />
@@ -489,13 +779,20 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
         <CText size={skin.type.label} color={C.textSoft}>
           {copy.doneLabel}
         </CText>
-        <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
+        <CText
+          weight="medium"
+          size={skin.type.display.md}
+          accessibilityRole="header"
+        >
           {copy.doneTitle}
         </CText>
       </View>
       <View style={styles.recap}>
         {copy.doneSteps.map((line, index) => (
-          <View key={line} style={[styles.recapRow, index > 0 && styles.recapDivider]}>
+          <View
+            key={line}
+            style={[styles.recapRow, index > 0 && styles.recapDivider]}
+          >
             <View style={styles.number}>
               <CText weight="medium" size={skin.type.label} color={C.onFill}>
                 {String(index + 1)}
@@ -523,8 +820,12 @@ const CalmTutorial = ({
   onDone: (startRound: boolean) => void;
 }) => {
   const copy = T.tutorial;
-  const { data: mainList } = useSWR<ListType & { foods?: FoodType[] }>({ url: "lists/read?main=true" });
-  const { data: household } = useSWR<HouseholdWithMembersType>({ url: "/households/me" });
+  const { data: mainList } = useSWR<ListType & { foods?: FoodType[] }>({
+    url: "lists/read?main=true",
+  });
+  const { data: household } = useSWR<HouseholdWithMembersType>({
+    url: "/households/me",
+  });
   const [step, setStep] = useState<Step>(withIntro ? "intro" : "profile");
   const [added, setAdded] = useState<Sample[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -533,21 +834,41 @@ const CalmTutorial = ({
 
   const inventory = mainList.foods ?? [];
   const joined = household.members.length > 1;
-  const samples: Sample[] = [...added, ...inventory, ...copy.samples.map((name) => ({ name }))]
-    .filter((item, index, list) => list.findIndex((other) => other.name === item.name) === index)
+  const samples: Sample[] = [
+    ...added,
+    ...inventory,
+    ...copy.samples.map((name) => ({ name })),
+  ]
+    .filter(
+      (item, index, list) =>
+        list.findIndex((other) => other.name === item.name) === index,
+    )
     .slice(0, PRACTICE_CARDS);
 
   const finish = (startRound: boolean) => {
     onDone(startRound);
   };
 
-  if (refine) return <ProfilePick listId={mainList.id} owned={inventory} onDone={() => finish(false)} />;
+  if (refine)
+    return (
+      <ProfilePick
+        listId={mainList.id}
+        owned={inventory}
+        onDone={() => finish(false)}
+      />
+    );
 
   if (step === "intro") {
     return (
       <Intro
         art={INTRO_ART}
-        onDone={() => setStep((inventory.length > 0 || joined) && !foodsOnly ? "practice" : "profile")}
+        onDone={() =>
+          setStep(
+            (inventory.length > 0 || joined) && !foodsOnly
+              ? "practice"
+              : "profile",
+          )
+        }
       />
     );
   }
@@ -578,7 +899,8 @@ const CalmTutorial = ({
     );
   }
 
-  if (step === "shop") return <PracticeShop answers={answers} onDone={() => setStep("done")} />;
+  if (step === "shop")
+    return <PracticeShop answers={answers} onDone={() => setStep("done")} />;
 
   return <Finished onStart={() => finish(true)} />;
 };
@@ -587,7 +909,11 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     center: { textAlign: "center" },
-    scroll: { gap: s.spacing.section + 4, paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },
+    scroll: {
+      gap: s.spacing.section + 4,
+      paddingBottom: s.spacing.stack,
+      paddingHorizontal: s.spacing.gutter,
+    },
     head: { gap: s.spacing.small },
     options: { gap: s.spacing.small + 2 },
     option: {
@@ -608,9 +934,30 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       minHeight: s.size.toggle,
       paddingHorizontal: s.spacing.stack,
     },
-    topRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+    full: { width: "100%" },
+    pageActions: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    topRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.stack,
+      justifyContent: "space-between",
+    },
+    barRow: { paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
+    barTrack: { backgroundColor: C.line, borderRadius: 2, height: 4, overflow: "hidden" },
+    barFill: { backgroundColor: C.fill, borderRadius: 2, height: "100%" },
     deck: { flex: 1, minHeight: 0 },
-    sheet: { backgroundColor: C.ground, flex: 1, paddingVertical: s.spacing.stack },
+    sheet: {
+      backgroundColor: C.ground,
+      flex: 1,
+      paddingBottom: s.spacing.stack,
+      paddingTop: s.spacing.small,
+    },
+    practice: { flex: 1, gap: s.spacing.stack, minHeight: 0 },
     card: {
       backgroundColor: C.card,
       borderColor: C.line,
@@ -633,7 +980,11 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       gap: s.spacing.tight + 2,
       padding: s.spacing.stack,
     },
-    slot: { borderTopColor: C.line, borderTopWidth: s.shape.divider, overflow: "hidden" },
+    slot: {
+      borderTopColor: C.line,
+      borderTopWidth: s.shape.divider,
+      overflow: "hidden",
+    },
     behind: {
       alignItems: "center",
       bottom: 0,
@@ -647,14 +998,24 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     behindBuy: { backgroundColor: C.positive, justifyContent: "flex-start" },
     behindLater: { backgroundColor: C.tint, justifyContent: "flex-end" },
     swipeBox: { backgroundColor: C.ground },
-    rowMain: { alignItems: "center", flexDirection: "row", minHeight: s.size.row.shop, paddingStart: s.spacing.stack },
+    rowMain: {
+      alignItems: "center",
+      flexDirection: "row",
+      minHeight: s.size.row.shop,
+      paddingStart: s.spacing.stack,
+    },
     recap: {
       backgroundColor: C.card,
       borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
     },
-    recapRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline + 2, padding: s.spacing.stack },
+    recapRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline + 2,
+      padding: s.spacing.stack,
+    },
     recapDivider: { borderTopColor: C.line, borderTopWidth: s.shape.divider },
     number: {
       alignItems: "center",

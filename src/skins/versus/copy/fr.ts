@@ -65,7 +65,7 @@ const fr: SkinCopy = {
     cardTitle: "Pas encore de rivaux",
     cardLine: "Tu joues seul sur ce téléphone. Crée un compte pour défier ton foyer et garder tes stats si tu changes de téléphone.",
     create: "Créer un compte",
-    login: "J'ai déjà un compte",
+    login: "Se connecter",
     later: "Pas maintenant",
     householdTitle: "Ramène tes rivaux",
     householdLine: "Partager une liste demande un compte. Tes aliments et tes stats te suivent.",
