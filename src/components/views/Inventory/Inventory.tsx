@@ -31,10 +31,10 @@ const Inventory = () => {
     mutateFood,
     search,
     setSearch,
-    isSelectMode,
-    selectedIds,
-    toggleSelect,
-    exitSelectMode,
+    isDeleteMode,
+    deleteIds,
+    toggleDelete,
+    exitDeleteMode,
     openAdd,
     query,
     isEmpty,
@@ -86,9 +86,9 @@ const Inventory = () => {
     <AnimatedListItem key={item.id}>
       <FoodRow
         food={item}
-        isSelectMode={isSelectMode}
-        isSelected={selectedIds.includes(item.id)}
-        onToggleSelect={toggleSelect}
+        isDeleteMode={isDeleteMode}
+        isMarked={deleteIds.includes(item.id)}
+        onToggleDelete={toggleDelete}
         onEdit={shelf.openEdit}
       />
     </AnimatedListItem>
@@ -132,7 +132,7 @@ const Inventory = () => {
           />
         )}
 
-        {isSelectMode ? (
+        {isDeleteMode ? (
           <Dock row>
             <KilButton
               flex={1}
@@ -140,15 +140,15 @@ const Inventory = () => {
               fontSize={skin.type.lead}
               variant="secondary"
               label={skin.copy.common.cancel}
-              onTouch={exitSelectMode}
+              onTouch={exitDeleteMode}
             />
             <KilButton
               flex={1}
               height={skin.size.button.md}
               fontSize={skin.type.lead}
               variant="danger"
-              label={copy.deleteSelected(selectedIds.length)}
-              onTouch={shelf.removeSelected}
+              label={copy.deleteCount(deleteIds.length)}
+              onTouch={shelf.confirmDelete}
             />
           </Dock>
         ) : (
@@ -167,8 +167,8 @@ const Inventory = () => {
                   height={skin.size.button.md}
                   fontSize={skin.type.lead}
                   variant="secondary"
-                  label={copy.select}
-                  onTouch={shelf.startSelect}
+                  label={copy.delete}
+                  onTouch={shelf.startDelete}
                 />
                 <KilButton
                   flex={1}

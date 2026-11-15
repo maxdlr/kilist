@@ -70,7 +70,7 @@ const CalmAccount = () => {
   const others = account.members.filter((member) => member.id !== user.id);
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
       <Screen padded={false}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>

@@ -35,14 +35,14 @@ const FoodRow = ({
   food,
   votes,
   colors,
-  selecting,
+  deleting,
   selected,
   onPress,
 }: {
   food: FoodType;
   votes: Vote[];
   colors: Record<number, string>;
-  selecting: boolean;
+  deleting: boolean;
   selected: boolean;
   onPress: () => void;
 }) => {
@@ -55,12 +55,12 @@ const FoodRow = ({
   return (
     <Press
       accessibilityRole="button"
-      accessibilityState={selecting ? { selected } : undefined}
+      accessibilityState={deleting ? { selected } : undefined}
       accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}${clash ? V.inventory.clashAria : ""}. ${voteText}`}
       onPress={onPress}
       style={withPressed([styles.row, { borderColor: selected ? P.you : "transparent" }])}
     >
-      {selecting && (
+      {deleting && (
         <View style={[styles.box, { backgroundColor: selected ? P.you : "transparent", borderColor: selected ? P.you : P.faint }]}>
           {selected && (
             <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
@@ -106,7 +106,7 @@ const VersusInventory = () => {
   const { user } = useAuth();
   const shelf = useInventoryShelf();
   const { data: house, mutate: refreshVotes } = useHouseVotes();
-  const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
+  const { foods, query, isEmpty, noResults, isDeleteMode, deleteIds } = shelf;
 
   useFocusEffect(
     useCallback(() => {
@@ -128,21 +128,21 @@ const VersusInventory = () => {
   const half = (label: string, onPress: () => void, variant: "primary" | "secondary" | "buy" = "primary") => (
     <VButton key={label} flex={1} label={label} variant={variant} onPress={onPress} />
   );
-  const actions = isSelectMode
-    ? [half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"), half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "buy")]
+  const actions = isDeleteMode
+    ? [half(skin.copy.common.cancel, shelf.exitDeleteMode, "secondary"), half(skin.copy.inventory.deleteCount(deleteIds.length), shelf.confirmDelete, "buy")]
     : noResults
       ? [half(V.inventory.clearSearch, () => shelf.setSearch(""), "secondary"), half(V.inventory.addQuery(query), () => shelf.openAdd(shelf.search.trim()))]
       : isEmpty
         ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(V.inventory.suggested, () => router.push("/onboarding"))]
-        : [half(skin.copy.inventory.select, shelf.startSelect, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
+        : [half(skin.copy.inventory.delete, shelf.startDelete, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
       <Screen
         padded={false}
         dock={
           <>
-            {!isEmpty && !isSelectMode && (
+            {!isEmpty && !isDeleteMode && (
               <FormInput
                 accessibilityLabel={skin.copy.inventory.search}
                 placeholder={skin.copy.inventory.search}
@@ -210,9 +210,9 @@ const VersusInventory = () => {
                 food={item}
                 votes={members.length > 1 ? votesFor(item) : []}
                 colors={colors}
-                selecting={isSelectMode}
-                selected={selectedIds.includes(item.id)}
-                onPress={() => (isSelectMode ? shelf.toggleSelect(item.id) : shelf.openEdit(item))}
+                deleting={isDeleteMode}
+                selected={deleteIds.includes(item.id)}
+                onPress={() => (isDeleteMode ? shelf.toggleDelete(item.id) : shelf.openEdit(item))}
               />
             )}
           />

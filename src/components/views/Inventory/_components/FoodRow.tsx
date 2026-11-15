@@ -11,15 +11,15 @@ import { StyleSheet, View } from "react-native";
 
 const FoodRow = ({
   food,
-  isSelectMode = false,
-  isSelected = false,
-  onToggleSelect,
+  isDeleteMode = false,
+  isMarked = false,
+  onToggleDelete,
   onEdit,
 }: {
   food: FoodType;
-  isSelectMode?: boolean;
-  isSelected?: boolean;
-  onToggleSelect?: (foodId: number) => void;
+  isDeleteMode?: boolean;
+  isMarked?: boolean;
+  onToggleDelete?: (foodId: number) => void;
   onEdit?: (food: FoodType) => void;
 }) => {
   const skin = useSkin();
@@ -32,9 +32,9 @@ const FoodRow = ({
   return (
     <Press
       accessibilityRole="button"
-      accessibilityState={isSelectMode ? { selected: isSelected } : undefined}
+      accessibilityState={isDeleteMode ? { selected: isMarked } : undefined}
       accessibilityLabel={`${name}, ${label}`}
-      onPress={() => (isSelectMode ? onToggleSelect?.(id) : onEdit?.(food))}
+      onPress={() => (isDeleteMode ? onToggleDelete?.(id) : onEdit?.(food))}
       style={withPressed([
         styles.row,
         {
@@ -43,15 +43,15 @@ const FoodRow = ({
         },
       ])}
     >
-      {isSelectMode && (
+      {isDeleteMode && (
         <View
           style={[
             styles.check,
             { borderColor: ink, borderWidth: skin.shape.border + 1 },
-            isSelected && { backgroundColor: skin.actions.primary.fill },
+            isMarked && { backgroundColor: skin.actions.primary.fill },
           ]}
         >
-          {isSelected && (
+          {isMarked && (
             <ThemedText size={skin.type.caption} color={skin.actions.primary.ink}>
               X
             </ThemedText>

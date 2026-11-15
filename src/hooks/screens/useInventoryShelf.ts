@@ -14,8 +14,8 @@ const useInventoryShelf = () => {
   const list = useInventory();
   const { mark } = useMark();
   const { foods, search, mutateFood, removeFoodsFromList } = list;
-  const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [deleteIds, setDeleteIds] = useState<number[]>([]);
   const [isAddVisible, setIsAddVisible] = useState(false);
   const [addInitialName, setAddInitialName] = useState("");
   const [addKey, setAddKey] = useState(0);
@@ -31,17 +31,17 @@ const useInventoryShelf = () => {
     }, [mutateFood]),
   );
 
-  const toggleSelect = (foodId: number) => {
-    setSelectedIds((prev) =>
+  const toggleDelete = (foodId: number) => {
+    setDeleteIds((prev) =>
       prev.includes(foodId)
         ? prev.filter((id) => id !== foodId)
         : [...prev, foodId],
     );
   };
 
-  const exitSelectMode = () => {
-    setIsSelectMode(false);
-    setSelectedIds([]);
+  const exitDeleteMode = () => {
+    setIsDeleteMode(false);
+    setDeleteIds([]);
   };
 
   const closeActionPanel = useCallback(() => setActionRequest(null), []);
@@ -77,7 +77,7 @@ const useInventoryShelf = () => {
           destructive: true,
           onPress: async () => {
             const removed = await removeFoodsFromList(ids);
-            exitSelectMode();
+            exitDeleteMode();
             if (removed) mark("removed", common.marks.removed(ids.length));
           },
         },
@@ -92,16 +92,9 @@ const useInventoryShelf = () => {
     askRemove([food.id], copy.removeOne(caseFor(skin, food.name)));
   };
 
-  const editSelected = () => {
-    const food = foods?.find((entry) => entry.id === selectedIds[0]);
-    if (!food) return;
-    exitSelectMode();
-    setEditingFood(food);
-  };
-
-  const removeSelected = () => {
-    if (selectedIds.length === 0) return;
-    askRemove(selectedIds, copy.removeMany(selectedIds.length));
+  const confirmDelete = () => {
+    if (deleteIds.length === 0) return;
+    askRemove(deleteIds, copy.removeMany(deleteIds.length));
   };
 
   const query = caseFor(skin, search.trim());
@@ -127,13 +120,12 @@ const useInventoryShelf = () => {
     query,
     isEmpty: !hasFoods && !query,
     noResults: !hasFoods && Boolean(query),
-    isSelectMode,
-    startSelect: () => setIsSelectMode(true),
-    exitSelectMode,
-    selectedIds,
-    toggleSelect,
-    removeSelected,
-    editSelected,
+    isDeleteMode,
+    startDelete: () => setIsDeleteMode(true),
+    exitDeleteMode,
+    deleteIds,
+    toggleDelete,
+    confirmDelete,
     isAddVisible,
     addInitialName,
     addKey,

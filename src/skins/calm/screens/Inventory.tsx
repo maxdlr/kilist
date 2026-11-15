@@ -12,7 +12,7 @@ import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, XMarkIcon } from "react-native-heroicons/outline";
+import { MagnifyingGlassIcon, PlusIcon, TrashIcon, XMarkIcon } from "react-native-heroicons/outline";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { calmColors, useCalmColors } from "./colors";
@@ -23,12 +23,12 @@ const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
 
 const FoodRow = ({
   food,
-  selecting,
+  deleting,
   selected,
   onPress,
 }: {
   food: FoodType;
-  selecting: boolean;
+  deleting: boolean;
   selected: boolean;
   onPress: () => void;
 }) => {
@@ -40,12 +40,12 @@ const FoodRow = ({
   return (
     <Press
       accessibilityRole="button"
-      accessibilityState={selecting ? { selected } : undefined}
+      accessibilityState={deleting ? { selected } : undefined}
       accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}`}
       onPress={onPress}
       style={({ pressed }) => [styles.row, { opacity: pressed ? skin.shape.pressedOpacity : 1 }]}
     >
-      {selecting && (
+      {deleting && (
         <View style={[styles.box, { backgroundColor: selected ? C.fill : "transparent", borderColor: selected ? C.fill : C.ring }]}>
           {selected && (
             <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
@@ -66,11 +66,11 @@ const CalmInventory = () => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const shelf = useInventoryShelf();
-  const { foods, query, isEmpty, noResults, isSelectMode, selectedIds } = shelf;
+  const { foods, query, isEmpty, noResults, isDeleteMode, deleteIds } = shelf;
   const [searching, setSearching] = useState(false);
   if (shelf.isLoading) return <CalmLoading />;
 
-  const canSearch = !isEmpty && !isSelectMode;
+  const canSearch = !isEmpty && !isDeleteMode;
   const searchOpen = canSearch && (searching || shelf.search !== "");
   const toggleSearch = () => {
     if (searchOpen) {
@@ -93,16 +93,15 @@ const CalmInventory = () => {
   const half = (label: string, onPress: () => void, variant: "primary" | "secondary" | "danger" = "primary") => (
     <CButton key={label} label={label} variant={variant} onPress={onPress} />
   );
-  const actions = isSelectMode
+  const actions = isDeleteMode
     ? [
-        half(skin.copy.common.cancel, shelf.exitSelectMode, "secondary"),
-        ...(selectedIds.length === 1 ? [half(T.inventory.editOne, shelf.editSelected, "secondary")] : []),
-        half(skin.copy.inventory.deleteSelected(selectedIds.length), shelf.removeSelected, "danger"),
+        half(skin.copy.common.cancel, shelf.exitDeleteMode, "secondary"),
+        half(skin.copy.inventory.deleteCount(deleteIds.length), shelf.confirmDelete, "danger"),
       ]
     : isEmpty
       ? [half(skin.copy.inventory.addOwn, () => shelf.openAdd(), "secondary"), half(skin.copy.inventory.addSuggested, () => router.push("/onboarding"))]
       : [
-          iconButton(skin.copy.inventory.select, PencilSquareIcon, shelf.startSelect),
+          iconButton(skin.copy.inventory.delete, TrashIcon, shelf.startDelete),
           iconButton(skin.copy.inventory.add, PlusIcon, () => shelf.openAdd()),
           iconButton(skin.copy.inventory.search, MagnifyingGlassIcon, toggleSearch),
         ];
@@ -120,13 +119,13 @@ const CalmInventory = () => {
       </View>
       {noResults
         ? iconButton(T.inventory.addQuery(query), PlusIcon, () => shelf.openAdd(shelf.search.trim()))
-        : iconButton(skin.copy.inventory.select, PencilSquareIcon, shelf.startSelect)}
+        : iconButton(skin.copy.inventory.delete, TrashIcon, shelf.startDelete)}
       {iconButton(T.inventory.closeSearch, XMarkIcon, toggleSearch)}
     </View>
   );
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
       <Screen
         padded={false}
         dock={searchOpen ? searchRow : actions}
@@ -159,9 +158,9 @@ const CalmInventory = () => {
             renderItem={({ item }) => (
               <FoodRow
                 food={item}
-                selecting={isSelectMode}
-                selected={selectedIds.includes(item.id)}
-                onPress={() => (isSelectMode ? shelf.toggleSelect(item.id) : shelf.openEdit(item))}
+                deleting={isDeleteMode}
+                selected={deleteIds.includes(item.id)}
+                onPress={() => (isDeleteMode ? shelf.toggleDelete(item.id) : shelf.openEdit(item))}
               />
             )}
           />

@@ -70,7 +70,6 @@ const fr: CalmText = {
     howAria: "Comment ça marche",
   },
   inventory: {
-    editOne: "Modifier",
     closeSearch: "Fermer la recherche",
     addQuery: (query: string) => `Ajouter « ${query} »`,
     noResultsLine: "Ajoute-le et Kilist commencera à le suivre.",

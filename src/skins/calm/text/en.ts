@@ -68,7 +68,6 @@ const en = {
     howAria: "How it works",
   },
   inventory: {
-    editOne: "Edit",
     closeSearch: "Close search",
     addQuery: (query: string) => `Add “${query}”`,
     noResultsLine: "Add it and Kilist will start keeping track of it.",
