@@ -9,6 +9,15 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", {
 const foods = (count: number) =>
   `${count} ${count <= 1 ? "aliment" : "aliments"}`;
 
+const joined = (names: string[]) => {
+  const words = names.map((name, index) =>
+    index === 0 ? name : name.toLowerCase(),
+  );
+  return words.length < 2
+    ? (words[0] ?? "")
+    : `${words.slice(0, -1).join(", ")} et ${words[words.length - 1]}`;
+};
+
 const fr: CalmText = {
   date: (date: Date) => {
     const text = dateFormat.format(date);
@@ -42,6 +51,7 @@ const fr: CalmText = {
     question: "Il t'en reste ?",
     position: (at: number, total: number) => `${at} sur ${total}`,
     showLabels: "Afficher le nom des boutons",
+    undo: "Annuler la dernière carte",
     ariaOut: "Plus en stock",
     ariaIn: "En stock",
     added: (count: number) =>
@@ -101,7 +111,10 @@ const fr: CalmText = {
         title: "Des animaux ?",
         line: "Choisis tout ce qui s'applique, ou rien.",
       },
-      kids: { title: "Des enfants ?", line: "Des enfants qui vivent avec toi." },
+      kids: {
+        title: "Des enfants ?",
+        line: "Des enfants qui vivent avec toi.",
+      },
       extras: {
         title: "Tu achètes autre chose ?",
         line: "Pas que de la nourriture. Choisis tout ce qui s'applique, ou rien.",
@@ -159,43 +172,37 @@ const fr: CalmText = {
       "La liste d'aliments n'est pas encore téléchargée. Tu pourras ajouter tes aliments plus tard depuis l'inventaire.",
     profileDone: "Terminé",
     profileAdding: "Ajout…",
-    samples: ["Bananes", "Lait", "Riz"],
+    samples: ["Bananes", "Lait", "Riz", "Œufs", "Café"],
     practiceLabel: (at: number, total: number) =>
       `Entraînement · ${at} sur ${total}`,
     stamps: { left: "Plus de", right: "J'en ai", up: "Pas sûr" },
     promptFirst: (name: string) => `Il te reste : ${name.toLowerCase()} ?`,
-    promptRight: (name: string) =>
-      `Maintenant : ${name.toLowerCase()}. Glisse à droite s'il t'en reste.`,
-    promptFree: (name: string) =>
-      `Dernière carte : ${name.toLowerCase()}. À gauche, à droite, ou en haut si tu ne sais pas.`,
-    saidOut: (name: string) => `Il n'y a plus de : ${name.toLowerCase()}.`,
-    saidOutLine:
-      "Donc ça va sur ta liste de courses. Tu ne l'écris jamais toi-même.",
-    saidIn: (name: string) => `Il te reste : ${name.toLowerCase()}.`,
-    saidInLine: "Rien à acheter. Ça reste hors de ta liste.",
-    saidUnsure: (name: string) => `Pas sûr pour : ${name.toLowerCase()}.`,
-    saidUnsureLine: "Kilist te redemandera un autre jour.",
-    seeList: "Voir ma liste",
+    summaryTitle: "Voilà ce qui s'est passé",
+    summaryOut: (names: string[]) =>
+      `${joined(names)} ${names.length > 1 ? "vont" : "va"} sur ta liste de courses.`,
+    summaryIn: (names: string[]) =>
+      `${joined(names)} ${names.length > 1 ? "ne vont pas" : "ne va pas"} sur ta liste, il t'en reste.`,
+    summaryUnsure: (names: string[]) =>
+      `${joined(names)} ${names.length > 1 ? "reviendront" : "reviendra"} plus tard dans ton tri.`,
+    summaryEnd:
+      "Quelques gestes de temps en temps, et ta liste de courses est toujours à jour.",
+    seeList: "Voir ma liste de courses",
     shopLabel: "Entraînement · ta liste",
     shopTitle: (count: number) => `${count} à acheter`,
-    shopCaption: "Voici ta liste.",
-    shopCaptionLine: (name: string) =>
-      `« ${name} » y est parce que tu as dit qu'il n'y en avait plus. Glisse la ligne à droite une fois dans ton panier.`,
-    shopPretend: (name: string) =>
-      `Disons qu'il n'y avait plus de : ${name.toLowerCase()}. Glisse la ligne à droite une fois dans ton panier.`,
     shopBought: "Acheté. C'est de nouveau en stock.",
-    shopLater:
-      "Gardé pour la prochaine fois. Ça reviendra à tes prochaines courses.",
-    shopNext: "Continuer",
+    shopSwipeTitle: "Au magasin",
+    shopSwipeHint: "Glisse le produit à droite, dans ton panier.",
+    shopLaterTitle: "Pas aujourd'hui ?",
+    shopLaterHint: "Glisse le produit à gauche, pour la prochaine fois.",
     doneLabel: "Entraînement terminé",
     doneTitle: "C'est tout ce qu'il y a à savoir.",
     doneSteps: [
-      "Chaque jour, trie 10 aliments : j'en ai, ou il n'y en a plus.",
+      "Chaque jour, trie 10 aliments.",
       "Ce qui manque arrive sur ta liste.",
-      "Au magasin, glisse chaque ligne quand tu l'achètes.",
+      "Au magasin, \nglisse tes produits dans ton panier.",
     ],
     doneNote:
-      "C'était un entraînement, rien n'a été enregistré. Ta première vraie partie rapporte des points.",
+      "C'était un entraînement, rien n'a été enregistré.\nTa première vraie partie rapporte des points.",
     start: "Commencer ma première partie",
   },
   settings: {

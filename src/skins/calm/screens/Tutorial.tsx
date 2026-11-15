@@ -4,6 +4,7 @@ import T from "../text";
 import FoodIcon from "@/components/elements/FoodIcon";
 import SwipeDeck, {
   SwipeDeckFling,
+  SwipeDeckReturn,
   SwipeDirection,
 } from "@/components/elements/SwipeDeck/SwipeDeck";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
@@ -24,7 +25,7 @@ import {
   HouseholdWithMembersType,
   ListType,
 } from "@/types/model";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -35,25 +36,43 @@ import {
 } from "react-native";
 import AnimationService from "@/services/animation";
 import Animated, {
+  Easing,
+  FadeIn,
+  LinearTransition,
   type SharedValue,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import {
+  ArrowDownIcon,
+  ChevronLeftIcon,
+  ShoppingCartIcon,
+  XMarkIcon,
+} from "react-native-heroicons/outline";
 import useSWR, { useSWRConfig } from "swr";
 import { calmColors, useCalmColors } from "./colors";
 import { CardPads, CButton, CText, Screen } from "./parts";
 import { CalmLoading } from "./States";
+import { UndoButton } from "./Play";
 import { useDeckCardLook } from "./deckCard";
 
 const PRACTICE_CARDS = 3;
-const NUDGE = 22;
-const NUDGE_MS = 420;
+const SHOP_ROWS = 2;
+const BOX_MOVE = LinearTransition.duration(
+  AnimationService.config.duration,
+).easing(AnimationService.config.easing);
+const BOX_FADE = FadeIn.duration(AnimationService.config.duration).easing(
+  AnimationService.config.easing,
+);
+const NUDGE = 180;
+const NUDGE_MS = 1000;
 const NUDGE_PAUSE_MS = 900;
 
 type Sample = { name: string; icon?: string | null };
@@ -62,7 +81,14 @@ const INTRO_ART = { 1: <SortArt />, 2: <ShopArt /> };
 
 type Step = "intro" | "profile" | "practice" | "shop" | "done";
 
-type QuestionId = "diet" | "avoid" | "drinks" | "home" | "kids" | "baking" | "extras";
+type QuestionId =
+  | "diet"
+  | "avoid"
+  | "drinks"
+  | "home"
+  | "kids"
+  | "baking"
+  | "extras";
 
 const QUESTIONS: { id: QuestionId; single?: boolean; options: string[] }[] = [
   {
@@ -71,8 +97,14 @@ const QUESTIONS: { id: QuestionId; single?: boolean; options: string[] }[] = [
     options: ["everything", "noPork", "noMeat", "veggie"],
   },
   { id: "avoid", options: [] },
-  { id: "drinks", options: ["coffee", "tea", "soda", "beer", "wine", "spirits"] },
-  { id: "home", options: ["cat", "dog", "bird", "rabbit", "rodent", "aquarium"] },
+  {
+    id: "drinks",
+    options: ["coffee", "tea", "soda", "beer", "wine", "spirits"],
+  },
+  {
+    id: "home",
+    options: ["cat", "dog", "bird", "rabbit", "rodent", "aquarium"],
+  },
   { id: "kids", single: true, options: ["yes", "no"] },
   { id: "baking", single: true, options: ["yes", "no"] },
   { id: "extras", options: ["bathroom", "cleaning", "dishwasher"] },
@@ -92,7 +124,9 @@ const profilesFrom = (picked: Record<QuestionId, string[]>) => [
     ...(DIETS[picked.diet[0] ?? "everything"] ?? []),
     ...picked.avoid,
     ...(picked.drinks.includes("soda") ? [] : ["soda"]),
-    ...(ALCOHOL.some((drink) => picked.drinks.includes(drink)) ? [] : ["alcohol"]),
+    ...(ALCOHOL.some((drink) => picked.drinks.includes(drink))
+      ? []
+      : ["alcohol"]),
     ...picked.drinks.filter((drink) => drink !== "soda"),
     ...picked.home,
     ...(picked.kids[0] === "yes" ? ["kids"] : []),
@@ -130,11 +164,52 @@ const StepBar = ({
   );
 };
 
+export type StepNav = { onBack?: () => void; onExit?: () => void };
+
+const TopBar = ({ onBack, onExit, children }: StepNav & { children?: ReactNode }) => {
+  const skin = useSkin();
+  const C = useCalmColors();
+  const styles = useSkinStyles(createStyles);
+  const icon = (Icon: typeof XMarkIcon) => (
+    <Icon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
+  );
+
+  return (
+    <View style={styles.topBar}>
+      {onBack && (
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={T.tutorial.questionBack}
+          hitSlop={skin.spacing.small}
+          onPress={onBack}
+          style={withPressed(styles.topIcon)}
+        >
+          {icon(ChevronLeftIcon)}
+        </Press>
+      )}
+      <View style={styles.topMiddle}>{children}</View>
+      {onExit && (
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={T.close}
+          hitSlop={skin.spacing.small}
+          onPress={onExit}
+          style={withPressed(styles.topIcon)}
+        >
+          {icon(XMarkIcon)}
+        </Press>
+      )}
+    </View>
+  );
+};
+
 const ProfilePick = ({
   listId,
   owned,
   onDone,
-}: {
+  onBack,
+  onExit,
+}: StepNav & {
   listId?: number;
   owned?: FoodType[];
   onDone: (added: Sample[]) => void;
@@ -242,7 +317,11 @@ const ProfilePick = ({
     if (target !== at) setAt(target);
   };
 
-  const pick = (questionId: QuestionId, single: boolean | undefined, id: string) =>
+  const pick = (
+    questionId: QuestionId,
+    single: boolean | undefined,
+    id: string,
+  ) =>
     setPicked((all) => {
       const current = all[questionId];
       const next = single
@@ -286,7 +365,11 @@ const ProfilePick = ({
     const text = copy.questions[question.id];
 
     return (
-      <ScrollView key={index} style={{ width }} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        key={index}
+        style={{ width }}
+        contentContainerStyle={styles.scroll}
+      >
         <View style={styles.head}>
           <CText
             weight="medium"
@@ -384,38 +467,34 @@ const ProfilePick = ({
                   : copy.profileCount(selected.length)}
             </CText>
           )}
-          <View style={styles.pageActions}>
-            {canBack ? (
-              <CButton
-                variant="text"
-                label={copy.questionBack}
-                onPress={() => goTo(page - 1)}
-              />
-            ) : (
-              <View />
-            )}
-            <CButton
-              label={
-                !isLast
-                  ? copy.questionNext
-                  : busy
-                    ? copy.profileAdding
-                    : copy.profileDone
-              }
-              onPress={isLast ? finish : () => goTo(page + 1)}
-            />
-          </View>
+          <CButton
+            label={
+              !isLast
+                ? copy.questionNext
+                : busy
+                  ? copy.profileAdding
+                  : copy.profileDone
+            }
+            onPress={isLast ? finish : () => goTo(page + 1)}
+          />
         </>
       }
     >
-      {paged && (
+      {(paged || onBack || onExit) && (
         <View style={styles.barRow}>
-          <StepBar
-            progress={filled}
-            label={copy.questionAt(Math.min(page + 1, QUESTIONS.length), QUESTIONS.length)}
-            now={page + 1}
-            max={pages.length}
-          />
+          <TopBar onBack={canBack ? () => goTo(page - 1) : busy ? undefined : onBack} onExit={onExit}>
+            {paged && (
+              <StepBar
+                progress={filled}
+                label={copy.questionAt(
+                  Math.min(page + 1, QUESTIONS.length),
+                  QUESTIONS.length,
+                )}
+                now={page + 1}
+                max={pages.length}
+              />
+            )}
+          </TopBar>
         </View>
       )}
       <Animated.ScrollView
@@ -435,34 +514,206 @@ const ProfilePick = ({
   );
 };
 
+const hintHeight = (s: Skin) => Math.round(s.type.label * 1.38);
+const captionGap = (s: Skin) => s.spacing.tight + 2;
+
+const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const Named = ({
+  text,
+  names,
+  size,
+  color,
+}: {
+  text: string;
+  names: string[];
+  size: number;
+  color?: string;
+}) => {
+  const wanted = names.filter(Boolean);
+  if (wanted.length === 0) return <>{text}</>;
+  const pattern = new RegExp(`(${wanted.map(escaped).join("|")})`, "gi");
+  return (
+    <>
+      {text.split(pattern).map((part, index) =>
+        index % 2 === 1 ? (
+          <CText key={index} weight="bold" size={size} color={color}>
+            {part}
+          </CText>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+};
+
 const Caption = ({
   title,
   line,
-  prompt,
+  hint,
+  names = [],
 }: {
   title: string;
   line?: string;
-  prompt?: string;
+  hint?: SwipeDirection | null;
+  names?: string[];
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
+  const hintColor: Record<SwipeDirection, string> = {
+    left: C.negative,
+    up: C.textSoft,
+    right: C.positive,
+  };
+  const withHint = hint !== undefined;
+  const [shownHint, setShownHint] = useState<SwipeDirection | null>(
+    hint ?? null,
+  );
+  if (hint && hint !== shownHint) setShownHint(hint);
+  const shown = useSharedValue(hint ? 1 : 0);
+  const shift = (hintHeight(skin) + captionGap(skin)) / 2;
+
+  useEffect(() => {
+    shown.set(withTiming(hint ? 1 : 0, AnimationService.config));
+  }, [hint, shown]);
+
+  const titleStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withHint ? (1 - shown.value) * shift : 0 }],
+  }));
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: shown.value,
+    transform: [{ translateY: (1 - shown.value) * shift }],
+  }));
 
   return (
     <View accessibilityLiveRegion="polite" style={styles.caption}>
-      <CText weight="medium" size={skin.type.lead} style={styles.center}>
-        {title}
-      </CText>
+      <Animated.View style={titleStyle}>
+        <CText weight="medium" size={skin.type.lead} style={styles.center}>
+          <Named text={title} names={names} size={skin.type.lead} />
+        </CText>
+      </Animated.View>
+      {withHint && (
+        <Animated.View style={[styles.hintLine, hintStyle]}>
+          {shownHint && (
+            <CText
+              weight="bold"
+              size={skin.type.label}
+              color={hintColor[shownHint]}
+              style={styles.center}
+            >
+              {T.intent[shownHint]}
+            </CText>
+          )}
+        </Animated.View>
+      )}
       {line && (
         <CText size={skin.type.body} color={C.textSoft} style={styles.center}>
-          {line}
+          <Named
+            text={line}
+            names={names}
+            size={skin.type.body}
+            color={C.textSoft}
+          />
         </CText>
       )}
-      {prompt && (
-        <CText size={skin.type.body} style={styles.center}>
-          {prompt}
-        </CText>
-      )}
+    </View>
+  );
+};
+
+const ARROW_BOUNCE = 20;
+const ARROW_SWING = {
+  duration: 1000,
+  easing: Easing.bezier(0.5, 0, 0.5, 1),
+};
+
+const BouncingArrow = () => {
+  const skin = useSkin();
+  const C = useCalmColors();
+  const reduced = useReducedMotion();
+  const drop = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduced) return;
+    drop.set(
+      withRepeat(
+        withSequence(
+          withTiming(ARROW_BOUNCE, ARROW_SWING),
+          withTiming(0, ARROW_SWING),
+        ),
+        -1,
+      ),
+    );
+  }, [reduced, drop]);
+
+  const dropStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: drop.value }],
+  }));
+
+  return (
+    <Animated.View style={dropStyle}>
+      <ArrowDownIcon
+        size={skin.size.icon.action}
+        color={C.text}
+        strokeWidth={1.8}
+      />
+    </Animated.View>
+  );
+};
+
+const PracticeSummary = ({ answers }: { answers: Answer[] }) => {
+  const skin = useSkin();
+  const C = useCalmColors();
+  const styles = useSkinStyles(createStyles);
+  const copy = T.tutorial;
+  const namesOf = (direction: SwipeDirection) =>
+    answers
+      .filter((answer) => answer.direction === direction)
+      .map((answer) => answer.name);
+  const sentences = [
+    { names: namesOf("left"), say: copy.summaryOut },
+    { names: namesOf("right"), say: copy.summaryIn },
+    { names: namesOf("up"), say: copy.summaryUnsure },
+  ]
+    .filter((group) => group.names.length > 0)
+    .map((group) => group.say(group.names));
+
+  return (
+    <View accessibilityLiveRegion="polite" style={styles.summary}>
+      <CText
+        weight="medium"
+        size={skin.type.display.md}
+        style={[styles.center, styles.summaryTitle]}
+        accessibilityRole="header"
+      >
+        {copy.summaryTitle}
+      </CText>
+      <View style={styles.bullets}>
+        {sentences.map((sentence) => (
+          <View key={sentence} style={styles.bullet}>
+            <CText size={skin.type.body} color={C.text}>
+              {"•"}
+            </CText>
+            <CText size={skin.type.body} color={C.text} style={styles.flex}>
+              <Named
+                text={sentence}
+                names={answers.map((answer) => answer.name)}
+                size={skin.type.body}
+                color={C.text}
+              />
+            </CText>
+          </View>
+        ))}
+      </View>
+      <CText
+        weight="medium"
+        size={skin.type.body}
+        color={C.text}
+        style={[styles.center, styles.summaryEnd]}
+      >
+        {copy.summaryEnd}
+      </CText>
     </View>
   );
 };
@@ -491,7 +742,7 @@ const PracticeCard = ({
               name={item.icon ?? undefined}
               size={skin.size.icon.card}
             />
-            <CText weight="medium" size={skin.type.title} style={styles.center}>
+            <CText weight="bold" size={skin.type.title} style={styles.center}>
               {item.name}
             </CText>
           </View>
@@ -504,91 +755,128 @@ const PracticeCard = ({
 
 const Practice = ({
   samples,
+  initialAnswers = [],
   onDone,
   onSkip,
-}: {
+  onBack,
+  onExit,
+}: StepNav & {
   samples: Sample[];
+  initialAnswers?: Answer[];
   onDone: (answers: Answer[]) => void;
   onSkip: () => void;
 }) => {
+  const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const flingRef = useRef<SwipeDeckFling | null>(null);
-  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [answers, setAnswers] = useState<Answer[]>(initialAnswers);
   const [intent, setIntent] = useState<SwipeDirection | null>(null);
   const practiced = useSharedValue(0);
+  const [returning, setReturning] = useState<SwipeDeckReturn>(null);
+  const undoLast = () => {
+    const last = answers[answers.length - 1];
+    if (!last) return;
+    setReturning({ key: last.name, direction: last.direction });
+    setAnswers((list) => list.slice(0, -1));
+  };
 
   useEffect(() => {
-    practiced.set(withTiming(answers.length / Math.max(1, samples.length), AnimationService.config));
+    practiced.set(
+      withTiming(
+        answers.length / Math.max(1, samples.length),
+        AnimationService.config,
+      ),
+    );
   }, [practiced, answers.length, samples.length]);
 
   const remaining = samples.slice(answers.length);
   const current = remaining[0];
-  const last = answers[answers.length - 1];
-
-  const feedback = last
-    ? last.direction === "left"
-      ? { title: copy.saidOut(last.name), line: copy.saidOutLine }
-      : last.direction === "right"
-        ? { title: copy.saidIn(last.name), line: copy.saidInLine }
-        : { title: copy.saidUnsure(last.name), line: copy.saidUnsureLine }
-    : current
-      ? { title: copy.promptFirst(current.name), line: undefined }
-      : { title: "", line: "" };
-  const prompt =
-    last && current
-      ? answers.length === 1
-        ? copy.promptRight(current.name)
-        : copy.promptFree(current.name)
-      : undefined;
 
   return (
     <Screen
       dock={
         current ? undefined : (
-          <CButton label={copy.seeList} onPress={() => onDone(answers)} />
+          <CButton
+            label={copy.seeList}
+            onPress={() => onDone(answers)}
+            icon={(color) => (
+              <ShoppingCartIcon
+                size={skin.size.icon.action}
+                color={color}
+                strokeWidth={1.8}
+              />
+            )}
+          />
         )
       }
     >
       <View style={styles.practice}>
-        <View style={styles.topRow}>
+        <TopBar onBack={onBack} onExit={onExit}>
+          <UndoButton enabled={answers.length > 0} onPress={undoLast} />
           <View style={styles.flex}>
             <StepBar
               progress={practiced}
-              label={copy.practiceLabel(Math.min(answers.length + 1, samples.length), samples.length)}
+              label={copy.practiceLabel(
+                Math.min(answers.length + 1, samples.length),
+                samples.length,
+              )}
               now={answers.length}
               max={samples.length}
             />
           </View>
-          <CButton variant="text" label={copy.skip} onPress={onSkip} />
-        </View>
-        <Caption title={feedback.title} line={feedback.line} prompt={prompt} />
-        <View style={styles.deck}>
-          <SwipeDeck
-            items={remaining}
-            keyOf={(item) => item.name}
-            stamps={copy.stamps}
-            allowUp
-            flingRef={flingRef}
-            onIntent={setIntent}
-            onSwipe={(item, direction) =>
-              setAnswers((list) => [...list, { ...item, direction }])
-            }
-            background={C.ground}
-            renderSheet={(item, depth) => (
-              <PracticeCard
-                item={item}
-                behind={depth > 0}
-                intent={depth === 0 ? intent : null}
-                onFling={
-                  depth === 0
-                    ? (direction) => flingRef.current?.(direction)
-                    : undefined
-                }
+          {!onExit && <CButton variant="text" label={copy.skip} onPress={onSkip} />}
+        </TopBar>
+        <View style={styles.practiceBody}>
+          {!current && <View style={styles.flex} />}
+          <Animated.View layout={BOX_MOVE}>
+            {current ? (
+              <Caption
+                title={copy.promptFirst(current.name)}
+                hint={intent}
+                names={[current.name]}
               />
+            ) : (
+              <Animated.View entering={BOX_FADE}>
+                <PracticeSummary answers={answers} />
+              </Animated.View>
             )}
-          />
+          </Animated.View>
+          {!current && (
+            <Animated.View entering={BOX_FADE} style={styles.arrowSlot}>
+              <BouncingArrow />
+            </Animated.View>
+          )}
+          {current && (
+            <View style={styles.deck}>
+              <SwipeDeck
+                items={remaining}
+                keyOf={(item) => item.name}
+                stamps={{}}
+                allowUp
+                returnFrom={returning}
+                flingRef={flingRef}
+                onIntent={setIntent}
+                onSwipe={(item, direction) =>
+                  setAnswers((list) => [...list, { ...item, direction }])
+                }
+                background={C.ground}
+                renderSheet={(item, depth) => (
+                  <PracticeCard
+                    item={item}
+                    behind={depth > 0}
+                    intent={depth === 0 ? intent : null}
+                    onFling={
+                      depth === 0
+                        ? (direction) => flingRef.current?.(direction)
+                        : undefined
+                    }
+                  />
+                )}
+              />
+            </View>
+          )}
         </View>
       </View>
     </Screen>
@@ -598,11 +886,13 @@ const Practice = ({
 const PracticeRow = ({
   name,
   nudging,
+  nudgeTo = 1,
   onBuy,
   onLater,
 }: {
   name: string;
   nudging: boolean;
+  nudgeTo?: 1 | -1;
   onBuy: () => void;
   onLater: () => void;
 }) => {
@@ -620,13 +910,15 @@ const PracticeRow = ({
     nudge.set(
       withRepeat(
         withSequence(
-          withDelay(NUDGE_PAUSE_MS, withTiming(NUDGE, { duration: NUDGE_MS })),
-          withTiming(0, { duration: NUDGE_MS }),
+          withDelay(NUDGE_PAUSE_MS, withTiming(NUDGE * nudgeTo, { duration: NUDGE_MS , easing: AnimationService.config.easing
+          })),
+          withTiming(0, { duration: NUDGE_MS , easing: AnimationService.config.easing
+          }),
         ),
         -1,
       ),
     );
-  }, [nudging, nudge]);
+  }, [nudging, nudge, nudgeTo]);
 
   const nudgeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: nudge.value }],
@@ -667,7 +959,12 @@ const PracticeRow = ({
           styles={{ box: styles.swipeBox }}
         >
           <View style={styles.rowMain}>
-            <CText size={skin.type.lead} style={styles.flex} numberOfLines={1}>
+            <CText
+              weight="bold"
+              size={skin.type.lead}
+              style={styles.flex}
+              numberOfLines={1}
+            >
               {name}
             </CText>
           </View>
@@ -679,9 +976,13 @@ const PracticeRow = ({
 
 const PracticeShop = ({
   answers,
+  spares,
   onDone,
-}: {
+  onBack,
+  onExit,
+}: StepNav & {
   answers: Answer[];
+  spares: Sample[];
   onDone: () => void;
 }) => {
   const skin = useSkin();
@@ -689,14 +990,29 @@ const PracticeShop = ({
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
   const out = answers.filter((answer) => answer.direction === "left");
-  const pretend = out.length === 0;
-  const rows = pretend ? answers.slice(0, 1) : out;
+  const rows = [...out, ...spares, ...answers].filter(
+    (item, index, list) => list.findIndex((other) => other.name === item.name) === index,
+  ).slice(0, SHOP_ROWS);
   const [handled, setHandled] = useState<Record<string, "bought" | "later">>(
     {},
   );
   const [lastAction, setLastAction] = useState<"bought" | "later" | null>(null);
   const open = rows.filter((row) => !handled[row.name]);
-  const first = rows[0];
+  const did = Object.values(handled);
+  const expected: "bought" | "later" | null = !did.includes("bought")
+    ? "bought"
+    : !did.includes("later")
+      ? "later"
+      : null;
+  const finished = expected === null || open.length === 0;
+
+  const left = useRef(false);
+
+  useEffect(() => {
+    if (!finished || left.current) return;
+    left.current = true;
+    onDone();
+  }, [finished, onDone]);
 
   const handle = (name: string, action: "bought" | "later") => {
     setHandled((map) => ({ ...map, [name]: action }));
@@ -704,13 +1020,8 @@ const PracticeShop = ({
   };
 
   return (
-    <Screen
-      dock={
-        lastAction ? (
-          <CButton label={copy.shopNext} onPress={onDone} />
-        ) : undefined
-      }
-    >
+    <Screen>
+      <TopBar onBack={onBack} onExit={onExit} />
       <View style={styles.head}>
         <CText size={skin.type.label} color={C.textSoft}>
           {copy.shopLabel}
@@ -728,33 +1039,29 @@ const PracticeShop = ({
           <PracticeRow
             key={row.name}
             name={row.name}
-            nudging={index === 0 && !lastAction}
+            nudging={index === 0 && !finished}
+            nudgeTo={expected === "later" ? -1 : 1}
             onBuy={() => handle(row.name, "bought")}
             onLater={() => handle(row.name, "later")}
           />
         ))}
+        {!finished && (
+          <View style={styles.rowHint}>
+            <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">
+              {expected === "later" ? copy.shopLaterTitle : copy.shopSwipeTitle}
+            </CText>
+            <CText size={skin.type.body} color={C.textSoft}>
+              {expected === "later" ? copy.shopLaterHint : copy.shopSwipeHint}
+            </CText>
+          </View>
+        )}
       </View>
-      {lastAction ? (
-        <Caption
-          title={lastAction === "bought" ? copy.shopBought : copy.shopLater}
-        />
-      ) : (
-        <Caption
-          title={copy.shopCaption}
-          line={
-            first
-              ? pretend
-                ? copy.shopPretend(first.name)
-                : copy.shopCaptionLine(first.name)
-              : undefined
-          }
-        />
-      )}
+      {lastAction === "bought" && <Caption title={copy.shopBought} />}
     </Screen>
   );
 };
 
-const Finished = ({ onStart }: { onStart: () => void }) => {
+const Finished = ({ onStart, onBack, onExit }: StepNav & { onStart: () => void }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
@@ -763,18 +1070,21 @@ const Finished = ({ onStart }: { onStart: () => void }) => {
   return (
     <Screen
       dock={
-        <>
-          <CText
-            size={skin.type.label + 1}
-            color={C.textSoft}
-            style={styles.center}
-          >
-            {copy.doneNote}
-          </CText>
-          <CButton label={copy.start} onPress={onStart} />
-        </>
+        onExit ? undefined : (
+          <>
+            <CText
+              size={skin.type.label + 1}
+              color={C.textSoft}
+              style={styles.center}
+            >
+              {copy.doneNote}
+            </CText>
+            <CButton label={copy.start} onPress={onStart} />
+          </>
+        )
       }
     >
+      <TopBar onBack={onBack} onExit={onExit} />
       <View style={styles.head}>
         <CText size={skin.type.label} color={C.textSoft}>
           {copy.doneLabel}
@@ -813,11 +1123,13 @@ const CalmTutorial = ({
   foodsOnly,
   refine = false,
   onDone,
+  onExit,
 }: {
   withIntro: boolean;
   foodsOnly: boolean;
   refine?: boolean;
   onDone: (startRound: boolean) => void;
+  onExit?: () => void;
 }) => {
   const copy = T.tutorial;
   const { data: mainList } = useSWR<ListType & { foods?: FoodType[] }>({
@@ -827,6 +1139,7 @@ const CalmTutorial = ({
     url: "/households/me",
   });
   const [step, setStep] = useState<Step>(withIntro ? "intro" : "profile");
+  const [trail, setTrail] = useState<Step[]>([]);
   const [added, setAdded] = useState<Sample[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
 
@@ -834,20 +1147,33 @@ const CalmTutorial = ({
 
   const inventory = mainList.foods ?? [];
   const joined = household.members.length > 1;
-  const samples: Sample[] = [
+  const candidates: Sample[] = [
     ...added,
     ...inventory,
     ...copy.samples.map((name) => ({ name })),
-  ]
-    .filter(
-      (item, index, list) =>
-        list.findIndex((other) => other.name === item.name) === index,
-    )
-    .slice(0, PRACTICE_CARDS);
+  ].filter(
+    (item, index, list) =>
+      list.findIndex((other) => other.name === item.name) === index,
+  );
+  const samples = candidates.slice(0, PRACTICE_CARDS);
+  const spares = candidates.slice(PRACTICE_CARDS, PRACTICE_CARDS + SHOP_ROWS);
 
   const finish = (startRound: boolean) => {
     onDone(startRound);
   };
+
+  const go = (next: Step, canReturn = true) => {
+    setTrail((list) => (canReturn ? [...list, step] : []));
+    setStep(next);
+  };
+  const previous = trail[trail.length - 1];
+  const back = previous
+    ? () => {
+        setTrail((list) => list.slice(0, -1));
+        setStep(previous);
+      }
+    : undefined;
+  const nav = { onBack: back, onExit };
 
   if (refine)
     return (
@@ -855,6 +1181,7 @@ const CalmTutorial = ({
         listId={mainList.id}
         owned={inventory}
         onDone={() => finish(false)}
+        onExit={onExit}
       />
     );
 
@@ -862,8 +1189,9 @@ const CalmTutorial = ({
     return (
       <Intro
         art={INTRO_ART}
+        onExit={onExit}
         onDone={() =>
-          setStep(
+          go(
             (inventory.length > 0 || joined) && !foodsOnly
               ? "practice"
               : "profile",
@@ -877,10 +1205,11 @@ const CalmTutorial = ({
     return (
       <ProfilePick
         listId={mainList.id}
+        {...nav}
         onDone={(items) => {
           setAdded(items);
           if (foodsOnly) finish(false);
-          else setStep("practice");
+          else go("practice", false);
         }}
       />
     );
@@ -890,19 +1219,28 @@ const CalmTutorial = ({
     return (
       <Practice
         samples={samples}
+        initialAnswers={answers}
+        {...nav}
         onSkip={() => finish(false)}
         onDone={(result) => {
           setAnswers(result);
-          setStep("shop");
+          go("shop");
         }}
       />
     );
   }
 
   if (step === "shop")
-    return <PracticeShop answers={answers} onDone={() => setStep("done")} />;
+    return (
+      <PracticeShop
+        answers={answers}
+        spares={spares}
+        {...nav}
+        onDone={() => go("done")}
+      />
+    );
 
-  return <Finished onStart={() => finish(true)} />;
+  return <Finished {...nav} onStart={() => finish(true)} />;
 };
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
@@ -947,8 +1285,16 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       gap: s.spacing.stack,
       justifyContent: "space-between",
     },
-    barRow: { paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
-    barTrack: { backgroundColor: C.line, borderRadius: 2, height: 4, overflow: "hidden" },
+    barRow: {
+      paddingBottom: s.spacing.section,
+      paddingHorizontal: s.spacing.gutter,
+    },
+    barTrack: {
+      backgroundColor: C.line,
+      borderRadius: 2,
+      height: 4,
+      overflow: "hidden",
+    },
     barFill: { backgroundColor: C.fill, borderRadius: 2, height: "100%" },
     deck: { flex: 1, minHeight: 0 },
     sheet: {
@@ -957,6 +1303,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingBottom: s.spacing.stack,
       paddingTop: s.spacing.small,
     },
+    hintLine: { height: hintHeight(s), justifyContent: "center" },
     practice: { flex: 1, gap: s.spacing.stack, minHeight: 0 },
     card: {
       backgroundColor: C.card,
@@ -972,12 +1319,23 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       justifyContent: "center",
       padding: s.spacing.gutter,
     },
+    practiceBody: { flex: 1, gap: s.spacing.stack, minHeight: 0 },
+    summary: { gap: s.spacing.stack, paddingHorizontal: s.spacing.small },
+    rowHint: { gap: s.spacing.tight, paddingTop: s.spacing.section },
+    topBar: { alignItems: "center", flexDirection: "row", gap: s.spacing.stack, minHeight: s.size.button.xs },
+    topMiddle: { alignItems: "center", flex: 1, flexDirection: "row", gap: s.spacing.stack },
+    topIcon: { justifyContent: "center", minHeight: s.size.button.xs },
+    summaryTitle: { paddingBottom: s.spacing.section },
+    bullets: { gap: s.spacing.small },
+    bullet: { flexDirection: "row", gap: s.spacing.small },
+    summaryEnd: { paddingTop: s.spacing.stack },
+    arrowSlot: { alignItems: "center", flex: 1, justifyContent: "center" },
     caption: {
       backgroundColor: C.card,
       borderColor: C.line,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
-      gap: s.spacing.tight + 2,
+      gap: captionGap(s),
       padding: s.spacing.stack,
     },
     slot: {

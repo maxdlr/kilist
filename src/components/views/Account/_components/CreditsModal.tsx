@@ -1,6 +1,5 @@
 import common from "@/i18n/common";
 import BottomPanel from "@/components/elements/BottomPanel";
-import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -60,13 +59,6 @@ const CreditsModal = ({
           {copy.creditsLicense}
         </ThemedText>
       </View>
-      <KilButton
-        height={skin.size.button.md}
-        fontSize={skin.type.lead}
-        variant={skin.panel.secondary}
-        label={skin.copy.common.close}
-        onTouch={onClose}
-      />
     </BottomPanel>
   );
 };

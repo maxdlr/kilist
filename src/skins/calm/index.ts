@@ -37,6 +37,8 @@ const calm: SkinSource = {
       regular: "Inter-Regular",
       medium: "Inter-Medium",
       bold: "Inter-SemiBold",
+      heavy: "Inter-Bold",
+      black: "Inter-Black",
     },
   },
   colors: paint.colors,

@@ -20,6 +20,7 @@ const EmailCodeModal = ({ visible, onClose }: { visible: boolean; onClose: () =>
   const { user, mutateUser } = useAuth();
   const { showToast } = useToast();
   const [code, setCode] = useState("");
+  const [sent, setSent] = useState(false);
 
   const confirm = async () => {
     try {
@@ -34,10 +35,11 @@ const EmailCodeModal = ({ visible, onClose }: { visible: boolean; onClose: () =>
     }
   };
 
-  const resend = async () => {
+  const send = async () => {
     try {
       await axios.post("/me/email/code", {});
-      showToast(T.sent, "info");
+      if (sent) showToast(T.sent, "info");
+      setSent(true);
     } catch (error) {
       showToast(messageOf(error));
     }
@@ -49,24 +51,39 @@ const EmailCodeModal = ({ visible, onClose }: { visible: boolean; onClose: () =>
         {T.title}
       </Title>
       <ThemedText size={skin.type.body} color={skin.panel.ink}>
-        {T.line(user?.email ?? "")}
+        {sent ? T.line(user?.email ?? "") : T.sendLine(user?.email ?? "")}
       </ThemedText>
-      <FormInput
-        label={T.code}
-        labelColor={skin.panel.ink}
-        type="number"
-        maxLength={6}
-        value={code}
-        onChangeText={setCode}
-      />
-      <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={T.confirm} onTouch={confirm} />
-      <KilButton
-        height={skin.size.button.sm}
-        fontSize={skin.type.label}
-        variant={skin.panel.secondary}
-        label={T.resend}
-        onTouch={resend}
-      />
+      {sent ? (
+        <>
+          <FormInput
+            label={T.code}
+            labelColor={skin.panel.ink}
+            type="number"
+            maxLength={6}
+            value={code}
+            onChangeText={setCode}
+          />
+          <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={T.confirm} onTouch={confirm} />
+          <KilButton
+            height={skin.size.button.sm}
+            fontSize={skin.type.label}
+            variant={skin.panel.secondary}
+            label={T.resend}
+            onTouch={send}
+          />
+        </>
+      ) : (
+        <>
+          <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={T.send} onTouch={send} />
+          <KilButton
+            height={skin.size.button.sm}
+            fontSize={skin.type.label}
+            variant={skin.panel.secondary}
+            label={T.haveCode}
+            onTouch={() => setSent(true)}
+          />
+        </>
+      )}
     </BottomPanel>
   );
 };

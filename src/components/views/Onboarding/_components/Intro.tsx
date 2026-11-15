@@ -1,4 +1,5 @@
 import Dock from "@/components/elements/Dock/Dock";
+import Press from "@/components/elements/Press";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
@@ -25,6 +26,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { XMarkIcon } from "react-native-heroicons/outline";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Dot = ({
@@ -58,9 +60,11 @@ const Dot = ({
 
 const Intro = ({
   onDone,
+  onExit,
   art = {},
 }: {
   onDone: () => void;
+  onExit?: () => void;
   art?: Record<number, ReactNode>;
 }) => {
   const skin = useSkin();
@@ -143,20 +147,33 @@ const Intro = ({
         })}
       </Animated.ScrollView>
 
-      <Animated.View
-        style={[styles.skip, { top: insets.top + skin.spacing.top }, skipStyle]}
-        pointerEvents={step < last ? "auto" : "none"}
-        accessibilityElementsHidden={step >= last}
-        importantForAccessibility={step < last ? "auto" : "no-hide-descendants"}
-      >
-        <KilButton
-          variant="ghost"
-          height={skin.size.button.xs}
-          fontSize={skin.type.label}
-          label={copy.skip}
-          onTouch={onDone}
-        />
-      </Animated.View>
+      <View style={[styles.skip, { top: insets.top + skin.spacing.top }]} pointerEvents="box-none">
+        <Animated.View
+          style={skipStyle}
+          pointerEvents={step < last ? "auto" : "none"}
+          accessibilityElementsHidden={step >= last}
+          importantForAccessibility={step < last ? "auto" : "no-hide-descendants"}
+        >
+          <KilButton
+            variant="ghost"
+            height={skin.size.button.xs}
+            fontSize={skin.type.label}
+            label={copy.skip}
+            onTouch={onDone}
+          />
+        </Animated.View>
+        {onExit && (
+          <Press
+            accessibilityRole="button"
+            accessibilityLabel={skin.copy.common.close}
+            hitSlop={skin.spacing.small}
+            onPress={onExit}
+            style={styles.exit}
+          >
+            <XMarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={1.8} />
+          </Press>
+        )}
+      </View>
 
       <Dock>
         <View
@@ -204,7 +221,14 @@ const createStyles = (s: Skin) =>
     body: { flex: 1, gap: s.spacing.inline, justifyContent: "center" },
     topLine: { height: s.size.button.xs, justifyContent: "center" },
     start: { overflow: "hidden" },
-    skip: { position: "absolute", right: Math.max(0, s.spacing.gutter - s.spacing.stack) },
+    skip: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.small,
+      position: "absolute",
+      right: s.spacing.gutter,
+    },
+    exit: { justifyContent: "center", minHeight: s.size.button.xs },
     dots: {
       alignSelf: "center",
       flexDirection: "row",

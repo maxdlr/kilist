@@ -1,5 +1,6 @@
 import { DarkTheme, ThemeProvider } from "expo-router";
 import { Stack } from "expo-router/js-stack";
+import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
@@ -21,6 +22,11 @@ import { ToastProvider } from "@/providers/ToastProvider";
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 SplashScreen.preventAutoHideAsync();
+
+const RUNTIME_FONTS = {
+  "Inter-Bold": require("../../assets/fonts/Inter-Bold.ttf"),
+  "Inter-Black": require("../../assets/fonts/Inter-Black.ttf"),
+};
 
 const SkinnedApp = () => {
   const skin = useSkin();
@@ -63,6 +69,9 @@ const SkinnedApp = () => {
 };
 
 export default function RootLayout() {
+  const [fontsLoaded, fontsFailed] = useFonts(RUNTIME_FONTS);
+  if (!fontsLoaded && !fontsFailed) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>

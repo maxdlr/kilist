@@ -52,7 +52,7 @@ const useAccount = () => {
   useEffect(() => {
     if (requestedPanel) router.setParams({ panel: undefined });
   }, [requestedPanel]);
-  const { lang, choice } = useLanguage();
+  const { choice } = useLanguage();
   const closePanel = useCallback(() => setPanel(null), []);
 
   const joinCode = (household?.joinCode ?? user?.household.joinCode) || HIDDEN_CODE;
@@ -137,7 +137,7 @@ const useAccount = () => {
     openNotifications: () => router.push("/notifications"),
     needsEmailCode,
     openEmailCode: () => setOpenPanel("emailCode"),
-    languageName: choice ? LANGUAGE_NAMES[choice] : common.languageAuto(LANGUAGE_NAMES[lang]),
+    languageName: choice ? LANGUAGE_NAMES[choice] : common.languagePhone,
     openIconsSite,
     switchTo,
     replayOnboarding: () => router.push("/onboarding?intro=1&replay=1"),

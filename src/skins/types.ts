@@ -77,7 +77,7 @@ export interface Skin {
   fonts: {
     display: SkinDisplayFont;
     mono: string;
-    body?: { regular: string; medium: string; bold: string };
+    body?: { regular: string; medium: string; bold: string; heavy?: string; black?: string };
     pixel?: string;
   };
   colors: {

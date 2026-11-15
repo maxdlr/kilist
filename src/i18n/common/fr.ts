@@ -45,7 +45,9 @@ const fr: CommonText = {
   creditsProducts: "Open Food Facts · openfoodfacts.org",
   language: "Langue",
   theme: "Thème",
-  languageAuto: (name: string) => `Réglage du téléphone (${name})`,
+  languagePhone: "Téléphone",
+  languageCurrent: "actuelle",
+  themeCurrent: "actuel",
   notifications: {
     title: "Me tenir au courant",
     menu: "Notifications",
@@ -94,6 +96,9 @@ const fr: CommonText = {
     menu: "Confirmer mon e-mail",
     title: "Confirme ton e-mail",
     line: (email: string) => `Entre le code à 6 chiffres envoyé à ${email}.`,
+    sendLine: (email: string) => `On va t'envoyer un code à 6 chiffres à ${email}.`,
+    send: "Envoyer le code",
+    haveCode: "J'ai déjà un code",
     code: "Code",
     confirm: "Confirmer",
     resend: "Envoyer un nouveau code",
@@ -213,6 +218,8 @@ const fr: CommonText = {
     joinTitle: "Une dernière étape",
     joinLine: (email: string) =>
       `Entre le code à 6 chiffres envoyé à ${email} pour rejoindre le foyer.`,
+    joinSendLine: (email: string) =>
+      `Pour rejoindre le foyer, confirme ton e-mail. On va t'envoyer un code à 6 chiffres à ${email}.`,
     joinSkip: "Rejoindre plus tard",
   },
   rowMore: "Plus",

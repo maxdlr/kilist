@@ -6,6 +6,15 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
 
 const foods = (count: number) => `${count} ${count === 1 ? "food" : "foods"}`;
 
+const joined = (names: string[]) => {
+  const words = names.map((name, index) =>
+    index === 0 ? name : name.toLowerCase(),
+  );
+  return words.length < 2
+    ? (words[0] ?? "")
+    : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+};
+
 const en = {
   date: (date: Date) => {
     const parts = dateFormat.formatToParts(date);
@@ -41,6 +50,7 @@ const en = {
     question: "Do you still have some?",
     position: (at: number, total: number) => `${at} of ${total}`,
     showLabels: "Show button labels",
+    undo: "Undo the last card",
     ariaOut: "Out of stock",
     ariaIn: "In stock",
     added: (count: number) => `${foods(count)} added to your list.`,
@@ -152,42 +162,37 @@ const en = {
       "The food list isn't downloaded yet. You can add your foods later from the inventory.",
     profileDone: "Done",
     profileAdding: "Adding…",
-    samples: ["Bananas", "Milk", "Rice"],
+    samples: ["Bananas", "Milk", "Rice", "Eggs", "Coffee"],
     practiceLabel: (at: number, total: number) =>
       `Practice · ${at} of ${total}`,
     stamps: { left: "Out", right: "Have it", up: "Not sure" },
     promptFirst: (name: string) => `Do you still have ${name.toLowerCase()}?`,
-    promptRight: (name: string) =>
-      `Now ${name.toLowerCase()}. Swipe right if you still have some.`,
-    promptFree: (name: string) =>
-      `Last one: ${name.toLowerCase()}. Left, right, or up if you're not sure.`,
-    saidOut: (name: string) => `You're out of ${name.toLowerCase()}.`,
-    saidOutLine:
-      "So it goes on your shopping list. You never write it yourself.",
-    saidIn: (name: string) => `You still have ${name.toLowerCase()}.`,
-    saidInLine: "Nothing to buy. It stays off your list.",
-    saidUnsure: (name: string) => `Not sure about ${name.toLowerCase()}.`,
-    saidUnsureLine: "Kilist will ask again another day.",
-    seeList: "See my list",
+    summaryTitle: "Here's what happened",
+    summaryOut: (names: string[]) =>
+      `${joined(names)} ${names.length > 1 ? "go" : "goes"} on your shopping list.`,
+    summaryIn: (names: string[]) =>
+      `${joined(names)} ${names.length > 1 ? "stay" : "stays"} off your list, you still have some.`,
+    summaryUnsure: (names: string[]) =>
+      `We'll ask you about ${joined(names).toLowerCase()} again later.`,
+    summaryEnd:
+      "A few swipes now and then, and your shopping list is always up to date.",
+    seeList: "See my shopping list",
     shopLabel: "Practice · your list",
     shopTitle: (count: number) => `${count} to buy`,
-    shopCaption: "Here is your list.",
-    shopCaptionLine: (name: string) =>
-      `${name} is on it because you said you're out. Swipe the row right once it's in your basket.`,
-    shopPretend: (name: string) =>
-      `Let's say you were out of ${name.toLowerCase()}. Swipe the row right once it's in your basket.`,
     shopBought: "Bought. It's back in stock.",
-    shopLater: "Kept for next time. It comes back on your next shop.",
-    shopNext: "Continue",
+    shopSwipeTitle: "When shopping",
+    shopSwipeHint: "Swipe it right into your basket.",
+    shopLaterTitle: "Not today?",
+    shopLaterHint: "Swipe it left to keep it for next time.",
     doneLabel: "Practice done",
     doneTitle: "That's all there is to it.",
     doneSteps: [
-      "Each day, sort 10 foods: still have it, or out.",
+      "Each day, sort 10 foods.",
       "What you're out of lands on your list.",
-      "In the store, swipe each row as you buy it.",
+      "In the store,\nswipe products to your basket.",
     ],
     doneNote:
-      "That was practice, nothing was saved. Your first real round earns points.",
+      "That was practice, nothing was saved.\nYour first real round earns points.",
     start: "Start my first round",
   },
   settings: {

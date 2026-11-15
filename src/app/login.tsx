@@ -52,6 +52,7 @@ const LoginScreen = () => {
   const { login, signup, loginWithGoogle, completeJoin, isGuest, mergePending, resolveMerge, guestName } = useAuth();
   const [joinStep, setJoinStep] = useState(false);
   const [emailCode, setEmailCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
   const guestCopy = skin.copy.guest;
   const { showToast } = useToast();
   const params = useLocalSearchParams<{ mode?: string }>();
@@ -148,10 +149,11 @@ const LoginScreen = () => {
     if (done) setJoinStep(false);
   };
 
-  const resendCode = async () => {
+  const sendCode = async () => {
     try {
       await axios.post("/me/email/code", {}, { network: true } as object);
-      showToast(common.emailCode.sent, "info");
+      if (codeSent) showToast(common.emailCode.sent, "info");
+      setCodeSent(true);
     } catch (error: any) {
       showToast(error?.response?.data?.message || common.needsConnection);
     }
@@ -367,29 +369,40 @@ const LoginScreen = () => {
             {common.emailGate.joinTitle}
           </Title>
           <ThemedText size={skin.type.body} color={skin.panel.ink}>
-            {common.emailGate.joinLine(email)}
+            {codeSent ? common.emailGate.joinLine(email) : common.emailGate.joinSendLine(email)}
           </ThemedText>
-          <FormInput
-            label={common.emailCode.code}
-            labelColor={skin.panel.ink}
-            type="number"
-            maxLength={6}
-            value={emailCode}
-            onChangeText={setEmailCode}
-          />
-          <KilButton
-            height={skin.size.button.md}
-            fontSize={skin.type.lead}
-            label={common.emailCode.confirm}
-            onTouch={() => finishJoin(true)}
-          />
-          <KilButton
-            height={skin.size.button.sm}
-            fontSize={skin.type.label}
-            variant={skin.panel.secondary}
-            label={common.emailCode.resend}
-            onTouch={resendCode}
-          />
+          {codeSent ? (
+            <>
+              <FormInput
+                label={common.emailCode.code}
+                labelColor={skin.panel.ink}
+                type="number"
+                maxLength={6}
+                value={emailCode}
+                onChangeText={setEmailCode}
+              />
+              <KilButton
+                height={skin.size.button.md}
+                fontSize={skin.type.lead}
+                label={common.emailCode.confirm}
+                onTouch={() => finishJoin(true)}
+              />
+              <KilButton
+                height={skin.size.button.sm}
+                fontSize={skin.type.label}
+                variant={skin.panel.secondary}
+                label={common.emailCode.resend}
+                onTouch={sendCode}
+              />
+            </>
+          ) : (
+            <KilButton
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              label={common.emailCode.send}
+              onTouch={sendCode}
+            />
+          )}
           <KilButton
             height={skin.size.button.sm}
             fontSize={skin.type.label}

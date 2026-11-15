@@ -39,6 +39,7 @@ export type SwipeFoodsContextType = {
   swipes?: FoodType[];
   foodsCount: number;
   swipe: (foodId: number) => void;
+  unswipe: (food: FoodType) => void;
   isLoading: boolean;
   mutateFoods: () => void;
   update: (payload: {
@@ -61,6 +62,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   swipes: undefined,
   foodsCount: 0,
   swipe: () => {},
+  unswipe: () => {},
   isLoading: false,
   mutateFoods: () => {},
   update: async () => null,
@@ -170,6 +172,11 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     setFoods((prevFoods) => prevFoods?.filter((food) => food.id !== foodId));
   };
 
+  const unswipe = (food: FoodType) => {
+    swipedIds.current.delete(food.id);
+    setFoods((prevFoods) => [food, ...(prevFoods ?? []).filter((entry) => entry.id !== food.id)]);
+  };
+
   const foodsCount = useMemo(() => data?.length || 0, [data]);
 
   const swipes = useMemo(() => foods?.slice(0, 3), [foods]);
@@ -186,6 +193,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         swipes,
         foodsCount,
         swipe,
+        unswipe,
         isLoading,
         mutateFoods,
         update,

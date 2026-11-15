@@ -30,7 +30,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { calmColors, useCalmColors } from "./colors";
 
-type Weight = "regular" | "medium" | "semibold";
+type Weight = "regular" | "medium" | "semibold" | "bold" | "black";
 
 export const CText = ({
   weight = "regular",
@@ -48,7 +48,11 @@ export const CText = ({
   const C = useCalmColors();
   const fontSize = size ?? skin.type.body;
   const family =
-    weight === "semibold"
+    weight === "black"
+      ? (skin.fonts.body!.black ?? skin.fonts.body!.heavy ?? skin.fonts.body!.bold)
+      : weight === "bold"
+      ? (skin.fonts.body!.heavy ?? skin.fonts.body!.bold)
+      : weight === "semibold"
       ? skin.fonts.body!.bold
       : weight === "medium"
         ? skin.fonts.body!.medium

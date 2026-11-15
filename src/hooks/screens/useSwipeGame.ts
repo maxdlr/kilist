@@ -1,5 +1,5 @@
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
-import type { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
+import type { SwipeDeckFling, SwipeDeckReturn, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";
@@ -19,6 +19,8 @@ const IN_STOCK: Record<SwipeDirection, boolean | null> = {
 };
 const BONUS_VISIBLE_MS = 700;
 
+type HeldSwipe = { food: FoodType; direction: SwipeDirection; replay: boolean };
+
 export type SwipeGameScreen = "loading" | "start" | "play" | "done" | "closed" | "empty";
 
 const useSwipeGame = () => {
@@ -36,6 +38,7 @@ const useSwipeGame = () => {
     mutateFoods,
     mutateGame,
     swipe,
+    unswipe,
     update,
     loadReplay,
     completeSession,
@@ -59,6 +62,9 @@ const useSwipeGame = () => {
   const outRef = useRef<FoodType[]>([]);
   const pendingUpdates = useRef<Promise<SwipeReward | null>[]>([]);
   const bonusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heldRef = useRef<HeldSwipe | null>(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [returning, setReturning] = useState<SwipeDeckReturn>(null);
 
   useEffect(() => {
     freezeDeck(phase === "play");
@@ -71,15 +77,41 @@ const useSwipeGame = () => {
     [],
   );
 
+  const collectRef = useRef<(reward: SwipeReward | null) => SwipeReward | null>((reward) => reward);
+  const updateRef = useRef(update);
+
+  useEffect(() => {
+    updateRef.current = update;
+  });
+
+  const commitHeld = useCallback(() => {
+    const held = heldRef.current;
+    if (!held) return;
+    heldRef.current = null;
+    setCanUndo(false);
+    pendingUpdates.current.push(
+      updateRef
+        .current({
+          foodId: held.food.id,
+          isInStock: IN_STOCK[held.direction],
+          ...(held.replay && { replay: true }),
+        })
+        .then((reward) => collectRef.current(reward)),
+    );
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       mutateGame();
       mutateFoods();
       return () => {
+        commitHeld();
         setPhase((current) => (current === "done" ? "idle" : current));
       };
-    }, [mutateFoods, mutateGame]),
+    }, [mutateFoods, mutateGame, commitHeld]),
   );
+
+  useEffect(() => () => commitHeld(), [commitHeld]);
 
   const replay = async () => {
     const count = await loadReplay();
@@ -102,6 +134,9 @@ const useSwipeGame = () => {
     setStartedAt(Date.now());
     setFinishedAt(0);
     pendingUpdates.current = [];
+    heldRef.current = null;
+    setCanUndo(false);
+    setReturning(null);
     setPhase("play");
   };
 
@@ -117,6 +152,10 @@ const useSwipeGame = () => {
     }
     return reward;
   };
+
+  useEffect(() => {
+    collectRef.current = collect;
+  });
 
   const finishRound = (added: FoodType[]) => {
     setFinishedAt(Date.now());
@@ -135,14 +174,33 @@ const useSwipeGame = () => {
     setSwiped((count) => count + 1);
     setOutFoods(added);
     swipe(food.id);
-    pendingUpdates.current.push(
-      update({ foodId: food.id, isInStock: IN_STOCK[direction], ...(isReplay && { replay: true }) }).then(collect),
-    );
+    commitHeld();
+    heldRef.current = { food, direction, replay: isReplay };
+    setCanUndo(true);
 
-    if (isLast) finishRound(added);
+    if (isLast) {
+      commitHeld();
+      finishRound(added);
+    }
+  };
+
+  const undo = () => {
+    const held = heldRef.current;
+    if (!held) return;
+    heldRef.current = null;
+    setCanUndo(false);
+    if (held.direction === "left") {
+      outRef.current = outRef.current.filter((entry) => entry.id !== held.food.id);
+      setOutFoods(outRef.current);
+    }
+    setSwiped((count) => Math.max(0, count - 1));
+    setIntent(null);
+    setReturning({ key: held.food.id, direction: held.direction });
+    unswipe(held.food);
   };
 
   const remove = async (food: FoodType) => {
+    commitHeld();
     try {
       const { data: list } = await axios.get<ListType>("lists/read?main=true");
       if (!list?.id) throw new Error("no list");
@@ -209,6 +267,9 @@ const useSwipeGame = () => {
     isReplay,
     recap,
     handleSwipe,
+    canUndo,
+    undo,
+    returning,
     askRemove: setRemoving,
     removeRequest,
     cancelRemove: () => setRemoving(null),

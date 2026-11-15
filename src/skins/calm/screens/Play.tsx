@@ -20,6 +20,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
 import {
   ArrowPathIcon,
+  ArrowUturnLeftIcon,
   InformationCircleIcon,
   XMarkIcon,
 } from "react-native-heroicons/outline";
@@ -50,27 +51,11 @@ const CheckCard = ({
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const look = useDeckCardLook(behind);
-  const intentColor: Record<SwipeDirection, string> = {
-    left: C.negative,
-    up: C.textSoft,
-    right: C.positive,
-  };
-  const hint = intent
-    ? { text: T.intent[intent], color: intentColor[intent] }
-    : null;
-
   return (
     <View style={styles.cardSlot}>
       <Animated.View style={[styles.card, look.cardStyle]}>
         <Animated.View style={[styles.cardFace, look.contentStyle]}>
           <View style={styles.cardBody}>
-            <View style={styles.hint}>
-              {hint && (
-                <CText weight="medium" size={skin.type.label} color={hint.color}>
-                  {hint.text}
-                </CText>
-              )}
-            </View>
             <FoodPicture food={food} size={skin.size.icon.card} />
             <View style={styles.cardText}>
               <CText
@@ -97,6 +82,26 @@ const CheckCard = ({
   );
 };
 
+export const UndoButton = ({ enabled, onPress }: { enabled: boolean; onPress: () => void }) => {
+  const skin = useSkin();
+  const C = useCalmColors();
+  const styles = useSkinStyles(createStyles);
+
+  return (
+    <Press
+      accessibilityRole="button"
+      accessibilityLabel={T.play.undo}
+      accessibilityState={{ disabled: !enabled }}
+      disabled={!enabled}
+      hitSlop={skin.spacing.small}
+      onPress={onPress}
+      style={withPressed([styles.close, !enabled && styles.undoOff])}
+    >
+      <ArrowUturnLeftIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
+    </Press>
+  );
+};
+
 const Checking = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
   const C = useCalmColors();
@@ -105,6 +110,11 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   useStatusBarStyle(skin.statusBarOnGround);
   const total = Math.max(1, game.total);
   const [labels, setLabels] = useState(false);
+  const intentColor: Record<SwipeDirection, string> = {
+    left: C.negative,
+    up: C.textSoft,
+    right: C.positive,
+  };
   const InfoIcon = labels ? InformationCircleSolid : InformationCircleIcon;
   const [touches, setTouches] = useState(0);
   const [idleFor, setIdleFor] = useState<number | null>(null);
@@ -124,19 +134,29 @@ const Checking = ({ game }: { game: SwipeGame }) => {
     >
       <View style={styles.header}>
         <View style={styles.between}>
-          <Press
-            accessibilityRole="button"
-            accessibilityLabel={T.close}
-            hitSlop={skin.spacing.small}
-            onPress={goBack}
-            style={withPressed(styles.close)}
-          >
-            <XMarkIcon
-              size={skin.size.icon.action}
-              color={C.textSoft}
-              strokeWidth={1.8}
-            />
-          </Press>
+          <View style={styles.headerStart}>
+            <Press
+              accessibilityRole="button"
+              accessibilityLabel={T.close}
+              hitSlop={skin.spacing.small}
+              onPress={goBack}
+              style={withPressed(styles.close)}
+            >
+              <XMarkIcon
+                size={skin.size.icon.action}
+                color={C.textSoft}
+                strokeWidth={1.8}
+              />
+            </Press>
+            <UndoButton enabled={game.canUndo} onPress={game.undo} />
+          </View>
+          <View style={styles.hint} accessibilityLiveRegion="polite">
+            {game.intent && (
+              <CText weight="bold" size={skin.type.label} color={intentColor[game.intent]}>
+                {T.intent[game.intent]}
+              </CText>
+            )}
+          </View>
           <View style={styles.headerEnd}>
             <CText size={skin.type.label} color={C.textSoft}>
               {T.play.position(
@@ -181,6 +201,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
           background="transparent"
           stamps={{}}
           nudging={nudging}
+          returnFrom={game.returning}
           flingRef={game.flingRef}
           onIntent={game.setIntent}
           onSwipe={game.handleSwipe}
@@ -334,6 +355,8 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingBottom: s.spacing.small,
     },
     close: { justifyContent: "center", minHeight: s.size.button.xs },
+    headerStart: { alignItems: "center", flexDirection: "row", gap: s.spacing.stack },
+    undoOff: { opacity: 0.3 },
     headerEnd: {
       alignItems: "center",
       flexDirection: "row",
@@ -366,14 +389,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       justifyContent: "center",
       padding: s.spacing.gutter,
     },
-    hint: {
-      alignItems: "center",
-      height: s.spacing.section,
-      left: 0,
-      position: "absolute",
-      right: 0,
-      top: s.spacing.stack + s.size.button.md + s.spacing.small,
-    },
+    hint: { alignItems: "center", flex: 1 },
     cardText: { alignItems: "center", gap: s.spacing.tight + 2 },
     doneContent: {
       flexGrow: 1,

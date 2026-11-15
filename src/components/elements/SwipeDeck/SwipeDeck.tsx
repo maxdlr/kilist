@@ -25,6 +25,7 @@ import { scheduleOnRN } from "react-native-worklets";
 
 export type SwipeDirection = "left" | "right" | "up";
 export type SwipeDeckFling = (direction: SwipeDirection) => void;
+export type SwipeDeckReturn = { key: string | number; direction: SwipeDirection } | null;
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const COMMIT_X = 100;
@@ -47,8 +48,14 @@ export const deckButtonColors = (
   return filled ? skin.actions.primary : skin.actions.secondary;
 };
 
+const offscreen = (direction: SwipeDirection | null) => ({
+  x: direction === "right" ? SCREEN_WIDTH * 1.6 : direction === "left" ? -SCREEN_WIDTH * 1.6 : 0,
+  y: direction === "up" ? -SCREEN_HEIGHT * 1.2 : 0,
+});
+
 const DeckSheet = ({
   isTop,
+  returnFrom,
   nudging,
   allowUp,
   stamps,
@@ -60,6 +67,7 @@ const DeckSheet = ({
 }: {
   onLongPress?: () => void;
   isTop: boolean;
+  returnFrom: SwipeDirection | null;
   nudging: boolean;
   allowUp: boolean;
   stamps: Partial<Record<SwipeDirection, string>>;
@@ -70,8 +78,8 @@ const DeckSheet = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const x = useSharedValue(0);
-  const y = useSharedValue(0);
+  const x = useSharedValue(offscreen(returnFrom).x);
+  const y = useSharedValue(offscreen(returnFrom).y);
   const flung = useSharedValue(false);
   const startX = useSharedValue(0);
   const startY = useSharedValue(0);
@@ -80,8 +88,13 @@ const DeckSheet = ({
   const rise = useSharedValue(isTop ? 1 : 0);
 
   useEffect(() => {
-    if (isTop) rise.set(withTiming(1, AnimationService.enter));
+    rise.set(withTiming(isTop ? 1 : 0, AnimationService.enter));
   }, [isTop, rise]);
+
+  useEffect(() => {
+    x.set(withTiming(0, AnimationService.config));
+    y.set(withTiming(0, AnimationService.config));
+  }, [x, y]);
   const lastIntent = useSharedValue<SwipeDirection | null>(null);
   const nudge = useSharedValue(0);
 
@@ -338,7 +351,9 @@ const SwipeDeck = <T,>({
   onLongPress,
   background,
   nudging = false,
+  returnFrom = null,
 }: {
+  returnFrom?: SwipeDeckReturn;
   onLongPress?: (item: T) => void;
   background?: string;
   nudging?: boolean;
@@ -367,6 +382,7 @@ const SwipeDeck = <T,>({
           <DeckSheet
             key={keyOf(item)}
             isTop={depth === 0}
+            returnFrom={returnFrom && returnFrom.key === keyOf(item) ? returnFrom.direction : null}
             nudging={nudging && depth === 0}
             allowUp={allowUp}
             stamps={stamps}
