@@ -5,6 +5,11 @@ import type { ActionColors, ActionKind, Skin } from "@/skins/types";
 import { Href, router } from "expo-router";
 import { createContext, ReactNode, useContext } from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { transparentColor } from "@/utils/colorUtils";
+
+const DISABLED_FILL = 0.15;
+
+const isHex = (color: string) => /^#[0-9a-f]{6}$/i.test(color);
 
 export const ButtonKindOverride = createContext<ActionKind | null>(null);
 
@@ -23,7 +28,7 @@ const KilButton = ({
   disabled = false,
   small = false,
 }: {
-  label: string;
+  label?: string;
   onTouch?: () => void;
   href?: Href;
   variant?: ActionKind;
@@ -41,8 +46,20 @@ const KilButton = ({
   const styles = useSkinStyles(createStyles);
   const override = useContext(ButtonKindOverride);
   const kind = override && variant !== "danger" ? override : variant;
-  const { fill, ink, line } = colors ?? skin.actions[kind];
+  const action = colors ?? skin.actions[kind];
+  const faded = disabled && isHex(action.fill);
+  const fill = faded ? transparentColor(action.fill, DISABLED_FILL) : action.fill;
+  const line = faded && isHex(action.line) ? transparentColor(action.line, DISABLED_FILL) : action.line;
+  const ink = faded ? action.fill : action.ink;
   const pill = skin.shape.pill === true;
+  const iconOnly = !label;
+  const side = pill
+    ? small
+      ? skin.size.button.xs - 8
+      : skin.size.button.xs
+    : small
+      ? skin.size.button.sm
+      : (height ?? skin.size.button.lg);
 
   return (
     <Press
@@ -71,23 +88,26 @@ const KilButton = ({
             ],
           },
         flex !== undefined && !pill && { flex },
+        iconOnly && { paddingHorizontal: 0, width: side },
         pressed && skin.shape.shadow.offset === 0 && styles.pressed,
-        disabled && styles.disabled,
+        disabled && !faded && styles.disabled,
         style,
       ]}
     >
       {icon?.(ink)}
-      <ThemedText
-        adjustsFontSizeToFit
-        allowFontScaling={false}
-        minimumFontScale={0.5}
-        numberOfLines={1}
-        size={small ? skin.type.label : pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
-        color={ink}
-        style={styles.label}
-      >
-        {label}
-      </ThemedText>
+      {!iconOnly && (
+        <ThemedText
+          adjustsFontSizeToFit
+          allowFontScaling={false}
+          minimumFontScale={0.5}
+          numberOfLines={1}
+          size={small ? skin.type.label : pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
+          color={ink}
+          style={styles.label}
+        >
+          {label}
+        </ThemedText>
+      )}
     </Press>
   );
 };

@@ -44,17 +44,12 @@ const drawn =
   (color: string) =>
     drawIcon(path, dot, color);
 
-/**
- * The home shortcuts. Pass `onAdd` to add a food in place (render an AddFoodPanel at screen level);
- * without it, "add" opens the list's add panel.
- */
 export const useHomeShortcuts = ({
   withNotice = false,
   onAdd,
 }: { withNotice?: boolean; onAdd?: () => void } = {}): HomeShortcut[] => {
   const skin = useSkin();
   const links = useHomeLinks();
-  // Guests aren't nudged to create an account from the dock; only the email confirmation shows here.
   const notice = withNotice && !links.isGuest ? links.notice : null;
 
   return [

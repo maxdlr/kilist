@@ -10,7 +10,6 @@ import { calmColors } from "../theme/useCalmColors";
 import { GlassBackdrop, GlassScene, useTabBarInset } from "./Glass";
 import { createButtonStyles } from "./styles";
 
-/** Empty space between the tab bar's top edge and its icons; mirrors the CalmTabBar tab layout. */
 const tabBarHeadroom = (s: Skin) => {
   const icon = s.size.icon.action + 2;
   const label = Math.round((s.type.caption - 1) * 1.38);
@@ -27,7 +26,6 @@ export const Screen = ({
   children: ReactNode;
   dock?: ReactNode;
   padded?: boolean;
-  /** Content scrolls under the dock and tab bar, which blur it. Scroll content goes in a GlassScrollView (or ends with a DockSpacer). */
   glass?: boolean;
   cover?: SharedValue<number>;
 }) => {
@@ -51,7 +49,6 @@ export const Screen = ({
     styles.actionRow,
     styles.dock,
     !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
-    // Sitting on the tab bar: match the gap above the buttons, counting the bar's own headroom.
     tabBar.inset > 0 && { paddingBottom: Math.max(0, skin.spacing.stack - tabBarHeadroom(skin)) },
   ];
 
@@ -76,7 +73,6 @@ export const Screen = ({
     );
   }
 
-  // Content stops above the tab bar, but the scene is still what the bar's glass blurs, so it looks the same everywhere.
   return (
     <GlassScene target={target}>
       <Animated.View style={[styles.root, tabBarRoom]}>

@@ -13,9 +13,7 @@ export type SkinScreens = {
   Account: ComponentType;
   Loading: ComponentType;
   TabBar: ComponentType<TabBarProps>;
-  /** The tab bar floats over the scenes; screens outside SkinScreen must leave room for it. */
   floatingTabBar?: boolean;
-  /** Wraps scrollable routes that don't come from SkinScreen (e.g. Looks), for skins with a glass tab bar. */
   Scene?: ComponentType<{ children: ReactNode }>;
 };
 

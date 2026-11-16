@@ -26,7 +26,6 @@ const fr: SkinCopy = {
     householdName: "Maison",
     householdCode: "6 lettres",
     foodName: "ex. Lait d'avoine",
-    foodDescription: "Marque, taille, parfum…",
   },
   splash: {
     top: "",
@@ -107,7 +106,6 @@ const fr: SkinCopy = {
     skipAll: "Passer, j'ajoute les miens",
     manualTitle: "Ajoute les tiens",
     name: "Nom",
-    description: "Description (facultatif)",
     saveAnother: "Enregistrer, un autre",
     finish: "Terminer",
     saved: (count: number) => `${count} ajouté${count > 1 ? "s" : ""}.`,
@@ -187,7 +185,6 @@ const fr: SkinCopy = {
     addTitle: "Ajouter un aliment",
     editTitle: (name: string) => `Modifier ${name}`,
     name: "Nom",
-    description: "Description (facultatif)",
     removeIt: "Le retirer",
     status: "Il en reste combien ?",
     discardTitle: "Attention, tes modifications ne seront pas gardées.",

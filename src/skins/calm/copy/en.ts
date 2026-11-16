@@ -26,7 +26,6 @@ const calmCopy: RoastCopy = {
     householdName: "Home",
     householdCode: "6 letters",
     foodName: "e.g. Oat milk",
-    foodDescription: "Brand, size, flavour…",
   },
   splash: {
     top: "",
@@ -107,7 +106,6 @@ const calmCopy: RoastCopy = {
     skipAll: "Skip, I'll add my own",
     manualTitle: "Add your own",
     name: "Name",
-    description: "Description (optional)",
     saveAnother: "Save, add another",
     finish: "Finish",
     saved: (count: number) => `${count} added.`,
@@ -187,7 +185,6 @@ const calmCopy: RoastCopy = {
     addTitle: "Add a food",
     editTitle: (name: string) => `Edit ${name}`,
     name: "Name",
-    description: "Description (optional)",
     removeIt: "Remove it",
     status: "How much is left?",
     discardTitle: "Careful, your edits won't be saved.",

@@ -65,7 +65,6 @@ export type AdminFoodRow = {
 };
 
 export type AdminFood = AdminFoodRow & {
-  description: string;
   createdAt: string;
   household: Ref;
   history: { user: string | null; answer: "have" | "need" | "unsure"; at: string }[];

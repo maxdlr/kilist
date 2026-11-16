@@ -1,6 +1,6 @@
 import Press from "@/components/elements/Press";
 import type { SwipeDirection } from "@/components/elements/SwipeDeck";
-import { CartIcon, CheckIcon, HelpCircleIcon, HelpCircleSolidIcon } from "@/components/icons";
+import { CartIcon, CheckIcon, ShrugIcon } from "@/components/icons";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
@@ -110,18 +110,11 @@ export const CardPads = ({
             },
           ]}
         >
-          {unsureOn ? (
-            <HelpCircleSolidIcon
-              size={skin.size.icon.action}
-              color={C.text}
-            />
-          ) : (
-            <HelpCircleIcon
-              size={skin.size.icon.action}
-              color={C.textSoft}
-              strokeWidth={1.8}
-            />
-          )}
+          <ShrugIcon
+            size={skin.size.icon.action}
+            color={unsureOn ? C.text : C.textSoft}
+            strokeWidth={unsureOn ? 2.6 : 1.8}
+          />
           {labels && (
             <CText
               size={skin.type.label + 1}

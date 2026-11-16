@@ -16,10 +16,10 @@ export type InventoryContextType = {
   mutateFood: () => void;
   search: string;
   setSearch: (search: string) => void;
-  createFood: (data: { name: string; description?: string; product?: ScannedProduct }) => Promise<boolean>;
+  createFood: (data: { name: string; product?: ScannedProduct }) => Promise<boolean>;
   editFood: (
     foodId: number,
-    data: { name?: string; description?: string; level?: LevelNumber },
+    data: { name?: string; level?: LevelNumber },
   ) => Promise<boolean>;
   removeFoodsFromList: (foodIds: number[]) => Promise<boolean>;
 };
@@ -80,7 +80,7 @@ export const InventoryProvider = ({
     showToast(message || common.unexpected);
   };
 
-  const createFood = async (data: { name: string; description?: string; product?: ScannedProduct }) => {
+  const createFood = async (data: { name: string; product?: ScannedProduct }) => {
     const res = await postCreateFood({ ...data, listId: listIds?.[0] });
     if (res.error) {
       handleError(res.error.message);
@@ -92,7 +92,7 @@ export const InventoryProvider = ({
 
   const editFood = async (
     foodId: number,
-    { level, ...data }: { name?: string; description?: string; level?: LevelNumber },
+    { level, ...data }: { name?: string; level?: LevelNumber },
   ) => {
     try {
       await axios.put(`foods/edit/${foodId}`, data);

@@ -16,7 +16,6 @@ export interface FoodType {
   quantity?: string | null;
   aisle?: string | null;
   lists: ListType[] | number[];
-  description?: string;
   inStockScore: number;
   snoozedUntil?: Date;
   foodHistories?: number[];

@@ -6,7 +6,6 @@ export type HistoryEntry = { isInStock: boolean | null; at: string };
 export type LocalFood = {
   id: number;
   name: string;
-  description?: string;
   imageUrl?: string;
   icon?: string | null;
   barcodes?: string[];

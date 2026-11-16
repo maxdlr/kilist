@@ -8,7 +8,8 @@ const en = {
   guestName: "Guest",
   marks: {
     added: (name: string) => `${name} added`,
-    removed: (count: number) => (count > 1 ? `${count} foods removed` : "Removed"),
+    removed: (count: number) =>
+      count > 1 ? `${count} foods removed` : "Removed",
     saved: "Saved",
   },
   guestRename: {
@@ -29,7 +30,8 @@ const en = {
   householdCodeMissing: "Enter a household code to join",
   inventoryNotReady: "Your inventory isn't ready yet, try again in a moment",
   addFailed: "Couldn't add that item",
-  shareMessage: (code: string) => `Join my household on Kilist with this code: ${code}`,
+  shareMessage: (code: string) =>
+    `Join my household on Kilist with this code: ${code}`,
   shareFailed: "Couldn't open the share menu",
   linkFailed: "Couldn't open the link",
   householdSwitched: "Household switched",
@@ -59,20 +61,25 @@ const en = {
       push: "Notification",
       both: "Email and notification",
     } as Record<string, string>,
-    always: "Password resets, email confirmation, account deletion and receipts always come by email.",
+    always:
+      "Password resets, email confirmation, account deletion and receipts always come by email.",
     line: "Pick how Kilist keeps you posted.",
     email: "Email",
     push: "Push",
     yourChoice: "Your choice",
     alwaysTitle: "Always by email",
-    reminder: { title: "Today's 10 are waiting", body: "Sort ten foods and keep your list in shape." },
+    reminder: {
+      title: "Today's 10 are waiting",
+      body: "Sort ten foods and keep your list in shape.",
+    },
     ask: {
       title: "Want a nudge?",
       line: "Kilist can remind you to play today's 10 and tell you when your household changes.",
       yes: "Turn on",
       later: "Not now",
     },
-    denied: "Notifications are off for Kilist. Turn them on in your phone settings.",
+    denied:
+      "Notifications are off for Kilist. Turn them on in your phone settings.",
     required: {
       passwordReset: "Password reset",
       signupConfirm: "Email confirmation",
@@ -105,7 +112,8 @@ const en = {
     emailLine: "Enter your account email. We'll send you a code.",
     email: "Email",
     send: "Send code",
-    codeLine: (email: string) => `If ${email} has an account, a code is on its way. Enter it with your new password.`,
+    codeLine: (email: string) =>
+      `If ${email} has an account, a code is on its way. Enter it with your new password.`,
     code: "Code",
     password: "New password",
     save: "Save password",
@@ -121,7 +129,8 @@ const en = {
     admin: "Admin",
   },
   shop: {
-    startTitle: (low: number, high: number) => `${countRange(low, high)} ${high === 1 ? "thing" : "things"} to buy`,
+    startTitle: (low: number, high: number) =>
+      `${countRange(low, high)} ${high === 1 ? "thing" : "things"} to buy`,
     startLabel: "Your list",
     startHow: "Once you're in the store",
     startRight: "Swipe right when it's in your basket.",
@@ -140,10 +149,11 @@ const en = {
     addTitle: "Add a food",
     addName: "Name",
     addLine: "It's saved to your inventory. Did you buy it today?",
-    addExists: (name: string) => `${name} is already in your inventory. Did you buy it today?`,
+    addExists: (name: string) =>
+      `${name} is already in your inventory. Did you buy it today?`,
     addBought: "Bought",
     addToList: "Add to the list",
-    addListLine: "It's saved to your inventory and put on your list.",
+    addListLine: "Saved to your inventory and added to your list.",
     addLater: "Next time",
     addMissing: "Type a name first",
     scan: "Scan a barcode",
@@ -187,7 +197,10 @@ const en = {
     admin: "Admin",
     createAccount: "Create an account to sync and share",
     confirmEmail: "Confirm your email to share your household",
-    teasers: { versus: "Race your housemates on the same 10 foods." } as Record<string, string>,
+    teasers: { versus: "Race your housemates on the same 10 foods." } as Record<
+      string,
+      string
+    >,
     prizesAria: "Open the prize counter",
   },
   looks: {
@@ -195,15 +208,18 @@ const en = {
     preview: "Preview",
     previewAria: (name: string) => `Preview ${name} with your data`,
     slides: { Home: "Home", Play: "Game", Shop: "Shopping" },
-    slideOf: (label: string, position: number, total: number) => `${label} · ${position}/${total}`,
+    slideOf: (label: string, position: number, total: number) =>
+      `${label} · ${position}/${total}`,
   },
   deleteAccount: {
     typeName: "Type your username to confirm",
   },
   emailGate: {
     joinTitle: "One last step",
-    joinLine: (email: string) => `Enter the 6-digit code we sent to ${email} to join the household.`,
-    joinSendLine: (email: string) => `To join the household, confirm your email. We'll send a 6-digit code to ${email}.`,
+    joinLine: (email: string) =>
+      `Enter the 6-digit code we sent to ${email} to join the household.`,
+    joinSendLine: (email: string) =>
+      `To join the household, confirm your email. We'll send a 6-digit code to ${email}.`,
     joinSkip: "Join later",
   },
   rowMore: "More",

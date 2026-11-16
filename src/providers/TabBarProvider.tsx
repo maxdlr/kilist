@@ -51,7 +51,6 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
 
 export const useTabBarVisibility = () => React.useContext(TabBarContext);
 
-/** Height of whatever floats over the bottom of the current scene (glass dock, tab bar); scroll content should end with this much room. */
 export const SceneInset = createContext(0);
 export const useSceneInset = () => React.useContext(SceneInset);
 

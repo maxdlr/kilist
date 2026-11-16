@@ -1,4 +1,3 @@
-/** Versus colours. The skin definition derives its paint from these; screens read them directly. */
 export const ground = "#16122E";
 export const panel = "#221C44";
 export const white = "#FFFFFF";

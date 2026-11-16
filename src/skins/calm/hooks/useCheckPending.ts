@@ -3,7 +3,6 @@ import { FoodType } from "@/types/model";
 import { useMemo } from "react";
 import useSWR from "swr";
 
-/** Whether today's sorting round is still waiting to be played. */
 const useCheckPending = () => {
   const tzOffset = useMemo(() => new Date().getTimezoneOffset(), []);
   const { data: foods } = useSWR<FoodType[]>({ url: "foods/swipe/browse" });

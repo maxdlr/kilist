@@ -25,7 +25,6 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const tabBar = useTabBarInset();
-  // The tab bar floats: keep the deck clear of it (and follow it when it hides).
   const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value }));
   useStatusBarStyle(skin.statusBarOnGround);
   const total = Math.max(1, game.total);

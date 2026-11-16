@@ -26,7 +26,6 @@ const fr: SkinCopy = {
     householdName: "les gens que tu nourris",
     householdCode: "6 lettres d'un coloc",
     foodName: "du lait d'avoine, sûrement",
-    foodDescription: "marque, taille, peu importe. personne ne lit ça.",
   },
   splash: {
     top: "LA MEILLEURE LISTE, C'EST PAS DE LISTE.",
@@ -114,7 +113,6 @@ const fr: SkinCopy = {
     skipAll: "PASSER. J'AJOUTE LES MIENS.",
     manualTitle: "OH, MONSIEUR EST SPÉCIAL.",
     name: "NOM",
-    description: "DESCRIPTION (FACULTATIF. TOUT LE MONDE S'EN FOUT.)",
     saveAnother: "ENREGISTRER. UN AUTRE.",
     finish: "TERMINER",
     saved: (count: number) => `${count} ENREGISTRÉ${count > 1 ? "S" : ""}. TOUJOURS PAS UNE LISTE.`,
@@ -208,7 +206,6 @@ const fr: SkinCopy = {
     addTitle: "ENCORE UN ? BON.",
     editTitle: (name: string) => `CORRIGE ${name}.`,
     name: "NOM",
-    description: "DESCRIPTION (FACULTATIF)",
     removeIt: "LE RETIRER",
     status: "IL EN RESTE COMBIEN ?",
     discardTitle: "ATTENTION. TES MODIFS NE SERONT PAS GARDÉES.",

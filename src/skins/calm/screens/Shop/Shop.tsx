@@ -11,8 +11,9 @@ import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, useWindowDimensions, View } from "react-native";
-import { ArrowLeftIcon, ArrowRightIcon, InfoCircleIcon, InfoCircleSolidIcon, PlusIcon, XmarkIcon } from "@/components/icons";
-import Animated from "react-native-reanimated";
+import { InfoCircleIcon, InfoCircleSolidIcon, PlusIcon, XmarkIcon } from "@/components/icons";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import AnimationService from "@/services/animation";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "@/skins/calm/components";
@@ -21,6 +22,8 @@ import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
 
 const TAGS_HEIGHT = 0.7;
+
+const HINT_SLIDE = 28;
 
 const OTHER_AISLE = "other";
 
@@ -32,6 +35,15 @@ const CalmShop = () => {
   const styles = useSkinStyles(createStyles);
   const { height } = useWindowDimensions();
   const [showHow, setShowHow] = useState(false);
+  const hint = useSharedValue(0);
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: hint.value,
+    transform: [{ translateX: (1 - hint.value) * HINT_SLIDE }],
+  }));
+
+  useEffect(() => {
+    hint.set(withTiming(showHow ? 1 : 0, AnimationService.config));
+  }, [showHow, hint]);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
@@ -171,27 +183,39 @@ const CalmShop = () => {
                     {common.shop.selected(run.selected.length)}
                   </CText>
                 ) : (
-                <Press
-                  accessibilityRole="button"
-                  accessibilityLabel={T.shop.howAria}
-                  accessibilityState={{ expanded: showHow }}
-                  hitSlop={skin.spacing.small}
-                  onPress={() => setShowHow((shown) => !shown)}
-                  style={withPressed(styles.info)}
-                >
-                  {showHow ? (
-                    <InfoCircleSolidIcon
-                      size={skin.size.icon.action + 2}
-                      color={C.text}
-                    />
-                  ) : (
-                    <InfoCircleIcon
-                      size={skin.size.icon.action + 2}
-                      color={C.textSoft}
-                      strokeWidth={1.6}
-                    />
-                  )}
-                </Press>
+                <View style={styles.howCluster}>
+                  <Animated.View
+                    pointerEvents="none"
+                    accessibilityElementsHidden={!showHow}
+                    importantForAccessibility={showHow ? "auto" : "no-hide-descendants"}
+                    style={hintStyle}
+                  >
+                    <CText size={12} color={C.textSoft} accessibilityLiveRegion="polite" numberOfLines={1}>
+                      {T.shop.selectToEdit}
+                    </CText>
+                  </Animated.View>
+                  <Press
+                    accessibilityRole="button"
+                    accessibilityLabel={T.shop.howAria}
+                    accessibilityState={{ expanded: showHow }}
+                    hitSlop={skin.spacing.small}
+                    onPress={() => setShowHow((shown) => !shown)}
+                    style={withPressed(styles.info)}
+                  >
+                    {showHow ? (
+                      <InfoCircleSolidIcon
+                        size={skin.size.icon.action + 2}
+                        color={C.text}
+                      />
+                    ) : (
+                      <InfoCircleIcon
+                        size={skin.size.icon.action + 2}
+                        color={C.textSoft}
+                        strokeWidth={1.6}
+                      />
+                    )}
+                  </Press>
+                </View>
                 )}
               </View>
             </View>
@@ -237,30 +261,6 @@ const CalmShop = () => {
               ))}
               <DockSpacer />
             </Animated.ScrollView>
-            {showHow && (
-              <View style={styles.how}>
-                <View style={styles.howRow}>
-                  <ArrowRightIcon
-                    size={skin.size.icon.action - 4}
-                    color={C.positive}
-                    strokeWidth={1.8}
-                  />
-                  <CText size={skin.type.label + 1} style={styles.flex}>
-                    {common.shop.startRight}
-                  </CText>
-                </View>
-                <View style={styles.howRow}>
-                  <ArrowLeftIcon
-                    size={skin.size.icon.action - 4}
-                    color={C.text}
-                    strokeWidth={1.8}
-                  />
-                  <CText size={skin.type.label + 1} style={styles.flex}>
-                    {common.shop.startLeft}
-                  </CText>
-                </View>
-              </View>
-            )}
           </View>
         </Screen>
         <ShopPanels run={run} />
@@ -439,18 +439,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingVertical: s.spacing.small,
     },
     tagPicked: { backgroundColor: C.fill, borderColor: C.fill },
-    how: {
-      backgroundColor: C.tint,
-      borderRadius: s.shape.radius,
-      gap: s.spacing.small + 2,
-      marginTop: s.spacing.section,
-      padding: s.spacing.stack,
-    },
-    howRow: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: s.spacing.small + 2,
-    },
+    howCluster: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
     headSide: {
       alignItems: "center",
       flexDirection: "row",

@@ -1,7 +1,6 @@
 import type { Skin } from "@/skins/types";
 import { StyleSheet } from "react-native";
 
-/** Pill / round button shape shared by CButton and the card pads. */
 export const createButtonStyles = (s: Skin) =>
   StyleSheet.create({
     button: {
@@ -16,7 +15,6 @@ export const createButtonStyles = (s: Skin) =>
     },
     pill: { paddingHorizontal: s.spacing.stack },
     round: { width: s.size.button.md },
-    /** A centred, wrapping row of buttons (docks, pads). */
     actionRow: {
       alignItems: "center",
       flexDirection: "row",

@@ -24,7 +24,6 @@ const roastCopy = {
     householdName: "the people you feed",
     householdCode: "6 letters from a housemate",
     foodName: "oat milk, probably",
-    foodDescription: "brand, size, whatever. nobody reads this.",
   },
   splash: {
     top: "THE BEST LIST IS NO LIST.",
@@ -112,7 +111,6 @@ const roastCopy = {
     skipAll: "SKIP. I'LL ADD MY OWN.",
     manualTitle: "OH, YOU'RE SPECIAL.",
     name: "NAME",
-    description: "DESCRIPTION (OPTIONAL. NOBODY CARES.)",
     saveAnother: "SAVE. ADD ANOTHER.",
     finish: "FINISH",
     saved: (count: number) => `${count} SAVED. STILL NOT A LIST.`,
@@ -206,7 +204,6 @@ const roastCopy = {
     addTitle: "ANOTHER ONE? FINE.",
     editTitle: (name: string) => `FIX ${name}.`,
     name: "NAME",
-    description: "DESCRIPTION (OPTIONAL)",
     removeIt: "REMOVE IT",
     status: "HOW MUCH IS LEFT?",
     discardTitle: "CAREFUL. YOUR EDITS WON'T BE SAVED.",

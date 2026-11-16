@@ -23,7 +23,6 @@ export const useDockInset = () => useContext(DockInset);
 
 export const DockSpacer = () => <View style={{ height: useDockInset() }} />;
 
-/** ScrollView for a glass Screen: its content ends with room for the dock and tab bar floating over it. */
 export const GlassScrollView = ({ contentContainerStyle, ...props }: ScrollViewProps) => {
   const inset = useDockInset();
   const own = StyleSheet.flatten(contentContainerStyle) ?? {};
@@ -108,7 +107,6 @@ export const GlassBackdrop = ({
   );
 };
 
-/** Space the floating tab bar takes at the bottom of a screen; 0 while it's hidden or under the keyboard. */
 export const useTabBarInset = () => {
   const skin = useSkin();
   const insets = useSafeAreaInsets();
@@ -124,10 +122,6 @@ export const useTabBarInset = () => {
   return { inset, offset };
 };
 
-/**
- * Scene whose content runs under the floating tab bar: it's what the bar's glass blurs while focused,
- * and it tells scroll content how much room to leave at the end (see DockSpacer / useSceneInset).
- */
 export const GlassScene = ({
   children,
   extraInset = 0,

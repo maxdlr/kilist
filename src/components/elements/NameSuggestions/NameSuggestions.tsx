@@ -7,7 +7,6 @@ import type { Skin } from "@/skins/types";
 import withPressed from "@/utils/withPressed";
 import { type ComponentRef, useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
-// Gesture-handler ScrollView: it negotiates with the BottomPanel drag gesture, so it can scroll sideways inside a panel on Android.
 import { ScrollView } from "react-native-gesture-handler";
 
 const MAX_SUGGESTIONS = 8;
@@ -18,7 +17,6 @@ const NameSuggestions = ({ query, onPick }: { query: string; onPick: (name: stri
   const names = suggestNames(query, getLang(), MAX_SUGGESTIONS);
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
 
-  // New query, new suggestions: start from the first one again.
   useEffect(() => {
     scroll.current?.scrollTo({ x: 0, animated: false });
   }, [query]);
@@ -56,7 +54,7 @@ const createStyles = (s: Skin) =>
     scroll: { flexGrow: 0 },
     row: { gap: s.spacing.small },
     chip: {
-      borderRadius: s.shape.radius,
+      borderRadius: s.shape.pill ? s.size.button.xs / 2 : s.shape.radius,
       borderWidth: s.shape.border,
       justifyContent: "center",
       minHeight: s.size.button.xs,

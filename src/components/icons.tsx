@@ -80,16 +80,11 @@ export const WrenchIcon = sized(WrenchBase);
 export const XmarkIcon = sized(XmarkBase);
 export const PlaySolidIcon = sized(PlaySolidBase);
 
-/*
- * Solid tab icons. Iconoir has no solid home, cart, list, settings or wrench, so these are its own outlines filled in
- * (same path data, so outline and solid line up). Line-only glyphs (list, wrench) get a heavier stroke instead.
- */
 const SOLID_STROKE = 1.6;
 const BOLD_STROKE = 2.4;
 
 const line = { strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
-/** `hole` (optional) is drawn in black into a mask, punching it out of the glyph at its exact size. */
 const solid = (draw: (color: string, mask: string) => ReactNode, hole?: ReactNode): Icon => {
   const Solid = ({ size, color }: IconProps) => {
     const id = `hole${useId().replace(/:/g, "")}`;
@@ -121,7 +116,6 @@ export const HomeSolidIcon = solid(
       d="M17 21H7C4.79086 21 3 19.2091 3 17V10.7076C3 9.30887 3.73061 8.01175 4.92679 7.28679L9.92679 4.25649C11.2011 3.48421 12.7989 3.48421 14.0732 4.25649L19.0732 7.28679C20.2694 8.01175 21 9.30887 21 10.7076V17C21 19.2091 19.2091 21 17 21Z"
     />
   ),
-  // the doorstep, cut out
   <Path d="M9 17H15" stroke="black" strokeWidth={SOLID_STROKE} {...line} />,
 );
 
@@ -146,7 +140,6 @@ export const SettingsSolidIcon = solid(
       d="M19.6224 10.3954L18.5247 7.7448L20 6L18 4L16.2647 5.48295L13.5578 4.36974L12.9353 2H10.981L10.3491 4.40113L7.70441 5.51596L6 4L4 6L5.45337 7.78885L4.3725 10.4463L2 11V13L4.40111 13.6555L5.51575 16.2997L4 18L6 20L7.79116 18.5403L10.397 19.6123L11 22H13L13.6045 19.6132L16.2551 18.5155C16.6969 18.8313 18 20 18 20L20 18L18.5159 16.2494L19.6139 13.598L21.9999 12.9772L22 11L19.6224 10.3954Z"
     />
   ),
-  // the centre hole, cut out
   <Circle cx={12} cy={12} r={2.6} fill="black" />,
 );
 
@@ -171,3 +164,29 @@ export const WrenchSolidIcon = solid((color) => (
     />
   </>
 ));
+
+const SHRUG_WIDTH = 120;
+const SHRUG_ASPECT = 3;
+const SHRUG_SCALE = 1.8;
+
+export const ShrugIcon = ({ size, color, strokeWidth = DEFAULT_STROKE }: IconProps) => {
+  const width = size * SHRUG_SCALE;
+  return (
+    <Svg
+      width={width}
+      height={width / SHRUG_ASPECT}
+      viewBox={`0 0 ${SHRUG_WIDTH} ${SHRUG_WIDTH / SHRUG_ASPECT}`}
+      fill="none"
+      stroke={color}
+      strokeWidth={(strokeWidth * SHRUG_WIDTH) / width}
+      strokeLinejoin="miter"
+    >
+      <Path d="M2 7H12L22 31H32" />
+      <Path d="M42 3Q30 20 42 37" />
+      <Path d="M48 9L51 15M55 7L58 13" />
+      <Path d="M67 9Q65 27 48 32" />
+      <Path d="M74 3Q86 20 74 37" />
+      <Path d="M84 31H94L104 7H118" />
+    </Svg>
+  );
+};

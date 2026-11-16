@@ -32,7 +32,6 @@ import useCheckPending from "../hooks/useCheckPending";
 
 const ORDER = MAIN_TABS;
 
-// Android binds a BlurView to its target once, so remount the backdrop whenever the target screen changes.
 const targetKeys = new WeakMap<GlassTarget, number>();
 let nextTargetKey = 0;
 const targetKey = (target: GlassTarget) => {
@@ -40,7 +39,6 @@ const targetKey = (target: GlassTarget) => {
   return targetKeys.get(target);
 };
 
-/** Outline when idle, the same glyph solid when selected. */
 const ICONS: Record<string, { idle: Icon; selected: Icon }> = {
   index: { idle: HomeIcon, selected: HomeSolidIcon },
   swipe: { idle: PlayIcon, selected: PlaySolidIcon },

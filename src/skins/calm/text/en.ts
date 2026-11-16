@@ -76,6 +76,7 @@ const en = {
     backToday: "Back home",
     legendBasket: "In the basket",
     howAria: "How it works",
+    selectToEdit: "Select products to edit",
   },
   inventory: {
     closeSearch: "Close search",

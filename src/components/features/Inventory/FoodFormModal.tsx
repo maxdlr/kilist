@@ -14,14 +14,13 @@ import useToast from "@/providers/ToastProvider";
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { StyleSheet, View } from "react-native";
 
-type FoodFormData = { name: string; description?: string; product?: ScannedProduct; level?: LevelNumber };
+type FoodFormData = { name: string; product?: ScannedProduct; level?: LevelNumber };
 
 type CloseGuard = MutableRefObject<() => boolean>;
 
 const FoodForm = ({
   title,
   initialName,
-  initialDescription,
   initialLevel,
   onSubmit,
   onRemove,
@@ -31,7 +30,6 @@ const FoodForm = ({
 }: {
   title: string;
   initialName: string;
-  initialDescription: string;
   initialLevel?: LevelNumber;
   scannable: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
@@ -44,14 +42,13 @@ const FoodForm = ({
   const copy = skin.copy.inventory;
   const { showToast } = useToast();
   const [name, setName] = useState(initialName);
-  const [description, setDescription] = useState(initialDescription);
   const [level, setLevel] = useState(initialLevel);
   const [scanning, setScanning] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
 
   const isDirty =
-    name !== initialName || description !== initialDescription || level !== initialLevel || product !== undefined;
+    name !== initialName || level !== initialLevel || product !== undefined;
 
   useEffect(() => {
     guardRef.current = () => {
@@ -68,7 +65,6 @@ const FoodForm = ({
     }
     const success = await onSubmit({
       name: name.trim(),
-      description,
       ...(product && { product }),
       ...(level !== undefined && level !== initialLevel && { level }),
     });
@@ -121,31 +117,27 @@ const FoodForm = ({
         {title}
       </Title>
 
-      {scannable && (
-        <KilButton
-          height={skin.size.button.sm}
-          fontSize={skin.type.label}
-          variant={name.trim() ? skin.panel.secondary : "primary"}
-          label={common.shop.scan}
-          icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
-          onTouch={() => setScanning(true)}
-        />
-      )}
-      <FormInput
-        label={copy.name}
-        placeholder={skin.copy.placeholders.foodName}
-        labelColor={skin.panel.ink}
-        value={name}
-        onChangeText={setName}
-      />
+      <View style={styles.nameRow}>
+        <View style={styles.nameField}>
+          <FormInput
+            accessibilityLabel={copy.name}
+            placeholder={skin.copy.placeholders.foodName}
+            labelColor={skin.panel.ink}
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+        {scannable && (
+          <KilButton
+            height={skin.size.input}
+            variant={name.trim() ? skin.panel.secondary : "primary"}
+            accessibilityLabel={common.shop.scan}
+            icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
+            onTouch={() => setScanning(true)}
+          />
+        )}
+      </View>
       {!onRemove && <NameSuggestions query={name} onPick={setName} />}
-      <FormInput
-        label={copy.description}
-        placeholder={skin.copy.placeholders.foodDescription}
-        labelColor={skin.panel.ink}
-        value={description}
-        onChangeText={setDescription}
-      />
 
       {level !== undefined && <LevelPicker label={copy.status} value={level} onChange={setLevel} />}
 
@@ -178,7 +170,6 @@ const FoodFormModal = ({
   title,
   formKey,
   initialName = "",
-  initialDescription = "",
   initialLevel,
   onSubmit,
   onRemove,
@@ -190,7 +181,6 @@ const FoodFormModal = ({
   title: string;
   formKey?: string | number;
   initialName?: string;
-  initialDescription?: string;
   initialLevel?: LevelNumber;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
@@ -205,7 +195,6 @@ const FoodFormModal = ({
         key={formKey}
         title={title}
         initialName={initialName}
-        initialDescription={initialDescription}
         initialLevel={initialLevel}
         onSubmit={onSubmit}
         onRemove={onRemove}
@@ -219,6 +208,8 @@ const FoodFormModal = ({
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    nameRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    nameField: { flex: 1, minWidth: 0 },
     actions: {
       flexDirection: "row",
       flexWrap: "wrap",

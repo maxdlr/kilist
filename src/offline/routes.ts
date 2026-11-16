@@ -78,8 +78,7 @@ const browseFoods = (query: Record<string, any>) => {
       (food) =>
         (!listIds || food.lists.some((id) => listIds.includes(id))) &&
         (!search ||
-          shownName(food.name, getLang()).toLowerCase().includes(search) ||
-          (food.description ?? "").toLowerCase().includes(search)),
+          shownName(food.name, getLang()).toLowerCase().includes(search)),
     )
     .sort((a, b) => a.inStockScore - b.inStockScore)
     .map(toFood);
@@ -254,7 +253,6 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
         enqueue("food.create", {
           tempId,
           name: body.name,
-          description: body.description,
           listId: body.listId,
           fromOnboarding: body.fromOnboarding === true,
           icon: typeof body.icon === "string" ? body.icon : undefined,
@@ -271,7 +269,6 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
       const food = enqueue("food.edit", {
         foodId: Number(match[1]),
         name: body.name,
-        description: body.description,
       });
       return food ? toFood(food) : null;
     },

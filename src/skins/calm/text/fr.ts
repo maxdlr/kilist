@@ -78,6 +78,7 @@ const fr: CalmText = {
     backToday: "Retour à l'accueil",
     legendBasket: "Au panier",
     howAria: "Comment ça marche",
+    selectToEdit: "Sélectionne pour modifier",
   },
   inventory: {
     closeSearch: "Fermer la recherche",

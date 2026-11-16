@@ -26,7 +26,6 @@ const versusCopy: RoastCopy = {
     householdName: "Like The Fridge Raiders",
     householdCode: "6 letters from your rival",
     foodName: "e.g. Oat milk",
-    foodDescription: "Brand, size, flavour…",
   },
   splash: {
     top: "Who runs your kitchen?",
@@ -114,7 +113,6 @@ const versusCopy: RoastCopy = {
     skipAll: "Skip, I'll add my own",
     manualTitle: "Add your own",
     name: "Name",
-    description: "Description (optional)",
     saveAnother: "Save, add another",
     finish: "Finish",
     saved: (count: number) => `${count} added. Nice!`,
@@ -195,7 +193,6 @@ const versusCopy: RoastCopy = {
     addTitle: "Add a food",
     editTitle: (name: string) => `Edit ${name}`,
     name: "Name",
-    description: "Description (optional)",
     removeIt: "Remove it",
     status: "How much is left?",
     discardTitle: "Careful, your edits won't be saved.",

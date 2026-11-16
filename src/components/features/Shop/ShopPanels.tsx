@@ -73,25 +73,29 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
       <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {T.addTitle}
       </Title>
-      <KilButton
-        height={skin.size.button.md}
-        fontSize={skin.type.lead}
-        variant={hasName ? skin.panel.secondary : "primary"}
-        label={T.scan}
-        icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
-        onTouch={() => setScanning(true)}
-      />
-      <FormInput
-        label={T.addName}
-        placeholder={skin.copy.placeholders.foodName}
-        labelColor={skin.panel.ink}
-        value={name}
-        onChangeText={setName}
-      />
+      <View style={styles.nameRow}>
+        <View style={styles.nameField}>
+          <FormInput
+            placeholder={skin.copy.placeholders.foodName}
+            labelColor={skin.panel.ink}
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+        <KilButton
+          height={skin.size.input}
+          variant={hasName ? skin.panel.secondary : "primary"}
+          accessibilityLabel={T.scan}
+          icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
+          onTouch={() => setScanning(true)}
+        />
+      </View>
       <NameSuggestions query={name} onPick={setName} />
       {!run.isStarted ? (
         <>
-          <ThemedText color={skin.panel.ink}>{T.addListLine}</ThemedText>
+          <ThemedText size={12} color={skin.panel.ink} style={styles.note}>
+            {T.addListLine}
+          </ThemedText>
           <KilButton
             height={skin.size.button.md}
             fontSize={skin.type.lead}
@@ -102,25 +106,27 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
         </>
       ) : (
         <>
-      <ThemedText color={skin.panel.ink}>{existing ? T.addExists(existing) : T.addLine}</ThemedText>
-      <View style={styles.actions}>
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
-          variant={skin.panel.secondary}
-          label={T.addLater}
-          onTouch={() => submit("later")}
-        />
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
-          variant={hasName ? "primary" : skin.panel.secondary}
-          label={T.addBought}
-          onTouch={() => submit("buy")}
-        />
-      </View>
+          <ThemedText color={skin.panel.ink}>
+            {existing ? T.addExists(existing) : T.addLine}
+          </ThemedText>
+          <View style={styles.actions}>
+            <KilButton
+              flex={1}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant={skin.panel.secondary}
+              label={T.addLater}
+              onTouch={() => submit("later")}
+            />
+            <KilButton
+              flex={1}
+              height={skin.size.button.md}
+              fontSize={skin.type.lead}
+              variant={hasName ? "primary" : skin.panel.secondary}
+              label={T.addBought}
+              onTouch={() => submit("buy")}
+            />
+          </View>
         </>
       )}
     </>
@@ -129,8 +135,15 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
 
 const ShopPanels = ({ run }: { run: ShopRun }) => (
   <>
-    <ActionPanel request={run.panel === "stop" ? run.stopRequest : null} onClose={run.closePanel} />
-    <BottomPanel visible={run.panel === "add"} onClose={run.closePanel} dismissible>
+    <ActionPanel
+      request={run.panel === "stop" ? run.stopRequest : null}
+      onClose={run.closePanel}
+    />
+    <BottomPanel
+      visible={run.panel === "add"}
+      onClose={run.closePanel}
+      dismissible
+    >
       {run.panel === "add" && <AddFoodForm run={run} />}
     </BottomPanel>
   </>
@@ -138,6 +151,9 @@ const ShopPanels = ({ run }: { run: ShopRun }) => (
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    nameRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    nameField: { flex: 1, minWidth: 0 },
+    note: { opacity: 0.6, textAlign: "center" },
     actions: {
       flexDirection: "row",
       flexWrap: "wrap",

@@ -12,7 +12,7 @@ const FoodScreen = () => {
   const { data: food, isValidating, mutate } = useAdmin<AdminFood>(`/foods/${id}`);
   const { call, busy } = useAdminCall();
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "" });
+  const [form, setForm] = useState({ name: "" });
   const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
   if (!food) return <ALoading />;
@@ -33,9 +33,9 @@ const FoodScreen = () => {
       dock={
         <AButton
           flex={1}
-          label="Edit name and description"
+          label="Edit name"
           onPress={() => {
-            setForm({ name: food.name, description: food.description });
+            setForm({ name: food.name });
             setEditing(true);
           }}
         />
@@ -127,13 +127,12 @@ const FoodScreen = () => {
 
       <ASheet visible={editing} title="Edit food" line="Renaming matches the icon again." onClose={() => setEditing(false)}>
         <AField label="Name" value={form.name} onChange={(name) => setForm({ ...form, name })} />
-        <AField label="Description" value={form.description} onChange={(description) => setForm({ ...form, description })} />
         <AButton
           label="Save"
           busy={busy}
           disabled={!form.name.trim()}
           onPress={async () => {
-            if (await run("put", "", { name: form.name.trim(), description: form.description }, "Food saved")) setEditing(false);
+            if (await run("put", "", { name: form.name.trim() }, "Food saved")) setEditing(false);
           }}
         />
       </ASheet>

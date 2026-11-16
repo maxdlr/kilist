@@ -189,7 +189,6 @@ export const applyOp = (state: LocalState, op: Op): any => {
       const created: LocalFood = {
         id: payload.tempId,
         name: payload.name,
-        description: payload.description,
         icon: payload.fromOnboarding ? (payload.icon ?? null) : null,
         inStockScore: payload.fromOnboarding ? rules().swipe.onboardingScore : 1,
         snoozedUntil: null,
@@ -207,7 +206,6 @@ export const applyOp = (state: LocalState, op: Op): any => {
       const target = food(payload.foodId);
       if (!target) return null;
       if (payload.name !== undefined) target.name = payload.name;
-      if (payload.description !== undefined) target.description = payload.description;
       return target;
     }
 

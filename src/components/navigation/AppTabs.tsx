@@ -14,7 +14,6 @@ export default function AppTabs() {
   const insets = useSafeAreaInsets();
   const floating = useFloatingTabBar();
   const scene = { backgroundColor: skin.colors.ground };
-  // Screens that don't come from SkinScreen don't know about a floating tab bar.
   const roomForTabBar = {
     sceneStyle: [scene, floating && { paddingBottom: skin.size.tabBar + insets.bottom }],
   };

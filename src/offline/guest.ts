@@ -49,7 +49,6 @@ export const exportGuestState = (state: LocalState, importId: string) => {
     foods: state.foods.map((food) => ({
       id: food.id,
       name: food.name,
-      description: food.description,
       icon: food.icon ?? null,
       imageUrl: food.imageUrl ?? null,
       barcodes: food.barcodes ?? [],
