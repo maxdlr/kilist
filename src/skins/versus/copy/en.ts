@@ -94,7 +94,7 @@ const versusCopy: RoastCopy = {
     loginAction: "Log in",
     signupAction: "Create the house",
     toSignup: "New here? Start a house",
-    toLogin: "Already a player? Log in",
+    toLogin: "Log in",
   },
   onboarding: {
     meta: (position: string, total: string) =>

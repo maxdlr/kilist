@@ -4,7 +4,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { ReactNode, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
-import { ArrowDownIcon } from "react-native-heroicons/solid";
+import { ArrowDownIcon } from "@/components/icons";
 import Animated, {
   clamp,
   useAnimatedStyle,

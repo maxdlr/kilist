@@ -12,13 +12,7 @@ import withPressed from "@/utils/withPressed";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import {
-  ChevronRightIcon,
-  ClockIcon,
-  PlayIcon,
-  ShoppingCartIcon,
-  SparklesIcon,
-} from "react-native-heroicons/outline";
+import { CartIcon, ClockIcon, NavArrowRightIcon, PlayIcon, SparksIcon } from "@/components/icons";
 import useSWR from "swr";
 import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
@@ -120,7 +114,7 @@ const CalmHome = () => {
                 count: range.low,
                 color: skin.colors.levels[1],
                 icon: (
-                  <ShoppingCartIcon
+                  <CartIcon
                     size={18}
                     color={C.positive}
                     strokeWidth={1.8}
@@ -155,7 +149,7 @@ const CalmHome = () => {
                   </CText>
                 </View>
                 <View style={styles.fact}>
-                  <SparklesIcon
+                  <SparksIcon
                     size={14}
                     color={C.textSoft}
                     strokeWidth={1.8}
@@ -166,7 +160,7 @@ const CalmHome = () => {
                 </View>
               </View>
             </View>
-            <ChevronRightIcon size={18} color={C.textFaint} strokeWidth={2} />
+            <NavArrowRightIcon size={18} color={C.textFaint} strokeWidth={2} />
           </Press>
         )}
 

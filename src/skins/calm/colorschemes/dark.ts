@@ -31,6 +31,7 @@ export const colors = {
   // peach: "#E3C3AE",
   // clay: "#D49A8F",
   veil: transparentColor(base[100], 0.5),
+  coral: "#FF9A88",
 };
 
 export const elements: CalmElements = {
@@ -49,7 +50,7 @@ export const elements: CalmElements = {
   positive: colors.sage300,
   onPositive: base[90],
   negative: base[5],
-  danger: base[5],
+  danger: colors.coral,
   success: colors.sage500,
   pendingDot: foods[30],
   barMaybe: foods[50],
@@ -74,6 +75,6 @@ export const elements: CalmElements = {
     ring: emphasis[30],
     fill: base[5],
     onFill: emphasis[80],
-    danger: emphasis[5],
+    danger: colors.coral,
   },
 };

@@ -92,7 +92,7 @@ const roastCopy = {
     loginAction: "LET ME IN",
     signupAction: "NO MORE LISTS",
     toSignup: "NO ACCOUNT? SIGN UP THEN.",
-    toLogin: "GOT AN ACCOUNT? LOG IN.",
+    toLogin: "LOG IN",
   },
   onboarding: {
     meta: (position: string, total: string) =>

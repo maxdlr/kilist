@@ -11,13 +11,7 @@ import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { ComponentType, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  HomeIcon,
-  ListBulletIcon,
-  ShoppingCartIcon,
-  UserIcon,
-  WrenchIcon,
-} from "react-native-heroicons/outline";
+import { CartIcon, HomeIcon, ListIcon, UserIcon, WrenchIcon } from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { versusPalette as P } from "..";
@@ -27,8 +21,8 @@ const ORDER = MAIN_TABS;
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
-  inventory: ListBulletIcon,
-  shop: ShoppingCartIcon,
+  inventory: ListIcon,
+  shop: CartIcon,
   account: UserIcon,
   admin: WrenchIcon,
 };

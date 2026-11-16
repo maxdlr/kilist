@@ -20,6 +20,7 @@ export const colors = {
   peach: "#E3C3AE",
   clay: "#D49A8F",
   veil: "rgba(35,34,31,0.32)",
+  brick: "#A8432F",
 };
 
 export const elements: CalmElements = {
@@ -38,7 +39,7 @@ export const elements: CalmElements = {
   positive: colors.sage700,
   onPositive: colors.white,
   negative: colors.ink,
-  danger: colors.ink,
+  danger: colors.brick,
   success: colors.sage600,
   pendingDot: colors.sage600,
   barMaybe: colors.stone400,

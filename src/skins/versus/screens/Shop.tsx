@@ -16,7 +16,7 @@ import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { XMarkIcon } from "react-native-heroicons/outline";
+import { XmarkIcon } from "@/components/icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -339,7 +339,7 @@ const VersusShop = () => {
             hitSlop={skin.spacing.small}
             style={withPressed(styles.close)}
           >
-            <XMarkIcon size={skin.size.icon.action} color={P.muted} strokeWidth={2} />
+            <XmarkIcon size={skin.size.icon.action} color={P.muted} strokeWidth={2} />
           </Press>
           <VText face="pixel" size={skin.type.title - 2} color={P.you}>{mmss(elapsed)}</VText>
           <VText face="bold" size={skin.type.label} color={gap !== null && gap <= 0 ? P.agree : P.muted}>

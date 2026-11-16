@@ -34,15 +34,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  CheckIcon,
-  QuestionMarkCircleIcon,
-  ShoppingCartIcon,
-} from "react-native-heroicons/outline";
-import {
-  QuestionMarkCircleIcon as QuestionMarkCircleSolid,
-  ShoppingCartIcon as ShoppingCartSolid,
-} from "react-native-heroicons/solid";
+import { CartIcon, CheckIcon, HelpCircleIcon, HelpCircleSolidIcon } from "@/components/icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { calmColors, useCalmColors } from "./colors";
@@ -404,9 +396,9 @@ export const CardPads = ({
       >
         {direction === "left" &&
           (on ? (
-            <ShoppingCartSolid size={skin.size.icon.action} color={ink} />
+            <CartIcon size={skin.size.icon.action} color={ink} />
           ) : (
-            <ShoppingCartIcon
+            <CartIcon
               size={skin.size.icon.action}
               color={ink}
               strokeWidth={1.8}
@@ -469,12 +461,12 @@ export const CardPads = ({
           ]}
         >
           {unsureOn ? (
-            <QuestionMarkCircleSolid
+            <HelpCircleSolidIcon
               size={skin.size.icon.action}
               color={C.text}
             />
           ) : (
-            <QuestionMarkCircleIcon
+            <HelpCircleIcon
               size={skin.size.icon.action}
               color={C.textSoft}
               strokeWidth={1.8}

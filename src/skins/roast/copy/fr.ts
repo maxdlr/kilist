@@ -94,7 +94,7 @@ const fr: SkinCopy = {
     loginAction: "LAISSE-MOI ENTRER",
     signupAction: "FINIES LES LISTES",
     toSignup: "PAS DE COMPTE ? INSCRIS-TOI, ALORS.",
-    toLogin: "DÉJÀ UN COMPTE ? CONNECTE-TOI.",
+    toLogin: "SE CONNECTER",
   },
   onboarding: {
     meta: (position: string, total: string) =>

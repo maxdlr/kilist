@@ -26,7 +26,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { XMarkIcon } from "react-native-heroicons/outline";
+import { XmarkIcon } from "@/components/icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Dot = ({
@@ -170,7 +170,7 @@ const Intro = ({
             onPress={onExit}
             style={styles.exit}
           >
-            <XMarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={1.8} />
+            <XmarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={1.8} />
           </Press>
         )}
       </View>

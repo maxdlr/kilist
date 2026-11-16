@@ -5,7 +5,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import type { ReactNode } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { EnvelopeIcon, UserPlusIcon } from "react-native-heroicons/outline";
+import { MailIcon, UserPlusIcon } from "@/components/icons";
 import Svg, { Circle, Path } from "react-native-svg";
 
 const SIZE = 46;
@@ -48,7 +48,7 @@ export const useHomeShortcuts = (withNotice = false): HomeShortcut[] => {
   const skin = useSkin();
   const links = useHomeLinks();
   const notice = withNotice ? links.notice : null;
-  const NoticeIcon = links.isGuest ? UserPlusIcon : EnvelopeIcon;
+  const NoticeIcon = links.isGuest ? UserPlusIcon : MailIcon;
 
   return [
     ...(notice

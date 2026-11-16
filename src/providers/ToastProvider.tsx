@@ -6,11 +6,7 @@ import { caseFor } from "@/skins";
 import { setToastTrigger } from "@/services/toastBridge";
 import React, { createContext, ReactNode, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  InformationCircleIcon,
-} from "react-native-heroicons/outline";
+import { CheckCircleIcon, InfoCircleIcon, WarningCircleIcon } from "@/components/icons";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 
 const DISPLAY_DURATION = 2500;
@@ -26,9 +22,9 @@ export type ToastContextType = {
 };
 
 const ICONS = {
-  error: ExclamationCircleIcon,
+  error: WarningCircleIcon,
   success: CheckCircleIcon,
-  info: InformationCircleIcon,
+  info: InfoCircleIcon,
 };
 
 const ToastContext = createContext<ToastContextType>({

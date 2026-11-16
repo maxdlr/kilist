@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useSkin } from "@/providers/SkinProvider";
 import { Href } from "expo-router";
 import { useState } from "react";
-import { ArrowPathIcon } from "react-native-heroicons/solid";
+import { RefreshIcon } from "@/components/icons";
 
 const EmptyData = ({
   label,
@@ -52,7 +52,7 @@ const EmptyData = ({
                 fontSize={skin.type.headline}
                 label={isRefreshing ? copy.refreshing : copy.refresh}
                 onTouch={refresh}
-                icon={(color) => <ArrowPathIcon size={skin.size.icon.action} color={color} />}
+                icon={(color) => <RefreshIcon size={skin.size.icon.action} color={color} />}
               />
             )}
           </Dock>

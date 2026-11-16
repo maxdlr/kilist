@@ -1,4 +1,4 @@
-import BarcodeIcon from "@/components/elements/BarcodeIcon/BarcodeIcon";
+import { BarcodeIcon } from "@/components/icons";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";

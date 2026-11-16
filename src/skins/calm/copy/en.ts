@@ -94,7 +94,7 @@ const calmCopy: RoastCopy = {
     loginAction: "Log in",
     signupAction: "Create account",
     toSignup: "No account yet? Create one",
-    toLogin: "Already have an account? Log in",
+    toLogin: "Log in",
   },
   onboarding: {
     meta: (position: string, total: string) =>

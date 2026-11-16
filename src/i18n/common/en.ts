@@ -195,8 +195,10 @@ const en = {
     slides: { Home: "Home", Play: "Game", Shop: "Shopping" },
     slideOf: (label: string, position: number, total: number) => `${label} · ${position}/${total}`,
   },
+  deleteAccount: {
+    typeName: "Type your username to confirm",
+  },
   emailGate: {
-    title: "Confirm your email first",
     joinTitle: "One last step",
     joinLine: (email: string) => `Enter the 6-digit code we sent to ${email} to join the household.`,
     joinSendLine: (email: string) => `To join the household, confirm your email. We'll send a 6-digit code to ${email}.`,

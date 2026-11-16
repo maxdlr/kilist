@@ -213,8 +213,10 @@ const fr: CommonText = {
     slideOf: (label: string, position: number, total: number) =>
       `${label} · ${position}/${total}`,
   },
+  deleteAccount: {
+    typeName: "Écris ton nom d'utilisateur pour confirmer",
+  },
   emailGate: {
-    title: "Confirme d'abord ton e-mail",
     joinTitle: "Une dernière étape",
     joinLine: (email: string) =>
       `Entre le code à 6 chiffres envoyé à ${email} pour rejoindre le foyer.`,

@@ -41,6 +41,7 @@ const swapAnimation = {
 };
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const STRONG_PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
@@ -73,6 +74,13 @@ const LoginScreen = () => {
   const isKeyboardOpen = useKeyboardState((state) => state.isVisible);
 
   const isSignup = mode === "signup";
+  const canSubmit = isSignup
+    ? username.trim().length > 0 &&
+      EMAIL_REGEX.test(email.trim()) &&
+      STRONG_PASSWORD_REGEX.test(password) &&
+      password === confirmPassword &&
+      (householdChoice === "create" || joinCode.trim().length > 0)
+    : username.trim().length > 0 && password.length > 0;
   useStatusBarStyle(isSignup ? "dark" : skin.statusBarOnGround);
 
   const wipe = useSharedValue(-SCREEN_WIDTH);
@@ -305,25 +313,51 @@ const LoginScreen = () => {
             fontSize={skin.type.title}
             label={isSignup ? copy.signupAction : copy.loginAction}
             onTouch={handleSubmit}
+            disabled={!canSubmit}
           />
           {googleSignInAvailable && (
             <KilButton
               variant={googleVariant}
               colors={{ ...skin.actions[googleVariant], line: skin.actions[googleVariant].ink }}
-              height={skin.size.button.lg}
-              fontSize={skin.type.lead}
+              small
               label={common.google.action}
               onTouch={handleGoogle}
               style={styles.google}
             />
           )}
-          <KilButton
-            variant="ghost"
-            height={skin.size.button.xs}
-            fontSize={skin.type.label}
-            label={isSignup ? copy.toLogin : copy.toSignup}
-            onTouch={() => switchMode(isSignup ? "login" : "signup")}
-          />
+          {isSignup ? (
+            <View style={styles.links}>
+              <KilButton
+                variant="ghost"
+                height={skin.size.button.xs}
+                fontSize={skin.type.label}
+                label={copy.toLogin}
+                onTouch={() => switchMode("login")}
+              />
+              {canLeave && (
+                <>
+                  <ThemedText size={skin.type.label} color={skin.actions.ghost.ink} importantForAccessibility="no">
+                    {"·"}
+                  </ThemedText>
+                  <KilButton
+                    variant="ghost"
+                    height={skin.size.button.xs}
+                    fontSize={skin.type.label}
+                    label={guestCopy.later}
+                    onTouch={() => router.back()}
+                  />
+                </>
+              )}
+            </View>
+          ) : (
+            <KilButton
+              variant="ghost"
+              height={skin.size.button.xs}
+              fontSize={skin.type.label}
+              label={copy.toSignup}
+              onTouch={() => switchMode("signup")}
+            />
+          )}
           {!isSignup && (
             <KilButton
               variant="ghost"
@@ -333,7 +367,7 @@ const LoginScreen = () => {
               onTouch={() => setResetOpen(true)}
             />
           )}
-          {canLeave && (
+          {canLeave && !isSignup && (
             <KilButton
               variant="ghost"
               height={skin.size.button.xs}
@@ -455,6 +489,7 @@ const createStyles = (s: Skin) =>
       marginBottom: s.spacing.small,
       marginTop: s.spacing.stack,
     },
+    links: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight, justifyContent: "center" },
     dock: {
       gap: s.spacing.hair,
       paddingBottom: s.spacing.section,

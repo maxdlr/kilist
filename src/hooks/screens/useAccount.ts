@@ -17,18 +17,14 @@ export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" |
 
 const useAccount = () => {
   const skin = useSkin();
-  const copy = skin.copy.account;
-  const { user, isGuest, logout, deleteAccount } = useAuth();
+  const { user, isGuest, logout } = useAuth();
   const { requireAccount } = useAccountGate();
   const { household, switchHousehold } = useHousehold();
   const { showToast } = useToast();
   const { counter } = useTickets();
   const [openPanel, setPanel] = useState<AccountPanel | null>(null);
   const needsEmailCode = !isGuest && !!user && !user.emailConfirmedAt;
-  const askForEmailCode = () => {
-    showToast(common.emailGate.title, "info");
-    setPanel("emailCode");
-  };
+  const askForEmailCode = () => setPanel("emailCode");
   const setOpenPanel = (panel: AccountPanel | null) => {
     if (isGuest && (panel === "qr" || panel === "switch" || panel === "householdName")) {
       requireAccount("household");
@@ -59,22 +55,6 @@ const useAccount = () => {
 
   const logOut = async () => {
     if (await logout()) router.replace("/");
-  };
-
-  const deleteRequest = {
-    title: copy.deleteTitle,
-    message: copy.deleteLine,
-    cancelLabel: copy.deleteKeep,
-    actions: [
-      {
-        label: copy.deleteAction,
-        destructive: true,
-        onPress: async () => {
-          const success = await deleteAccount();
-          if (success) router.replace("/");
-        },
-      },
-    ],
   };
 
   const shareCode = async () => {
@@ -122,7 +102,6 @@ const useAccount = () => {
     openPanel,
     setOpenPanel,
     closePanel,
-    deleteRequest,
     logOut,
     shareCode,
     openCredits: () => setOpenPanel("credits"),

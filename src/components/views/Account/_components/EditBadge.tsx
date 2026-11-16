@@ -1,6 +1,6 @@
 import { useSkin } from "@/providers/SkinProvider";
 import { View } from "react-native";
-import { PencilIcon } from "react-native-heroicons/solid";
+import { EditPencilIcon } from "@/components/icons";
 
 const EditBadge = () => {
   const skin = useSkin();
@@ -20,7 +20,7 @@ const EditBadge = () => {
         width: size,
       }}
     >
-      <PencilIcon size={size * 0.45} color={ink} />
+      <EditPencilIcon size={size * 0.45} color={ink} />
     </View>
   );
 };

@@ -21,6 +21,7 @@ const KilButton = ({
   colors,
   style,
   disabled = false,
+  small = false,
 }: {
   label: string;
   onTouch?: () => void;
@@ -34,6 +35,7 @@ const KilButton = ({
   colors?: ActionColors;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  small?: boolean;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -60,6 +62,7 @@ const KilButton = ({
           height: height ?? skin.size.button.lg,
         },
         pill && styles.pill,
+        small && (pill ? styles.smallPill : { height: skin.size.button.sm }),
         skin.shape.shadow.offset > 0 &&
           line !== "transparent" && {
             boxShadow: `0 ${pressed ? 1 : skin.shape.shadow.offset}px 0 ${skin.shape.shadow.color}`,
@@ -79,7 +82,7 @@ const KilButton = ({
         allowFontScaling={false}
         minimumFontScale={0.5}
         numberOfLines={1}
-        size={pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
+        size={small ? skin.type.label : pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
         color={ink}
         style={styles.label}
       >
@@ -107,6 +110,10 @@ const createStyles = (s: Skin) =>
     },
     pressed: {
       opacity: s.shape.pressedOpacity,
+    },
+    smallPill: {
+      borderRadius: (s.size.button.xs - 8) / 2,
+      height: s.size.button.xs - 8,
     },
     disabled: {
       opacity: 0.4,

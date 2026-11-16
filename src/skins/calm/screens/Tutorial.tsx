@@ -50,12 +50,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import {
-  ArrowDownIcon,
-  ChevronLeftIcon,
-  ShoppingCartIcon,
-  XMarkIcon,
-} from "react-native-heroicons/outline";
+import { ArrowDownIcon, CartIcon, NavArrowLeftIcon, XmarkIcon } from "@/components/icons";
 import useSWR, { useSWRConfig } from "swr";
 import { calmColors, useCalmColors } from "./colors";
 import { CardPads, CButton, CText, Screen } from "./parts";
@@ -170,7 +165,7 @@ const TopBar = ({ onBack, onExit, children }: StepNav & { children?: ReactNode }
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const icon = (Icon: typeof XMarkIcon) => (
+  const icon = (Icon: typeof XmarkIcon) => (
     <Icon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
   );
 
@@ -184,7 +179,7 @@ const TopBar = ({ onBack, onExit, children }: StepNav & { children?: ReactNode }
           onPress={onBack}
           style={withPressed(styles.topIcon)}
         >
-          {icon(ChevronLeftIcon)}
+          {icon(NavArrowLeftIcon)}
         </Press>
       )}
       <View style={styles.topMiddle}>{children}</View>
@@ -196,7 +191,7 @@ const TopBar = ({ onBack, onExit, children }: StepNav & { children?: ReactNode }
           onPress={onExit}
           style={withPressed(styles.topIcon)}
         >
-          {icon(XMarkIcon)}
+          {icon(XmarkIcon)}
         </Press>
       )}
     </View>
@@ -802,7 +797,7 @@ const Practice = ({
             label={copy.seeList}
             onPress={() => onDone(answers)}
             icon={(color) => (
-              <ShoppingCartIcon
+              <CartIcon
                 size={skin.size.icon.action}
                 color={color}
                 strokeWidth={1.8}
@@ -1104,7 +1099,7 @@ const Finished = ({ onStart, onBack, onExit }: StepNav & { onStart: () => void }
             style={[styles.recapRow, index > 0 && styles.recapDivider]}
           >
             <View style={styles.number}>
-              <CText weight="medium" size={skin.type.label} color={C.onFill}>
+              <CText weight="bold" size={skin.type.label} color={C.onFill}>
                 {String(index + 1)}
               </CText>
             </View>
@@ -1362,17 +1357,12 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       minHeight: s.size.row.shop,
       paddingStart: s.spacing.stack,
     },
-    recap: {
-      backgroundColor: C.card,
-      borderColor: C.line,
-      borderRadius: s.shape.radius,
-      borderWidth: s.shape.border,
-    },
+    recap: {},
     recapRow: {
       alignItems: "center",
       flexDirection: "row",
       gap: s.spacing.inline + 2,
-      padding: s.spacing.stack,
+      paddingVertical: s.spacing.stack,
     },
     recapDivider: { borderTopColor: C.line, borderTopWidth: s.shape.divider },
     number: {

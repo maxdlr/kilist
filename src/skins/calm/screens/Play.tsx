@@ -18,13 +18,7 @@ import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
-import {
-  ArrowPathIcon,
-  ArrowUturnLeftIcon,
-  InformationCircleIcon,
-  XMarkIcon,
-} from "react-native-heroicons/outline";
-import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
+import { InfoCircleIcon, InfoCircleSolidIcon, RefreshIcon, UndoIcon, XmarkIcon } from "@/components/icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
@@ -97,7 +91,7 @@ export const UndoButton = ({ enabled, onPress }: { enabled: boolean; onPress: ()
       onPress={onPress}
       style={withPressed([styles.close, !enabled && styles.undoOff])}
     >
-      <ArrowUturnLeftIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
+      <UndoIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
     </Press>
   );
 };
@@ -115,7 +109,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
     up: C.textSoft,
     right: C.positive,
   };
-  const InfoIcon = labels ? InformationCircleSolid : InformationCircleIcon;
+  const InfoIcon = labels ? InfoCircleSolidIcon : InfoCircleIcon;
   const [touches, setTouches] = useState(0);
   const [idleFor, setIdleFor] = useState<number | null>(null);
   const canNudge = game.position === 0 && !game.removeRequest;
@@ -142,7 +136,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
               onPress={goBack}
               style={withPressed(styles.close)}
             >
-              <XMarkIcon
+              <XmarkIcon
                 size={skin.size.icon.action}
                 color={C.textSoft}
                 strokeWidth={1.8}
@@ -236,7 +230,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
           accessibilityLabel={T.play.replay}
           onPress={game.replay}
           icon={(color) => (
-            <ArrowPathIcon
+            <RefreshIcon
               size={skin.size.icon.action}
               color={color}
               strokeWidth={1.8}

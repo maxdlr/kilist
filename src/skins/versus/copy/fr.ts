@@ -94,7 +94,7 @@ const fr: SkinCopy = {
     loginAction: "Se connecter",
     signupAction: "Créer la maison",
     toSignup: "Nouveau ? Lance une maison",
-    toLogin: "Déjà joueur ? Connecte-toi",
+    toLogin: "Se connecter",
   },
   onboarding: {
     meta: (position: string, total: string) =>

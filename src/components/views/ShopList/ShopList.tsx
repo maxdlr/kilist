@@ -18,7 +18,7 @@ import { FoodType } from "@/types/model";
 import { StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { XMarkIcon } from "react-native-heroicons/outline";
+import { XmarkIcon } from "@/components/icons";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
 import ShopPanels from "./_components/ShopPanels";
 
@@ -132,7 +132,7 @@ const ShopList = () => {
           hitSlop={skin.spacing.small}
           style={withPressed(styles.close)}
         >
-          <XMarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={2.5} />
+          <XmarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={2.5} />
         </Press>
       </View>
 

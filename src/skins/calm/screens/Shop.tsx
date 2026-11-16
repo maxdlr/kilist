@@ -18,14 +18,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  InformationCircleIcon,
-  PlusIcon,
-  XMarkIcon,
-} from "react-native-heroicons/outline";
-import { InformationCircleIcon as InformationCircleSolid } from "react-native-heroicons/solid";
+import { ArrowLeftIcon, ArrowRightIcon, InfoCircleIcon, InfoCircleSolidIcon, PlusIcon, XmarkIcon } from "@/components/icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -306,12 +299,12 @@ const CalmShop = () => {
                   style={withPressed(styles.info)}
                 >
                   {showHow ? (
-                    <InformationCircleSolid
+                    <InfoCircleSolidIcon
                       size={skin.size.icon.action + 2}
                       color={C.text}
                     />
                   ) : (
-                    <InformationCircleIcon
+                    <InfoCircleIcon
                       size={skin.size.icon.action + 2}
                       color={C.textSoft}
                       strokeWidth={1.6}
@@ -420,7 +413,7 @@ const CalmShop = () => {
                 hitSlop={skin.spacing.small}
                 style={withPressed(styles.close)}
               >
-                <XMarkIcon
+                <XmarkIcon
                   size={skin.size.icon.action}
                   color={C.textSoft}
                   strokeWidth={1.6}

@@ -9,14 +9,7 @@ import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { ComponentType, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  Cog6ToothIcon,
-  ListBulletIcon,
-  PlayIcon,
-  ShoppingCartIcon,
-  HomeIcon,
-  WrenchIcon,
-} from "react-native-heroicons/outline";
+import { CartIcon, HomeIcon, ListIcon, PlayIcon, SettingsIcon, WrenchIcon } from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "./colors";
@@ -27,9 +20,9 @@ const ORDER = MAIN_TABS;
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
   swipe: PlayIcon,
-  shop: ShoppingCartIcon,
-  inventory: ListBulletIcon,
-  account: Cog6ToothIcon,
+  shop: CartIcon,
+  inventory: ListIcon,
+  account: SettingsIcon,
   admin: WrenchIcon,
 };
 

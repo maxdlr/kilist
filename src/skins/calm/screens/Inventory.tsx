@@ -12,7 +12,7 @@ import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { MagnifyingGlassIcon, PlusIcon, TrashIcon, XMarkIcon } from "react-native-heroicons/outline";
+import { PlusIcon, SearchIcon, TrashIcon, XmarkIcon } from "@/components/icons";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { calmColors, useCalmColors } from "./colors";
@@ -81,7 +81,7 @@ const CalmInventory = () => {
       setSearching(true);
     }
   };
-  const iconButton = (label: string, Icon: typeof XMarkIcon, onPress: () => void) => (
+  const iconButton = (label: string, Icon: typeof XmarkIcon, onPress: () => void) => (
     <CButton
       key={label}
       variant="secondary"
@@ -104,7 +104,7 @@ const CalmInventory = () => {
       : [
           iconButton(skin.copy.inventory.delete, TrashIcon, shelf.startDelete),
           iconButton(skin.copy.inventory.add, PlusIcon, () => shelf.openAdd()),
-          iconButton(skin.copy.inventory.search, MagnifyingGlassIcon, toggleSearch),
+          iconButton(skin.copy.inventory.search, SearchIcon, toggleSearch),
         ];
 
   const searchRow = (
@@ -121,7 +121,7 @@ const CalmInventory = () => {
       {noResults
         ? iconButton(T.inventory.addQuery(query), PlusIcon, () => shelf.openAdd(shelf.search.trim()))
         : iconButton(skin.copy.inventory.delete, TrashIcon, shelf.startDelete)}
-      {iconButton(T.inventory.closeSearch, XMarkIcon, toggleSearch)}
+      {iconButton(T.inventory.closeSearch, XmarkIcon, toggleSearch)}
     </View>
   );
 
