@@ -135,7 +135,9 @@ export const VButton = ({
   flex,
   accessibilityLabel,
   scale = 1,
+  icon,
 }: {
+  icon?: (color: string) => ReactNode;
   label: string;
   onPress?: () => void;
   href?: Href;
@@ -173,6 +175,7 @@ export const VButton = ({
         flex !== undefined && { flex },
       ]}
     >
+      {icon?.(look.ink)}
       <VText
         face={big ? "display" : "bold"}
         size={big ? skin.type.title : skin.type.body}
@@ -290,6 +293,8 @@ const createStyles = (s: Skin) =>
       alignItems: "center",
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.tight,
       justifyContent: "center",
       paddingHorizontal: s.spacing.inline,
     },

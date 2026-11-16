@@ -18,7 +18,7 @@ import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
-import { InfoCircleIcon, InfoCircleSolidIcon, RefreshIcon, UndoIcon, XmarkIcon } from "@/components/icons";
+import { InfoCircleIcon, InfoCircleSolidIcon, PlayIcon, RefreshIcon, UndoIcon, XmarkIcon } from "@/components/icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
@@ -226,17 +226,31 @@ const Recap = ({ game }: { game: SwipeGame }) => {
   return (
     <Screen
       dock={
-        <CButton
-          accessibilityLabel={T.play.replay}
-          onPress={game.replay}
-          icon={(color) => (
-            <RefreshIcon
-              size={skin.size.icon.action}
-              color={color}
-              strokeWidth={1.8}
-            />
-          )}
-        />
+        <>
+          <CButton
+            variant="secondary"
+            accessibilityLabel={T.play.replay}
+            onPress={game.replay}
+            icon={(color) => (
+              <RefreshIcon
+                size={skin.size.icon.action}
+                color={color}
+                strokeWidth={1.8}
+              />
+            )}
+          />
+          <CButton
+            label={skin.copy.swipe.playAgain}
+            onPress={game.playAgain}
+            icon={(color) => (
+              <PlayIcon
+                size={skin.size.icon.action}
+                color={color}
+                strokeWidth={1.8}
+              />
+            )}
+          />
+        </>
       }
     >
       <ScrollView contentContainerStyle={styles.doneContent}>
@@ -282,7 +296,7 @@ const CalmPlay = () => {
   const copy = skin.copy.swipe;
   const { screen, begin } = game;
 
-  const suggestion = useDailySuggestion(screen === "done" && !game.isReplay);
+  const suggestion = useDailySuggestion(screen === "done" && game.mode === "daily");
 
   useEffect(() => {
     if (screen === "start") begin();

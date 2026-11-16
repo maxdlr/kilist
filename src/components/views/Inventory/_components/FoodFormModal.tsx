@@ -1,8 +1,9 @@
 import { BarcodeIcon } from "@/components/icons";
-import type { Skin } from "@/skins/types";
+import type { LevelNumber, Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import LevelPicker from "@/components/elements/LevelPicker";
 import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title/Title";
@@ -10,27 +11,33 @@ import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { StyleSheet, View } from "react-native";
 
-type FoodFormData = { name: string; description?: string; product?: ScannedProduct };
+type FoodFormData = { name: string; description?: string; product?: ScannedProduct; level?: LevelNumber };
+
+type CloseGuard = MutableRefObject<() => boolean>;
 
 const FoodForm = ({
   title,
   initialName,
   initialDescription,
+  initialLevel,
   onSubmit,
   onRemove,
   onClose,
   scannable,
+  guardRef,
 }: {
   title: string;
   initialName: string;
   initialDescription: string;
+  initialLevel?: LevelNumber;
   scannable: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
   onClose: () => void;
+  guardRef: CloseGuard;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -38,17 +45,62 @@ const FoodForm = ({
   const { showToast } = useToast();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [level, setLevel] = useState(initialLevel);
   const [scanning, setScanning] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
+
+  const isDirty =
+    name !== initialName || description !== initialDescription || level !== initialLevel || product !== undefined;
+
+  useEffect(() => {
+    guardRef.current = () => {
+      if (!isDirty || confirming) return true;
+      setConfirming(true);
+      return false;
+    };
+  }, [guardRef, isDirty, confirming]);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
       showToast(skin.copy.errors.nameMissing);
       return;
     }
-    const success = await onSubmit({ name: name.trim(), description, ...(product && { product }) });
+    const success = await onSubmit({
+      name: name.trim(),
+      description,
+      ...(product && { product }),
+      ...(level !== undefined && level !== initialLevel && { level }),
+    });
     if (success) onClose();
   };
+
+  if (confirming) {
+    return (
+      <>
+        <Title size={skin.type.headline} lines={3} color={skin.panel.title}>
+          {copy.discardTitle}
+        </Title>
+        <View style={styles.actions}>
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            variant={skin.panel.secondary}
+            label={copy.discardLeave}
+            onTouch={onClose}
+          />
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            label={copy.discardKeep}
+            onTouch={() => setConfirming(false)}
+          />
+        </View>
+      </>
+    );
+  }
 
   if (scanning) {
     return (
@@ -95,25 +147,19 @@ const FoodForm = ({
         onChangeText={setDescription}
       />
 
-      {onRemove && (
-        <KilButton
-          height={skin.size.button.sm}
-          fontSize={skin.type.body}
-          variant="danger"
-          label={copy.removeIt}
-          onTouch={onRemove}
-        />
-      )}
+      {level !== undefined && <LevelPicker label={copy.status} value={level} onChange={setLevel} />}
 
       <View style={styles.actions}>
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
-          variant={skin.panel.secondary}
-          label={skin.copy.common.cancel}
-          onTouch={onClose}
-        />
+        {onRemove && (
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            variant="danger"
+            label={copy.removeIt}
+            onTouch={onRemove}
+          />
+        )}
         <KilButton
           flex={1}
           height={skin.size.button.md}
@@ -133,6 +179,7 @@ const FoodFormModal = ({
   formKey,
   initialName = "",
   initialDescription = "",
+  initialLevel,
   onSubmit,
   onRemove,
   onClose,
@@ -144,23 +191,31 @@ const FoodFormModal = ({
   formKey?: string | number;
   initialName?: string;
   initialDescription?: string;
+  initialLevel?: LevelNumber;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
   onClose: () => void;
-}) => (
-  <BottomPanel visible={visible} onClose={onClose}>
-    <FoodForm
-      key={formKey}
-      title={title}
-      initialName={initialName}
-      initialDescription={initialDescription}
-      onSubmit={onSubmit}
-      onRemove={onRemove}
-      onClose={onClose}
-      scannable={scannable}
-    />
-  </BottomPanel>
-);
+}) => {
+  const guardRef = useRef(() => true);
+  const canClose = useCallback(() => guardRef.current(), []);
+
+  return (
+    <BottomPanel visible={visible} onClose={onClose} dismissible canClose={canClose}>
+      <FoodForm
+        key={formKey}
+        title={title}
+        initialName={initialName}
+        initialDescription={initialDescription}
+        initialLevel={initialLevel}
+        onSubmit={onSubmit}
+        onRemove={onRemove}
+        onClose={onClose}
+        scannable={scannable}
+        guardRef={guardRef}
+      />
+    </BottomPanel>
+  );
+};
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({

@@ -85,6 +85,27 @@ describe("session", () => {
   });
 });
 
+describe("setting a food's level", () => {
+  it("puts the food on the chosen level and queues the change", () => {
+    pull();
+
+    const updated = call("put", "foods/level/1", { level: 0.75 });
+
+    expect(updated.inStockScore).toBe(0.75);
+    expect(getState()!.foods[0]!.histories).toHaveLength(4);
+    expect(pendingOps().map((op: any) => op.type)).toEqual(["food.setLevel"]);
+  });
+
+  it("drops the food from the shopping preview once it has enough", () => {
+    pull();
+    expect(call("get", "shop-list/preview").map((entry: any) => entry.id)).toContain(1);
+
+    call("put", "foods/level/1", { level: 0.5 });
+
+    expect(call("get", "shop-list/preview").map((entry: any) => entry.id)).not.toContain(1);
+  });
+});
+
 describe("the swipe game offline", () => {
   it("removes a swiped food from today's deck and recalculates its score", () => {
     pull();
@@ -122,11 +143,12 @@ describe("the swipe game offline", () => {
     ).toBe(0.33);
   });
 
-  it("pays tickets once per food, up to ten a day", () => {
+  it("halves the pay once the day's first game is paid", () => {
     pull(
       {},
       snapshot({
         foods: Array.from({ length: 12 }, (_, index) => food(index + 1)),
+        swipedBefore: true,
         recentSwipes: Array.from({ length: 9 }, (_, index) => ({
           foodId: 100 + index,
           at: new Date(Date.now() - 3600000).toISOString(),
@@ -135,7 +157,53 @@ describe("the swipe game offline", () => {
     );
 
     expect(call("put", "foods/swipe/edit/1", { isInStock: false }).earned).toBe(10);
-    expect(call("put", "foods/swipe/edit/2", { isInStock: false }).earned).toBe(0);
+    const second = call("put", "foods/swipe/edit/2", { isInStock: false });
+    expect(second.earned - second.bonus).toBe(5);
+    expect(call("put", "foods/swipe/edit/1", { isInStock: true }).earned).toBe(0);
+  });
+
+  it("pays a first game of 20 swipes in full", () => {
+    pull(
+      {},
+      snapshot({
+        foods: Array.from({ length: 12 }, (_, index) => food(index + 1)),
+        recentSwipes: Array.from({ length: 19 }, (_, index) => ({
+          foodId: 100 + index,
+          at: new Date(Date.now() - 3600000).toISOString(),
+        })),
+      }),
+    );
+
+    expect(call("put", "foods/swipe/edit/1", { isInStock: false }).earned).toBe(10);
+    const next = call("put", "foods/swipe/edit/2", { isInStock: false });
+    expect(next.earned - next.bonus).toBe(5);
+  });
+
+  it("deals 20 foods to someone who never played, 10 afterwards", () => {
+    const foods = Array.from({ length: 25 }, (_, index) => food(index + 1));
+    pull({}, snapshot({ foods }));
+    expect(call("get", "foods/swipe/browse")).toHaveLength(20);
+
+    pull({}, snapshot({ foods, swipedBefore: true }));
+    expect(call("get", "foods/swipe/browse")).toHaveLength(10);
+  });
+
+  it("plays again with foods not sorted today, well-stocked ones included", () => {
+    const hourAgo = new Date(Date.now() - 3600000).toISOString();
+    pull(
+      {},
+      snapshot({
+        swipedBefore: true,
+        foods: [
+          food(1, 0.25, { histories: [{ isInStock: false, at: hourAgo }] }),
+          food(2, 1, { lastBoughtAt: hourAgo }),
+          food(3, 0),
+        ],
+      }),
+    );
+
+    expect(call("get", "foods/swipe/browse").map((entry: any) => entry.id)).toEqual([3]);
+    expect(call("get", "foods/swipe/browse", {}, { again: "1" }).map((entry: any) => entry.id)).toEqual([3, 2]);
   });
 
   it("marks the household's day as played and levels up", () => {

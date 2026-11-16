@@ -3,6 +3,11 @@ import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import useShopList from "@/providers/ShopListProvider";
+import { useSkin } from "@/providers/SkinProvider";
+import { caseFor } from "@/skins";
+import type { LevelNumber } from "@/skins/types";
+import { leavesShopList, putFoodLevel } from "@/utils/foodLevel";
+import { levelOf } from "@/utils/scoreUtils";
 import useMark from "@/providers/MarkProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
@@ -15,6 +20,7 @@ export type ShopAddAction = "buy" | "later" | "list";
 
 const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) => {
   const shop = useShopList();
+  const skin = useSkin();
   const { showToast } = useToast();
   const { mark } = useMark();
   const { shopListId, startNewShopList, cancelShopList, setShopListId } = shop;
@@ -22,6 +28,8 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const [bought, setBought] = useState(0);
   const [isResuming, setIsResuming] = useState(true);
   const [panel, setPanel] = useState<"stop" | "add" | null>(null);
+  const [levelFood, setLevelFood] = useState<FoodType | null>(null);
+  const [leaving, setLeaving] = useState<{ food: FoodType; level: LevelNumber } | null>(null);
   const { data: preview, mutate: refreshPreview } = useSWR<FoodType[]>({ url: "shop-list/preview" });
   const { data: mainList } = useSWR<ListType>({ url: "lists/read?main=true" });
 
@@ -155,6 +163,37 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     }
   };
 
+  const applyLevel = async (food: FoodType, level: LevelNumber) => {
+    try {
+      await putFoodLevel(food.id, level);
+      mark("saved", common.marks.saved);
+    } catch {
+      showToast(common.unexpected);
+    }
+    refreshPreview();
+  };
+
+  const pickLevel = (level: LevelNumber) => {
+    const food = levelFood;
+    setLevelFood(null);
+    if (!food || level === levelOf(food.inStockScore)) return;
+    if (leavesShopList(level)) setLeaving({ food, level });
+    else applyLevel(food, level);
+  };
+
+  const leaveRequest: ActionPanelRequest | null = leaving && {
+    title: skin.copy.inventory.leaveListTitle(caseFor(skin, leaving.food.name)),
+    message: skin.copy.inventory.leaveListLine,
+    cancelLabel: skin.copy.common.keep,
+    actions: [
+      {
+        label: skin.copy.inventory.leaveListConfirm,
+        destructive: true,
+        onPress: () => applyLevel(leaving.food, leaving.level),
+      },
+    ],
+  };
+
   const suggestion = foods?.find((food) => food.id === shop.suggestedFoodIds[0]);
   const isStarted = shopListId !== undefined;
 
@@ -187,6 +226,12 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     findFood,
     addFood,
     refreshEmpty,
+    levelFood,
+    openLevel: setLevelFood,
+    closeLevel: () => setLevelFood(null),
+    pickLevel,
+    leaveRequest,
+    closeLeave: () => setLeaving(null),
   };
 };
 

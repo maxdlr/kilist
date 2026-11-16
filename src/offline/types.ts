@@ -91,6 +91,7 @@ export type Snapshot = {
   dashboard: DashboardTotals;
   prizes: Prizes;
   recentSwipes: { foodId: number | null; at: string }[];
+  swipedBefore?: boolean;
 };
 
 export type RaceAnswer = "in" | "out" | "up";
@@ -112,6 +113,7 @@ export type OpType =
   | "shop.cancel"
   | "food.create"
   | "food.edit"
+  | "food.setLevel"
   | "food.remove"
   | "me.skin"
   | "me.language"

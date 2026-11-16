@@ -158,6 +158,8 @@ const versusCopy: RoastCopy = {
     emptyLabel: "Nothing to swipe",
     emptyTitle: "All checked!",
     emptyLine: "Come back tomorrow, or add some foods.",
+    playAgain: "Play again",
+    allChecked: "All checked today!",
   },
   shop: {
     toGo: (count: number) => `${count} to go`,
@@ -195,6 +197,13 @@ const versusCopy: RoastCopy = {
     name: "Name",
     description: "Description (optional)",
     removeIt: "Remove it",
+    status: "How much is left?",
+    discardTitle: "Careful, your edits won't be saved.",
+    discardLeave: "Discard",
+    discardKeep: "Keep editing",
+    leaveListTitle: (name: string) => `${name} will leave your list.`,
+    leaveListLine: "It won't be on this shopping trip.",
+    leaveListConfirm: "Remove from list",
     removeOne: (name: string) => `Remove ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,

@@ -158,6 +158,8 @@ const fr: SkinCopy = {
     emptyLabel: "Rien à swiper",
     emptyTitle: "Tout est vérifié !",
     emptyLine: "Reviens demain, ou ajoute des aliments.",
+    playAgain: "Rejouer",
+    allChecked: "Tout est vérifié aujourd'hui !",
   },
   shop: {
     toGo: (count: number) => `Encore ${count}`,
@@ -195,6 +197,13 @@ const fr: SkinCopy = {
     name: "Nom",
     description: "Description (facultatif)",
     removeIt: "Le retirer",
+    status: "Il en reste combien ?",
+    discardTitle: "Attention, tes modifs ne seront pas gardées.",
+    discardLeave: "Abandonner",
+    discardKeep: "Continuer",
+    leaveListTitle: (name: string) => `${name} va quitter ta liste.`,
+    leaveListLine: "Il ne sera pas de ces courses.",
+    leaveListConfirm: "Retirer de la liste",
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "Retirer cet aliment ?" : `Retirer ${count} aliments ?`,

@@ -8,6 +8,7 @@ import {
   suggestionKey,
   toLocalDay,
   attachProduct,
+  setLevel,
 } from "./domain";
 import { foodKey } from "./foodNames";
 import { rules } from "./rules";
@@ -208,6 +209,12 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (payload.name !== undefined) target.name = payload.name;
       if (payload.description !== undefined) target.description = payload.description;
       return target;
+    }
+
+    case "food.setLevel": {
+      const target = food(payload.foodId);
+      if (target) setLevel(target, payload.level, at);
+      return target ?? null;
     }
 
     case "food.remove": {

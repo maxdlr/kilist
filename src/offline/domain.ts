@@ -100,22 +100,39 @@ export const attachProduct = (food: LocalFood, product?: ScannedProduct | null) 
 const lastActivity = (food: LocalFood) =>
   Math.max(time(food.lastBoughtAt), ...food.histories.map((entry) => time(entry.at)));
 
-export const swipeDeck = (foods: LocalFood[], now: number) => {
-  const { deckSize, eligibleBelow, restHours } = rules().swipe;
+const payWindowMs = () => rules().tickets.payWindowHours * HOUR_MS;
+
+export const isFirstGame = (state: Pick<LocalState, "swipedBefore" | "recentSwipes">, now: number) =>
+  !state.swipedBefore && !state.recentSwipes.some((entry) => time(entry.at) < now - payWindowMs());
+
+export const deckSizeFor = (state: Pick<LocalState, "swipedBefore" | "recentSwipes">, now: number) => {
+  const { deckSize, firstDeckSize: first } = rules().swipe;
+  return isFirstGame(state, now) && state.recentSwipes.length === 0 ? (first ?? deckSize) : deckSize;
+};
+
+export const swipeDeck = (
+  foods: LocalFood[],
+  now: number,
+  { size = rules().swipe.deckSize, again = false }: { size?: number; again?: boolean } = {},
+) => {
+  const { eligibleBelow, restHours } = rules().swipe;
   const eligible = foods.filter(
     (food) =>
       food.lists.length > 0 && !food.histories.some((entry) => time(entry.at) >= now - restHours * HOUR_MS),
   );
+  const isStale = (food: LocalFood) => lastActivity(food) < now - waitDaysFor(food) * DAY_MS;
   const low = eligible
     .filter((food) => food.inStockScore < eligibleBelow)
     .sort((a, b) => b.inStockScore - a.inStockScore);
   const stale = eligible
-    .filter(
-      (food) =>
-        food.inStockScore >= eligibleBelow && lastActivity(food) < now - waitDaysFor(food) * DAY_MS,
-    )
+    .filter((food) => food.inStockScore >= eligibleBelow && isStale(food))
     .sort((a, b) => lastActivity(a) - lastActivity(b));
-  return [...low, ...stale].slice(0, deckSize);
+  const rest = again
+    ? eligible
+        .filter((food) => food.inStockScore >= eligibleBelow && !isStale(food))
+        .sort((a, b) => lastActivity(a) - lastActivity(b))
+    : [];
+  return [...low, ...stale, ...rest].slice(0, size);
 };
 
 export const replayDeck = (foods: LocalFood[], now: number) => {
@@ -197,25 +214,48 @@ export const swipeGame = (playedAt: string[], tzOffset: number, now: number) => 
   return { level: playedToday ? days.size : days.size + 1, playedToday };
 };
 
+export const swipePay = (paidBefore: number, firstGame: boolean) => {
+  const { deckSize, firstDeckSize: firstSize } = rules().swipe;
+  const { perSwipe, speedBonus } = rules().tickets;
+  const first = firstGame ? (firstSize ?? deckSize) : deckSize;
+  const game = paidBefore < first ? 0 : 1 + Math.floor((paidBefore - first) / deckSize);
+  const factor = 2 ** game;
+  return { perSwipe: Math.floor(perSwipe / factor), speedBonus: Math.floor(speedBonus / factor) };
+};
+
 export const awardSwipe = (state: LocalState, foodId: number, at: string): Reward => {
   const atMs = time(at);
   const balance = state.prizes.balance;
-  const { perSwipe, speedBonus, speedWindowMs, paidSwipesPerDay, payWindowHours } = rules().tickets;
+  const { speedWindowMs } = rules().tickets;
   const window = state.recentSwipes
-    .filter((entry) => Math.abs(time(entry.at) - atMs) <= payWindowHours * HOUR_MS)
+    .filter((entry) => Math.abs(time(entry.at) - atMs) <= payWindowMs())
     .sort((a, b) => time(b.at) - time(a.at));
+  const pay = swipePay(window.length, isFirstGame(state, atMs));
 
-  if (window.some((entry) => entry.foodId === foodId) || window.length >= paidSwipesPerDay) {
+  if (window.some((entry) => entry.foodId === foodId) || pay.perSwipe === 0) {
     return { earned: 0, bonus: 0, balance };
   }
 
   const previous = window.find((entry) => time(entry.at) <= atMs);
-  const bonus = previous && atMs - time(previous.at) < speedWindowMs ? speedBonus : 0;
-  const earned = perSwipe + bonus;
+  const bonus = previous && atMs - time(previous.at) < speedWindowMs ? pay.speedBonus : 0;
+  const earned = pay.perSwipe + bonus;
 
   state.recentSwipes.push({ foodId, at });
   state.prizes.balance = balance + earned;
   return { earned, bonus, balance: state.prizes.balance };
+};
+
+export const LEVEL_STEPS = 4;
+
+export const setLevel = (food: LocalFood, level: number, at: string) => {
+  if (time(food.lastBoughtAt) > time(at)) return;
+  const inStock = Math.round(level * LEVEL_STEPS);
+  const later = food.histories.filter((entry) => time(entry.at) > time(at));
+  const reset = Array.from({ length: LEVEL_STEPS }, (_, step) => ({ isInStock: step < inStock, at }));
+  food.histories = [...reset, ...later]
+    .sort((a, b) => time(a.at) - time(b.at))
+    .slice(-rules().swipe.historyLimit);
+  food.inStockScore = calculateScore(food.histories);
 };
 
 export const verdictOf = (answers: RaceAnswer[]) => {

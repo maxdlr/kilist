@@ -4,7 +4,9 @@ import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import useToast from "@/providers/ToastProvider";
 import type { ScannedProduct } from "@/offline/domain";
+import type { LevelNumber } from "@/skins/types";
 import { FoodType } from "@/types/model";
+import { putFoodLevel } from "@/utils/foodLevel";
 import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 
@@ -17,7 +19,7 @@ export type InventoryContextType = {
   createFood: (data: { name: string; description?: string; product?: ScannedProduct }) => Promise<boolean>;
   editFood: (
     foodId: number,
-    data: { name?: string; description?: string },
+    data: { name?: string; description?: string; level?: LevelNumber },
   ) => Promise<boolean>;
   removeFoodsFromList: (foodIds: number[]) => Promise<boolean>;
 };
@@ -90,10 +92,11 @@ export const InventoryProvider = ({
 
   const editFood = async (
     foodId: number,
-    data: { name?: string; description?: string },
+    { level, ...data }: { name?: string; description?: string; level?: LevelNumber },
   ) => {
     try {
       await axios.put(`foods/edit/${foodId}`, data);
+      if (level !== undefined) await putFoodLevel(foodId, level);
       mutateFood();
       return true;
     } catch (err: any) {

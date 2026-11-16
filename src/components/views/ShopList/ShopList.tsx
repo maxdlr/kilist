@@ -15,11 +15,12 @@ import useShopRun from "@/hooks/screens/useShopRun";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { FoodType } from "@/types/model";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { XmarkIcon } from "@/components/icons";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
+import FoodLevelPanel from "./_components/FoodLevelPanel";
 import ShopPanels from "./_components/ShopPanels";
 
 const ShopList = () => {
@@ -53,6 +54,7 @@ const ShopList = () => {
 
   if (!run.isStarted && !run.isEmpty) {
     return (
+      <View style={styles.flex}>
       <Sheet
         fill={skin.colors.accent}
         dock={
@@ -70,7 +72,23 @@ const ShopList = () => {
         <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.range.low, run.range.high))}</Title>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startRight)}</ThemedText>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startLeft)}</ThemedText>
+        <ScrollView style={styles.tagScroll} contentContainerStyle={styles.tags}>
+          {run.preview.map((food) => (
+            <Press
+              key={food.id}
+              accessibilityRole="button"
+              onPress={() => run.openLevel(food)}
+              style={withPressed([styles.tag, { borderColor: skin.colors.onPaper }])}
+            >
+              <ThemedText size={skin.type.body} numberOfLines={1}>
+                {caseFor(skin, food.name)}
+              </ThemedText>
+            </Press>
+          ))}
+        </ScrollView>
       </Sheet>
+      <FoodLevelPanel run={run} />
+      </View>
     );
   }
 
@@ -222,6 +240,14 @@ const createStyles = (s: Skin) =>
     },
     flex: {
       flex: 1,
+    },
+    tagScroll: { flexGrow: 0, flexShrink: 1 },
+    tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
+    tag: {
+      borderRadius: s.shape.radius,
+      borderWidth: s.shape.border,
+      paddingHorizontal: s.spacing.inline,
+      paddingVertical: s.spacing.tight,
     },
     close: { alignItems: "center", height: s.size.button.xs, justifyContent: "center", width: s.size.button.xs },
     header: {

@@ -5,6 +5,7 @@ import Dock from "@/components/elements/Dock/Dock";
 import EmptyData from "@/components/elements/EmptyData";
 import FoodIcon from "@/components/elements/FoodIcon";
 import KilButton from "@/components/elements/KilButton";
+import { PlayIcon } from "@/components/icons";
 import LoadingAnim from "@/components/elements/LoadingAnim/LoadingAnim";
 import Sheet from "@/components/elements/Sheet/Sheet";
 import ActionPanel from "@/components/elements/ActionPanel";
@@ -244,7 +245,7 @@ const SwipeFoodGame = () => {
   const copy = skin.copy.swipe;
   const game = useSwipeGame();
   const { screen, position, total, intent } = game;
-  const suggestion = useDailySuggestion(screen === "done");
+  const suggestion = useDailySuggestion(screen === "done" && game.mode === "daily");
 
   useStatusBarStyle(
     screen === "done" ||
@@ -265,6 +266,14 @@ const SwipeFoodGame = () => {
               fontSize={skin.type.title}
               label={copy.overShop}
               href="/shop"
+            />
+            <KilButton
+              variant="secondary"
+              height={skin.size.button.sm}
+              fontSize={skin.type.body}
+              label={copy.playAgain}
+              icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
+              onTouch={game.playAgain}
             />
             <KilButton
               variant="ghost"
@@ -413,6 +422,14 @@ const SwipeFoodGame = () => {
               fontSize={skin.type.headline}
               label={copy.tomorrowAction}
               href="/shop"
+            />
+            <KilButton
+              variant="secondary"
+              height={skin.size.button.sm}
+              fontSize={skin.type.body}
+              label={copy.playAgain}
+              icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
+              onTouch={game.playAgain}
             />
           </Dock>
         }

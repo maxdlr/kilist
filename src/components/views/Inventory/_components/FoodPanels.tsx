@@ -2,6 +2,7 @@ import ActionPanel from "@/components/elements/ActionPanel";
 import type { InventoryShelf } from "@/hooks/screens/useInventoryShelf";
 import { useSkin } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
+import { levelOf } from "@/utils/scoreUtils";
 import FoodFormModal from "./FoodFormModal";
 
 const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
@@ -29,6 +30,7 @@ const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
         title={copy.editTitle(editingFood ? caseFor(skin, editingFood.name) : "")}
         initialName={editingFood?.name}
         initialDescription={editingFood?.description}
+        initialLevel={editingFood ? levelOf(editingFood.inStockScore) : undefined}
         onSubmit={async (data) => {
           if (!editingFood) return false;
           return shelf.editFood(editingFood.id, data);

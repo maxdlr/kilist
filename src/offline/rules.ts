@@ -2,6 +2,7 @@ export type Rules = {
   suggestions: { everyDays: number; retryDays: number; maxDeclines: number };
   swipe: {
     deckSize: number;
+    firstDeckSize?: number;
     eligibleBelow: number;
     restHours: number;
     staleDays: number;

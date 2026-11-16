@@ -170,6 +170,8 @@ const fr: SkinCopy = {
     emptyLabel: "RIEN À SWIPER",
     emptyTitle: "TON STOCK A L'AIR BIEN. LOUCHE.",
     emptyLine: "REVIENS DEMAIN, OU AJOUTE UN TRUC.",
+    playAgain: "REJOUER",
+    allChecked: "T'AS TOUT VÉRIFIÉ AUJOURD'HUI. VA ACHETER UN TRUC.",
   },
   shop: {
     toGo: (count: number) => `ENCORE ${count} TICKETS`,
@@ -208,6 +210,13 @@ const fr: SkinCopy = {
     name: "NOM",
     description: "DESCRIPTION (FACULTATIF)",
     removeIt: "LE RETIRER",
+    status: "IL EN RESTE COMBIEN ?",
+    discardTitle: "ATTENTION. TES MODIFS NE SERONT PAS GARDÉES.",
+    discardLeave: "LES JETER",
+    discardKeep: "CONTINUER",
+    leaveListTitle: (name: string) => `${name} QUITTE TA LISTE.`,
+    leaveListLine: "TU DIS QUE T'EN AS ASSEZ. J'ESPÈRE QUE T'AS RAISON.",
+    leaveListConfirm: "L'ENLEVER",
     removeOne: (name: string) => `RETIRER ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "RETIRER CET ALIMENT ?" : `RETIRER ${count} ALIMENTS ?`,

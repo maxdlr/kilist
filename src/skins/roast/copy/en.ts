@@ -168,6 +168,8 @@ const roastCopy = {
     emptyLabel: "NOTHING TO SWIPE",
     emptyTitle: "YOUR STOCK LOOKS FINE. SUSPICIOUS.",
     emptyLine: "COME BACK TOMORROW, OR ADD SOMETHING.",
+    playAgain: "PLAY AGAIN",
+    allChecked: "YOU CHECKED EVERYTHING TODAY. GO BUY SOMETHING.",
   },
   shop: {
     toGo: (count: number) => `${count} TICKETS TO GO`,
@@ -206,6 +208,13 @@ const roastCopy = {
     name: "NAME",
     description: "DESCRIPTION (OPTIONAL)",
     removeIt: "REMOVE IT",
+    status: "HOW MUCH IS LEFT?",
+    discardTitle: "CAREFUL. YOUR EDITS WON'T BE SAVED.",
+    discardLeave: "THROW THEM AWAY",
+    discardKeep: "KEEP EDITING",
+    leaveListTitle: (name: string) => `${name} LEAVES YOUR LIST.`,
+    leaveListLine: "YOU SAID YOU HAVE ENOUGH. HOPE YOU'RE RIGHT.",
+    leaveListConfirm: "TAKE IT OFF",
     removeOne: (name: string) => `REMOVE ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "REMOVE THIS FOOD?" : `REMOVE ${count} FOODS?`,

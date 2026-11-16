@@ -6,6 +6,7 @@ beforeEach(() => {
     suggestions: { everyDays: 2, retryDays: 30, maxDeclines: 2 },
     swipe: {
       deckSize: 10,
+      firstDeckSize: 20,
       eligibleBelow: 0.75,
       restHours: 24,
       staleDays: 7,

@@ -47,7 +47,7 @@ export type SwipeFoodsContextType = {
     isInStock: boolean | null;
     replay?: boolean;
   }) => Promise<SwipeReward | null>;
-  loadReplay: () => Promise<number>;
+  loadDeck: (mode: "replay" | "again") => Promise<number>;
   completeSession: () => Promise<void>;
   freezeDeck: (frozen: boolean) => void;
 };
@@ -66,7 +66,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
   isLoading: false,
   mutateFoods: () => {},
   update: async () => null,
-  loadReplay: async () => 0,
+  loadDeck: async () => 0,
   completeSession: async () => {},
   freezeDeck: () => {},
 });
@@ -125,9 +125,9 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const loadReplay = async () => {
+  const loadDeck = async (mode: "replay" | "again") => {
     try {
-      const { data: deck } = await axios.get<FoodType[]>("foods/swipe/browse", { params: { replay: 1 } });
+      const { data: deck } = await axios.get<FoodType[]>("foods/swipe/browse", { params: { [mode]: 1 } });
       swipedIds.current.clear();
       deckFrozen.current = true;
       setFoods(deck ?? []);
@@ -197,7 +197,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         mutateFoods,
         update,
-        loadReplay,
+        loadDeck,
         completeSession,
         freezeDeck,
       }}

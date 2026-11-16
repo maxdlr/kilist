@@ -332,11 +332,16 @@ const CalmShop = () => {
                   )}
                   <View style={styles.tags}>
                     {section.foods.map((food) => (
-                      <View key={food.id} style={styles.tag}>
+                      <Press
+                        key={food.id}
+                        accessibilityRole="button"
+                        onPress={() => run.openLevel(food)}
+                        style={withPressed(styles.tag)}
+                      >
                         <CText size={skin.type.body} numberOfLines={1}>
                           {food.name}
                         </CText>
-                      </View>
+                      </Press>
                     ))}
                   </View>
                 </View>

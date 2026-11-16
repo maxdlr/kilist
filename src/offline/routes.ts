@@ -1,5 +1,6 @@
 import {
   classifyScores,
+  deckSizeFor,
   isShopListDone,
   nextSuggestion,
   remainingShopFoods,
@@ -23,6 +24,7 @@ import {
   resolveAlias,
   saveValue,
 } from "./store";
+import { rules } from "./rules";
 import type { LocalFood, LocalState, RaceAnswer } from "./types";
 
 export const GHOST_RACE_ID = -1;
@@ -222,7 +224,13 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
   [
     "get",
     /^foods\/swipe\/browse$/,
-    ({ query }) => (query.replay ? replayDeck : swipeDeck)(state().foods, Date.now()).map(toFood),
+    ({ query }) => {
+      const now = Date.now();
+      if (query.replay) return replayDeck(state().foods, now).map(toFood);
+      const again = query.again === "1" || query.again === 1;
+      const size = again ? rules().swipe.deckSize : deckSizeFor(state(), now);
+      return swipeDeck(state().foods, now, { size, again }).map(toFood);
+    },
   ],
   [
     "put",
@@ -262,6 +270,22 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
         name: body.name,
         description: body.description,
       });
+      return food ? toFood(food) : null;
+    },
+  ],
+  [
+    "put",
+    /^foods\/level\/(-?\d+)$/,
+    ({ body }, match) => {
+      const food = enqueue("food.setLevel", { foodId: Number(match[1]), level: body.level });
+      return food ? toFood(food) : null;
+    },
+  ],
+  [
+    "put",
+    /^foods\/level\/(-?\d+)$/,
+    ({ body }, match) => {
+      const food = enqueue("food.setLevel", { foodId: Number(match[1]), level: body.level });
       return food ? toFood(food) : null;
     },
   ],

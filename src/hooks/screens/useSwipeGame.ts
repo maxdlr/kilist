@@ -19,6 +19,8 @@ const IN_STOCK: Record<SwipeDirection, boolean | null> = {
 };
 const BONUS_VISIBLE_MS = 700;
 
+type SwipeMode = "daily" | "replay" | "again";
+
 type HeldSwipe = { food: FoodType; direction: SwipeDirection; replay: boolean };
 
 export type SwipeGameScreen = "loading" | "start" | "play" | "done" | "closed" | "empty";
@@ -29,7 +31,7 @@ const useSwipeGame = () => {
   const { showToast } = useToast();
   const { mark } = useMark();
   const [removing, setRemoving] = useState<FoodType | null>(null);
-  const [isReplay, setIsReplay] = useState(false);
+  const [mode, setMode] = useState<SwipeMode>("daily");
   const {
     foods,
     game,
@@ -40,7 +42,7 @@ const useSwipeGame = () => {
     swipe,
     unswipe,
     update,
-    loadReplay,
+    loadDeck,
     completeSession,
     freezeDeck,
     roundRecap,
@@ -113,15 +115,19 @@ const useSwipeGame = () => {
 
   useEffect(() => () => commitHeld(), [commitHeld]);
 
-  const replay = async () => {
-    const count = await loadReplay();
-    if (count === 0) return;
-    setIsReplay(true);
+  const playDeck = async (next: Exclude<SwipeMode, "daily">) => {
+    const count = await loadDeck(next);
+    if (count === 0) {
+      if (next === "again") showToast(skin.copy.swipe.allChecked);
+      return false;
+    }
+    setMode(next);
     start();
+    return true;
   };
 
   const begin = () => {
-    setIsReplay(false);
+    setMode("daily");
     start();
   };
 
@@ -175,7 +181,7 @@ const useSwipeGame = () => {
     setOutFoods(added);
     swipe(food.id);
     commitHeld();
-    heldRef.current = { food, direction, replay: isReplay };
+    heldRef.current = { food, direction, replay: mode === "replay" };
     setCanUndo(true);
 
     if (isLast) {
@@ -263,8 +269,10 @@ const useSwipeGame = () => {
     flingRef,
     fling,
     begin,
-    replay,
-    isReplay,
+    replay: () => playDeck("replay"),
+    playAgain: () => playDeck("again"),
+    isReplay: mode === "replay",
+    mode,
     recap,
     handleSwipe,
     canUndo,

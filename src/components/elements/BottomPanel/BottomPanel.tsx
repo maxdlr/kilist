@@ -42,11 +42,13 @@ const BottomPanel = ({
   visible,
   onClose,
   dismissible = false,
+  canClose,
   children,
 }: {
   visible: boolean;
   onClose: () => void;
   dismissible?: boolean;
+  canClose?: () => boolean;
   children: ReactNode;
 }) => {
   const skin = useSkin();
@@ -58,7 +60,7 @@ const BottomPanel = ({
   const backdropOpacity = useSharedValue(0);
   const drag = useSharedValue(0);
   const closing = useSharedValue(false);
-  const latest = useRef({ visible, onClose });
+  const latest = useRef({ visible, onClose, canClose });
   const [self] = useState(() => ({}));
   const [isRendered, setIsRendered] = useState(visible);
 
@@ -67,8 +69,8 @@ const BottomPanel = ({
   }
 
   useEffect(() => {
-    latest.current = { visible, onClose };
-  }, [visible, onClose]);
+    latest.current = { visible, onClose, canClose };
+  }, [visible, onClose, canClose]);
 
   useFocusEffect(
     useCallback(
@@ -118,7 +120,14 @@ const BottomPanel = ({
     );
   }, [visible, offset, contentHeight, backdropOpacity, drag, closing, self]);
 
-  const requestClose = useCallback(() => latest.current.onClose(), []);
+  const requestClose = useCallback(() => {
+    if (latest.current.canClose && !latest.current.canClose()) {
+      closing.set(false);
+      drag.set(withSpring(0, AnimationService.snap));
+      return;
+    }
+    latest.current.onClose();
+  }, [closing, drag]);
 
   const pan = usePanGesture({
     enabled: visible,
@@ -153,13 +162,13 @@ const BottomPanel = ({
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        onClose();
+        requestClose();
         return true;
       },
     );
 
     return () => subscription.remove();
-  }, [visible, onClose]);
+  }, [visible, requestClose]);
 
   const handleContentLayout = (event: LayoutChangeEvent) => {
     const measured = event.nativeEvent.layout.height;
@@ -189,7 +198,7 @@ const BottomPanel = ({
   return (
     <View style={styles.root}>
       <AnimatedPressable
-        onPress={dismissible ? onClose : undefined}
+        onPress={dismissible ? requestClose : undefined}
         accessibilityLabel={dismissible ? "Close" : undefined}
         style={[
           styles.backdrop,

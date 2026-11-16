@@ -6,13 +6,15 @@ import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import { clock, seconds } from "@/hooks/versus/api";
 import useRaceGame, { RaceGame } from "@/hooks/versus/useRaceGame";
+import useSwipeGame from "@/hooks/screens/useSwipeGame";
+import { PlayIcon } from "@/components/icons";
 import useAuth from "@/providers/AuthProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { versusPalette as P } from "..";
 import { Avatar, Card, Chip, Kicker, memberColor, Screen, VButton, VText, WORD } from "./parts";
@@ -211,6 +213,97 @@ const Arena = ({ game }: { game: RaceGame }) => {
   );
 };
 
+const ExtraRound = ({ onLeave }: { onLeave: () => void }) => {
+  const skin = useSkin();
+  const styles = useSkinStyles(createStyles);
+  const copy = skin.copy.swipe;
+  const game = useSwipeGame();
+  const [ready, setReady] = useState(false);
+  const asked = useRef(false);
+  const { playAgain } = game;
+
+  useEffect(() => {
+    if (asked.current) return;
+    asked.current = true;
+    playAgain().then((started) => (started ? setReady(true) : onLeave()));
+  }, [playAgain, onLeave]);
+
+  if (!ready || game.screen === "loading") return <VersusLoading />;
+
+  if (game.screen === "done") {
+    return (
+      <Screen
+        dock={
+          <>
+            <VButton big label={V.play.goShopping} href="/shop" />
+            <VButton variant="ghost" label={copy.overAgain} onPress={onLeave} />
+          </>
+        }
+      >
+        <View style={styles.centered}>
+          <VText face="display" size={skin.type.display.lg} style={styles.centerText}>
+            {copy.overTitle}
+          </VText>
+          <VText size={skin.type.body} color={P.soft} style={styles.centerText}>
+            {V.play.time(seconds(game.seconds * 1000), game.earned)}
+          </VText>
+        </View>
+      </Screen>
+    );
+  }
+
+  const pad = (direction: SwipeDirection, label: string, aria: string) => (
+    <VButton
+      key={direction}
+      flex={direction !== "up" ? 1.2 : 1}
+      label={label}
+      accessibilityLabel={aria}
+      variant={direction !== "up" || game.intent === direction ? "primary" : "secondary"}
+      scale={game.intent === direction ? 1.06 : 1}
+      onPress={() => game.fling(direction)}
+    />
+  );
+
+  return (
+    <Screen
+      padded={false}
+      dock={
+        <View style={styles.pads}>
+          {pad("left", copy.out, V.play.ariaOut)}
+          {pad("up", copy.unsure, V.play.ariaUnsure)}
+          {pad("right", copy.inStock, V.play.ariaIn)}
+        </View>
+      }
+    >
+      <View style={styles.flex}>
+        <SwipeDeck
+          items={game.foods}
+          keyOf={(food) => food.id}
+          allowUp
+          background="transparent"
+          stamps={{ right: copy.stampIn, left: copy.stampOut, up: copy.stampUnsure }}
+          flingRef={game.flingRef}
+          onIntent={game.setIntent}
+          onSwipe={game.handleSwipe}
+          renderSheet={(food, depth) => <FoodCard food={food} position={game.position + depth} total={game.total} />}
+        />
+      </View>
+    </Screen>
+  );
+};
+
+const PlayAgainButton = ({ onPress }: { onPress: () => void }) => {
+  const skin = useSkin();
+  return (
+    <VButton
+      variant="secondary"
+      label={skin.copy.swipe.playAgain}
+      icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
+      onPress={onPress}
+    />
+  );
+};
+
 const Start = ({ game }: { game: RaceGame }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -269,7 +362,7 @@ const Start = ({ game }: { game: RaceGame }) => {
   );
 };
 
-const Results = ({ game }: { game: RaceGame }) => {
+const Results = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => void }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -286,6 +379,7 @@ const Results = ({ game }: { game: RaceGame }) => {
       dock={
         <>
           <VButton big label={V.play.goShoppingCount(toBuy)} href="/shop" />
+          <PlayAgainButton onPress={onPlayAgain} />
           <VButton variant="ghost" label={V.play.doneToday} onPress={game.reset} />
         </>
       }
@@ -375,7 +469,7 @@ const Results = ({ game }: { game: RaceGame }) => {
   );
 };
 
-const Closed = ({ game }: { game: RaceGame }) => {
+const Closed = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => void }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -386,7 +480,14 @@ const Closed = ({ game }: { game: RaceGame }) => {
   const waiting = rows.filter((row) => !row.run);
 
   return (
-    <Screen dock={<VButton big label={V.play.goShopping} href="/shop" />}>
+    <Screen
+      dock={
+        <>
+          <VButton big label={V.play.goShopping} href="/shop" />
+          <PlayAgainButton onPress={onPlayAgain} />
+        </>
+      }
+    >
       <View>
         <Kicker>{`${V.play.todaysRace} · ${V.day(race.level)}`}</Kicker>
         <VText face="display" size={skin.type.display.sm}>{V.play.playedToday}</VText>
@@ -419,9 +520,12 @@ const Closed = ({ game }: { game: RaceGame }) => {
 
 const VersusPlay = () => {
   const game = useRaceGame();
-  const suggestion = useDailySuggestion(game.screen === "done");
+  const [extra, setExtra] = useState(false);
+  const suggestion = useDailySuggestion(game.screen === "done" && !extra);
+  const playAgain = () => setExtra(true);
 
   const body = () => {
+    if (extra) return <ExtraRound onLeave={() => setExtra(false)} />;
     if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
     switch (game.screen) {
@@ -430,9 +534,9 @@ const VersusPlay = () => {
       case "play":
         return <Arena game={game} />;
       case "done":
-        return <Results game={game} />;
+        return <Results game={game} onPlayAgain={playAgain} />;
       case "closed":
-        return <Closed game={game} />;
+        return <Closed game={game} onPlayAgain={playAgain} />;
       case "empty":
         return (
           <VersusEmpty
@@ -447,7 +551,7 @@ const VersusPlay = () => {
     }
   };
 
-  return <StateFade stateKey={suggestion.item ? "suggestion" : game.screen}>{body()}</StateFade>;
+  return <StateFade stateKey={extra ? "extra" : suggestion.item ? "suggestion" : game.screen}>{body()}</StateFade>;
 };
 
 const createStyles = (s: Skin) =>

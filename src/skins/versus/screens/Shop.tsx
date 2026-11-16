@@ -4,6 +4,7 @@ import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
+import FoodLevelPanel from "@/components/views/ShopList/_components/FoodLevelPanel";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
 import common from "@/i18n/common";
@@ -63,10 +64,12 @@ const StartLine = ({
   foods,
   record,
   onStart,
+  onPick,
 }: {
   foods: FoodType[];
   record: { ms: number; username: string } | null;
   onStart: () => void;
+  onPick: (food: FoodType) => void;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -93,9 +96,15 @@ const StartLine = ({
       </Card>
       <View style={styles.lineup}>
         {foods.slice(0, LINEUP_SIZE).map((food) => (
-          <View key={food.id} style={styles.lineupCell}>
+          <Press
+            key={food.id}
+            accessibilityRole="button"
+            accessibilityLabel={food.name}
+            onPress={() => onPick(food)}
+            style={withPressed(styles.lineupCell)}
+          >
             <FoodPicture food={food} size={skin.size.icon.row - 8} />
-          </View>
+          </Press>
         ))}
         {more > 0 && (
           <View style={styles.lineupCell}>
@@ -314,7 +323,12 @@ const VersusShop = () => {
   }
 
   if (!run.isStarted) {
-    return <StartLine foods={run.preview} record={record} onStart={begin} />;
+    return (
+      <View style={styles.flex}>
+        <StartLine foods={run.preview} record={record} onStart={begin} onPick={run.openLevel} />
+        <FoodLevelPanel run={run} />
+      </View>
+    );
   }
 
   const allDone = remaining.length === 0;
