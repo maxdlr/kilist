@@ -2,18 +2,22 @@ import Press from "@/components/elements/Press";
 import type { SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
 import T from "../text";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
-import { useTabBarVisibility } from "@/providers/TabBarProvider";
+import { type GlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
+import AnimationService from "@/services/animation";
+import { useKeyboardState } from "react-native-keyboard-controller";
 import type { SwipeGameType } from "@/providers/SwipeFoodsProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
-import { Href, router } from "expo-router";
+import { Href, router, useFocusEffect } from "expo-router";
 import { BlurTargetView, BlurView } from "expo-blur";
 import {
   createContext,
   type ComponentRef,
   ReactNode,
+  useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -33,6 +37,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { CartIcon, CheckIcon, HelpCircleIcon, HelpCircleSolidIcon } from "@/components/icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -190,6 +195,51 @@ const ANDROID_REDUCTION = 4;
 const TINTLESS = 1;
 const GLASS_VEIL = 0.52;
 
+export const GlassBackdrop = ({
+  target,
+  cover,
+}: {
+  target: GlassTarget;
+  cover?: SharedValue<number>;
+}) => {
+  const C = useCalmColors();
+  const coverStyle = useAnimatedStyle(() => ({ opacity: cover ? cover.value : 1 }));
+
+  return (
+    <>
+      <Animated.View style={[StyleSheet.absoluteFill, coverStyle]}>
+        <BlurView
+          blurTarget={target}
+          intensity={Platform.OS === "android" ? TINTLESS : GLASS_BLUR}
+          blurReductionFactor={(TINTLESS * ANDROID_REDUCTION) / GLASS_BLUR}
+          blurMethod="dimezisBlurViewSdk31Plus"
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+      <View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: C.ground, opacity: GLASS_VEIL }]}
+      />
+    </>
+  );
+};
+
+/** Space the floating tab bar takes at the bottom of a screen; 0 while it's hidden or under the keyboard. */
+export const useTabBarInset = () => {
+  const skin = useSkin();
+  const insets = useSafeAreaInsets();
+  const { insideTabs, isHidden } = useTabBarVisibility();
+  const keyboardOpen = useKeyboardState((state) => state.isVisible);
+  const inset = insideTabs && !isHidden && !keyboardOpen ? skin.size.tabBar + insets.bottom : 0;
+  const offset = useSharedValue(inset);
+
+  useEffect(() => {
+    offset.set(withTiming(inset, AnimationService.config));
+  }, [inset, offset]);
+
+  return { inset, offset };
+};
+
 export const Screen = ({
   children,
   dock,
@@ -204,16 +254,26 @@ export const Screen = ({
   cover?: SharedValue<number>;
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { insideTabs } = useTabBarVisibility();
+  const { insideTabs, setGlassTarget } = useTabBarVisibility();
   const target = useRef<ComponentRef<typeof View>>(null);
   const [dockHeight, setDockHeight] = useState(0);
-  const coverStyle = useAnimatedStyle(() => ({ opacity: cover ? cover.value : 1 }));
+  const tabBar = useTabBarInset();
+  const isGlass = glass && !!dock;
+  const dockLift = useAnimatedStyle(() => ({ bottom: tabBar.offset.value }));
+  const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value }));
   useStatusBarStyle(skin.statusBarOnGround);
 
-  if (glass && dock) {
+  useFocusEffect(
+    useCallback(() => {
+      if (!isGlass || !insideTabs) return;
+      setGlassTarget(target);
+      return () => setGlassTarget((current) => (current === target ? null : current));
+    }, [isGlass, insideTabs, setGlassTarget]),
+  );
+
+  if (isGlass) {
     return (
       <View style={styles.root}>
         <BlurTargetView ref={target} style={[styles.root, styles.glassTarget]}>
@@ -227,30 +287,16 @@ export const Screen = ({
               },
             ]}
           >
-            <DockInset.Provider value={dockHeight}>
+            <DockInset.Provider value={dockHeight + tabBar.inset}>
               {children}
             </DockInset.Provider>
           </View>
         </BlurTargetView>
-        <View
-          style={styles.glassDock}
+        <Animated.View
+          style={[styles.glassDock, dockLift]}
           onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
         >
-          <Animated.View style={[StyleSheet.absoluteFill, coverStyle]}>
-            <BlurView
-              blurTarget={target}
-              intensity={Platform.OS === "android" ? TINTLESS : GLASS_BLUR}
-              blurReductionFactor={(TINTLESS * ANDROID_REDUCTION) / GLASS_BLUR}
-              blurMethod="dimezisBlurViewSdk31Plus"
-              style={StyleSheet.absoluteFill}
-            />
-          </Animated.View>
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: C.ground, opacity: GLASS_VEIL },
-            ]}
-          />
+          <GlassBackdrop target={target} cover={cover} />
           <View
             style={[
               styles.actionRow,
@@ -263,13 +309,13 @@ export const Screen = ({
           >
             {dock}
           </View>
-        </View>
+        </Animated.View>
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <Animated.View style={[styles.root, tabBarRoom]}>
       <View
         style={[
           styles.content,
@@ -296,7 +342,7 @@ export const Screen = ({
           {dock}
         </View>
       )}
-    </View>
+    </Animated.View>
   );
 };
 

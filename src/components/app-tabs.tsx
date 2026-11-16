@@ -1,15 +1,23 @@
 import { useSkin } from "@/providers/SkinProvider";
 import { SLIDE } from "@/services/screenSlide";
-import { SkinTabBar } from "@/skins/screens";
+import { SkinTabBar, useFloatingTabBar } from "@/skins/screens";
 import { Tabs } from "expo-router";
 import { useMemo } from "react";
 import { Animated, useWindowDimensions } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AppTabs() {
   const skin = useSkin();
   const reduced = useReducedMotion();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const floating = useFloatingTabBar();
+  const scene = { backgroundColor: skin.colors.ground };
+  // Screens that don't come from SkinScreen don't know about a floating tab bar.
+  const roomForTabBar = {
+    sceneStyle: [scene, floating && { paddingBottom: skin.size.tabBar + insets.bottom }],
+  };
 
   const slide = useMemo(
     () =>
@@ -37,7 +45,7 @@ export default function AppTabs() {
         animation: reduced ? "none" : "shift",
         sceneStyleInterpolator: reduced ? undefined : slide,
         transitionSpec: SLIDE,
-        sceneStyle: { backgroundColor: skin.colors.ground },
+        sceneStyle: scene,
       }}
     >
       <Tabs.Screen name="swipe" />
@@ -45,9 +53,9 @@ export default function AppTabs() {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="inventory" />
       <Tabs.Screen name="account" />
-      <Tabs.Screen name="looks" />
-      <Tabs.Screen name="look-preview" />
-      <Tabs.Screen name="admin" />
+      <Tabs.Screen name="looks" options={roomForTabBar} />
+      <Tabs.Screen name="look-preview" options={roomForTabBar} />
+      <Tabs.Screen name="admin" options={roomForTabBar} />
     </Tabs>
   );
 }

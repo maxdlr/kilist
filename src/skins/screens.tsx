@@ -13,6 +13,8 @@ export type SkinScreens = {
   Account: ComponentType;
   Loading: ComponentType;
   TabBar: ComponentType<TabBarProps>;
+  /** The tab bar floats over the scenes; screens outside SkinScreen must leave room for it. */
+  floatingTabBar?: boolean;
 };
 
 const SKIN_SCREENS: Record<string, SkinScreens> = {
@@ -21,7 +23,7 @@ const SKIN_SCREENS: Record<string, SkinScreens> = {
   calm: calmScreens,
 };
 
-export type ScreenSlot = Exclude<keyof SkinScreens, "TabBar">;
+export type ScreenSlot = Exclude<keyof SkinScreens, "TabBar" | "floatingTabBar">;
 
 const useScreens = () => SKIN_SCREENS[useSkin().id] ?? roastScreens;
 
@@ -30,3 +32,5 @@ export const SkinScreen = ({ slot }: { slot: ScreenSlot }) =>
 
 export const SkinTabBar = (props: TabBarProps) =>
   createElement(useScreens().TabBar, props);
+
+export const useFloatingTabBar = () => useScreens().floatingTabBar === true;

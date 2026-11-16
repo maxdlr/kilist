@@ -4,7 +4,7 @@ import T from "../text";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { useTabBarVisibility } from "@/providers/TabBarProvider";
+import { type GlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { ComponentType, useEffect } from "react";
@@ -13,9 +13,17 @@ import { CartIcon, HomeIcon, ListIcon, PlayIcon, SettingsIcon, WrenchIcon } from
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "./colors";
-import { CText, Dot, useCheckPending } from "./parts";
+import { CText, Dot, GlassBackdrop, useCheckPending } from "./parts";
 
 const ORDER = MAIN_TABS;
+
+// Android binds a BlurView to its target once, so remount the backdrop whenever the target screen changes.
+const targetKeys = new WeakMap<GlassTarget, number>();
+let nextTargetKey = 0;
+const targetKey = (target: GlassTarget) => {
+  if (!targetKeys.has(target)) targetKeys.set(target, ++nextTargetKey);
+  return targetKeys.get(target);
+};
 
 const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
   index: HomeIcon,
@@ -31,7 +39,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { isHidden } = useTabBarVisibility();
+  const { isHidden, glassTarget } = useTabBarVisibility();
   const { pending } = useCheckPending();
   const fullHeight = skin.size.tabBar + insets.bottom;
   const height = useSharedValue(fullHeight);
@@ -48,7 +56,11 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const currentName = shownTab(actualName);
 
   return (
-    <Animated.View accessibilityRole="tablist" style={[styles.bar, animatedStyle]}>
+    <Animated.View
+      accessibilityRole="tablist"
+      style={[styles.bar, !glassTarget && styles.solid, animatedStyle]}
+    >
+      {glassTarget && <GlassBackdrop key={targetKey(glassTarget)} target={glassTarget} />}
       <View style={[styles.row, { paddingBottom: insets.bottom }]}>
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
@@ -98,11 +110,15 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     bar: {
-      backgroundColor: C.ground,
       borderTopColor: C.line,
       borderTopWidth: s.shape.divider,
+      bottom: 0,
+      left: 0,
       overflow: "hidden",
+      position: "absolute",
+      right: 0,
     },
+    solid: { backgroundColor: C.ground },
     row: { flex: 1, flexDirection: "row", paddingHorizontal: s.spacing.tight },
     tab: { alignItems: "center", flex: 1, gap: s.spacing.tight, justifyContent: "center" },
     iconWrap: { alignItems: "center", justifyContent: "center" },

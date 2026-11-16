@@ -15,6 +15,7 @@ const calmScreens: SkinScreens = {
   Account: CalmAccount,
   Loading: CalmLoading,
   TabBar: CalmTabBar,
+  floatingTabBar: true,
 };
 
 export default calmScreens;
