@@ -5,7 +5,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import type { ReactNode } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { MailIcon, UserPlusIcon } from "@/components/icons";
+import { MailIcon } from "@/components/icons";
 import Svg, { Circle, Path } from "react-native-svg";
 
 const SIZE = 46;
@@ -44,11 +44,18 @@ const drawn =
   (color: string) =>
     drawIcon(path, dot, color);
 
-export const useHomeShortcuts = (withNotice = false): HomeShortcut[] => {
+/**
+ * The home shortcuts. Pass `onAdd` to add a food in place (render an AddFoodPanel at screen level);
+ * without it, "add" opens the list's add panel.
+ */
+export const useHomeShortcuts = ({
+  withNotice = false,
+  onAdd,
+}: { withNotice?: boolean; onAdd?: () => void } = {}): HomeShortcut[] => {
   const skin = useSkin();
   const links = useHomeLinks();
-  const notice = withNotice ? links.notice : null;
-  const NoticeIcon = links.isGuest ? UserPlusIcon : MailIcon;
+  // Guests aren't nudged to create an account from the dock; only the email confirmation shows here.
+  const notice = withNotice && !links.isGuest ? links.notice : null;
 
   return [
     ...(notice
@@ -57,12 +64,12 @@ export const useHomeShortcuts = (withNotice = false): HomeShortcut[] => {
             label: notice.label,
             open: notice.open,
             icon: (color: string) => (
-              <NoticeIcon size={ICON} color={color} strokeWidth={1.8} />
+              <MailIcon size={ICON} color={color} strokeWidth={1.8} />
             ),
           },
         ]
       : []),
-    { label: common.shop.add, open: links.openAdd, icon: drawn(PLUS) },
+    { label: common.shop.add, open: onAdd ?? links.openAdd, icon: drawn(PLUS) },
     {
       label: skin.copy.tabs.inventory,
       open: links.openInventory,
@@ -92,7 +99,7 @@ const HomeShortcuts = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const items = useHomeShortcuts(withNotice);
+  const items = useHomeShortcuts({ withNotice });
   const color = ink ?? skin.colors.onGround;
 
   return (

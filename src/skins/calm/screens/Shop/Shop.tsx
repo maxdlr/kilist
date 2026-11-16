@@ -7,6 +7,7 @@ import { aisleList, aisleOf } from "@/offline/foodNames";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
+import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, useWindowDimensions, View } from "react-native";
@@ -14,7 +15,7 @@ import { ArrowLeftIcon, ArrowRightIcon, InfoCircleIcon, InfoCircleSolidIcon, Plu
 import Animated from "react-native-reanimated";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, DockSpacer, Screen, useDockCover } from "@/skins/calm/components";
+import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "@/skins/calm/components";
 import { CalmLoading, CalmMessage } from "../States";
 import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
@@ -214,14 +215,17 @@ const CalmShop = () => {
                   <View style={styles.tags}>
                     {section.foods.map((food) => {
                       const picked = run.selected.includes(food.id);
+                      const level = levelOf(food.inStockScore);
                       return (
                         <Press
                           key={food.id}
                           accessibilityRole="button"
+                          accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}`}
                           accessibilityState={{ selected: picked }}
                           onPress={() => run.toggleSelect(food)}
                           style={withPressed([styles.tag, picked && styles.tagPicked])}
                         >
+                          <Dot color={skin.colors.levels[level]} />
                           <CText size={skin.type.body} color={picked ? C.onFill : C.text} numberOfLines={1}>
                             {food.name}
                           </CText>
@@ -425,9 +429,12 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     section: { gap: s.spacing.small },
     tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     tag: {
+      alignItems: "center",
       borderColor: C.fieldLine,
       borderRadius: s.size.toggle / 2,
       borderWidth: s.shape.border,
+      flexDirection: "row",
+      gap: s.spacing.small,
       paddingHorizontal: s.spacing.inline + 2,
       paddingVertical: s.spacing.small,
     },

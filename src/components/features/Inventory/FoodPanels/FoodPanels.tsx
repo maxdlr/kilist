@@ -3,7 +3,7 @@ import type { InventoryShelf } from "@/hooks/screens/useInventoryShelf";
 import { useSkin } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { levelOf } from "@/utils/scoreUtils";
-import FoodFormModal from "./_components/FoodFormModal";
+import FoodFormModal from "../FoodFormModal";
 
 const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
   const skin = useSkin();

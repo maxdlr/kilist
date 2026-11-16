@@ -7,9 +7,23 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { type GlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
-import { ComponentType, useEffect } from "react";
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import { CartIcon, HomeIcon, ListIcon, PlayIcon, SettingsIcon, WrenchIcon } from "@/components/icons";
+import {
+  CartIcon,
+  CartSolidIcon,
+  HomeIcon,
+  HomeSolidIcon,
+  type Icon,
+  ListIcon,
+  ListSolidIcon,
+  PlayIcon,
+  PlaySolidIcon,
+  SettingsIcon,
+  SettingsSolidIcon,
+  WrenchIcon,
+  WrenchSolidIcon,
+} from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
@@ -26,13 +40,14 @@ const targetKey = (target: GlassTarget) => {
   return targetKeys.get(target);
 };
 
-const ICONS: Record<string, ComponentType<{ size: number; color: string; strokeWidth?: number }>> = {
-  index: HomeIcon,
-  swipe: PlayIcon,
-  shop: CartIcon,
-  inventory: ListIcon,
-  account: SettingsIcon,
-  admin: WrenchIcon,
+/** Outline when idle, the same glyph solid when selected. */
+const ICONS: Record<string, { idle: Icon; selected: Icon }> = {
+  index: { idle: HomeIcon, selected: HomeSolidIcon },
+  swipe: { idle: PlayIcon, selected: PlaySolidIcon },
+  shop: { idle: CartIcon, selected: CartSolidIcon },
+  inventory: { idle: ListIcon, selected: ListSolidIcon },
+  account: { idle: SettingsIcon, selected: SettingsSolidIcon },
+  admin: { idle: WrenchIcon, selected: WrenchSolidIcon },
 };
 
 const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
@@ -69,7 +84,8 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           if (!label) return null;
           const isCurrent = currentName === route.name;
           const badge = name === "swipe" && pending && !isCurrent;
-          const Icon = ICONS[name] ?? HomeIcon;
+          const icons = ICONS[name] ?? ICONS.index!;
+          const TabIcon = isCurrent ? icons.selected : icons.idle;
 
           return (
             <Press
@@ -84,7 +100,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               style={withPressed(styles.tab)}
             >
               <View style={styles.iconWrap}>
-                <Icon size={skin.size.icon.action + 2} color={isCurrent ? C.text : C.textSoft} strokeWidth={isCurrent ? 1.8 : 1.4} />
+                <TabIcon size={skin.size.icon.action + 2} color={isCurrent ? C.text : C.textSoft} strokeWidth={1.4} />
                 {badge && (
                   <View style={styles.badge}>
                     <Dot color={C.pendingDot} size={7} />
