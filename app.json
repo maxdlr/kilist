@@ -75,7 +75,9 @@
           "icon": "./assets/images/notification-icon.png",
           "color": "#23221F"
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
