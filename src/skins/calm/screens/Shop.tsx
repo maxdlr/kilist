@@ -246,6 +246,7 @@ const CalmShop = () => {
     </>
   );
   if (!run.isStarted && !run.isEmpty) {
+    const selecting = run.selected.length > 0;
     const lang = getLang();
     const byAisle = new Map<string, FoodType[]>();
     for (const food of run.preview) {
@@ -276,7 +277,16 @@ const CalmShop = () => {
       <View style={styles.flex}>
         <Screen
           padded={false}
-          dock={dockWith(common.shop.start, run.start)}
+          dock={
+            selecting ? (
+              <>
+                <CButton variant="secondary" label={skin.copy.common.cancel} onPress={run.clearSelection} />
+                <CButton label={common.shop.buyLater(run.selected.length)} onPress={run.buyLater} />
+              </>
+            ) : (
+              dockWith(common.shop.start, run.start)
+            )
+          }
           glass
           cover={startCover.cover}
         >
@@ -290,6 +300,11 @@ const CalmShop = () => {
                 >
                   {T.shop.title}
                 </CText>
+                {selecting ? (
+                  <CText size={skin.type.label} color={C.text} accessibilityLiveRegion="polite">
+                    {common.shop.selected(run.selected.length)}
+                  </CText>
+                ) : (
                 <Press
                   accessibilityRole="button"
                   accessibilityLabel={T.shop.howAria}
@@ -311,6 +326,7 @@ const CalmShop = () => {
                     />
                   )}
                 </Press>
+                )}
               </View>
             </View>
             <Animated.ScrollView
@@ -331,18 +347,22 @@ const CalmShop = () => {
                     </CText>
                   )}
                   <View style={styles.tags}>
-                    {section.foods.map((food) => (
-                      <Press
-                        key={food.id}
-                        accessibilityRole="button"
-                        onPress={() => run.openLevel(food)}
-                        style={withPressed(styles.tag)}
-                      >
-                        <CText size={skin.type.body} numberOfLines={1}>
-                          {food.name}
-                        </CText>
-                      </Press>
-                    ))}
+                    {section.foods.map((food) => {
+                      const picked = run.selected.includes(food.id);
+                      return (
+                        <Press
+                          key={food.id}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: picked }}
+                          onPress={() => run.toggleSelect(food)}
+                          style={withPressed([styles.tag, picked && styles.tagPicked])}
+                        >
+                          <CText size={skin.type.body} color={picked ? C.onFill : C.text} numberOfLines={1}>
+                            {food.name}
+                          </CText>
+                        </Press>
+                      );
+                    })}
                   </View>
                 </View>
               ))}
@@ -560,6 +580,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingHorizontal: s.spacing.inline + 2,
       paddingVertical: s.spacing.small,
     },
+    tagPicked: { backgroundColor: C.fill, borderColor: C.fill },
     how: {
       backgroundColor: C.tint,
       borderRadius: s.shape.radius,

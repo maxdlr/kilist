@@ -18,6 +18,7 @@ const IN_STOCK: Record<SwipeDirection, boolean | null> = {
   up: null,
 };
 const BONUS_VISIBLE_MS = 700;
+const HINT_VISIBLE_MS = 900;
 
 type SwipeMode = "daily" | "replay" | "again";
 
@@ -43,6 +44,7 @@ const useSwipeGame = () => {
     unswipe,
     update,
     loadDeck,
+    rememberDeck,
     completeSession,
     freezeDeck,
     roundRecap,
@@ -54,7 +56,10 @@ const useSwipeGame = () => {
   const [phase, setPhase] = useState<"idle" | "play" | "done">("idle");
   const [swiped, setSwiped] = useState(0);
   const [outFoods, setOutFoods] = useState<FoodType[]>([]);
-  const [intent, setIntent] = useState<SwipeDirection | null>(null);
+  const [intent, setIntentState] = useState<SwipeDirection | null>(null);
+  const [hint, setHint] = useState<SwipeDirection | null>(null);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdHint = useRef(false);
   const [earned, setEarned] = useState(0);
   const [bonus, setBonus] = useState(0);
   const [bonusPop, setBonusPop] = useState(0);
@@ -75,9 +80,24 @@ const useSwipeGame = () => {
   useEffect(
     () => () => {
       if (bonusTimer.current) clearTimeout(bonusTimer.current);
+      if (hintTimer.current) clearTimeout(hintTimer.current);
     },
     [],
   );
+
+  const setIntent = useCallback((next: SwipeDirection | null) => {
+    setIntentState(next);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = null;
+    if (next) {
+      setHint(next);
+    } else if (holdHint.current) {
+      hintTimer.current = setTimeout(() => setHint(null), HINT_VISIBLE_MS);
+    } else {
+      setHint(null);
+    }
+    holdHint.current = false;
+  }, []);
 
   const collectRef = useRef<(reward: SwipeReward | null) => SwipeReward | null>((reward) => reward);
   const updateRef = useRef(update);
@@ -128,6 +148,7 @@ const useSwipeGame = () => {
 
   const begin = () => {
     setMode("daily");
+    rememberDeck((foods ?? []).map((food) => food.id));
     start();
   };
 
@@ -175,6 +196,7 @@ const useSwipeGame = () => {
   const handleSwipe = (food: FoodType, direction: SwipeDirection) => {
     const isLast = foods?.length === 1;
 
+    holdHint.current = true;
     if (direction === "left") outRef.current = [...outRef.current, food];
     const added = outRef.current;
     setSwiped((count) => count + 1);
@@ -200,6 +222,7 @@ const useSwipeGame = () => {
       setOutFoods(outRef.current);
     }
     setSwiped((count) => Math.max(0, count - 1));
+    holdHint.current = false;
     setIntent(null);
     setReturning({ key: held.food.id, direction: held.direction });
     unswipe(held.food);
@@ -257,6 +280,7 @@ const useSwipeGame = () => {
     total: swiped + (foods?.length ?? 0),
     outFoods,
     intent,
+    hint,
     setIntent,
     earned,
     bonus,

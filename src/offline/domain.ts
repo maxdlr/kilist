@@ -135,14 +135,20 @@ export const swipeDeck = (
   return [...low, ...stale, ...rest].slice(0, size);
 };
 
-export const replayDeck = (foods: LocalFood[], now: number) => {
+export const replayDeck = (foods: LocalFood[], now: number, ids: number[] = []) => {
   const { deckSize, restHours } = rules().swipe;
   const since = now - restHours * HOUR_MS;
+  const listed = foods.filter((food) => food.lists.length > 0);
+  if (ids.length > 0) {
+    const byId = new Map(listed.map((food) => [food.id, food]));
+    return ids.map((id) => byId.get(id)).filter((food): food is LocalFood => food !== undefined);
+  }
   const lastSwipe = (food: LocalFood) => Math.max(0, ...food.histories.map((entry) => time(entry.at)));
-  return foods
-    .filter((food) => food.lists.length > 0 && lastSwipe(food) >= since)
-    .sort((a, b) => lastSwipe(a) - lastSwipe(b))
-    .slice(0, deckSize);
+  return listed
+    .filter((food) => lastSwipe(food) >= since)
+    .sort((a, b) => lastSwipe(b) - lastSwipe(a))
+    .slice(0, deckSize)
+    .reverse();
 };
 
 export const shopCandidates = (foods: LocalFood[], now: number) => {

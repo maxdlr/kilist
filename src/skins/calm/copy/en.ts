@@ -193,9 +193,6 @@ const calmCopy: RoastCopy = {
     discardTitle: "Careful, your edits won't be saved.",
     discardLeave: "Discard",
     discardKeep: "Keep editing",
-    leaveListTitle: (name: string) => `${name} will leave your list.`,
-    leaveListLine: "It won't be on this shopping trip.",
-    leaveListConfirm: "Remove from list",
     removeOne: (name: string) => `Remove ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "Remove this food?" : `Remove ${count} foods?`,

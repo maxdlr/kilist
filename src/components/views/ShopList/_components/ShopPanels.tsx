@@ -14,7 +14,6 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
-import FoodLevelPanel from "./FoodLevelPanel";
 import { StyleSheet, View } from "react-native";
 
 const LOOKUP_DELAY_MS = 250;
@@ -134,7 +133,6 @@ const ShopPanels = ({ run }: { run: ShopRun }) => (
     <BottomPanel visible={run.panel === "add"} onClose={run.closePanel} dismissible>
       {run.panel === "add" && <AddFoodForm run={run} />}
     </BottomPanel>
-    <FoodLevelPanel run={run} />
   </>
 );
 

@@ -146,6 +146,8 @@ const fr: CommonText = {
     stopSave: "Enregistrer mes achats",
     stopDiscard: "Ne pas compter ces courses",
     stopKeep: "Continuer les courses",
+    selected: (count: number) => `${count} ${count === 1 ? "sélectionné" : "sélectionnés"}`,
+    buyLater: (count: number) => `Plus tard (${count})`,
     add: "Ajouter un aliment",
     addTitle: "Ajouter un aliment",
     addName: "Nom",

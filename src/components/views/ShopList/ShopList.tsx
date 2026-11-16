@@ -20,7 +20,6 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { XmarkIcon } from "@/components/icons";
 import ShopListFoodRow from "./_components/ShopListFoodRow";
-import FoodLevelPanel from "./_components/FoodLevelPanel";
 import ShopPanels from "./_components/ShopPanels";
 
 const ShopList = () => {
@@ -53,41 +52,71 @@ const ShopList = () => {
   }
 
   if (!run.isStarted && !run.isEmpty) {
+    const selecting = run.selected.length > 0;
     return (
       <View style={styles.flex}>
       <Sheet
         fill={skin.colors.accent}
         dock={
           <Dock>
-            <KilButton
-              height={skin.size.button.xl}
-              fontSize={skin.type.headline}
-              label={caseFor(skin, common.shop.start)}
-              onTouch={run.start}
-            />
+            {selecting ? (
+              <View style={styles.controls}>
+                <KilButton
+                  flex={1}
+                  height={skin.size.button.xl}
+                  fontSize={skin.type.lead}
+                  variant="secondary"
+                  label={skin.copy.common.cancel}
+                  onTouch={run.clearSelection}
+                />
+                <KilButton
+                  flex={1}
+                  height={skin.size.button.xl}
+                  fontSize={skin.type.lead}
+                  label={caseFor(skin, common.shop.buyLater(run.selected.length))}
+                  onTouch={run.buyLater}
+                />
+              </View>
+            ) : (
+              <KilButton
+                height={skin.size.button.xl}
+                fontSize={skin.type.headline}
+                label={caseFor(skin, common.shop.start)}
+                onTouch={run.start}
+              />
+            )}
           </Dock>
         }
       >
-        <ThemedText size={skin.type.body}>{caseFor(skin, common.shop.startLabel)}</ThemedText>
+        <ThemedText size={skin.type.body}>
+          {caseFor(skin, selecting ? common.shop.selected(run.selected.length) : common.shop.startLabel)}
+        </ThemedText>
         <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.range.low, run.range.high))}</Title>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startRight)}</ThemedText>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startLeft)}</ThemedText>
         <ScrollView style={styles.tagScroll} contentContainerStyle={styles.tags}>
-          {run.preview.map((food) => (
-            <Press
-              key={food.id}
-              accessibilityRole="button"
-              onPress={() => run.openLevel(food)}
-              style={withPressed([styles.tag, { borderColor: skin.colors.onPaper }])}
-            >
-              <ThemedText size={skin.type.body} numberOfLines={1}>
-                {caseFor(skin, food.name)}
-              </ThemedText>
-            </Press>
-          ))}
+          {run.preview.map((food) => {
+            const picked = run.selected.includes(food.id);
+            return (
+              <Press
+                key={food.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected: picked }}
+                onPress={() => run.toggleSelect(food)}
+                style={withPressed([
+                  styles.tag,
+                  { borderColor: skin.colors.onPaper },
+                  picked && { backgroundColor: skin.colors.onPaper },
+                ])}
+              >
+                <ThemedText size={skin.type.body} color={picked ? skin.colors.accent : undefined} numberOfLines={1}>
+                  {caseFor(skin, food.name)}
+                </ThemedText>
+              </Press>
+            );
+          })}
         </ScrollView>
       </Sheet>
-      <FoodLevelPanel run={run} />
       </View>
     );
   }

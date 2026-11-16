@@ -4,7 +4,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { LevelNumber, Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
 
-export const LEVEL_NUMBERS: LevelNumber[] = [1, 2, 3, 4, 5];
+export const LEVEL_NUMBERS: LevelNumber[] = [1, 3, 5];
 
 const LevelPicker = ({
   value,
@@ -39,13 +39,15 @@ const LevelPicker = ({
               style={({ pressed }) => [
                 styles.option,
                 {
-                  backgroundColor: selected ? color : "transparent",
+                  // backgroundColor: selected ? color : "transparent",
                   borderColor: selected ? color : skin.panel.line,
                   opacity: pressed ? skin.shape.pressedOpacity : 1,
                 },
               ]}
             >
-              {!selected && <View style={[styles.dot, { backgroundColor: color }]} />}
+              {!selected && (
+                <View style={[styles.dot, { backgroundColor: color }]} />
+              )}
               <ThemedText
                 size={skin.type.caption}
                 color={selected ? skin.colors.onLevel : skin.panel.ink}
@@ -79,7 +81,11 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.hair,
       paddingVertical: s.spacing.tight,
     },
-    dot: { borderRadius: s.spacing.small, height: s.spacing.small, width: s.spacing.small },
+    dot: {
+      borderRadius: s.spacing.small,
+      height: s.spacing.small,
+      width: s.spacing.small,
+    },
     text: { textAlign: "center" },
   });
 

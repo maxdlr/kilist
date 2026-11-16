@@ -188,6 +188,21 @@ describe("the swipe game offline", () => {
     expect(call("get", "foods/swipe/browse")).toHaveLength(10);
   });
 
+  it("replays the latest game, not the first one of the day", () => {
+    const at = (minutes: number) => new Date(Date.now() - minutes * 60000).toISOString();
+    const foods = Array.from({ length: 15 }, (_, index) =>
+      food(index + 1, 0.25, { histories: [{ isInStock: true, at: at(60 - index) }] }),
+    );
+    pull({}, snapshot({ foods, swipedBefore: true }));
+
+    expect(call("get", "foods/swipe/browse", {}, { replay: 1 }).map((entry: any) => entry.id)).toEqual([
+      6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+    ]);
+    expect(call("get", "foods/swipe/browse", {}, { replay: 1, ids: "3,1,2" }).map((entry: any) => entry.id)).toEqual([
+      3, 1, 2,
+    ]);
+  });
+
   it("plays again with foods not sorted today, well-stocked ones included", () => {
     const hourAgo = new Date(Date.now() - 3600000).toISOString();
     pull(

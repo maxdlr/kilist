@@ -145,9 +145,9 @@ const Checking = ({ game }: { game: SwipeGame }) => {
             <UndoButton enabled={game.canUndo} onPress={game.undo} />
           </View>
           <View style={styles.hint} accessibilityLiveRegion="polite">
-            {game.intent && (
-              <CText weight="bold" size={skin.type.label} color={intentColor[game.intent]}>
-                {T.intent[game.intent]}
+            {game.hint && (
+              <CText weight="bold" size={skin.type.label} color={intentColor[game.hint]}>
+                {T.intent[game.hint]}
               </CText>
             )}
           </View>

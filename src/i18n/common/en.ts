@@ -134,6 +134,8 @@ const en = {
     stopSave: "Save what I bought",
     stopDiscard: "Don't count this shop",
     stopKeep: "Keep shopping",
+    selected: (count: number) => `${count} selected`,
+    buyLater: (count: number) => `Buy later (${count})`,
     add: "Add a food",
     addTitle: "Add a food",
     addName: "Name",

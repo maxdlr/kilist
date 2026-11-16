@@ -226,7 +226,10 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
     /^foods\/swipe\/browse$/,
     ({ query }) => {
       const now = Date.now();
-      if (query.replay) return replayDeck(state().foods, now).map(toFood);
+      if (query.replay) {
+        const ids = String(query.ids ?? "").split(",").map(Number).filter(Number.isInteger).filter(Boolean);
+        return replayDeck(state().foods, now, ids.map((id) => resolveLocalId(state(), resolveAlias(id)))).map(toFood);
+      }
       const again = query.again === "1" || query.again === 1;
       const size = again ? rules().swipe.deckSize : deckSizeFor(state(), now);
       return swipeDeck(state().foods, now, { size, again }).map(toFood);

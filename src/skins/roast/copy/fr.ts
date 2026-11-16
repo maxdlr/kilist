@@ -214,9 +214,6 @@ const fr: SkinCopy = {
     discardTitle: "ATTENTION. TES MODIFS NE SERONT PAS GARDÉES.",
     discardLeave: "LES JETER",
     discardKeep: "CONTINUER",
-    leaveListTitle: (name: string) => `${name} QUITTE TA LISTE.`,
-    leaveListLine: "TU DIS QUE T'EN AS ASSEZ. J'ESPÈRE QUE T'AS RAISON.",
-    leaveListConfirm: "L'ENLEVER",
     removeOne: (name: string) => `RETIRER ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "RETIRER CET ALIMENT ?" : `RETIRER ${count} ALIMENTS ?`,

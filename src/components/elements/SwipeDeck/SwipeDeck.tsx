@@ -1,7 +1,7 @@
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService, { projectFling } from "@/services/animation";
 import type { ActionColors, Skin } from "@/skins/types";
-import { ReactNode, RefObject, useEffect } from "react";
+import { createContext, ReactNode, RefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import {
   GestureDetector,
@@ -10,6 +10,7 @@ import {
   useSimultaneousGestures,
 } from "react-native-gesture-handler";
 import Animated, {
+  type SharedValue,
   clamp,
   interpolate,
   useAnimatedReaction,
@@ -53,25 +54,42 @@ const offscreen = (direction: SwipeDirection | null) => ({
   y: direction === "up" ? -SCREEN_HEIGHT * 1.2 : 0,
 });
 
+type DeckKey = string | number;
+
+const DeckRise = createContext<SharedValue<number> | null>(null);
+
+export const useDeckRise = () => useContext(DeckRise);
+type Flinger = (direction: SwipeDirection) => void;
+
 const DeckSheet = ({
+  itemKey,
+  order,
+  gone,
+  register,
   isTop,
+  leaving,
+  onGone,
   returnFrom,
   nudging,
   allowUp,
   stamps,
-  flingRef,
   onIntent,
   onSwipe,
   onLongPress,
   children,
 }: {
   onLongPress?: () => void;
+  itemKey: DeckKey;
+  order: SharedValue<DeckKey[]>;
+  gone: SharedValue<DeckKey[]>;
+  register: (key: DeckKey, flinger: Flinger | null) => void;
   isTop: boolean;
+  leaving: boolean;
+  onGone: () => void;
   returnFrom: SwipeDirection | null;
   nudging: boolean;
   allowUp: boolean;
   stamps: Partial<Record<SwipeDirection, string>>;
-  flingRef: RefObject<SwipeDeckFling | null>;
   onIntent: (intent: SwipeDirection | null) => void;
   onSwipe: (direction: SwipeDirection) => void;
   children: ReactNode;
@@ -86,15 +104,45 @@ const DeckSheet = ({
   const speedX = useSharedValue(0);
   const speedY = useSharedValue(0);
   const rise = useSharedValue(isTop ? 1 : 0);
+  const dragging = useSharedValue(false);
 
+  const handlers = useRef({ onSwipe, onIntent, onGone, onLongPress });
   useEffect(() => {
-    rise.set(withTiming(isTop ? 1 : 0, AnimationService.enter));
-  }, [isTop, rise]);
+    handlers.current = { onSwipe, onIntent, onGone, onLongPress };
+  });
+  const hasLongPress = onLongPress !== undefined;
+
+  const callIntent = useCallback((next: SwipeDirection | null) => handlers.current.onIntent(next), []);
+  const callCommit = useCallback((direction: SwipeDirection) => {
+    handlers.current.onSwipe(direction);
+    handlers.current.onIntent(null);
+  }, []);
+  const callGone = useCallback(() => handlers.current.onGone(), []);
+  const callHold = useCallback(() => handlers.current.onLongPress?.(), []);
+
+  const isTopNow = useCallback(() => {
+    "worklet";
+    return order.value.find((key) => !gone.value.includes(key)) === itemKey;
+  }, [order, gone, itemKey]);
+
+  useAnimatedReaction(
+    () => flung.value || isTopNow(),
+    (front, previous) => {
+      if (front !== previous) rise.set(withTiming(front ? 1 : 0, AnimationService.enter));
+    },
+  );
 
   useEffect(() => {
     x.set(withTiming(0, AnimationService.config));
     y.set(withTiming(0, AnimationService.config));
   }, [x, y]);
+
+  useEffect(() => {
+    if (leaving || !flung.value) return;
+    flung.set(false);
+    x.set(withTiming(0, AnimationService.config));
+    y.set(withTiming(0, AnimationService.config));
+  }, [leaving, flung, x, y]);
   const lastIntent = useSharedValue<SwipeDirection | null>(null);
   const nudge = useSharedValue(0);
 
@@ -126,116 +174,127 @@ const DeckSheet = ({
           : null,
     (next, previous) => {
       if (previous !== undefined && next !== previous)
-        scheduleOnRN(onIntent, next);
+        scheduleOnRN(callIntent, next);
     },
   );
 
-  const finish = (direction: SwipeDirection) => {
-    onIntent(null);
-    onSwipe(direction);
-  };
-
-  const fling = (direction: SwipeDirection) => {
-    "worklet";
-    if (flung.value) return;
-    flung.set(true);
-
-    const done = () => {
+  const fling = useCallback(
+    (direction: SwipeDirection) => {
       "worklet";
-      scheduleOnRN(finish, direction);
-    };
-    const timing = AnimationService.fling;
+      if (flung.value) return;
+      flung.set(true);
+      dragging.set(false);
+      gone.modify((keys) => {
+        "worklet";
+        return keys.includes(itemKey) ? keys : [...keys, itemKey];
+      });
+      scheduleOnRN(callCommit, direction);
 
-    if (direction === "up") {
-      y.set(withTiming(-SCREEN_HEIGHT * 1.2, timing, done));
-      return;
-    }
-    x.set(
-      withTiming(
-        (direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6,
-        timing,
-        done,
-      ),
-    );
-  };
+      const done = (finished?: boolean) => {
+        "worklet";
+        if (finished) scheduleOnRN(callGone);
+      };
+      const timing = AnimationService.fling;
+
+      if (direction === "up") {
+        y.set(withTiming(-SCREEN_HEIGHT * 1.2, timing, done));
+        return;
+      }
+      x.set(withTiming((direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6, timing, done));
+    },
+    [flung, dragging, gone, itemKey, callCommit, callGone, x, y],
+  );
 
   useEffect(() => {
-    if (!isTop) return;
-    flingRef.current = (direction) => {
-      onIntent(direction);
+    if (leaving) return;
+    register(itemKey, (direction) => {
+      callIntent(direction);
       fling(direction);
-    };
-  });
+    });
+    return () => register(itemKey, null);
+  }, [leaving, register, itemKey, callIntent, fling]);
 
-  const pan = usePanGesture({
-    enabled: isTop,
-    onActivate: () => {
-      startX.set(x.value);
-      startY.set(y.value);
-      speedX.set(0);
-      speedY.set(0);
-    },
-    onUpdate: (event) => {
-      if (flung.value) return;
-      x.set(startX.value + event.translationX);
-      y.set(startY.value + event.translationY);
-      speedX.set(event.velocityX);
-      speedY.set(event.velocityY);
+  const panConfig = useMemo(
+    () => ({
+      onActivate: () => {
+        "worklet";
+        dragging.set(!flung.value && isTopNow());
+        if (!dragging.value) return;
+        startX.set(x.value);
+        startY.set(y.value);
+        speedX.set(0);
+        speedY.set(0);
+      },
+      onUpdate: (event: { translationX: number; translationY: number; velocityX: number; velocityY: number }) => {
+        "worklet";
+        if (flung.value || !dragging.value) return;
+        x.set(startX.value + event.translationX);
+        y.set(startY.value + event.translationY);
+        speedX.set(event.velocityX);
+        speedY.set(event.velocityY);
 
-      let next: SwipeDirection | null = null;
-      if (allowUp && y.value < -INTENT_AT && -y.value > Math.abs(x.value)) {
-        next = "up";
-      } else if (x.value > INTENT_AT) {
-        next = "right";
-      } else if (x.value < -INTENT_AT) {
-        next = "left";
-      }
+        let next: SwipeDirection | null = null;
+        if (allowUp && y.value < -INTENT_AT && -y.value > Math.abs(x.value)) {
+          next = "up";
+        } else if (x.value > INTENT_AT) {
+          next = "right";
+        } else if (x.value < -INTENT_AT) {
+          next = "left";
+        }
 
-      if (next !== lastIntent.value) {
-        lastIntent.set(next);
-        scheduleOnRN(onIntent, next);
-      }
-    },
-    onFinalize: () => {
-      if (flung.value) return;
+        if (next !== lastIntent.value) {
+          lastIntent.set(next);
+          scheduleOnRN(callIntent, next);
+        }
+      },
+      onFinalize: () => {
+        "worklet";
+        if (flung.value || !dragging.value) return;
+        dragging.set(false);
 
-      const vx = speedX.value;
-      const vy = speedY.value;
-      speedX.set(0);
-      speedY.set(0);
-      const flickX =
-        Math.abs(vx) > FLICK_VELOCITY && Math.sign(vx) === Math.sign(x.value)
-          ? x.value + projectFling(vx)
-          : x.value;
-      const flickY =
-        vy < -FLICK_VELOCITY && y.value < 0
-          ? y.value + projectFling(vy)
-          : y.value;
+        const vx = speedX.value;
+        const vy = speedY.value;
+        speedX.set(0);
+        speedY.set(0);
+        const flickX =
+          Math.abs(vx) > FLICK_VELOCITY && Math.sign(vx) === Math.sign(x.value)
+            ? x.value + projectFling(vx)
+            : x.value;
+        const flickY = vy < -FLICK_VELOCITY && y.value < 0 ? y.value + projectFling(vy) : y.value;
 
-      if (allowUp && flickY < -COMMIT_UP && -y.value > Math.abs(x.value)) {
-        fling("up");
-      } else if (flickX > COMMIT_X && x.value > INTENT_AT) {
-        fling("right");
-      } else if (flickX < -COMMIT_X && x.value < -INTENT_AT) {
-        fling("left");
-      } else {
-        x.set(withSpring(0, { ...AnimationService.settle, velocity: vx }));
-        y.set(withSpring(0, { ...AnimationService.settle, velocity: vy }));
-        lastIntent.set(null);
-        scheduleOnRN(onIntent, null);
-      }
-    },
-  });
+        if (allowUp && flickY < -COMMIT_UP && -y.value > Math.abs(x.value)) {
+          fling("up");
+        } else if (flickX > COMMIT_X && x.value > INTENT_AT) {
+          fling("right");
+        } else if (flickX < -COMMIT_X && x.value < -INTENT_AT) {
+          fling("left");
+        } else {
+          x.set(withSpring(0, { ...AnimationService.settle, velocity: vx }));
+          y.set(withSpring(0, { ...AnimationService.settle, velocity: vy }));
+          lastIntent.set(null);
+          scheduleOnRN(callIntent, null);
+        }
+      },
+    }),
+    [allowUp, fling, callIntent, isTopNow, dragging, flung, startX, startY, speedX, speedY, x, y, lastIntent],
+  );
+  const pan = usePanGesture(panConfig);
 
-  const hold = useLongPressGesture({
-    enabled: isTop && onLongPress !== undefined,
-    onActivate: () => {
-      if (onLongPress && !flung.value) scheduleOnRN(onLongPress);
-    },
-  });
+  const holdConfig = useMemo(
+    () => ({
+      enabled: hasLongPress,
+      onActivate: () => {
+        "worklet";
+        if (!flung.value && isTopNow()) scheduleOnRN(callHold);
+      },
+    }),
+    [hasLongPress, callHold, flung, isTopNow],
+  );
+  const hold = useLongPressGesture(holdConfig);
   const gesture = useSimultaneousGestures(pan, hold);
 
   const sheetStyle = useAnimatedStyle(() => ({
+    pointerEvents: flung.value ? "none" : "auto",
     transform: [
       { translateX: x.value + nudge.value },
       { translateY: y.value },
@@ -330,7 +389,7 @@ const DeckSheet = ({
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View style={[StyleSheet.absoluteFill, sheetStyle]}>
-        {children}
+        <DeckRise.Provider value={rise}>{children}</DeckRise.Provider>
         {renderStamp("right")}
         {renderStamp("left")}
         {renderStamp("up")}
@@ -368,6 +427,66 @@ const SwipeDeck = <T,>({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
+  const [leaving, setLeaving] = useState<{ key: string | number; item: T }[]>([]);
+  const shown = items.slice(0, 3);
+  const order = useSharedValue<DeckKey[]>(shown.map(keyOf));
+  const gone = useSharedValue<DeckKey[]>([]);
+  const flingers = useRef(new Map<DeckKey, Flinger>());
+  const shownKeys = shown.map(keyOf);
+
+  useEffect(() => {
+    order.set(shownKeys);
+    gone.modify((current) => {
+      "worklet";
+      return current.filter((key) => shownKeys.includes(key));
+    });
+  });
+
+  const register = useCallback((key: DeckKey, flinger: Flinger | null) => {
+    if (flinger) flingers.current.set(key, flinger);
+    else flingers.current.delete(key);
+  }, []);
+
+  useEffect(() => {
+    flingRef.current = (direction) => {
+      const top = order.value.find((key) => !gone.value.includes(key));
+      if (top !== undefined) flingers.current.get(top)?.(direction);
+    };
+  }, [flingRef, order, gone]);
+
+  const live = new Set(items.map(keyOf));
+  const flying = leaving.filter((entry) => !live.has(entry.key));
+  const landed = (key: string | number) =>
+    setLeaving((current) => current.filter((entry) => entry.key !== key));
+
+  const sheet = (item: T, depth: number) => {
+    const key = keyOf(item);
+    const isLeaving = depth < 0;
+    return (
+      <DeckSheet
+        key={key}
+        itemKey={key}
+        order={order}
+        gone={gone}
+        register={register}
+        isTop={depth === 0}
+        leaving={isLeaving}
+        onGone={() => landed(key)}
+        returnFrom={returnFrom && returnFrom.key === key ? returnFrom.direction : null}
+        nudging={nudging && depth === 0}
+        allowUp={allowUp}
+        stamps={stamps}
+        onIntent={onIntent}
+        onSwipe={(direction) => {
+          setLeaving((current) => [...current.filter((entry) => entry.key !== key), { key, item }]);
+          onSwipe(item, direction);
+        }}
+        onLongPress={onLongPress ? () => onLongPress(item) : undefined}
+      >
+        {renderSheet(item, depth)}
+      </DeckSheet>
+    );
+  };
 
   return (
     <View
@@ -376,25 +495,12 @@ const SwipeDeck = <T,>({
         { backgroundColor: background ?? skin.colors.ground },
       ]}
     >
-      {items
-        .slice(0, 2)
-        .map((item, depth) => (
-          <DeckSheet
-            key={keyOf(item)}
-            isTop={depth === 0}
-            returnFrom={returnFrom && returnFrom.key === keyOf(item) ? returnFrom.direction : null}
-            nudging={nudging && depth === 0}
-            allowUp={allowUp}
-            stamps={stamps}
-            flingRef={flingRef}
-            onIntent={onIntent}
-            onSwipe={(direction) => onSwipe(item, direction)}
-            onLongPress={onLongPress ? () => onLongPress(item) : undefined}
-          >
-            {renderSheet(item, depth)}
-          </DeckSheet>
-        ))
-        .reverse()}
+      {[
+        ...shown
+          .map((item, depth) => sheet(item, depth))
+          .reverse(),
+        ...flying.map((entry) => sheet(entry.item, -1)),
+      ]}
     </View>
   );
 };

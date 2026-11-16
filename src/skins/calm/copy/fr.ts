@@ -193,9 +193,6 @@ const fr: SkinCopy = {
     discardTitle: "Attention, tes modifications ne seront pas gardées.",
     discardLeave: "Abandonner",
     discardKeep: "Continuer",
-    leaveListTitle: (name: string) => `${name} va quitter ta liste.`,
-    leaveListLine: "Il ne sera pas de ces courses.",
-    leaveListConfirm: "Retirer de la liste",
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>
       count <= 1 ? "Retirer cet aliment ?" : `Retirer ${count} aliments ?`,

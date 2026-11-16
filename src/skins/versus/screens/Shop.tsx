@@ -4,7 +4,6 @@ import { buyRangeOf } from "@/hooks/screens/useBuyRange";
 import V from "../text";
 import FoodPicture from "@/components/elements/FoodIcon/FoodPicture";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
-import FoodLevelPanel from "@/components/views/ShopList/_components/FoodLevelPanel";
 import ShopPanels from "@/components/views/ShopList/_components/ShopPanels";
 import useShopRun from "@/hooks/screens/useShopRun";
 import common from "@/i18n/common";
@@ -64,19 +63,37 @@ const StartLine = ({
   foods,
   record,
   onStart,
+  selected,
   onPick,
+  onCancel,
+  onLater,
 }: {
   foods: FoodType[];
   record: { ms: number; username: string } | null;
   onStart: () => void;
+  selected: number[];
   onPick: (food: FoodType) => void;
+  onCancel: () => void;
+  onLater: () => void;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const more = foods.length - LINEUP_SIZE;
+  const selecting = selected.length > 0;
 
   return (
-    <Screen dock={<VButton big label={V.shop.start} onPress={onStart} />}>
+    <Screen
+      dock={
+        selecting ? (
+          <View style={styles.selectDock}>
+            <VButton flex={1} variant="secondary" label={skin.copy.common.cancel} onPress={onCancel} />
+            <VButton flex={1} label={common.shop.buyLater(selected.length)} onPress={onLater} />
+          </View>
+        ) : (
+          <VButton big label={V.shop.start} onPress={onStart} />
+        )
+      }
+    >
       <Kicker>{V.shop.kicker}</Kicker>
       <View style={styles.startHero}>
         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.lights}>
@@ -100,8 +117,9 @@ const StartLine = ({
             key={food.id}
             accessibilityRole="button"
             accessibilityLabel={food.name}
+            accessibilityState={{ selected: selected.includes(food.id) }}
             onPress={() => onPick(food)}
-            style={withPressed(styles.lineupCell)}
+            style={withPressed([styles.lineupCell, selected.includes(food.id) && styles.lineupPicked])}
           >
             <FoodPicture food={food} size={skin.size.icon.row - 8} />
           </Press>
@@ -112,6 +130,11 @@ const StartLine = ({
           </View>
         )}
       </View>
+      {selecting && (
+        <VText face="bold" size={skin.type.lead} color={P.action} accessibilityLiveRegion="polite">
+          {common.shop.selected(selected.length)}
+        </VText>
+      )}
     </Screen>
   );
 };
@@ -325,8 +348,15 @@ const VersusShop = () => {
   if (!run.isStarted) {
     return (
       <View style={styles.flex}>
-        <StartLine foods={run.preview} record={record} onStart={begin} onPick={run.openLevel} />
-        <FoodLevelPanel run={run} />
+        <StartLine
+          foods={run.preview}
+          record={record}
+          onStart={begin}
+          selected={run.selected}
+          onPick={run.toggleSelect}
+          onCancel={run.clearSelection}
+          onLater={run.buyLater}
+        />
       </View>
     );
   }
@@ -412,6 +442,8 @@ const createStyles = (s: Skin) =>
     startHero: { alignItems: "center", flex: 1, gap: s.spacing.inline, justifyContent: "center" },
     lights: { flexDirection: "row", gap: s.spacing.inline },
     light: { borderRadius: s.spacing.stack, height: s.spacing.stack, width: s.spacing.stack },
+    lineupPicked: { backgroundColor: P.action },
+    selectDock: { flexDirection: "row", gap: s.spacing.inline },
     lineup: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     lineupCell: {
       alignItems: "center",

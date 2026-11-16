@@ -212,9 +212,6 @@ const roastCopy = {
     discardTitle: "CAREFUL. YOUR EDITS WON'T BE SAVED.",
     discardLeave: "THROW THEM AWAY",
     discardKeep: "KEEP EDITING",
-    leaveListTitle: (name: string) => `${name} LEAVES YOUR LIST.`,
-    leaveListLine: "YOU SAID YOU HAVE ENOUGH. HOPE YOU'RE RIGHT.",
-    leaveListConfirm: "TAKE IT OFF",
     removeOne: (name: string) => `REMOVE ${name}?`,
     removeMany: (count: number) =>
       count === 1 ? "REMOVE THIS FOOD?" : `REMOVE ${count} FOODS?`,
