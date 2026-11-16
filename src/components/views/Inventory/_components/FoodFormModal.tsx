@@ -1,3 +1,4 @@
+import BarcodeIcon from "@/components/elements/BarcodeIcon/BarcodeIcon";
 import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
@@ -72,8 +73,9 @@ const FoodForm = ({
         <KilButton
           height={skin.size.button.sm}
           fontSize={skin.type.label}
-          variant={skin.panel.secondary}
+          variant={name.trim() ? skin.panel.secondary : "primary"}
           label={common.shop.scan}
+          icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
           onTouch={() => setScanning(true)}
         />
       )}
@@ -118,6 +120,7 @@ const FoodForm = ({
           fontSize={skin.type.lead}
           label={skin.copy.common.save}
           onTouch={handleSubmit}
+          disabled={!name.trim()}
         />
       </View>
     </>

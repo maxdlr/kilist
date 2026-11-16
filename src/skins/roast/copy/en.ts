@@ -204,7 +204,7 @@ const roastCopy = {
     addTitle: "ANOTHER ONE? FINE.",
     editTitle: (name: string) => `FIX ${name}.`,
     name: "NAME",
-    description: "DESCRIPTION",
+    description: "DESCRIPTION (OPTIONAL)",
     removeIt: "REMOVE IT",
     removeOne: (name: string) => `REMOVE ${name}?`,
     removeMany: (count: number) =>

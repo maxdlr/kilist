@@ -20,6 +20,7 @@ const KilButton = ({
   accessibilityLabel,
   colors,
   style,
+  disabled = false,
 }: {
   label: string;
   onTouch?: () => void;
@@ -32,6 +33,7 @@ const KilButton = ({
   accessibilityLabel?: string;
   colors?: ActionColors;
   style?: StyleProp<ViewStyle>;
+  disabled?: boolean;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -45,6 +47,8 @@ const KilButton = ({
       accessibilityRole="button"
       scale={skin.shape.shadow.offset === 0}
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onTouch ?? (href ? () => router.navigate(href) : undefined)}
       style={({ pressed }) => [
         styles.button,
@@ -65,6 +69,7 @@ const KilButton = ({
           },
         flex !== undefined && !pill && { flex },
         pressed && skin.shape.shadow.offset === 0 && styles.pressed,
+        disabled && styles.disabled,
         style,
       ]}
     >
@@ -102,6 +107,9 @@ const createStyles = (s: Skin) =>
     },
     pressed: {
       opacity: s.shape.pressedOpacity,
+    },
+    disabled: {
+      opacity: 0.4,
     },
     label: {
       includeFontPadding: false,

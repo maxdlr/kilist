@@ -11,7 +11,6 @@ const base = generateColorVariants("#312855");
 const foods = generateColorGradient("#FFFFFF", "#095527");
 const emphasis = generateColorVariants("#492AC6");
 // const accent = generateColorVariants("#FFB443");
-const accentToBaseGradient = generateColorGradient("#A1C7FF", base[50]);
 
 export const colors = {
   // paper: "#F6F4EF",
@@ -39,9 +38,9 @@ export const elements: CalmElements = {
   ground: base[70],
   card: base[80],
   tint: base[60],
-  text: accentToBaseGradient[5],
-  textSoft: accentToBaseGradient[30],
-  textFaint: accentToBaseGradient[50],
+  text: base[5],
+  textSoft: base[20],
+  textFaint: base[40],
   line: base[70],
   fieldLine: base[40],
   ring: base[30],
@@ -65,15 +64,15 @@ export const elements: CalmElements = {
   scrim: colors.veil,
   em: {
     ground: emphasis[70],
-    card: emphasis[80],
+    card: base[70],
     tint: emphasis[50],
-    text: accentToBaseGradient[5],
-    textSoft: accentToBaseGradient[50],
-    textFaint: accentToBaseGradient[60],
-    line: emphasis[70],
-    fieldLine: emphasis[50],
+    text: base[5],
+    textSoft: base[20],
+    textFaint: base[30],
+    line: emphasis[40],
+    fieldLine: emphasis[40],
     ring: emphasis[30],
-    fill: accentToBaseGradient[30],
+    fill: base[5],
     onFill: emphasis[80],
     danger: emphasis[5],
   },

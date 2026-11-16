@@ -193,7 +193,7 @@ const versusCopy: RoastCopy = {
     addTitle: "Add a food",
     editTitle: (name: string) => `Edit ${name}`,
     name: "Name",
-    description: "Description",
+    description: "Description (optional)",
     removeIt: "Remove it",
     removeOne: (name: string) => `Remove ${name}?`,
     removeMany: (count: number) =>

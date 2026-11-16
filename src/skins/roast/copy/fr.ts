@@ -206,7 +206,7 @@ const fr: SkinCopy = {
     addTitle: "ENCORE UN ? BON.",
     editTitle: (name: string) => `CORRIGE ${name}.`,
     name: "NOM",
-    description: "DESCRIPTION",
+    description: "DESCRIPTION (FACULTATIF)",
     removeIt: "LE RETIRER",
     removeOne: (name: string) => `RETIRER ${name} ?`,
     removeMany: (count: number) =>

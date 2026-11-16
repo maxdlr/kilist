@@ -16,7 +16,7 @@ import { MagnifyingGlassIcon, PlusIcon, TrashIcon, XMarkIcon } from "react-nativ
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Svg, { Path } from "react-native-svg";
 import { calmColors, useCalmColors } from "./colors";
-import { CButton, CText, Dot, Screen } from "./parts";
+import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "./parts";
 import { CalmLoading } from "./States";
 
 const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
@@ -68,6 +68,7 @@ const CalmInventory = () => {
   const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isDeleteMode, deleteIds } = shelf;
   const [searching, setSearching] = useState(false);
+  const dockCover = useDockCover();
   if (shelf.isLoading) return <CalmLoading />;
 
   const canSearch = !isEmpty && !isDeleteMode;
@@ -128,6 +129,8 @@ const CalmInventory = () => {
     <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
       <Screen
         padded={false}
+        glass
+        cover={dockCover.cover}
         dock={searchOpen ? searchRow : actions}
       >
         <View style={styles.titleRow}>
@@ -155,6 +158,8 @@ const CalmInventory = () => {
             onRefresh={shelf.mutateFood}
             refreshing={shelf.isFoodLoading}
             keyboardShouldPersistTaps="handled"
+            ListFooterComponent={DockSpacer}
+            {...dockCover.listProps}
             renderItem={({ item }) => (
               <FoodRow
                 food={item}

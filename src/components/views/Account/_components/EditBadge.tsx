@@ -5,14 +5,16 @@ import { PencilIcon } from "react-native-heroicons/solid";
 const EditBadge = () => {
   const skin = useSkin();
   const size = skin.size.icon.row;
-  const { fill, ink } = skin.actions.primary;
+  const { fill, ink, line } = skin.actions.secondary;
 
   return (
     <View
       style={{
         alignItems: "center",
         backgroundColor: fill,
+        borderColor: line,
         borderRadius: size / 2,
+        borderWidth: skin.shape.border,
         height: size,
         justifyContent: "center",
         width: size,

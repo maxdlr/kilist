@@ -193,7 +193,7 @@ const fr: SkinCopy = {
     addTitle: "Ajouter un aliment",
     editTitle: (name: string) => `Modifier ${name}`,
     name: "Nom",
-    description: "Description",
+    description: "Description (facultatif)",
     removeIt: "Le retirer",
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>

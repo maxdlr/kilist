@@ -1,6 +1,7 @@
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
+import { ButtonKindOverride } from "@/components/elements/KilButton/KilButton";
 import Title from "@/components/elements/Title/Title";
 import { ThemedText } from "@/components/themed-text";
 import common from "@/i18n/common";
@@ -75,13 +76,15 @@ const EmailCodeModal = ({ visible, onClose }: { visible: boolean; onClose: () =>
       ) : (
         <>
           <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={T.send} onTouch={send} />
-          <KilButton
-            height={skin.size.button.sm}
-            fontSize={skin.type.label}
-            variant={skin.panel.secondary}
-            label={T.haveCode}
-            onTouch={() => setSent(true)}
-          />
+          <ButtonKindOverride.Provider value={null}>
+            <KilButton
+              height={skin.size.button.sm}
+              fontSize={skin.type.label}
+              variant="ghost"
+              label={T.haveCode}
+              onTouch={() => setSent(true)}
+            />
+          </ButtonKindOverride.Provider>
         </>
       )}
     </BottomPanel>

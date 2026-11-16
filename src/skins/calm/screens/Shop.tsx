@@ -14,7 +14,6 @@ import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import {
   RefreshControl,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -38,7 +37,7 @@ import Animated, {
 import Svg, { Path } from "react-native-svg";
 import T from "../text";
 import { calmColors, useCalmColors } from "./colors";
-import { CButton, CText, Dot, Screen } from "./parts";
+import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "./parts";
 import { CalmLoading, CalmMessage } from "./States";
 
 const TAGS_HEIGHT = 0.7;
@@ -186,6 +185,8 @@ const CalmShop = () => {
   const remaining = run.foods ?? [];
   const [touches, setTouches] = useState(0);
   const [idleFor, setIdleFor] = useState<string | null>(null);
+  const startCover = useDockCover();
+  const runCover = useDockCover();
   const canNudge = run.isStarted && run.handled === 0 && remaining.length > 0;
   const activity = `${touches}:${run.panel}`;
   const nudging = canNudge && !run.panel && idleFor === activity;
@@ -280,7 +281,12 @@ const CalmShop = () => {
     ];
     return (
       <View style={styles.flex}>
-        <Screen padded={false} dock={dockWith(common.shop.start, run.start)}>
+        <Screen
+          padded={false}
+          dock={dockWith(common.shop.start, run.start)}
+          glass
+          cover={startCover.cover}
+        >
           <View style={[styles.flex, styles.list]}>
             <View style={styles.startHead}>
               <View style={styles.titleRow}>
@@ -314,10 +320,11 @@ const CalmShop = () => {
                 </Press>
               </View>
             </View>
-            <ScrollView
+            <Animated.ScrollView
               style={[styles.tagScroll, { maxHeight: height * TAGS_HEIGHT }]}
               contentContainerStyle={styles.sections}
               refreshControl={refresher}
+              {...startCover.listProps}
             >
               {sections.map((section) => (
                 <View key={section.id} style={styles.section}>
@@ -341,7 +348,8 @@ const CalmShop = () => {
                   </View>
                 </View>
               ))}
-            </ScrollView>
+              <DockSpacer />
+            </Animated.ScrollView>
             {showHow && (
               <View style={styles.how}>
                 <View style={styles.howRow}>
@@ -391,7 +399,7 @@ const CalmShop = () => {
       style={styles.flex}
       onTouchStart={() => setTouches((count) => count + 1)}
     >
-      <Screen padded={false} dock={dockWith(common.shop.finish, run.finish)}>
+      <Screen padded={false} glass cover={runCover.cover} dock={dockWith(common.shop.finish, run.finish)}>
         <View style={styles.head}>
           <View style={styles.titleRow}>
             <CText
@@ -421,10 +429,11 @@ const CalmShop = () => {
             </View>
           </View>
         </View>
-        <ScrollView
+        <Animated.ScrollView
           style={styles.flex}
           contentContainerStyle={styles.list}
           refreshControl={refresher}
+          {...runCover.listProps}
         >
           {run.suggestion && (
             <View style={styles.next}>
@@ -479,7 +488,8 @@ const CalmShop = () => {
               ))}
             </>
           )}
-        </ScrollView>
+          <DockSpacer />
+        </Animated.ScrollView>
       </Screen>
       <ShopPanels run={run} />
     </View>
@@ -546,8 +556,9 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     section: { gap: s.spacing.small },
     tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     tag: {
-      backgroundColor: C.tint,
+      borderColor: C.fieldLine,
       borderRadius: s.size.toggle / 2,
+      borderWidth: s.shape.border,
       paddingHorizontal: s.spacing.inline + 2,
       paddingVertical: s.spacing.small,
     },

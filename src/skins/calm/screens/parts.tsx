@@ -8,8 +8,19 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import { Href, router } from "expo-router";
-import { ReactNode, useMemo } from "react";
+import { BlurTargetView, BlurView } from "expo-blur";
 import {
+  createContext,
+  type ComponentRef,
+  ReactNode,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  LayoutChangeEvent,
+  Platform,
   StyleProp,
   StyleSheet,
   Text,
@@ -17,6 +28,12 @@ import {
   TextStyle,
   View,
 } from "react-native";
+import Animated, {
+  type SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import {
   CheckIcon,
   QuestionMarkCircleIcon,
@@ -49,14 +66,16 @@ export const CText = ({
   const fontSize = size ?? skin.type.body;
   const family =
     weight === "black"
-      ? (skin.fonts.body!.black ?? skin.fonts.body!.heavy ?? skin.fonts.body!.bold)
+      ? (skin.fonts.body!.black ??
+        skin.fonts.body!.heavy ??
+        skin.fonts.body!.bold)
       : weight === "bold"
-      ? (skin.fonts.body!.heavy ?? skin.fonts.body!.bold)
-      : weight === "semibold"
-      ? skin.fonts.body!.bold
-      : weight === "medium"
-        ? skin.fonts.body!.medium
-        : skin.fonts.body!.regular;
+        ? (skin.fonts.body!.heavy ?? skin.fonts.body!.bold)
+        : weight === "semibold"
+          ? skin.fonts.body!.bold
+          : weight === "medium"
+            ? skin.fonts.body!.medium
+            : skin.fonts.body!.regular;
   return (
     <Text
       style={[
@@ -130,20 +149,132 @@ export const CButton = ({
   );
 };
 
+const DockInset = createContext(0);
+
+export const useDockInset = () => useContext(DockInset);
+
+export const DockSpacer = () => <View style={{ height: useDockInset() }} />;
+
+const COVER_FADE = 24;
+
+export const useDockCover = () => {
+  const cover = useSharedValue(0);
+  const content = useSharedValue(0);
+  const frame = useSharedValue(0);
+  const offset = useSharedValue(0);
+
+  const update = () => {
+    "worklet";
+    const hidden = content.value - offset.value - frame.value;
+    cover.set(Math.max(0, Math.min(1, hidden / COVER_FADE)));
+  };
+
+  const onScroll = useAnimatedScrollHandler((event) => {
+    content.set(event.contentSize.height);
+    frame.set(event.layoutMeasurement.height);
+    offset.set(event.contentOffset.y);
+    update();
+  });
+
+  return {
+    cover,
+    listProps: {
+      onScroll,
+      scrollEventThrottle: 16,
+      onContentSizeChange: (_width: number, height: number) => {
+        content.set(height);
+        update();
+      },
+      onLayout: (event: LayoutChangeEvent) => {
+        frame.set(event.nativeEvent.layout.height);
+        update();
+      },
+    },
+  };
+};
+
+const GLASS_BLUR = 30;
+const ANDROID_REDUCTION = 4;
+const TINTLESS = 1;
+const GLASS_VEIL = 0.52;
+
 export const Screen = ({
   children,
   dock,
   padded = true,
+  glass = false,
+  cover,
 }: {
   children: ReactNode;
   dock?: ReactNode;
   padded?: boolean;
+  glass?: boolean;
+  cover?: SharedValue<number>;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const { insideTabs } = useTabBarVisibility();
+  const target = useRef<ComponentRef<typeof View>>(null);
+  const [dockHeight, setDockHeight] = useState(0);
+  const coverStyle = useAnimatedStyle(() => ({ opacity: cover ? cover.value : 1 }));
   useStatusBarStyle(skin.statusBarOnGround);
+
+  if (glass && dock) {
+    return (
+      <View style={styles.root}>
+        <BlurTargetView ref={target} style={[styles.root, styles.glassTarget]}>
+          <View style={[StyleSheet.absoluteFill, styles.glassTarget]} />
+          <View
+            style={[
+              styles.content,
+              padded && styles.padded,
+              {
+                paddingTop: insets.top + skin.spacing.page - skin.spacing.small,
+              },
+            ]}
+          >
+            <DockInset.Provider value={dockHeight}>
+              {children}
+            </DockInset.Provider>
+          </View>
+        </BlurTargetView>
+        <View
+          style={styles.glassDock}
+          onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
+        >
+          <Animated.View style={[StyleSheet.absoluteFill, coverStyle]}>
+            <BlurView
+              blurTarget={target}
+              intensity={Platform.OS === "android" ? TINTLESS : GLASS_BLUR}
+              blurReductionFactor={(TINTLESS * ANDROID_REDUCTION) / GLASS_BLUR}
+              blurMethod="dimezisBlurViewSdk31Plus"
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: C.ground, opacity: GLASS_VEIL },
+            ]}
+          />
+          <View
+            style={[
+              styles.actionRow,
+              styles.dock,
+              styles.glassRow,
+              !insideTabs && {
+                paddingBottom: skin.spacing.stack + insets.bottom,
+              },
+            ]}
+          >
+            {dock}
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -305,7 +436,9 @@ export const CardPads = ({
 
   const hidden = {
     accessibilityElementsHidden: !live,
-    importantForAccessibility: live ? ("auto" as const) : ("no-hide-descendants" as const),
+    importantForAccessibility: live
+      ? ("auto" as const)
+      : ("no-hide-descendants" as const),
   };
 
   return (
@@ -314,7 +447,11 @@ export const CardPads = ({
         {pad("left", copy.out, T.play.ariaOut)}
         {pad("right", copy.inStock, T.play.ariaIn)}
       </View>
-      <View {...hidden} pointerEvents="box-none" style={[styles.unsureSlot, styles.pads]}>
+      <View
+        {...hidden}
+        pointerEvents="box-none"
+        style={[styles.unsureSlot, styles.pads]}
+      >
         <Press
           accessibilityRole="button"
           accessibilityLabel={T.intent.up}
@@ -375,7 +512,13 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
     pads: { padding: s.spacing.stack },
-    unsureSlot: { alignItems: "center", left: 0, position: "absolute", right: 0, top: 0 },
+    unsureSlot: {
+      alignItems: "center",
+      left: 0,
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
     bars: { gap: s.spacing.inline },
     barRow: {
       alignItems: "center",
@@ -406,6 +549,15 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingBottom: s.spacing.gutter,
       paddingHorizontal: s.spacing.gutter,
     },
+    glassTarget: { backgroundColor: C.ground },
+    glassDock: {
+      bottom: 0,
+      left: 0,
+      overflow: "hidden",
+      position: "absolute",
+      right: 0,
+    },
+    glassRow: { paddingTop: s.spacing.stack },
     button: {
       alignItems: "center",
       alignSelf: "center",

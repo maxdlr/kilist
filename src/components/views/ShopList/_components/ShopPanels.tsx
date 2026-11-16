@@ -1,3 +1,4 @@
+import BarcodeIcon from "@/components/elements/BarcodeIcon/BarcodeIcon";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
@@ -77,6 +78,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
         fontSize={skin.type.lead}
         variant={hasName ? skin.panel.secondary : "primary"}
         label={T.scan}
+        icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
         onTouch={() => setScanning(true)}
       />
       <FormInput
