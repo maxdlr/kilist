@@ -1,9 +1,8 @@
 import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import { A } from "@/admin/ui";
-import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import useRoundOpen from "@/hooks/useRoundOpen";
-import { tabAria } from "@/components/elements/TabBar/RoastTabBar";
+import { MAIN_TABS, shownTab, tabAria } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
@@ -14,8 +13,8 @@ import { StyleSheet, View } from "react-native";
 import { CartIcon, HomeIcon, ListIcon, UserIcon, WrenchIcon } from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { versusPalette as P } from "..";
-import { VText } from "./parts";
+import { versusPalette as P } from "../theme/palette";
+import { VText } from "../components";
 
 const ORDER = MAIN_TABS;
 

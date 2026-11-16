@@ -1,8 +1,8 @@
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import KilButton from "@/components/elements/KilButton";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { ThemedText } from "@/components/elements/ThemedText";
+import { ThemedView } from "@/components/elements/ThemedView";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { type BarcodeType, CameraView, useCameraPermissions } from "expo-camera";

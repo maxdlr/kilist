@@ -1,5 +1,5 @@
-import AppTabs from "@/components/app-tabs";
-import RequireAuth from "@/components/RequireAuth";
+import AppTabs from "@/components/navigation/AppTabs";
+import RequireAuth from "@/components/guards/RequireAuth";
 import SyncBridge from "@/offline/SyncBridge";
 import NotificationsBridge from "@/notifications/NotificationsBridge";
 import { AccountGateProvider } from "@/providers/AccountGateProvider";

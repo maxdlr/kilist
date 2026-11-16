@@ -1,5 +1,5 @@
-import BackBar from "@/components/elements/BackBar/BackBar";
-import LookPreview from "@/components/views/Account/_components/LookPreview";
+import BackBar from "@/components/elements/BackBar";
+import LookPreview from "@/components/features/Looks/LookPreview";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin } from "@/providers/SkinProvider";
 import { useLocalSearchParams } from "expo-router";

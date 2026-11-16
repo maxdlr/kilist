@@ -1,9 +1,9 @@
 import type { SkinScreens } from "../../screens";
-import VersusAccount from "./Account";
-import VersusInventory from "./Inventory";
-import VersusHome from "./Home";
-import VersusPlay from "./Play";
-import VersusShop from "./Shop";
+import VersusAccount from "./Account/Account";
+import VersusInventory from "./Inventory/Inventory";
+import VersusHome from "./Home/Home";
+import VersusPlay from "./Play/Play";
+import VersusShop from "./Shop/Shop";
 import { VersusLoading } from "./States";
 import VersusTabBar from "./TabBar";
 

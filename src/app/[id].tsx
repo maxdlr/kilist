@@ -1,5 +1,5 @@
-import Inventory from "@/components/views/Inventory";
-import RequireAuth from "@/components/RequireAuth";
+import Inventory from "@/skins/roast/screens/Inventory";
+import RequireAuth from "@/components/guards/RequireAuth";
 import { InventoryProvider } from "@/providers/InventoryProvider";
 import { useLocalSearchParams } from "expo-router";
 

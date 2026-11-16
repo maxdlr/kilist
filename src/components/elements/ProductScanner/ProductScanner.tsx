@@ -1,7 +1,7 @@
 import KilButton from "@/components/elements/KilButton";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
-import Title from "@/components/elements/Title/Title";
-import { ThemedText } from "@/components/themed-text";
+import Title from "@/components/elements/Title";
+import { ThemedText } from "@/components/elements/ThemedText";
 import useProductScan, { type ScanResult } from "@/hooks/useProductScan";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";

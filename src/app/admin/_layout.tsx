@@ -1,4 +1,4 @@
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/guards/RequireAuth";
 import { useSlideStackOptions } from "@/services/screenSlide";
 import { Stack } from "expo-router/js-stack";
 

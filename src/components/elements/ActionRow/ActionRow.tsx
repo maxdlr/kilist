@@ -1,6 +1,6 @@
 import Press from "@/components/elements/Press";
 import type { Skin } from "@/skins/types";
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { StyleSheet, View } from "react-native";
 

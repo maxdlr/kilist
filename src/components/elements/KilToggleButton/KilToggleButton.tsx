@@ -1,7 +1,7 @@
 import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import type { Skin } from "@/skins/types";
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";

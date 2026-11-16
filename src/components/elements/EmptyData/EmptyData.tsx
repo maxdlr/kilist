@@ -1,9 +1,9 @@
-import Dock from "@/components/elements/Dock/Dock";
+import Dock from "@/components/elements/Dock";
 import KilButton from "@/components/elements/KilButton";
-import Sheet from "@/components/elements/Sheet/Sheet";
-import Title from "@/components/elements/Title/Title";
-import PullToRefresh from "@/components/gestures/PullToRefresh/PullToRefresh";
-import { ThemedText } from "@/components/themed-text";
+import Sheet from "@/components/elements/Sheet";
+import Title from "@/components/elements/Title";
+import PullToRefresh from "@/components/gestures/PullToRefresh";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin } from "@/providers/SkinProvider";
 import { Href } from "expo-router";
 import { useState } from "react";

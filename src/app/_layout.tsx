@@ -11,8 +11,8 @@ import { SWRConfig } from "swr";
 import { useSlideStackOptions } from "@/services/screenSlide";
 import fetcher, { onError } from "@/services/fetcher";
 
-import AuthGate from "@/components/AuthGate";
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import AuthGate from "@/components/guards/AuthGate";
+import { AnimatedSplashOverlay } from "@/components/navigation/AnimatedSplashOverlay";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LanguageProvider, useLanguage } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";

@@ -9,8 +9,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { versusPalette as P } from "..";
-import { Avatar, Kicker, Screen, VButton, VText } from "./parts";
+import { versusPalette as P } from "../theme/palette";
+import { Avatar, Kicker, Screen, VButton, VText } from "../components";
 
 const BOUNCE_MS = 320;
 

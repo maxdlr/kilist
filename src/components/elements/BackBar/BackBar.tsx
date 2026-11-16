@@ -1,5 +1,5 @@
 import Press from "@/components/elements/Press";
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/elements/ThemedText";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";

@@ -1,7 +1,8 @@
-import BackBar from "@/components/elements/BackBar/BackBar";
-import LooksShowcase from "@/components/views/Account/_components/LooksShowcase";
+import BackBar from "@/components/elements/BackBar";
+import LooksShowcase from "@/components/features/Looks/LooksShowcase";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin } from "@/providers/SkinProvider";
+import { SkinScene } from "@/skins/screens";
 import { useLocalSearchParams } from "expo-router";
 
 const LooksScreen = () => {
@@ -11,7 +12,9 @@ const LooksScreen = () => {
 
   return (
     <BackBar>
-      <LooksShowcase focus={focus} titleColor={skin.colors.onGround} />
+      <SkinScene>
+        <LooksShowcase focus={focus} titleColor={skin.colors.onGround} />
+      </SkinScene>
     </BackBar>
   );
 };

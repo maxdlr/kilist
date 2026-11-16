@@ -1,4 +1,4 @@
-import BackBar from "@/components/elements/BackBar/BackBar";
+import BackBar from "@/components/elements/BackBar";
 import { MaxContentWidth } from "@/constants/theme";
 import { InventoryProvider } from "@/providers/InventoryProvider";
 import { SkinScreen } from "@/skins/screens";

@@ -12,8 +12,9 @@ import { StyleSheet, View } from "react-native";
 import { CartIcon, HomeIcon, ListIcon, PlayIcon, SettingsIcon, WrenchIcon } from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { calmColors, useCalmColors } from "./colors";
-import { CText, Dot, GlassBackdrop, useCheckPending } from "./parts";
+import { calmColors, useCalmColors } from "../theme/useCalmColors";
+import { CText, Dot, GlassBackdrop } from "../components";
+import useCheckPending from "../hooks/useCheckPending";
 
 const ORDER = MAIN_TABS;
 
@@ -110,8 +111,6 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     bar: {
-      borderTopColor: C.line,
-      borderTopWidth: s.shape.divider,
       bottom: 0,
       left: 0,
       overflow: "hidden",

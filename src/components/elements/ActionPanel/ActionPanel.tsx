@@ -1,8 +1,8 @@
 import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import KilButton from "@/components/elements/KilButton";
-import Title from "@/components/elements/Title/Title";
-import { ThemedText } from "@/components/themed-text";
+import Title from "@/components/elements/Title";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";

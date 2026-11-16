@@ -1,6 +1,6 @@
 import type { SkinSource } from "../types";
 import calmCopy from "./copy";
-import { CALM_THEMES, DEFAULT_CALM_THEME } from "./themes";
+import { CALM_THEMES, DEFAULT_CALM_THEME } from "./theme/index";
 
 const NARROW = new Set([..."iljtfrI1.,:;'!|()[]-"]);
 const WIDE = new Set([..."mwMW%@"]);

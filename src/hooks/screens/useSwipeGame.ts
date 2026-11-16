@@ -1,5 +1,5 @@
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
-import type { SwipeDeckFling, SwipeDeckReturn, SwipeDirection } from "@/components/elements/SwipeDeck/SwipeDeck";
+import type { SwipeDeckFling, SwipeDeckReturn, SwipeDirection } from "@/components/elements/SwipeDeck";
 import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";

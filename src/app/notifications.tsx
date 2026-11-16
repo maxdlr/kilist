@@ -1,9 +1,9 @@
-import BackBar from "@/components/elements/BackBar/BackBar";
-import Dock from "@/components/elements/Dock/Dock";
+import BackBar from "@/components/elements/BackBar";
+import Dock from "@/components/elements/Dock";
 import KilButton from "@/components/elements/KilButton";
 import KilSwitch from "@/components/elements/KilSwitch";
-import Title from "@/components/elements/Title/Title";
-import { ThemedText } from "@/components/themed-text";
+import Title from "@/components/elements/Title";
+import { ThemedText } from "@/components/elements/ThemedText";
 import useNotificationSettings from "@/hooks/screens/useNotificationSettings";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import common from "@/i18n/common";

@@ -1,4 +1,4 @@
-import BackBar from "@/components/elements/BackBar/BackBar";
+import BackBar from "@/components/elements/BackBar";
 import { SkinScreen } from "@/skins/screens";
 
 const AccountScreen = () => (

@@ -1,5 +1,5 @@
 import useBuyRange from "@/hooks/screens/useBuyRange";
-import { DashboardType } from "@/components/views/Dashboard/interfaces";
+import { DashboardType } from "@/components/features/Home/types";
 import { THRESHOLDS } from "@/utils/scoreUtils";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";

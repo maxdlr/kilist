@@ -3,10 +3,10 @@ import { DrawnMark, type MarkKind } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
-import { calmColors, useCalmColors } from "./colors";
-import { CButton, CText, Screen } from "./parts";
+import { calmColors, useCalmColors } from "../theme/useCalmColors";
+import { CButton, CText, GlassScrollView, Screen } from "../components";
 
 const BAR = 120;
 const SLIDER = 40;
@@ -85,14 +85,14 @@ export const CalmMessage = ({
     </View>
   );
   return (
-    <Screen dock={dock}>
+    <Screen dock={dock} glass={!!onRefresh}>
       {onRefresh ? (
-        <ScrollView
+        <GlassScrollView
           contentContainerStyle={styles.grow}
           refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={C.textSoft} />}
         >
           {body}
-        </ScrollView>
+        </GlassScrollView>
       ) : (
         body
       )}

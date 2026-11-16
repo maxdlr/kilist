@@ -1,5 +1,5 @@
 import Press from "@/components/elements/Press";
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { ActionColors, ActionKind, Skin } from "@/skins/types";
 import { Href, router } from "expo-router";

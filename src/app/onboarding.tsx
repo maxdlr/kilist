@@ -1,5 +1,5 @@
 import ActionPanel from "@/components/elements/ActionPanel";
-import Onboarding from "@/components/views/Onboarding";
+import Onboarding from "@/components/features/Onboarding/Onboarding";
 import common from "@/i18n/common";
 import { canAskPermission, requestPermission } from "@/notifications/push";
 import { router, useLocalSearchParams } from "expo-router";

@@ -1,2 +1,2 @@
 export { default } from "./KilToggleButton";
-export type { KilToggleOption } from "./KilToggleButton";
+export * from "./KilToggleButton";

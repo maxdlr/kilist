@@ -1,5 +1,5 @@
 import type { Skin } from "@/skins/types";
-import Title from "@/components/elements/Title/Title";
+import Title from "@/components/elements/Title";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { ReactNode, useState } from "react";
 import { StyleSheet, View } from "react-native";
