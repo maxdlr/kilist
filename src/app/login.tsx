@@ -174,7 +174,6 @@ const LoginScreen = () => {
   };
 
   const signupSheet = skin.colors.signup ?? { fill: skin.colors.alert, ink: skin.colors.onAlert };
-  const labelColor = isSignup ? skin.colors.onPaper : skin.colors.accent;
 
   const googleVariant = isSignup ? "secondaryOnLight" : "secondary";
 
@@ -209,9 +208,7 @@ const LoginScreen = () => {
           )}
 
           <FormInput
-            label={copy.username}
             placeholder={skin.copy.placeholders.username}
-            labelColor={labelColor}
             autoCapitalize="none"
             value={username}
             onChangeText={setUsername}
@@ -219,9 +216,7 @@ const LoginScreen = () => {
 
           {isSignup && (
             <FormInput
-              label={copy.email}
               placeholder={skin.copy.placeholders.email}
-              labelColor={labelColor}
               type="email"
               value={email}
               onChangeText={setEmail}
@@ -229,9 +224,7 @@ const LoginScreen = () => {
           )}
 
           <FormInput
-            label={copy.password}
             placeholder={skin.copy.placeholders.password}
-            labelColor={labelColor}
             type="password"
             value={password}
             onChangeText={setPassword}
@@ -239,9 +232,7 @@ const LoginScreen = () => {
 
           {isSignup && (
             <FormInput
-              label={copy.confirm}
               placeholder={skin.copy.placeholders.confirm}
-              labelColor={labelColor}
               type="password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -262,7 +253,6 @@ const LoginScreen = () => {
           {isSignup && householdChoice === "create" && (
             <Animated.View key="create" {...swapAnimation}>
               <FormInput
-                label={copy.householdName}
                 placeholder={skin.copy.placeholders.householdName}
                 value={householdName}
                 onChangeText={setHouseholdName}
@@ -273,7 +263,6 @@ const LoginScreen = () => {
           {isSignup && householdChoice === "join" && !showScanner && (
             <Animated.View key="join" {...swapAnimation}>
               <FormInput
-                label={copy.householdCode}
                 placeholder={skin.copy.placeholders.householdCode}
                 value={joinCode}
                 onChangeText={setJoinCode}
@@ -408,8 +397,7 @@ const LoginScreen = () => {
           {codeSent ? (
             <>
               <FormInput
-                label={common.emailCode.code}
-                labelColor={skin.panel.ink}
+                placeholder={common.emailCode.code}
                 type="number"
                 maxLength={6}
                 value={emailCode}

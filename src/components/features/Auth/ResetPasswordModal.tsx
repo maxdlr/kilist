@@ -65,11 +65,11 @@ const ResetPasswordModal = ({ visible, onClose }: { visible: boolean; onClose: (
         </ThemedText>
       )}
       {step === "email" ? (
-        <FormInput label={T.email} labelColor={skin.panel.ink} type="email" value={email} onChangeText={setEmail} />
+        <FormInput placeholder={T.email} type="email" value={email} onChangeText={setEmail} />
       ) : (
         <>
-          <FormInput label={T.code} labelColor={skin.panel.ink} type="number" maxLength={6} value={code} onChangeText={setCode} />
-          <FormInput label={T.password} labelColor={skin.panel.ink} type="password" value={password} onChangeText={setPassword} />
+          <FormInput placeholder={T.code} type="number" maxLength={6} value={code} onChangeText={setCode} />
+          <FormInput placeholder={T.password} type="password" value={password} onChangeText={setPassword} />
         </>
       )}
       <KilButton
