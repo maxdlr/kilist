@@ -3,14 +3,14 @@ import Title from "@/components/elements/Title";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import * as SplashScreen from "expo-splash-screen";
 import { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import KilistMark from "@/components/elements/KilistMark";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Keyframe } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
 const DURATION = 1400;
-const MARK = require("../../../assets/images/kilist-mark.png");
 const MARK_SIZE = 120;
 
 export function AnimatedSplashOverlay() {
@@ -35,7 +35,9 @@ export function AnimatedSplashOverlay() {
     : [styles.splash, { backgroundColor: skin.colors.accent }];
   const content = centered ? (
     <>
-      <Image source={MARK} style={styles.mark} accessibilityIgnoresInvertColors />
+      <View style={styles.mark}>
+        <KilistMark size={MARK_SIZE} ink={skin.colors.onGround} ground={skin.colors.ground} />
+      </View>
       <ThemedText size={skin.type.title} color={skin.colors.onGround} style={styles.name}>
         {name}
       </ThemedText>

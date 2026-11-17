@@ -8,7 +8,7 @@ import type { CalmElements } from "../index";
 export const name = { en: "Dark", fr: "Sombre" };
 
 const base = generateColorVariants("#312855");
-const foods = generateColorGradient("#FFFFFF", "#095527");
+const foods = generateColorGradient("#FFFFFF", base[50]);
 const emphasis = generateColorVariants("#492AC6");
 // const accent = generateColorVariants("#FFB443");
 

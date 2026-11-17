@@ -20,6 +20,8 @@ type TabBarContextType = {
   hide: () => () => void;
   glassTarget: GlassTarget | null;
   setGlassTarget: Dispatch<SetStateAction<GlassTarget | null>>;
+  glassDockHeight: number;
+  setGlassDockHeight: Dispatch<SetStateAction<number>>;
 };
 
 const TabBarContext = createContext<TabBarContextType>({
@@ -28,11 +30,14 @@ const TabBarContext = createContext<TabBarContextType>({
   hide: () => () => {},
   glassTarget: null,
   setGlassTarget: () => {},
+  glassDockHeight: 0,
+  setGlassDockHeight: () => {},
 });
 
 export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   const [hideCount, setHideCount] = useState(0);
   const [glassTarget, setGlassTarget] = useState<GlassTarget | null>(null);
+  const [glassDockHeight, setGlassDockHeight] = useState(0);
 
   const hide = useCallback(() => {
     setHideCount((count) => count + 1);
@@ -40,8 +45,16 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ insideTabs: true, isHidden: hideCount > 0, hide, glassTarget, setGlassTarget }),
-    [hideCount, hide, glassTarget],
+    () => ({
+      insideTabs: true,
+      isHidden: hideCount > 0,
+      hide,
+      glassTarget,
+      setGlassTarget,
+      glassDockHeight,
+      setGlassDockHeight,
+    }),
+    [hideCount, hide, glassTarget, glassDockHeight],
   );
 
   return (

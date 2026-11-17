@@ -10,7 +10,7 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, useWindowDimensions, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 import { InfoCircleIcon, InfoCircleSolidIcon, PlusIcon, XmarkIcon } from "@/components/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import AnimationService from "@/services/animation";
@@ -21,7 +21,6 @@ import { CalmLoading, CalmMessage } from "../States";
 import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
 
-const TAGS_HEIGHT = 0.7;
 
 const HINT_SLIDE = 28;
 
@@ -33,7 +32,6 @@ const CalmShop = () => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const { height } = useWindowDimensions();
   const [showHow, setShowHow] = useState(false);
   const hint = useSharedValue(0);
   const hintStyle = useAnimatedStyle(() => ({
@@ -220,7 +218,7 @@ const CalmShop = () => {
               </View>
             </View>
             <Animated.ScrollView
-              style={[styles.tagScroll, { maxHeight: height * TAGS_HEIGHT }]}
+              style={styles.tagScroll}
               contentContainerStyle={styles.sections}
               refreshControl={refresher}
               {...startCover.listProps}
@@ -424,7 +422,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       justifyContent: "center",
       width: s.size.button.xs,
     },
-    tagScroll: { flexGrow: 0, flexShrink: 1 },
+    tagScroll: { flex: 1 },
     sections: { gap: s.spacing.section },
     section: { gap: s.spacing.small },
     tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },

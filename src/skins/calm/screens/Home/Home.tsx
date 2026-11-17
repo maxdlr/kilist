@@ -191,14 +191,11 @@ const CalmHome = () => {
                 >
                   {links.prizesTitle}
                 </CText>
-                <Press
-                  accessibilityRole="button"
-                  hitSlop={skin.spacing.small}
+                <CButton
+                  small
+                  label={links.discoverLabel}
                   onPress={links.openPrizes}
-                  style={withPressed(styles.discover)}
-                >
-                  <CText size={skin.type.label}>{links.discoverLabel}</CText>
-                </Press>
+                />
               </View>
               {links.prizes.map((prize) => (
                 <Press
@@ -280,13 +277,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       alignItems: "center",
       flexDirection: "row",
       gap: s.spacing.inline,
-    },
-    discover: {
-      borderColor: C.fieldLine,
-      borderRadius: s.shape.radius,
-      borderWidth: s.shape.border,
-      paddingHorizontal: s.spacing.inline,
-      paddingVertical: s.spacing.tight,
     },
     prize: { gap: s.spacing.small },
     prizeName: { flexShrink: 1 },

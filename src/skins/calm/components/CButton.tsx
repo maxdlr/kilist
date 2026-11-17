@@ -13,6 +13,7 @@ export const CButton = ({
   variant = "primary",
   accessibilityLabel,
   icon,
+  small = false,
 }: {
   icon?: (color: string) => ReactNode;
   label?: string;
@@ -20,6 +21,7 @@ export const CButton = ({
   href?: Href;
   variant?: "primary" | "secondary" | "text" | "danger";
   accessibilityLabel?: string;
+  small?: boolean;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
@@ -41,6 +43,7 @@ export const CButton = ({
       style={({ pressed }) => [
         styles.button,
         round ? styles.round : styles.pill,
+        small && styles.small,
         {
           backgroundColor: look.fill,
           borderColor: look.line,
@@ -51,8 +54,8 @@ export const CButton = ({
       {icon?.(look.ink)}
       {label && (
         <CText
-          weight={variant === "text" ? "regular" : "medium"}
-          size={skin.type.label + 1}
+          weight={variant === "text" || small ? "regular" : "medium"}
+          size={small ? skin.type.label : skin.type.label + 1}
           color={look.ink}
           numberOfLines={1}
         >

@@ -1,3 +1,4 @@
+import { generateColorGradient } from "@/utils/colorUtils";
 import type { CalmElements } from "../index";
 
 export const name = { en: "Light", fr: "Clair" };
@@ -23,6 +24,8 @@ export const colors = {
   brick: "#A8432F",
 };
 
+const foods = generateColorGradient(colors.ink, colors.paper);
+
 export const elements: CalmElements = {
   statusBar: "dark",
   ground: colors.paper,
@@ -44,11 +47,11 @@ export const elements: CalmElements = {
   pendingDot: colors.sage600,
   barMaybe: colors.stone400,
   levels: {
-    1: colors.sage500,
-    2: colors.sage300,
-    3: colors.sand,
-    4: colors.peach,
-    5: colors.clay,
+    1: foods[10],
+    2: foods[40],
+    3: foods[50],
+    4: foods[60],
+    5: foods[80],
   },
   onLevel: colors.ink,
   scrim: colors.veil,

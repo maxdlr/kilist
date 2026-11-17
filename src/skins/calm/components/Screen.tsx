@@ -2,7 +2,8 @@ import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import type { Skin } from "@/skins/types";
-import { type ComponentRef, ReactNode, useRef, useState } from "react";
+import { type ComponentRef, ReactNode, useCallback, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import Animated, { type SharedValue, useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,13 +33,22 @@ export const Screen = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { insideTabs } = useTabBarVisibility();
+  const { insideTabs, setGlassDockHeight } = useTabBarVisibility();
   const target = useRef<ComponentRef<typeof View>>(null);
   const [dockHeight, setDockHeight] = useState(0);
   const tabBar = useTabBarInset();
   const dockLift = useAnimatedStyle(() => ({ bottom: tabBar.offset.value }));
   const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value }));
+  const docked = glass && Boolean(dock) && insideTabs;
   useStatusBarStyle(skin.statusBarOnGround);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!docked) return;
+      setGlassDockHeight(dockHeight);
+      return () => setGlassDockHeight(0);
+    }, [docked, dockHeight, setGlassDockHeight]),
+  );
 
   const content = [
     styles.content,
@@ -74,7 +84,7 @@ export const Screen = ({
   }
 
   return (
-    <GlassScene target={target}>
+    <GlassScene target={target} fade={false}>
       <Animated.View style={[styles.root, tabBarRoom]}>
         <View
           style={[

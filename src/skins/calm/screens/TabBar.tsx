@@ -53,7 +53,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { isHidden, glassTarget } = useTabBarVisibility();
+  const { isHidden, glassTarget, glassDockHeight } = useTabBarVisibility();
   const { pending } = useCheckPending();
   const fullHeight = skin.size.tabBar + insets.bottom;
   const height = useSharedValue(fullHeight);
@@ -74,7 +74,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
       accessibilityRole="tablist"
       style={[styles.bar, !glassTarget && styles.solid, animatedStyle]}
     >
-      {glassTarget && <GlassBackdrop key={targetKey(glassTarget)} target={glassTarget} />}
+      {glassTarget && <GlassBackdrop key={targetKey(glassTarget)} target={glassTarget} featherFrom={glassDockHeight} />}
       <View style={[styles.row, { paddingBottom: insets.bottom }]}>
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
@@ -98,7 +98,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               style={withPressed(styles.tab)}
             >
               <View style={styles.iconWrap}>
-                <TabIcon size={skin.size.icon.action + 2} color={isCurrent ? C.text : C.textSoft} strokeWidth={1.4} />
+                <TabIcon size={skin.size.icon.action + 2} color={C.text} strokeWidth={1.4} />
                 {badge && (
                   <View style={styles.badge}>
                     <Dot color={C.pendingDot} size={7} />
@@ -109,7 +109,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 allowFontScaling={false}
                 weight={isCurrent ? "semibold" : "regular"}
                 size={skin.type.caption - 1}
-                color={isCurrent ? C.text : C.textSoft}
+                color={C.text}
                 numberOfLines={1}
               >
                 {label}

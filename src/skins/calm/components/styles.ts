@@ -14,6 +14,11 @@ export const createButtonStyles = (s: Skin) =>
       justifyContent: "center",
     },
     pill: { paddingHorizontal: s.spacing.stack },
+    small: {
+      borderRadius: (s.size.button.xs - 16) / 2,
+      height: s.size.button.xs - 16,
+      paddingHorizontal: s.spacing.inline,
+    },
     round: { width: s.size.button.md },
     actionRow: {
       alignItems: "center",

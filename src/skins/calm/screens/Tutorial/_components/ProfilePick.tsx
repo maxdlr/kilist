@@ -12,11 +12,12 @@ import axios from "@/services/axios";
 import type { Skin } from "@/skins/types";
 import { FoodBankItemType, FoodType } from "@/types/model";
 import { useEffect, useState } from "react";
-import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, { useAnimatedRef, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useSWRConfig } from "swr";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, Screen } from "@/skins/calm/components";
+import { CButton, CText, GlassScrollView, Screen } from "@/skins/calm/components";
+import { XmarkIcon } from "@/components/icons";
 import { Sample, StepNav } from "./shared";
 import StepBar from "./StepBar";
 import TopBar from "./TopBar";
@@ -153,6 +154,7 @@ const ProfilePick = ({
   const isLast = page === pages.length - 1;
   const canBack = page > 0 && !busy;
   const paged = pages.length > 1;
+  const exitInTitle = !paged && !onBack && Boolean(onExit);
 
   useEffect(() => {
     filled.set((page + 1) / pages.length);
@@ -237,25 +239,39 @@ const ProfilePick = ({
     const text = copy.questions[question.id];
 
     return (
-      <ScrollView
+      <GlassScrollView
         key={index}
         style={{ width }}
         contentContainerStyle={styles.scroll}
       >
         <View style={styles.head}>
-          <CText
-            weight="medium"
-            size={skin.type.display.md}
-            accessibilityRole="header"
-          >
-            {refine
-              ? copy.refineTitle
-              : reviewing
-                ? copy.reviewTitle
-                : online
-                  ? text.title
-                  : copy.profileTitle}
-          </CText>
+          <View style={styles.titleRow}>
+            <CText
+              weight="medium"
+              size={skin.type.display.md}
+              accessibilityRole="header"
+              style={styles.title}
+            >
+              {refine
+                ? copy.refineTitle
+                : reviewing
+                  ? copy.reviewTitle
+                  : online
+                    ? text.title
+                    : copy.profileTitle}
+            </CText>
+            {exitInTitle && (
+              <Press
+                accessibilityRole="button"
+                accessibilityLabel={T.close}
+                hitSlop={skin.spacing.small}
+                onPress={onExit}
+                style={withPressed(styles.exit)}
+              >
+                <XmarkIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
+              </Press>
+            )}
+          </View>
           <CText size={skin.type.body} color={C.textSoft}>
             {refine && reviewing
               ? copy.refineLine
@@ -317,20 +333,21 @@ const ProfilePick = ({
             })}
           </View>
         )}
-      </ScrollView>
+      </GlassScrollView>
     );
   };
 
   return (
     <Screen
       padded={false}
+      glass
       dock={
         <>
           {isLast && (
             <CText
               size={skin.type.label + 1}
-              color={C.textSoft}
-              style={[styles.center, styles.full]}
+              color={C.text}
+              style={[styles.center, styles.full, styles.dockNote]}
             >
               {profiles.length === 0
                 ? copy.profileOffline
@@ -352,7 +369,7 @@ const ProfilePick = ({
         </>
       }
     >
-      {(paged || onBack || onExit) && (
+      {!exitInTitle && (paged || onBack || onExit) && (
         <View style={styles.barRow}>
           <TopBar onBack={canBack ? () => goTo(page - 1) : busy ? undefined : onBack} onExit={onExit}>
             {paged && (
@@ -416,8 +433,11 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingHorizontal: s.spacing.stack,
     },
     full: { width: "100%" },
+    dockNote: { paddingTop: s.spacing.inline },
+    titleRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.stack },
+    title: { flexShrink: 1 },
+    exit: { justifyContent: "center", marginLeft: "auto", minHeight: s.size.button.xs },
     barRow: {
-      paddingBottom: s.spacing.section,
       paddingHorizontal: s.spacing.gutter,
     },
   });

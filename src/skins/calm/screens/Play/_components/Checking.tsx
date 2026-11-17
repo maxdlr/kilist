@@ -47,7 +47,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   }, [canNudge, touches]);
 
   return (
-    <GlassScene>
+    <GlassScene fade={false}>
       <Animated.View
         onTouchStart={() => setTouches((count) => count + 1)}
         style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }, tabBarRoom]}
