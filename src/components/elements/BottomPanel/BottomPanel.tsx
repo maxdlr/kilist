@@ -1,6 +1,7 @@
 import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { PanelSkin, useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { useCoverDock } from "@/providers/DockStore";
 import { useHideTabBar, useInsideGlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import PANEL_GLASS from "./panelGlass";
@@ -64,6 +65,7 @@ const BottomPanel = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   useHideTabBar(visible);
+  useCoverDock(visible);
   const insets = useSafeAreaInsets();
   const { glassTarget } = useTabBarVisibility();
   const insideTarget = useInsideGlassTarget();

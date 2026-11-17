@@ -10,12 +10,13 @@ import ProfilePick from "./_components/ProfilePick";
 import Practice from "./_components/Practice";
 import PracticeShop from "./_components/PracticeShop";
 import Finished from "./_components/Finished";
+import Ready from "./_components/Ready";
 
 const PRACTICE_CARDS = 3;
 
 const INTRO_ART = { 1: <SortArt />, 2: <ShopArt /> };
 
-type Step = "intro" | "profile" | "practice" | "shop" | "done";
+type Step = "intro" | "profile" | "ready" | "practice" | "shop" | "done";
 
 const CalmTutorial = ({
   withIntro,
@@ -92,7 +93,7 @@ const CalmTutorial = ({
         onDone={() =>
           go(
             (inventory.length > 0 || joined) && !foodsOnly
-              ? "practice"
+              ? "ready"
               : "profile",
           )
         }
@@ -108,10 +109,14 @@ const CalmTutorial = ({
         onDone={(items) => {
           setAdded(items);
           if (foodsOnly) finish(false);
-          else go("practice", false);
+          else go("ready", false);
         }}
       />
     );
+  }
+
+  if (step === "ready") {
+    return <Ready cards={samples.length} {...nav} onGo={() => go("practice")} />;
   }
 
   if (step === "practice") {

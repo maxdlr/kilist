@@ -177,6 +177,8 @@ const CalmShop = () => {
               dockWith(common.shop.start, run.start)
             )
           }
+          dockMode={selecting ? "select" : "start"}
+          dockDepth={selecting ? 1 : 0}
           glass
         >
           <View style={[styles.flex, styles.list]}>
@@ -268,7 +270,7 @@ const CalmShop = () => {
                           onPress={() => run.toggleSelect(food)}
                           style={withPressed([styles.tag, picked && styles.tagPicked])}
                         >
-                          <Dot color={skin.colors.levels[level]} />
+                          <Dot color={picked ? C.onFill : skin.colors.levels[level]} />
                           <CText size={skin.type.body} color={picked ? C.onFill : C.text} numberOfLines={1}>
                             {food.name}
                           </CText>

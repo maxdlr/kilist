@@ -29,10 +29,11 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   useStatusBarStyle(skin.statusBarOnGround);
   const total = Math.max(1, game.total);
   const [labels, setLabels] = useState(false);
+  const head = C.gameHeader;
   const intentColor: Record<SwipeDirection, string> = {
-    left: C.negative,
-    up: C.textSoft,
-    right: C.positive,
+    left: head.hint.out,
+    up: head.hint.unsure,
+    right: head.hint.haveIt,
   };
   const InfoIcon = labels ? InfoCircleSolidIcon : InfoCircleIcon;
   const [touches, setTouches] = useState(0);
@@ -65,8 +66,8 @@ const Checking = ({ game }: { game: SwipeGame }) => {
                 >
                   <XmarkIcon
                     size={skin.size.icon.action}
-                    color={C.textSoft}
-                    strokeWidth={1.8}
+                    color={head.icon}
+                    strokeWidth={head.iconStroke}
                   />
                 </Press>
                 <UndoButton enabled={game.canUndo} onPress={game.undo} />
@@ -79,7 +80,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
                 )}
               </View>
               <View style={styles.headerEnd}>
-                <CText size={skin.type.label} color={C.textSoft}>
+                <CText size={skin.type.label} color={head.counter}>
                   {T.play.position(
                     Math.min(game.position + 1, game.total),
                     game.total,
@@ -95,8 +96,8 @@ const Checking = ({ game }: { game: SwipeGame }) => {
                 >
                   <InfoIcon
                     size={skin.size.icon.action}
-                    color={labels ? C.text : C.textSoft}
-                    strokeWidth={1.8}
+                    color={labels ? head.iconActive : head.icon}
+                    strokeWidth={head.iconStroke}
                   />
                 </Press>
               </View>
@@ -104,11 +105,12 @@ const Checking = ({ game }: { game: SwipeGame }) => {
             <View
               accessibilityRole="progressbar"
               accessibilityValue={{ min: 0, max: total, now: game.position }}
-              style={styles.track}
+              style={[styles.track, { backgroundColor: head.progress.track, height: head.progress.height }]}
             >
               <View
                 style={[
                   styles.fill,
+                  { backgroundColor: head.progress.fill },
                   { width: `${(game.position / total) * 100}%` },
                 ]}
               />
@@ -171,8 +173,8 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       justifyContent: "center",
       minHeight: s.size.button.xs,
     },
-    track: { backgroundColor: C.line, height: 2 },
-    fill: { backgroundColor: C.fill, height: "100%" },
+    track: {},
+    fill: { height: "100%" },
     hint: { alignItems: "center", flex: 1 },
   });
 

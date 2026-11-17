@@ -9,7 +9,7 @@ import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CText, GlassScrollView, Screen } from "@/skins/calm/components";
 import Group from "./_components/Group";
@@ -29,7 +29,7 @@ const CalmAccount = () => {
   const others = account.members.filter((member) => member.id !== user.id);
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
+    <AvoidKeyboard>
       <Screen padded={false} glass glassLook={GLASS}>
         <GlassScrollView contentContainerStyle={styles.scroll}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
@@ -105,7 +105,7 @@ const CalmAccount = () => {
       <ButtonKindOverride.Provider value="secondary">
         <AccountPanels account={account} />
       </ButtonKindOverride.Provider>
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 
@@ -113,7 +113,6 @@ export default CalmAccount;
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
-    flex: { flex: 1, minWidth: 0 },
     scroll: { gap: s.spacing.section + 4, paddingBottom: s.spacing.section, paddingHorizontal: s.spacing.gutter },
     row: {
       alignItems: "center",

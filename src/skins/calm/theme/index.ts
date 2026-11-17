@@ -1,6 +1,32 @@
 import type { Lang } from "@/i18n";
 import type { BottomPanelLook, LevelNumber, Skin, SkinPaint, SkinThemeSource } from "@/skins/types";
 
+export type GameCardButtonLook = { fill: string; border: string; ink: string };
+
+export type GameCardLook = {
+  front: { fill: string; border: string };
+  behind: { fill: string; border: string; contentOpacity: number };
+  border: { width: number; radius: number };
+  title: string;
+  question: string;
+  buttons: {
+    idle: GameCardButtonLook;
+    active: GameCardButtonLook;
+    haveItIcon: string;
+    unsure: { idle: GameCardButtonLook; active: GameCardButtonLook };
+  };
+};
+
+export type GameHeaderLook = {
+  icon: string;
+  iconActive: string;
+  iconStroke: number;
+  undoDisabledOpacity: number;
+  counter: string;
+  hint: { out: string; unsure: string; haveIt: string };
+  progress: { track: string; fill: string; height: number };
+};
+
 type CalmBase = {
   statusBar: "light" | "dark";
   ground: string;
@@ -25,6 +51,8 @@ type CalmBase = {
   onLevel: string;
   scrim: string;
   bottomPanel: BottomPanelLook;
+  gameCard: GameCardLook;
+  gameHeader: GameHeaderLook;
 };
 
 type EmphasisKey =

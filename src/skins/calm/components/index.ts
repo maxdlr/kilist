@@ -9,6 +9,7 @@ export {
   type GlassLook,
   GlassScene,
   GlassScrollView,
+  glassTargetKey,
   useDockInset,
   useTabBarInset,
 } from "./Glass";

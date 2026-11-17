@@ -19,14 +19,15 @@ export const CardPads = ({
   onFling?: (direction: SwipeDirection) => void;
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
+  const look = useCalmColors().gameCard.buttons;
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.swipe;
   const live = onFling !== undefined;
 
   const pad = (direction: "left" | "right", label: string, aria: string) => {
     const on = intent === direction;
-    const ink = on ? C.onFill : C.text;
+    const state = on ? look.active : look.idle;
+    const ink = state.ink;
     return (
       <Press
         accessibilityRole="button"
@@ -38,8 +39,8 @@ export const CardPads = ({
           styles.button,
           labels ? styles.pill : styles.round,
           {
-            backgroundColor: on ? C.fill : C.tint,
-            borderColor: on ? C.fill : C.tint,
+            backgroundColor: state.fill,
+            borderColor: state.border,
             opacity: pressed ? skin.shape.pressedOpacity : 1,
           },
         ]}
@@ -67,7 +68,7 @@ export const CardPads = ({
         {direction === "right" && (
           <CheckIcon
             size={skin.size.icon.action}
-            color={on ? C.onFill : C.positive}
+            color={on ? state.ink : look.haveItIcon}
             strokeWidth={on ? 3 : 2}
           />
         )}
@@ -75,6 +76,7 @@ export const CardPads = ({
     );
   };
   const unsureOn = intent === "up";
+  const unsure = unsureOn ? look.unsure.active : look.unsure.idle;
 
   const hidden = {
     accessibilityElementsHidden: !live,
@@ -104,21 +106,21 @@ export const CardPads = ({
             styles.button,
             labels ? styles.pill : styles.round,
             {
-              backgroundColor: "transparent",
-              borderColor: unsureOn ? C.text : C.fieldLine,
+              backgroundColor: unsure.fill,
+              borderColor: unsure.border,
               opacity: pressed ? skin.shape.pressedOpacity : 1,
             },
           ]}
         >
           <ShrugIcon
             size={skin.size.icon.action}
-            color={unsureOn ? C.text : C.textSoft}
+            color={unsure.ink}
             strokeWidth={unsureOn ? 2.6 : 1.8}
           />
           {labels && (
             <CText
               size={skin.type.label + 1}
-              color={unsureOn ? C.text : C.textSoft}
+              color={unsure.ink}
               numberOfLines={1}
             >
               {copy.unsure}

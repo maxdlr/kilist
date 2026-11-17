@@ -12,7 +12,7 @@ import { FoodType } from "@/types/model";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { versusPalette as P } from "@/skins/versus/theme/palette";
 import { ANSWER_FILL, Kicker, memberColor, Screen, VButton, VText, WORD } from "@/skins/versus/components";
 import { VersusLoading } from "../States";
@@ -58,7 +58,7 @@ const VersusInventory = () => {
         : [half(skin.copy.inventory.delete, shelf.startDelete, "secondary"), half(skin.copy.inventory.add, () => shelf.openAdd())];
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
+    <AvoidKeyboard>
       <Screen
         padded={false}
         dock={
@@ -140,7 +140,7 @@ const VersusInventory = () => {
         )}
       </Screen>
       <FoodPanels shelf={shelf} />
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 

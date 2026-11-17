@@ -4,7 +4,7 @@ import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { type Href, router } from "expo-router";
-import { ReactNode } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   SafeAreaInsetsContext,
@@ -14,6 +14,10 @@ import Svg, { Path } from "react-native-svg";
 
 const TOUCH = 44;
 const ICON = 22;
+
+const BackBarOffset = createContext(0);
+
+export const useBackBarOffset = () => useContext(BackBarOffset);
 
 const BackBar = ({
   children,
@@ -32,12 +36,16 @@ const BackBar = ({
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const color = ink ?? skin.colors.onGround;
+  const [barHeight, setBarHeight] = useState(0);
 
   return (
     <View
       style={[styles.root, { backgroundColor: fill ?? skin.colors.ground }]}
     >
-      <View style={[styles.bar, { paddingTop: insets.top }]}>
+      <View
+        style={[styles.bar, { paddingTop: insets.top }]}
+        onLayout={(event) => setBarHeight(event.nativeEvent.layout.height)}
+      >
         <Press
           accessibilityRole="button"
           accessibilityLabel={label}
@@ -65,7 +73,9 @@ const BackBar = ({
         </Press>
       </View>
       <SafeAreaInsetsContext.Provider value={{ ...insets, top: 0 }}>
-        <View style={styles.body}>{children}</View>
+        <BackBarOffset.Provider value={barHeight}>
+          <View style={styles.body}>{children}</View>
+        </BackBarOffset.Provider>
       </SafeAreaInsetsContext.Provider>
     </View>
   );

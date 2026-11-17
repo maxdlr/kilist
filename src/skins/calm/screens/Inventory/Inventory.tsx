@@ -10,7 +10,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { PlusIcon, SearchIcon, TrashIcon, XmarkIcon } from "@/components/icons";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, DockSpacer, Screen } from "@/skins/calm/components";
 import { CalmLoading } from "../States";
@@ -83,12 +83,14 @@ const CalmInventory = () => {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
+    <AvoidKeyboard>
       <Screen
         padded={false}
         glass
         glassLook={GLASS}
         dock={searchOpen ? searchRow : actions}
+        dockMode={searchOpen ? "search" : isDeleteMode ? "delete" : isEmpty ? "empty" : "actions"}
+        dockDepth={searchOpen || isDeleteMode ? 1 : 0}
       >
         <View style={styles.titleRow}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
@@ -128,7 +130,7 @@ const CalmInventory = () => {
         )}
       </Screen>
       <FoodPanels shelf={shelf} />
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 

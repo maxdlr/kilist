@@ -8,7 +8,7 @@ import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { versusPalette as P } from "@/skins/versus/theme/palette";
 import { Avatar, Card, memberColor, Screen, VButton, VText } from "@/skins/versus/components";
 import Stat from "./_components/Stat";
@@ -43,7 +43,7 @@ const VersusAccount = () => {
   }));
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <AvoidKeyboard>
       <Screen padded={false}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.profile}>
@@ -154,7 +154,7 @@ const VersusAccount = () => {
         </ScrollView>
       </Screen>
       <AccountPanels account={account} />
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 

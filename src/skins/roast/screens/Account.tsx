@@ -9,7 +9,7 @@ import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import EditBadge from "@/components/features/Account/EditBadge";
 import GuestCard from "@/components/features/Account/GuestCard";
@@ -30,7 +30,7 @@ const RoastAccount = () => {
   if (!user) return null;
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <AvoidKeyboard>
       <ScrollView
         style={[styles.flex, { backgroundColor: skin.colors.ground }]}
       >
@@ -167,7 +167,7 @@ const RoastAccount = () => {
       </ScrollView>
 
       <AccountPanels account={account} />
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 

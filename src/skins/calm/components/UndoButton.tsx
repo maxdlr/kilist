@@ -5,7 +5,7 @@ import withPressed from "@/utils/withPressed";
 import { StyleSheet } from "react-native";
 import { UndoIcon } from "@/components/icons";
 import T from "../text";
-import { calmColors, useCalmColors } from "../theme/useCalmColors";
+import { useCalmColors } from "../theme/useCalmColors";
 
 export const UndoButton = ({ enabled, onPress }: { enabled: boolean; onPress: () => void }) => {
   const skin = useSkin();
@@ -20,16 +20,15 @@ export const UndoButton = ({ enabled, onPress }: { enabled: boolean; onPress: ()
       disabled={!enabled}
       hitSlop={skin.spacing.small}
       onPress={onPress}
-      style={withPressed([styles.close, !enabled && styles.undoOff])}
+      style={withPressed([styles.close, !enabled && { opacity: C.gameHeader.undoDisabledOpacity }])}
     >
-      <UndoIcon size={skin.size.icon.action} color={C.textSoft} strokeWidth={1.8} />
+      <UndoIcon size={skin.size.icon.action} color={C.gameHeader.icon} strokeWidth={C.gameHeader.iconStroke} />
     </Press>
   );
 };
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin) =>
   StyleSheet.create({
     close: { justifyContent: "center", minHeight: s.size.button.xs },
-    undoOff: { opacity: 0.3 },
   });
 

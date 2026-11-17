@@ -189,6 +189,10 @@ const fr: CalmText = {
     profileDone: "Terminé",
     profileAdding: "Ajout…",
     samples: ["Bananes", "Lait", "Riz", "Œufs", "Café"],
+    readyLabel: "Entraînement",
+    readyTitle: "On s'entraîne ?",
+    readyLine: (cards: number) => `${cards} cartes, puis une petite liste.\nRien n'est enregistré.`,
+    readyGo: "C'est parti",
     practiceLabel: (at: number, total: number) =>
       `Entraînement · ${at} sur ${total}`,
     stamps: { left: "Plus de", right: "J'en ai", up: "Pas sûr" },

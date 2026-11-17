@@ -4,7 +4,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
-import { calmColors } from "@/skins/calm/theme/useCalmColors";
+import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CardPads, CText } from "@/skins/calm/components";
 import { useDeckCardLook } from "@/skins/calm/components/deckCard";
 import { Sample } from "./shared";
@@ -21,6 +21,7 @@ const PracticeCard = ({
   onFling?: (direction: SwipeDirection) => void;
 }) => {
   const skin = useSkin();
+  const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const look = useDeckCardLook(behind);
 
@@ -33,7 +34,7 @@ const PracticeCard = ({
               name={item.icon ?? undefined}
               size={skin.size.icon.card}
             />
-            <CText weight="bold" size={skin.type.title} style={styles.center}>
+            <CText weight="bold" size={skin.type.title} color={C.gameCard.title} style={styles.center}>
               {item.name}
             </CText>
           </View>
@@ -55,10 +56,10 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingTop: s.spacing.small,
     },
     card: {
-      backgroundColor: C.card,
-      borderColor: C.line,
-      borderRadius: s.size.button.lg / 2 + s.spacing.inline,
-      borderWidth: s.shape.border,
+      backgroundColor: C.gameCard.front.fill,
+      borderColor: C.gameCard.front.border,
+      borderRadius: C.gameCard.border.radius,
+      borderWidth: C.gameCard.border.width,
       flex: 1,
     },
     cardBody: {

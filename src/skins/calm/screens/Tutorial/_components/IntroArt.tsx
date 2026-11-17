@@ -133,7 +133,9 @@ export const ShopArt = () => {
         </Animated.View>
         <Animated.View style={[styles.row, rowStyle]}>
           <CText size={skin.type.lead}>{name}</CText>
-          <Animated.View style={[styles.finger, styles.rowFinger, fingerStyle]} />
+          <View pointerEvents="none" style={styles.rowFinger}>
+            <Animated.View style={[styles.finger, styles.fingerCentered, fingerStyle]} />
+          </View>
         </Animated.View>
       </View>
     </View>
@@ -189,5 +191,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingHorizontal: s.spacing.stack,
     },
     cardFinger: { bottom: s.spacing.stack },
-    rowFinger: { left: "50%", marginLeft: -FINGER / 2, marginTop: -FINGER / 2, top: "50%" },
+    rowFinger: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
+    fingerCentered: { position: "relative" },
   });

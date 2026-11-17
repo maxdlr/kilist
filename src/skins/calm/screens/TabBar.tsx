@@ -4,7 +4,7 @@ import T from "../text";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { type GlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
+import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { useEffect } from "react";
@@ -27,17 +27,12 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CText, Dot, GlassBackdrop } from "../components";
+import { CText, Dot, GlassBackdrop, glassTargetKey } from "../components";
+import DockHost from "../components/DockHost";
 import useCheckPending from "../hooks/useCheckPending";
 
 const ORDER = MAIN_TABS;
 
-const targetKeys = new WeakMap<GlassTarget, number>();
-let nextTargetKey = 0;
-const targetKey = (target: GlassTarget) => {
-  if (!targetKeys.has(target)) targetKeys.set(target, ++nextTargetKey);
-  return targetKeys.get(target);
-};
 
 const ICONS: Record<string, { idle: Icon; selected: Icon }> = {
   index: { idle: HomeIcon, selected: HomeSolidIcon },
@@ -70,12 +65,14 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const currentName = shownTab(actualName);
 
   return (
+    <>
+    <DockHost />
     <Animated.View
       accessibilityRole="tablist"
       style={[styles.bar, !glassTarget && styles.solid, animatedStyle]}
     >
       {glassTarget && <GlassBackdrop
-          key={targetKey(glassTarget)}
+          key={glassTargetKey(glassTarget)}
           target={glassTarget}
           featherFrom={glassDockHeight}
           look={glassLook ?? undefined}
@@ -124,6 +121,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
         })}
       </View>
     </Animated.View>
+    </>
   );
 };
 

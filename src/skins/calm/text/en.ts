@@ -179,6 +179,10 @@ const en = {
     profileDone: "Done",
     profileAdding: "Adding…",
     samples: ["Bananas", "Milk", "Rice", "Eggs", "Coffee"],
+    readyLabel: "Practice",
+    readyTitle: "Let's practice.",
+    readyLine: (cards: number) => `${cards} cards, then a short list.\nNothing is saved.`,
+    readyGo: "Let's go",
     practiceLabel: (at: number, total: number) =>
       `Practice · ${at} of ${total}`,
     stamps: { left: "Out", right: "Have it", up: "Not sure" },

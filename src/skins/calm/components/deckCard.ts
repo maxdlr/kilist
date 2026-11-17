@@ -4,10 +4,8 @@ import { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "
 import { useDeckRise } from "@/components/elements/SwipeDeck";
 import { useCalmColors } from "../theme/useCalmColors";
 
-const BEHIND_CONTENT = 0.35;
-
 export const useDeckCardLook = (behind: boolean) => {
-  const C = useCalmColors();
+  const { front: face, behind: back } = useCalmColors().gameCard;
   const rise = useDeckRise();
   const own = useSharedValue(behind ? 0 : 1);
   const front = rise ?? own;
@@ -17,11 +15,11 @@ export const useDeckCardLook = (behind: boolean) => {
   }, [behind, own]);
 
   const cardStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(front.value, [0, 1], [C.tint, C.card]),
-    borderColor: interpolateColor(front.value, [0, 1], [C.tint, C.line]),
+    backgroundColor: interpolateColor(front.value, [0, 1], [back.fill, face.fill]),
+    borderColor: interpolateColor(front.value, [0, 1], [back.border, face.border]),
   }));
   const contentStyle = useAnimatedStyle(() => ({
-    opacity: BEHIND_CONTENT + (1 - BEHIND_CONTENT) * front.value,
+    opacity: back.contentOpacity + (1 - back.contentOpacity) * front.value,
   }));
 
   return { cardStyle, contentStyle };

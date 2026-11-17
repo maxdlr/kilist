@@ -63,6 +63,31 @@ export const elements: CalmElements = {
   },
   onLevel: base[5],
   scrim: colors.veil,
+  gameCard: {
+    front: { fill: base[80], border: base[70] },
+    behind: { fill: base[60], border: base[60], contentOpacity: 0.35 },
+    border: { width: 1, radius: 39 },
+    title: base[5],
+    question: base[20],
+    buttons: {
+      idle: { fill: base[60], border: base[60], ink: base[5] },
+      active: { fill: base[5], border: base[5], ink: base[80] },
+      haveItIcon: colors.sage300,
+      unsure: {
+        idle: { fill: "transparent", border: base[40], ink: base[20] },
+        active: { fill: "transparent", border: base[5], ink: base[5] },
+      },
+    },
+  },
+  gameHeader: {
+    icon: base[20],
+    iconActive: base[5],
+    iconStroke: 1.8,
+    undoDisabledOpacity: 0.3,
+    counter: base[20],
+    hint: { out: base[5], unsure: base[20], haveIt: colors.sage300 },
+    progress: { track: base[70], fill: base[5], height: 2 },
+  },
   bottomPanel: {
     glassSettings: {
       enabled: true,

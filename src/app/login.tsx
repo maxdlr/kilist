@@ -1,5 +1,5 @@
 import ActionPanel from "@/components/elements/ActionPanel";
-import BackBar from "@/components/elements/BackBar";
+import BackBar, { AvoidKeyboard } from "@/components/elements/BackBar";
 import AuthFooter from "@/components/features/Auth/AuthFooter";
 import { signupSheet } from "@/components/features/Auth/authLook";
 import JoinCodePanel from "@/components/features/Auth/JoinCodePanel";
@@ -15,7 +15,6 @@ import type { Skin } from "@/skins/types";
 import { BlurTargetView } from "expo-blur";
 import { type ComponentRef, useRef, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
@@ -56,7 +55,7 @@ const LoginScreen = () => {
   if (flow.creating) return <SkinScreen slot="Loading" />;
 
   const screen = (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <AvoidKeyboard>
       <View style={[styles.flex, { backgroundColor: pageFill }]}>
         <BlurTargetView ref={blurTarget} style={[styles.flex, { backgroundColor: pageFill }]}>
           <ScrollView
@@ -106,7 +105,7 @@ const LoginScreen = () => {
           style={[StyleSheet.absoluteFill, { backgroundColor: skin.colors.paper }, wipeStyle]}
         />
       </View>
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 
   return flow.canLeave ? (

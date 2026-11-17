@@ -37,6 +37,7 @@ const CheckCard = ({
               <CText
                 weight="medium"
                 size={skin.type.headline + 2}
+                color={C.gameCard.title}
                 style={styles.center}
                 numberOfLines={2}
               >
@@ -44,7 +45,7 @@ const CheckCard = ({
               </CText>
               <CText
                 size={skin.type.body - 1}
-                color={C.textSoft}
+                color={C.gameCard.question}
                 style={styles.center}
               >
                 {T.play.question}
@@ -67,10 +68,10 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingVertical: s.spacing.stack,
     },
     card: {
-      backgroundColor: C.card,
-      borderColor: C.line,
-      borderRadius: s.size.button.lg / 2 + s.spacing.inline,
-      borderWidth: s.shape.border,
+      backgroundColor: C.gameCard.front.fill,
+      borderColor: C.gameCard.front.border,
+      borderRadius: C.gameCard.border.radius,
+      borderWidth: C.gameCard.border.width,
       flex: 1,
     },
     cardFace: { flex: 1 },

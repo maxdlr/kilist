@@ -30,13 +30,20 @@ import {
   View,
   type ViewStyle,
 } from "react-native";
-import { useKeyboardState } from "react-native-keyboard-controller";
+import useKeyboardOpen from "@/hooks/useKeyboardOpen";
 import { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
 
 const DockInset = SceneInset;
+
+const targetKeys = new WeakMap<GlassTarget, number>();
+let nextTargetKey = 0;
+export const glassTargetKey = (target: GlassTarget) => {
+  if (!targetKeys.has(target)) targetKeys.set(target, ++nextTargetKey);
+  return targetKeys.get(target);
+};
 
 export const useDockInset = () => useContext(DockInset);
 
@@ -188,7 +195,7 @@ export const useTabBarInset = () => {
   const skin = useSkin();
   const insets = useSafeAreaInsets();
   const { insideTabs, isHidden } = useTabBarVisibility();
-  const keyboardOpen = useKeyboardState((state) => state.isVisible);
+  const keyboardOpen = useKeyboardOpen();
   const inset =
     insideTabs && !isHidden && !keyboardOpen
       ? skin.size.tabBar + insets.bottom

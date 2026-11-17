@@ -1,27 +1,35 @@
-import { BarcodeIcon } from "@/components/icons";
-import type { LevelNumber, Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
-import LevelPicker from "@/components/elements/LevelPicker";
 import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title";
+import { BarcodeIcon } from "@/components/icons";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
-import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
+import type { LevelNumber, Skin } from "@/skins/types";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from "react";
 import { StyleSheet, View } from "react-native";
 
-type FoodFormData = { name: string; product?: ScannedProduct; level?: LevelNumber };
+type FoodFormData = {
+  name: string;
+  product?: ScannedProduct;
+  level?: LevelNumber;
+};
 
 type CloseGuard = MutableRefObject<() => boolean>;
 
 const FoodForm = ({
   title,
   initialName,
-  initialLevel,
   onSubmit,
   onRemove,
   onClose,
@@ -30,7 +38,6 @@ const FoodForm = ({
 }: {
   title: string;
   initialName: string;
-  initialLevel?: LevelNumber;
   scannable: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
   onRemove?: () => void;
@@ -42,13 +49,11 @@ const FoodForm = ({
   const copy = skin.copy.inventory;
   const { showToast } = useToast();
   const [name, setName] = useState(initialName);
-  const [level, setLevel] = useState(initialLevel);
   const [scanning, setScanning] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
 
-  const isDirty =
-    name !== initialName || level !== initialLevel || product !== undefined;
+  const isDirty = name !== initialName || product !== undefined;
 
   useEffect(() => {
     guardRef.current = () => {
@@ -66,7 +71,6 @@ const FoodForm = ({
     const success = await onSubmit({
       name: name.trim(),
       ...(product && { product }),
-      ...(level !== undefined && level !== initialLevel && { level }),
     });
     if (success) onClose();
   };
@@ -132,14 +136,14 @@ const FoodForm = ({
             height={skin.size.input}
             variant={name.trim() ? skin.panel.secondary : "primary"}
             accessibilityLabel={common.shop.scan}
-            icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
+            icon={(color) => (
+              <BarcodeIcon size={skin.size.icon.action} color={color} />
+            )}
             onTouch={() => setScanning(true)}
           />
         )}
       </View>
       {!onRemove && <NameSuggestions query={name} onPick={setName} />}
-
-      {level !== undefined && <LevelPicker label={copy.status} value={level} onChange={setLevel} />}
 
       <View style={styles.actions}>
         {onRemove && (
@@ -190,7 +194,12 @@ const FoodFormModal = ({
   const canClose = useCallback(() => guardRef.current(), []);
 
   return (
-    <BottomPanel visible={visible} onClose={onClose} dismissible canClose={canClose}>
+    <BottomPanel
+      visible={visible}
+      onClose={onClose}
+      dismissible
+      canClose={canClose}
+    >
       <FoodForm
         key={formKey}
         title={title}
@@ -208,7 +217,11 @@ const FoodFormModal = ({
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
-    nameRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    nameRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
     nameField: { flex: 1, minWidth: 0 },
     actions: {
       flexDirection: "row",

@@ -13,7 +13,7 @@ import useInventoryShelf from "@/hooks/screens/useInventoryShelf";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { FoodType } from "@/types/model";
 import { StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { AvoidKeyboard } from "@/components/elements/BackBar";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FoodPanels from "@/components/features/Inventory/FoodPanels";
@@ -53,7 +53,7 @@ const Inventory = () => {
 
   if (isEmpty) {
     return (
-      <KeyboardAvoidingView style={styles.flex} behavior="padding">
+      <AvoidKeyboard>
         <Sheet
           fill={skin.colors.accent}
           dock={
@@ -78,7 +78,7 @@ const Inventory = () => {
           <ThemedText size={skin.type.body}> </ThemedText>
         </Sheet>
         {panels}
-      </KeyboardAvoidingView>
+      </AvoidKeyboard>
     );
   }
 
@@ -104,7 +104,7 @@ const Inventory = () => {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding">
+    <AvoidKeyboard>
       <View style={[styles.root, { backgroundColor: skin.colors.ground }]}>
         <View style={[styles.header, { paddingTop: insets.top + skin.spacing.top }]}>
           <Title size={skin.type.display.sm} lines={1} color={skin.colors.onGround}>
@@ -184,7 +184,7 @@ const Inventory = () => {
       </View>
 
       {panels}
-    </KeyboardAvoidingView>
+    </AvoidKeyboard>
   );
 };
 

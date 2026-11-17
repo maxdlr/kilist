@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import type { View } from "react-native";
 import type { SceneGlass } from "@/components/elements/Glass";
+import { DockStoreProvider } from "./DockStore";
 
 export type GlassTarget = RefObject<ComponentRef<typeof View> | null>;
 
@@ -66,7 +67,9 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   );
 
   return (
-    <TabBarContext.Provider value={value}>{children}</TabBarContext.Provider>
+    <TabBarContext.Provider value={value}>
+      <DockStoreProvider>{children}</DockStoreProvider>
+    </TabBarContext.Provider>
   );
 };
 

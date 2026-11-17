@@ -1,7 +1,17 @@
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService, { projectFling } from "@/services/animation";
 import type { ActionColors, Skin } from "@/skins/types";
-import { createContext, ReactNode, RefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import {
   GestureDetector,
@@ -26,7 +36,10 @@ import { scheduleOnRN } from "react-native-worklets";
 
 export type SwipeDirection = "left" | "right" | "up";
 export type SwipeDeckFling = (direction: SwipeDirection) => void;
-export type SwipeDeckReturn = { key: string | number; direction: SwipeDirection } | null;
+export type SwipeDeckReturn = {
+  key: string | number;
+  direction: SwipeDirection;
+} | null;
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const COMMIT_X = 100;
@@ -36,8 +49,9 @@ const STAMP_FULL_AT = 80;
 const FLICK_VELOCITY = 600;
 const BACK_SCALE = 0.95;
 const NUDGE = 100;
-const NUDGE_PAUSE_MS = 900;
-const NUDGE_SETTLE_MS = 150;
+const NUDGE_DURATION = 800;
+const NUDGE_PAUSE_MS = 500;
+const NUDGE_SETTLE_MS = 500;
 
 export const deckButtonColors = (
   skin: Skin,
@@ -50,7 +64,12 @@ export const deckButtonColors = (
 };
 
 const offscreen = (direction: SwipeDirection | null) => ({
-  x: direction === "right" ? SCREEN_WIDTH * 1.6 : direction === "left" ? -SCREEN_WIDTH * 1.6 : 0,
+  x:
+    direction === "right"
+      ? SCREEN_WIDTH * 1.6
+      : direction === "left"
+        ? -SCREEN_WIDTH * 1.6
+        : 0,
   y: direction === "up" ? -SCREEN_HEIGHT * 1.2 : 0,
 });
 
@@ -112,7 +131,10 @@ const DeckSheet = ({
   });
   const hasLongPress = onLongPress !== undefined;
 
-  const callIntent = useCallback((next: SwipeDirection | null) => handlers.current.onIntent(next), []);
+  const callIntent = useCallback(
+    (next: SwipeDirection | null) => handlers.current.onIntent(next),
+    [],
+  );
   const callCommit = useCallback((direction: SwipeDirection) => {
     handlers.current.onSwipe(direction);
     handlers.current.onIntent(null);
@@ -128,7 +150,8 @@ const DeckSheet = ({
   useAnimatedReaction(
     () => flung.value || isTopNow(),
     (front, previous) => {
-      if (front !== previous) rise.set(withTiming(front ? 1 : 0, AnimationService.enter));
+      if (front !== previous)
+        rise.set(withTiming(front ? 1 : 0, AnimationService.enter));
     },
   );
 
@@ -154,10 +177,22 @@ const DeckSheet = ({
     nudge.set(
       withRepeat(
         withSequence(
-          withTiming(-NUDGE, AnimationService.config),
-          withTiming(0, AnimationService.config),
-          withTiming(NUDGE, AnimationService.config),
-          withTiming(0, AnimationService.config),
+          withTiming(-NUDGE, {
+            duration: NUDGE_DURATION,
+            easing: AnimationService.config.easing,
+          }),
+          withTiming(0, {
+            duration: NUDGE_DURATION,
+            easing: AnimationService.config.easing,
+          }),
+          withTiming(NUDGE, {
+            duration: NUDGE_DURATION,
+            easing: AnimationService.config.easing,
+          }),
+          withTiming(0, {
+            duration: NUDGE_DURATION,
+            easing: AnimationService.config.easing,
+          }),
           withDelay(NUDGE_PAUSE_MS, withTiming(0, { duration: 0 })),
         ),
         -1,
@@ -200,7 +235,13 @@ const DeckSheet = ({
         y.set(withTiming(-SCREEN_HEIGHT * 1.2, timing, done));
         return;
       }
-      x.set(withTiming((direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6, timing, done));
+      x.set(
+        withTiming(
+          (direction === "right" ? 1 : -1) * SCREEN_WIDTH * 1.6,
+          timing,
+          done,
+        ),
+      );
     },
     [flung, dragging, gone, itemKey, callCommit, callGone, x, y],
   );
@@ -225,7 +266,12 @@ const DeckSheet = ({
         speedX.set(0);
         speedY.set(0);
       },
-      onUpdate: (event: { translationX: number; translationY: number; velocityX: number; velocityY: number }) => {
+      onUpdate: (event: {
+        translationX: number;
+        translationY: number;
+        velocityX: number;
+        velocityY: number;
+      }) => {
         "worklet";
         if (flung.value || !dragging.value) return;
         x.set(startX.value + event.translationX);
@@ -260,7 +306,10 @@ const DeckSheet = ({
           Math.abs(vx) > FLICK_VELOCITY && Math.sign(vx) === Math.sign(x.value)
             ? x.value + projectFling(vx)
             : x.value;
-        const flickY = vy < -FLICK_VELOCITY && y.value < 0 ? y.value + projectFling(vy) : y.value;
+        const flickY =
+          vy < -FLICK_VELOCITY && y.value < 0
+            ? y.value + projectFling(vy)
+            : y.value;
 
         if (allowUp && flickY < -COMMIT_UP && -y.value > Math.abs(x.value)) {
           fling("up");
@@ -276,7 +325,21 @@ const DeckSheet = ({
         }
       },
     }),
-    [allowUp, fling, callIntent, isTopNow, dragging, flung, startX, startY, speedX, speedY, x, y, lastIntent],
+    [
+      allowUp,
+      fling,
+      callIntent,
+      isTopNow,
+      dragging,
+      flung,
+      startX,
+      startY,
+      speedX,
+      speedY,
+      x,
+      y,
+      lastIntent,
+    ],
   );
   const pan = usePanGesture(panConfig);
 
@@ -427,7 +490,9 @@ const SwipeDeck = <T,>({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const [leaving, setLeaving] = useState<{ key: string | number; item: T }[]>([]);
+  const [leaving, setLeaving] = useState<{ key: string | number; item: T }[]>(
+    [],
+  );
   const shown = items.slice(0, 3);
   const order = useSharedValue<DeckKey[]>(shown.map(keyOf));
   const gone = useSharedValue<DeckKey[]>([]);
@@ -472,13 +537,18 @@ const SwipeDeck = <T,>({
         isTop={depth === 0}
         leaving={isLeaving}
         onGone={() => landed(key)}
-        returnFrom={returnFrom && returnFrom.key === key ? returnFrom.direction : null}
+        returnFrom={
+          returnFrom && returnFrom.key === key ? returnFrom.direction : null
+        }
         nudging={nudging && depth === 0}
         allowUp={allowUp}
         stamps={stamps}
         onIntent={onIntent}
         onSwipe={(direction) => {
-          setLeaving((current) => [...current.filter((entry) => entry.key !== key), { key, item }]);
+          setLeaving((current) => [
+            ...current.filter((entry) => entry.key !== key),
+            { key, item },
+          ]);
           onSwipe(item, direction);
         }}
         onLongPress={onLongPress ? () => onLongPress(item) : undefined}
@@ -496,9 +566,7 @@ const SwipeDeck = <T,>({
       ]}
     >
       {[
-        ...shown
-          .map((item, depth) => sheet(item, depth))
-          .reverse(),
+        ...shown.map((item, depth) => sheet(item, depth)).reverse(),
         ...flying.map((entry) => sheet(entry.item, -1)),
       ]}
     </View>

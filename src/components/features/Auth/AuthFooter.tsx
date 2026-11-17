@@ -11,7 +11,7 @@ import type { Skin } from "@/skins/types";
 import { router } from "expo-router";
 import { Fragment } from "react";
 import { type LayoutChangeEvent, StyleSheet, View } from "react-native";
-import { useKeyboardState } from "react-native-keyboard-controller";
+import useKeyboardOpen from "@/hooks/useKeyboardOpen";
 import { AUTH_FOOTER_GLASS } from "./authLook";
 
 type Link = { label: string; onTouch: () => void };
@@ -32,7 +32,7 @@ const AuthFooter = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
-  const isKeyboardOpen = useKeyboardState((state) => state.isVisible);
+  const isKeyboardOpen = useKeyboardOpen();
   const googleVariant = flow.isSignup ? "secondaryOnLight" : "secondary";
   const label = flow.isSignup ? (flow.isLastStep ? copy.signupAction : copy.signupNext) : copy.loginAction;
 

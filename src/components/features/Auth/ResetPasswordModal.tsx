@@ -8,7 +8,7 @@ import { useSkin } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { useState } from "react";
-import { useKeyboardState } from "react-native-keyboard-controller";
+import useKeyboardOpen from "@/hooks/useKeyboardOpen";
 
 const STRONG_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 const messageOf = (error: any) => error?.response?.data?.message || common.needsConnection;
@@ -17,7 +17,7 @@ const ResetPasswordModal = ({ visible, onClose }: { visible: boolean; onClose: (
   const skin = useSkin();
   const T = common.reset;
   const { showToast } = useToast();
-  const isKeyboardOpen = useKeyboardState((state) => state.isVisible);
+  const isKeyboardOpen = useKeyboardOpen();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
