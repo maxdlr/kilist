@@ -14,6 +14,7 @@ import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CText, GlassScrollView, Screen } from "@/skins/calm/components";
 import Group from "./_components/Group";
 import Row from "./_components/Row";
+import GLASS from "./glass";
 
 const CalmAccount = () => {
   const skin = useSkin();
@@ -29,7 +30,7 @@ const CalmAccount = () => {
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
-      <Screen padded={false} glass>
+      <Screen padded={false} glass glassLook={GLASS}>
         <GlassScrollView contentContainerStyle={styles.scroll}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
 

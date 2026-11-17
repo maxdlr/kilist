@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CButton, CText, GlassScrollView, Screen } from "../components";
+import { CButton, CText, type GlassLook, GlassScrollView, Screen } from "../components";
 
 const BAR = 120;
 const SLIDER = 40;
@@ -67,12 +67,14 @@ export const CalmMessage = ({
   dock,
   mark,
   onRefresh,
+  glassLook,
 }: {
   title: string;
   line: string;
   dock?: React.ReactNode;
   mark?: MarkKind;
   onRefresh?: () => void | Promise<void>;
+  glassLook?: GlassLook;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
@@ -85,7 +87,7 @@ export const CalmMessage = ({
     </View>
   );
   return (
-    <Screen dock={dock} glass={!!onRefresh}>
+    <Screen dock={dock} glass={!!onRefresh} glassLook={glassLook}>
       {onRefresh ? (
         <GlassScrollView
           contentContainerStyle={styles.grow}

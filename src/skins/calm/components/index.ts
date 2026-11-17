@@ -3,8 +3,10 @@ export { CardPads } from "./CardPads";
 export { CText, type Weight } from "./CText";
 export { Dot } from "./Dot";
 export {
+  DEFAULT_GLASS,
   DockSpacer,
   GlassBackdrop,
+  type GlassLook,
   GlassScene,
   GlassScrollView,
   useDockInset,

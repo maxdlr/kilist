@@ -22,6 +22,7 @@ import { CalmLoading, CalmMessage } from "../States";
 import AisleManager from "./_components/AisleManager";
 import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
+import GLASS from "./glass";
 
 
 const HINT_SLIDE = 28;
@@ -97,6 +98,7 @@ const CalmShop = () => {
   if (result) {
     return (
       <CalmMessage
+        glassLook={GLASS}
         mark="done"
         title={T.done}
         line={T.shop.result(result.bought, result.left)}
@@ -164,6 +166,7 @@ const CalmShop = () => {
       <View style={styles.flex}>
         <Screen
           padded={false}
+          glassLook={GLASS}
           dock={
             selecting ? (
               <>
@@ -289,6 +292,7 @@ const CalmShop = () => {
     return (
       <View style={styles.flex}>
         <CalmMessage
+          glassLook={GLASS}
           title={skin.copy.shop.emptyTitle}
           line={skin.copy.shop.emptyLine}
           onRefresh={run.refreshEmpty}
@@ -303,7 +307,7 @@ const CalmShop = () => {
       style={styles.flex}
       onTouchStart={() => setTouches((count) => count + 1)}
     >
-      <Screen padded={false} glass dock={dockWith(common.shop.finish, run.finish)}>
+      <Screen padded={false} glass glassLook={GLASS} dock={dockWith(common.shop.finish, run.finish)}>
         <View style={styles.head}>
           <View style={styles.titleRow}>
             <CText

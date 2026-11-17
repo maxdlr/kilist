@@ -15,6 +15,7 @@ import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, DockSpacer, Screen } from "@/skins/calm/components";
 import { CalmLoading } from "../States";
 import FoodRow from "./_components/FoodRow";
+import GLASS from "./glass";
 
 const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
 
@@ -86,6 +87,7 @@ const CalmInventory = () => {
       <Screen
         padded={false}
         glass
+        glassLook={GLASS}
         dock={searchOpen ? searchRow : actions}
       >
         <View style={styles.titleRow}>

@@ -27,7 +27,7 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CText, Dot, GlassBackdrop } from "../components";
+import { CText, Dot, GlassBackdrop, type GlassLook } from "../components";
 import useCheckPending from "../hooks/useCheckPending";
 
 const ORDER = MAIN_TABS;
@@ -53,7 +53,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { isHidden, glassTarget, glassDockHeight } = useTabBarVisibility();
+  const { isHidden, glassTarget, glassDockHeight, glassLook } = useTabBarVisibility();
   const { pending } = useCheckPending();
   const fullHeight = skin.size.tabBar + insets.bottom;
   const height = useSharedValue(fullHeight);
@@ -74,7 +74,12 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
       accessibilityRole="tablist"
       style={[styles.bar, !glassTarget && styles.solid, animatedStyle]}
     >
-      {glassTarget && <GlassBackdrop key={targetKey(glassTarget)} target={glassTarget} featherFrom={glassDockHeight} />}
+      {glassTarget && <GlassBackdrop
+          key={targetKey(glassTarget)}
+          target={glassTarget}
+          featherFrom={glassDockHeight}
+          look={(glassLook as GlassLook | null) ?? undefined}
+        />}
       <View style={[styles.row, { paddingBottom: insets.bottom }]}>
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;

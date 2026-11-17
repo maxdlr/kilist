@@ -59,19 +59,36 @@ export const GlassScrollView = ({
   );
 };
 
-const GLASS_BLUR = 30;
-const ANDROID_REDUCTION = 4;
+export type GlassLook = {
+  height?: number;
+  blur: number;
+  androidReduction: number;
+  veil: number;
+  feather: number;
+  fadeFloor: number;
+  fadeLead?: number;
+  fadeCurve: number;
+};
+
+export const DEFAULT_GLASS: GlassLook = {
+  blur: 30,
+  androidReduction: 4,
+  veil: 0.5,
+  feather: 64,
+  fadeFloor: 0.25,
+  fadeCurve: 2,
+};
+
 const TINTLESS = 1;
-const GLASS_VEIL = 0.5;
-const GLASS_FEATHER = 64;
-const CONTENT_FADE_FLOOR = 0.25;
-const CONTENT_FADE_LEAD = 100;
-const CONTENT_FADE_CURVE = 2;
-const CONTENT_FADE_STOPS = Array.from({ length: 9 }, (_, index) => {
-  const at = index / 8;
-  const eased = 1 - (1 - at) ** CONTENT_FADE_CURVE;
-  return { at, opacity: 1 - eased * (1 - CONTENT_FADE_FLOOR) };
-});
+const SCENE_FADE_LEAD = 100;
+const FADE_STEPS = 8;
+
+const fadeStops = (look: GlassLook) =>
+  Array.from({ length: FADE_STEPS + 1 }, (_, index) => {
+    const at = index / FADE_STEPS;
+    const eased = 1 - (1 - at) ** look.fadeCurve;
+    return { at, opacity: 1 - eased * (1 - look.fadeFloor) };
+  });
 
 const MaskedView = MaskedViewBase as unknown as ComponentType<{
   style?: StyleProp<ViewStyle>;
@@ -113,13 +130,13 @@ const Feather = ({
   </View>
 );
 
-const ContentFadeMask = ({ id, height }: { id: string; height: number }) => (
+const ContentFadeMask = ({ id, height, look }: { id: string; height: number; look: GlassLook }) => (
   <View style={StyleSheet.absoluteFill}>
     <View style={[glassStyles.solid, glassStyles.grow]} />
     <Svg width="100%" height={height}>
       <Defs>
         <LinearGradient id={id} x1={0} y1={0} x2={0} y2={1}>
-          {CONTENT_FADE_STOPS.map((stop) => (
+          {fadeStops(look).map((stop) => (
             <Stop
               key={stop.at}
               offset={stop.at}
@@ -137,19 +154,21 @@ const ContentFadeMask = ({ id, height }: { id: string; height: number }) => (
 export const GlassBackdrop = ({
   target,
   featherFrom = 0,
+  look = DEFAULT_GLASS,
 }: {
   target: GlassTarget;
   featherFrom?: number;
+  look?: GlassLook;
 }) => {
   const C = useCalmColors();
   const id = useId().replace(/:/g, "");
-  const featherLeft = Math.max(0, GLASS_FEATHER - featherFrom);
-  const featherStart = 1 - featherLeft / GLASS_FEATHER;
+  const featherLeft = Math.max(0, look.feather - featherFrom);
+  const featherStart = look.feather > 0 ? 1 - featherLeft / look.feather : 1;
   const blur = (
     <BlurView
       blurTarget={target}
-      intensity={Platform.OS === "android" ? TINTLESS : GLASS_BLUR}
-      blurReductionFactor={(TINTLESS * ANDROID_REDUCTION) / GLASS_BLUR}
+      intensity={Platform.OS === "android" ? TINTLESS : look.blur}
+      blurReductionFactor={(TINTLESS * look.androidReduction) / Math.max(1, look.blur)}
       blurMethod="dimezisBlurViewSdk31Plus"
       style={StyleSheet.absoluteFill}
     />
@@ -181,8 +200,8 @@ export const GlassBackdrop = ({
         <Feather
           id={`veil${id}`}
           color={C.ground}
-          from={featherStart * GLASS_VEIL}
-          to={GLASS_VEIL}
+          from={featherStart * look.veil}
+          to={look.veil}
           height={featherLeft}
         />
       </View>
@@ -213,11 +232,13 @@ export const GlassScene = ({
   extraInset = 0,
   target: given,
   fade = true,
+  look = DEFAULT_GLASS,
 }: {
   children: ReactNode;
   extraInset?: number;
   target?: GlassTarget;
   fade?: boolean;
+  look?: GlassLook;
 }) => {
   const styles = useSkinStyles(createStyles);
   const own = useRef<ComponentRef<typeof View>>(null);
@@ -225,7 +246,7 @@ export const GlassScene = ({
   const { insideTabs, setGlassTarget } = useTabBarVisibility();
   const tabBar = useTabBarInset();
   const glassHeight = extraInset + tabBar.inset;
-  const fadeHeight = glassHeight + (extraInset > 0 ? 0 : CONTENT_FADE_LEAD);
+  const fadeHeight = glassHeight + (look.fadeLead ?? (extraInset > 0 ? 0 : SCENE_FADE_LEAD));
   const fadeId = `fade${useId().replace(/:/g, "")}`;
 
   useFocusEffect(
@@ -244,7 +265,7 @@ export const GlassScene = ({
         {fade && glassHeight > 0 ? (
           <MaskedView
             style={glassStyles.grow}
-            maskElement={<ContentFadeMask id={fadeId} height={fadeHeight} />}
+            maskElement={<ContentFadeMask id={fadeId} height={fadeHeight} look={look} />}
           >
             {children}
           </MaskedView>

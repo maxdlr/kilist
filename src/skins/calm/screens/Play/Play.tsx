@@ -9,6 +9,7 @@ import { CButton } from "@/skins/calm/components";
 import { CalmLoading, CalmMessage } from "../States";
 import Checking from "./_components/Checking";
 import Recap from "./_components/Recap";
+import GLASS from "./glass";
 
 const CalmPlay = () => {
   const skin = useSkin();
@@ -34,6 +35,7 @@ const CalmPlay = () => {
       case "empty":
         return (
           <CalmMessage
+            glassLook={GLASS}
             title={copy.emptyTitle}
             line={copy.emptyLine}
             dock={

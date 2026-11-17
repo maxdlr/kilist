@@ -7,6 +7,7 @@ import { ArcadeIcon, RefreshIcon } from "@/components/icons";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, Dot, GlassScrollView, Screen } from "@/skins/calm/components";
+import GLASS from "../glass";
 
 const Recap = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
@@ -18,6 +19,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
   return (
     <Screen
       glass
+      glassLook={GLASS}
       dock={
         <>
           <CButton

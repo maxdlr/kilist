@@ -22,6 +22,7 @@ import { CButton, CText, GlassScrollView, Screen } from "@/skins/calm/components
 import { StockBars } from "./_components/StockBars";
 import useCheckPending from "@/skins/calm/hooks/useCheckPending";
 import { CalmError, CalmLoading } from "../States";
+import GLASS from "./glass";
 
 const PREVIEW = 12;
 
@@ -75,6 +76,7 @@ const CalmHome = () => {
       <Screen
         padded={false}
         glass
+        glassLook={GLASS}
         dock={shortcuts.map((item) => (
           <CButton
             key={item.label}
