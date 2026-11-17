@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import type { View } from "react-native";
+import type { SceneGlass } from "@/components/elements/Glass";
 
 export type GlassTarget = RefObject<ComponentRef<typeof View> | null>;
 
@@ -22,8 +23,8 @@ type TabBarContextType = {
   setGlassTarget: Dispatch<SetStateAction<GlassTarget | null>>;
   glassDockHeight: number;
   setGlassDockHeight: Dispatch<SetStateAction<number>>;
-  glassLook: object | null;
-  setGlassLook: Dispatch<SetStateAction<object | null>>;
+  glassLook: SceneGlass | null;
+  setGlassLook: Dispatch<SetStateAction<SceneGlass | null>>;
 };
 
 const TabBarContext = createContext<TabBarContextType>({
@@ -42,7 +43,7 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   const [hideCount, setHideCount] = useState(0);
   const [glassTarget, setGlassTarget] = useState<GlassTarget | null>(null);
   const [glassDockHeight, setGlassDockHeight] = useState(0);
-  const [glassLook, setGlassLook] = useState<object | null>(null);
+  const [glassLook, setGlassLook] = useState<SceneGlass | null>(null);
 
   const hide = useCallback(() => {
     setHideCount((count) => count + 1);

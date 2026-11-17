@@ -2,7 +2,7 @@ import common from "@/i18n/common";
 import useAxios from "@/hooks/useAxios";
 import useToast from "@/providers/ToastProvider";
 import { FoodType, ShopListType } from "@/types/model";
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useMemo, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
 import { isQuietError } from "@/services/fetcher";
 
@@ -69,13 +69,17 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     } as SWRConfiguration,
   );
 
-  const [shopList, setShopList] = useState<ShopListType | undefined>(data);
-  const isFoodLoading = isStarting || isLoading || (!!data && !shopList);
-
-  useEffect(() => {
-    setShopList(data);
-    orderFoodBy(orderedBy);
-  }, [data]);
+  const [reversed, setReversed] = useState(false);
+  const foods = useMemo(() => {
+    if (!data) return undefined;
+    const sorted = [...data.foods].sort((a, b) =>
+      orderedBy === "name"
+        ? a.name.localeCompare(b.name)
+        : (a.inStockScore || 0) - (b.inStockScore || 0),
+    );
+    return reversed ? sorted.reverse() : sorted;
+  }, [data, orderedBy, reversed]);
+  const isFoodLoading = isStarting || isLoading;
 
   const { postData: startShopList } = useAxios("shop-list/start");
   const { postData: endShopList } = useAxios(`shop-list/cancel/${shopListId}`);
@@ -83,30 +87,11 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   const { postData: postShopClock } = useAxios(`shop-list/clock/${shopListId}`);
 
   const orderFoodBy = (type: "score" | "name") => {
-    setShopList((prev) => {
-      if (!prev) return prev;
-      const sortedFoods = [...prev.foods].sort((a, b) => {
-        if (type === "name") {
-          return a.name.localeCompare(b.name);
-        }
-        return (b.inStockScore || 0) - (a.inStockScore || 0);
-      });
-
-      return {
-        ...prev,
-        foods: type === "score" ? sortedFoods.reverse() : sortedFoods,
-      };
-    });
     setOrderedBy(type);
+    setReversed(false);
   };
 
-  const reverseOrderFood = () => {
-    setShopList((prev) => {
-      if (!prev) return prev;
-      const reversedFoods = [...prev.foods].reverse();
-      return { ...prev, foods: reversedFoods };
-    });
-  };
+  const reverseOrderFood = () => setReversed((current) => !current);
 
   const buyFood = async (foodId: number) => {
     const res = await editFood({
@@ -168,7 +153,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ShopListContext.Provider
       value={{
-        foods: shopList?.foods,
+        foods,
         isFoodLoading,
         mutateFood,
         buyFood,

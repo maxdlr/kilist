@@ -7,7 +7,8 @@ import {
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
-import { BlurTargetView, BlurView } from "expo-blur";
+import { BlurTargetView } from "expo-blur";
+import { DEFAULT_SCENE_GLASS, GlassBlur, type SceneGlass } from "@/components/elements/Glass";
 import MaskedViewBase from "@react-native-masked-view/masked-view";
 import { useFocusEffect } from "expo-router";
 import {
@@ -22,7 +23,6 @@ import {
   useRef,
 } from "react";
 import {
-  Platform,
   ScrollView,
   type ScrollViewProps,
   type StyleProp,
@@ -60,27 +60,9 @@ export const GlassScrollView = ({
   );
 };
 
-export type GlassLook = {
-  height?: number;
-  blur: number;
-  androidReduction: number;
-  veil: number;
-  feather: number;
-  fadeFloor: number;
-  fadeLead?: number;
-  fadeCurve: number;
-};
+export type GlassLook = SceneGlass;
 
-export const DEFAULT_GLASS: GlassLook = {
-  blur: 30,
-  androidReduction: 4,
-  veil: 0.5,
-  feather: 64,
-  fadeFloor: 0.25,
-  fadeCurve: 2,
-};
-
-const TINTLESS = 1;
+export const DEFAULT_GLASS: GlassLook = DEFAULT_SCENE_GLASS;
 const SCENE_FADE_LEAD = 100;
 const FADE_STEPS = 8;
 
@@ -165,15 +147,7 @@ export const GlassBackdrop = ({
   const id = useId().replace(/:/g, "");
   const featherLeft = Math.max(0, look.feather - featherFrom);
   const featherStart = look.feather > 0 ? 1 - featherLeft / look.feather : 1;
-  const blur = (
-    <BlurView
-      blurTarget={target}
-      intensity={Platform.OS === "android" ? TINTLESS : look.blur}
-      blurReductionFactor={(TINTLESS * look.androidReduction) / Math.max(1, look.blur)}
-      blurMethod="dimezisBlurViewSdk31Plus"
-      style={StyleSheet.absoluteFill}
-    />
-  );
+  const blur = <GlassBlur target={target} settings={look} />;
 
   return (
     <>

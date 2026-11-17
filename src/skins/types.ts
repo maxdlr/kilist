@@ -1,6 +1,6 @@
 import type { Lang } from "@/i18n";
 import type { RoastCopy } from "./roast/copy/en";
-import type { PanelGlass } from "@/components/elements/BottomPanel/panelGlass";
+import type { GlassSettings } from "@/components/elements/Glass";
 
 export type SkinCopy = RoastCopy;
 
@@ -64,7 +64,7 @@ export interface SkinDisplayFont {
 export type TextCase = "upper" | "none";
 
 export type BottomPanelLook = {
-  glassSettings?: Partial<PanelGlass>;
+  glassSettings?: Partial<GlassSettings>;
   border: { gradientStroke: { start: string; end: string; midPoint?: number }; width?: number };
   grip?: { width?: number; height?: number; color?: string; opacity?: number };
 };

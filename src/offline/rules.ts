@@ -1,3 +1,11 @@
+export type PasswordPolicy = {
+  minLength: number;
+  minLowercase: number;
+  minUppercase: number;
+  minNumbers: number;
+  minSymbols: number;
+};
+
 export type Rules = {
   suggestions: { everyDays: number; retryDays: number; maxDeclines: number };
   swipe: {
@@ -21,7 +29,11 @@ export type Rules = {
   };
   shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number; buyBelow?: number };
   products: { maxBarcodes: number; quantityLength: number };
-  accounts?: { usernameMin: number; usernameMax: number };
+  accounts?: {
+    usernameMin: number;
+    usernameMax: number;
+    password?: PasswordPolicy;
+  };
 };
 
 const SECTIONS = ["suggestions", "swipe", "tickets", "shop", "products"] as const;

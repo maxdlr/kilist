@@ -20,6 +20,7 @@ export default defineConfig({
       "src/offline/__tests__/**/*.test.ts",
       "src/skins/__tests__/**/*.test.ts",
       "src/notifications/__tests__/**/*.test.ts",
+      "src/utils/__tests__/**/*.test.ts",
     ],
   },
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },

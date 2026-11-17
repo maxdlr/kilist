@@ -29,7 +29,7 @@ const fr: CommonText = {
     line: "Tout le foyer voit ce nom.",
   },
   passwordRules: {
-    length: "8 caractères min.",
+    length: (min: number) => `${min} caractères min.`,
     upper: "Majuscule",
     lower: "Minuscule",
     number: "Chiffre",
@@ -255,8 +255,6 @@ const fr: CommonText = {
   hidePassword: "Masquer le mot de passe",
   showPassword: "Afficher le mot de passe",
   answerNotSaved: "Impossible d'enregistrer cette réponse",
-  hide: "Masquer",
-  show: "Afficher",
   selected: "sélectionné",
 };
 

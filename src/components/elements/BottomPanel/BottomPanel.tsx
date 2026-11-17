@@ -3,15 +3,14 @@ import { useFocusEffect } from "expo-router";
 import { PanelSkin, useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useHideTabBar, useInsideGlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
-import { BlurView } from "expo-blur";
-import PANEL_GLASS, { type PanelGlass } from "./panelGlass";
+import PANEL_GLASS from "./panelGlass";
+import { GlassLayer, glassWith, type GlassSettings } from "@/components/elements/Glass";
 import PanelStroke from "./PanelStroke";
 import { PanelScrollContext } from "./panelScroll";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Dimensions,
-  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -36,7 +35,6 @@ const DRAG_START = 12;
 const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
-const TINTLESS = 1;
 
 const handoff: { owner: object | null; until: number } = {
   owner: null,
@@ -60,7 +58,7 @@ const BottomPanel = ({
   dismissible?: boolean;
   canClose?: () => boolean;
   tall?: boolean;
-  glass?: Partial<PanelGlass>;
+  glass?: Partial<GlassSettings>;
   children: ReactNode;
 }) => {
   const skin = useSkin();
@@ -70,8 +68,8 @@ const BottomPanel = ({
   const { glassTarget } = useTabBarVisibility();
   const insideTarget = useInsideGlassTarget();
   const gripLook = skin.bottomPanel.grip;
-  const glass = { ...PANEL_GLASS, ...skin.bottomPanel.glassSettings, ...glassOverride };
-  const glassy = glass.enabled && Boolean(glassTarget) && !insideTarget;
+  const glass = glassWith(PANEL_GLASS, skin.bottomPanel.glassSettings, glassOverride);
+  const glassy = glass.enabled !== false && Boolean(glassTarget) && !insideTarget;
   const offset = useSharedValue(SCREEN_HEIGHT);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
@@ -254,24 +252,12 @@ const BottomPanel = ({
       ]}
     >
       {glassy && (
-        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-          {Platform.OS === "android" && (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: skin.colors.ground }]} />
-          )}
-          <BlurView
-            blurTarget={glassTarget!}
-            intensity={Platform.OS === "android" ? TINTLESS : glass.blur}
-            blurReductionFactor={(TINTLESS * glass.androidReduction) / Math.max(1, glass.blur)}
-            blurMethod="dimezisBlurViewSdk31Plus"
-            style={StyleSheet.absoluteFill}
-          />
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: skin.panel.veil ?? skin.panel.fill, opacity: glass.veil },
-            ]}
-          />
-        </View>
+        <GlassLayer
+          target={glassTarget!}
+          settings={glass}
+          veil={skin.panel.veil ?? skin.panel.fill}
+          backing={skin.colors.ground}
+        />
       )}
       <View
         onLayout={handleContentLayout}

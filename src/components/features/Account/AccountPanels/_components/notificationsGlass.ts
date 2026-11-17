@@ -1,6 +1,6 @@
-import type { PanelGlass } from "@/components/elements/BottomPanel/panelGlass";
+import type { GlassSettings } from "@/components/elements/Glass";
 
-const NOTIFICATIONS_GLASS: Partial<PanelGlass> = {
+const NOTIFICATIONS_GLASS: Partial<GlassSettings> = {
   blur: 40,
   veil: 0.8,
 };

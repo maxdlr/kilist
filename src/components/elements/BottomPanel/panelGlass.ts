@@ -1,15 +1,5 @@
-export type PanelGlass = {
-  enabled: boolean;
-  blur: number;
-  androidReduction: number;
-  veil: number;
-};
+import { DEFAULT_GLASS, type GlassSettings } from "@/components/elements/Glass";
 
-const PANEL_GLASS: PanelGlass = {
-  enabled: true,
-  blur: 30,
-  androidReduction: 4,
-  veil: 0.8,
-};
+const PANEL_GLASS: GlassSettings = DEFAULT_GLASS;
 
 export default PANEL_GLASS;

@@ -200,7 +200,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     aisle: { flexShrink: 1, textAlign: "right" },
     body: { gap: s.spacing.small, paddingBottom: s.spacing.inline },
     searchRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
-    dock: { flexDirection: "row" },
+    dock: { flexDirection: "row", justifyContent: "center" },
   });
 
 export default AisleManager;

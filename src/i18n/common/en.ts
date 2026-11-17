@@ -27,7 +27,7 @@ const en = {
     line: "Everyone in the household sees this name.",
   },
   passwordRules: {
-    length: "8+ characters",
+    length: (min: number) => `${min}+ characters`,
     upper: "Uppercase",
     lower: "Lowercase",
     number: "Number",
@@ -250,8 +250,6 @@ const en = {
   hidePassword: "Hide password",
   showPassword: "Show password",
   answerNotSaved: "Couldn't save that answer",
-  hide: "Hide",
-  show: "Show",
   selected: "selected",
 };
 

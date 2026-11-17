@@ -18,7 +18,7 @@ const PanelScrollView = ({ onScroll, ...props }: ScrollViewProps) => {
       overScrollMode="never"
       scrollEventThrottle={16}
       onScroll={handleScroll}
-      {...(panel && { simultaneousWith: panel.pan as never })}
+      simultaneousWith={panel?.pan}
     />
   );
 };

@@ -27,7 +27,7 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CText, Dot, GlassBackdrop, type GlassLook } from "../components";
+import { CText, Dot, GlassBackdrop } from "../components";
 import useCheckPending from "../hooks/useCheckPending";
 
 const ORDER = MAIN_TABS;
@@ -78,7 +78,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           key={targetKey(glassTarget)}
           target={glassTarget}
           featherFrom={glassDockHeight}
-          look={(glassLook as GlassLook | null) ?? undefined}
+          look={glassLook ?? undefined}
         />}
       <View style={[styles.row, { paddingBottom: insets.bottom }]}>
         {routes.map((route) => {
