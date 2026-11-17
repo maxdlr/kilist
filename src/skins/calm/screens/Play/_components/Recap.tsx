@@ -3,7 +3,7 @@ import { DrawnMark } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
-import { PlayIcon, RefreshIcon } from "@/components/icons";
+import { ArcadeIcon, RefreshIcon } from "@/components/icons";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, Dot, GlassScrollView, Screen } from "@/skins/calm/components";
@@ -43,7 +43,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
               label={skin.copy.swipe.playAgain}
               onPress={game.playAgain}
               icon={(color) => (
-                <PlayIcon
+                <ArcadeIcon
                   size={skin.size.icon.action}
                   color={color}
                   strokeWidth={1.8}

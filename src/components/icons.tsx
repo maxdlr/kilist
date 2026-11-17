@@ -1,4 +1,5 @@
 import {
+  Arcade as ArcadeBase,
   ArrowDown as ArrowDownBase,
   ArrowLeft as ArrowLeftBase,
   ArrowRight as ArrowRightBase,
@@ -48,6 +49,7 @@ const sized = (Base: ComponentType<SvgProps>): Icon => {
   return Sized;
 };
 
+export const ArcadeIcon = sized(ArcadeBase);
 export const ArrowDownIcon = sized(ArrowDownBase);
 export const ArrowLeftIcon = sized(ArrowLeftBase);
 export const ArrowRightIcon = sized(ArrowRightBase);

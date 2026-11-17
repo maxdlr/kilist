@@ -57,23 +57,29 @@ const fr: SkinCopy = {
     remove: "Retirer",
   },
   sync: {
-    toast: "Tu es hors ligne. Tes changements sont gardés et seront synchronisés plus tard.",
+    toast:
+      "Tu es hors ligne. Tes changements sont gardés et seront synchronisés plus tard.",
     waiting: "En attente de retour en ligne",
   },
   guest: {
     cardTitle: "Juste toi, sur ce téléphone",
-    cardLine: "Tout reste sur cet appareil. Un compte te permet de partager la liste avec ton foyer et la garde si tu changes de téléphone.",
+    cardLine:
+      "Tout reste sur cet appareil. Un compte te permet de partager la liste avec ton foyer et la garde si tu changes de téléphone.",
     create: "Créer un compte",
     login: "Se connecter",
     later: "Pas maintenant",
     householdTitle: "Partager demande un compte",
-    householdLine: "Pour partager ta liste avec ton foyer, crée un compte. Tout ce que tu as fait est conservé.",
+    householdLine:
+      "Pour partager ta liste avec ton foyer, crée un compte. Tout ce que tu as fait est conservé.",
     versusTitle: "Versus demande un compte",
-    versusLine: "Versus se joue avec ton foyer, il faut donc un compte. Tout ce que tu as fait est conservé, et Versus se débloque avec les tickets gagnés une fois ton compte créé.",
+    versusLine:
+      "Versus se joue avec ton foyer, il faut donc un compte. Tout ce que tu as fait est conservé, et Versus se débloque avec les tickets gagnés une fois ton compte créé.",
     reminderTitle: "Garder ce que Kilist a appris",
-    reminderLine: "Après une semaine, Kilist connaît bien tes habitudes. Un compte les garde si tu perds ou changes de téléphone.",
+    reminderLine:
+      "Après une semaine, Kilist connaît bien tes habitudes. Un compte les garde si tu perds ou changes de téléphone.",
     mergeTitle: "Garder les produits de ce téléphone ?",
-    mergeLine: "Ajouter les produits et habitudes de ce téléphone à ton foyer ? Les produits du même nom sont regroupés.",
+    mergeLine:
+      "Ajouter les produits et habitudes de ce téléphone à ton foyer ? Les produits du même nom sont regroupés.",
     mergeKeep: "Les ajouter",
     mergeDiscard: "Ne pas ajouter",
   },
@@ -148,7 +154,7 @@ const fr: SkinCopy = {
     emptyLabel: "",
     emptyTitle: "Rien à trier.",
     emptyLine: "Kilist te préviendra quand quelque chose risque de manquer.",
-    playAgain: "Rejouer",
+    playAgain: "Nouvelle partie",
     allChecked: "Tout est trié. Ta liste est parfaitement à jour.",
   },
   shop: {
@@ -197,7 +203,10 @@ const fr: SkinCopy = {
   },
   intro: {
     steps: [
-      { title: "Kilist tient ta liste de courses à jour.", line: "Tu ne l'écris jamais." },
+      {
+        title: "Kilist tient ta liste de courses à jour.",
+        line: "Tu ne l'écris jamais.",
+      },
       {
         title: "Chaque jour,\ntrie 10 produits.",
         line: "Glisse à droite s'il t'en reste, à gauche s'il n'y en a plus, en haut si tu ne sais pas.",
@@ -285,7 +294,8 @@ const fr: SkinCopy = {
     failed: "Impossible",
     sectionTitle: "Styles",
     progress: (have: number, price: number) => `${have} / ${price} points`,
-    sectionLine: (count: number) => `${count} points. Chaque produit trié en ajoute 10.`,
+    sectionLine: (count: number) =>
+      `${count} points. Chaque produit trié en ajoute 10.`,
     locked: (count: number) => `Verrouillé · encore ${count} points`,
     needsAccount: "Verrouillé · compte nécessaire",
     buy: (price: string) => `Acheter · ${price}`,
