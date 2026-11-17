@@ -45,18 +45,20 @@ export const Screen = ({
   const tabbed = insideTabs && tabBar.inset > 0;
   const hasGlassDock = Boolean(dock) || tabbed;
   const docked = glass && hasGlassDock && insideTabs;
+  const rowHeight = dock ? dockHeight : 0;
+  const glassHeight = Math.max(rowHeight, tabbed ? (glassLook.height ?? dockGlassHeight(skin)) : 0);
   useStatusBarStyle(skin.statusBarOnGround);
 
   useFocusEffect(
     useCallback(() => {
       if (!docked) return;
-      setGlassDockHeight(dockHeight);
+      setGlassDockHeight(glassHeight);
       setGlassLook(glassLook);
       return () => {
         setGlassDockHeight(0);
         setGlassLook(null);
       };
-    }, [docked, dockHeight, setGlassDockHeight, glassLook, setGlassLook]),
+    }, [docked, glassHeight, setGlassDockHeight, glassLook, setGlassLook]),
   );
 
   const content = [
@@ -74,19 +76,24 @@ export const Screen = ({
   if (glass) {
     return (
       <View style={styles.root}>
-        <GlassScene target={target} extraInset={hasGlassDock ? dockHeight : 0} look={glassLook}>
+        <GlassScene target={target} extraInset={hasGlassDock ? glassHeight : 0} look={glassLook}>
           <View style={[content, !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom }]}>
             {children}
           </View>
         </GlassScene>
         {hasGlassDock && (
-          <Animated.View
-            pointerEvents={dock ? "auto" : "none"}
-            style={[styles.glassDock, tabbed && { minHeight: glassLook.height ?? dockGlassHeight(skin) }, dockLift]}
-            onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
-          >
-            <GlassBackdrop target={target} look={glassLook} />
-            {dock && <View style={[dockRow, styles.glassRow]}>{dock}</View>}
+          <Animated.View pointerEvents="box-none" style={[styles.glassDock, dockLift]}>
+            <View pointerEvents="none" style={[styles.glassLayer, { height: glassHeight }]}>
+              <GlassBackdrop target={target} look={glassLook} />
+            </View>
+            {dock && (
+              <View
+                style={[dockRow, styles.glassRow]}
+                onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
+              >
+                {dock}
+              </View>
+            )}
           </Animated.View>
         )}
       </View>
@@ -117,6 +124,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
     dock: { paddingBottom: s.spacing.gutter, paddingHorizontal: s.spacing.gutter },
-    glassDock: { bottom: 0, left: 0, overflow: "hidden", position: "absolute", right: 0 },
+    glassDock: { bottom: 0, left: 0, position: "absolute", right: 0 },
+    glassLayer: { bottom: 0, left: 0, overflow: "hidden", position: "absolute", right: 0 },
     glassRow: { paddingTop: s.spacing.stack },
   });

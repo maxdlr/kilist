@@ -13,7 +13,7 @@ import { Linking, Share } from "react-native";
 
 const HIDDEN_CODE = "••••••";
 
-export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode" | "name" | "householdName" | "theme";
+export type AccountPanel = "switch" | "qr" | "delete" | "credits" | "language" | "emailCode" | "name" | "householdName" | "theme" | "notifications";
 
 const useAccount = () => {
   const skin = useSkin();
@@ -113,7 +113,7 @@ const useAccount = () => {
     openHouseholdName: () => setOpenPanel("householdName"),
     openLooks: () => router.navigate("/looks"),
     looksLabel: skin.copy.prizes.sectionTitle,
-    openNotifications: () => router.push("/notifications"),
+    openNotifications: () => setOpenPanel("notifications"),
     needsEmailCode,
     openEmailCode: () => setOpenPanel("emailCode"),
     languageName: choice ? LANGUAGE_NAMES[choice] : common.languagePhone,

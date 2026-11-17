@@ -87,7 +87,6 @@ const en = {
       purchaseConfirm: "Purchase receipts",
     } as Record<string, string>,
     guest: "Without an account, Kilist can only reach you with notifications.",
-    back: "Back",
   },
   emailCode: {
     menu: "Confirm my email",

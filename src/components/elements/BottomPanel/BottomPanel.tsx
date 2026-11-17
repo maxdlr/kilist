@@ -1,12 +1,17 @@
 import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { PanelSkin, useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { useHideTabBar } from "@/providers/TabBarProvider";
+import { useHideTabBar, useInsideGlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
+import { BlurView } from "expo-blur";
+import PANEL_GLASS, { type PanelGlass } from "./panelGlass";
+import PanelStroke from "./PanelStroke";
+import { PanelScrollContext } from "./panelScroll";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Dimensions,
+  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -20,15 +25,18 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { initialWindowMetrics, useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { height: SCREEN_HEIGHT } = Dimensions.get("screen");
+const { height: WINDOW_HEIGHT } = Dimensions.get("window");
+const DEVICE_TOP = initialWindowMetrics?.insets.top ?? 0;
 const DRAG_START = 12;
 const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
+const TINTLESS = 1;
 
 const handoff: { owner: object | null; until: number } = {
   owner: null,
@@ -43,26 +51,37 @@ const BottomPanel = ({
   onClose,
   dismissible = false,
   canClose,
+  tall = false,
+  glass: glassOverride,
   children,
 }: {
   visible: boolean;
   onClose: () => void;
   dismissible?: boolean;
   canClose?: () => boolean;
+  tall?: boolean;
+  glass?: Partial<PanelGlass>;
   children: ReactNode;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   useHideTabBar(visible);
   const insets = useSafeAreaInsets();
+  const { glassTarget } = useTabBarVisibility();
+  const insideTarget = useInsideGlassTarget();
+  const glass = { ...PANEL_GLASS, ...skin.bottomPanel.glassSettings, ...glassOverride };
+  const glassy = glass.enabled && Boolean(glassTarget) && !insideTarget;
   const offset = useSharedValue(SCREEN_HEIGHT);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
   const drag = useSharedValue(0);
+  const scrollY = useSharedValue(0);
+  const dragFrom = useSharedValue(-1);
   const closing = useSharedValue(false);
   const latest = useRef({ visible, onClose, canClose });
   const [self] = useState(() => ({}));
   const [isRendered, setIsRendered] = useState(visible);
+  const [frame, setFrame] = useState({ width: 0, height: 0 });
 
   if (visible && !isRendered) {
     setIsRendered(true);
@@ -134,14 +153,22 @@ const BottomPanel = ({
     activeOffsetY: [-1000, DRAG_START],
     failOffsetX: [-24, 24],
     onUpdate: (event) => {
-      drag.set(Math.max(0, event.translationY));
+      if (scrollY.value > 0) {
+        dragFrom.set(-1);
+        drag.set(0);
+        return;
+      }
+      if (dragFrom.value < 0) dragFrom.set(event.translationY);
+      drag.set(Math.max(0, event.translationY - dragFrom.value));
     },
     onDeactivate: (event) => {
+      const pulled = drag.value;
+      dragFrom.set(-1);
       const limit = Math.min(
         DISMISS_DISTANCE,
         contentHeight.value * DISMISS_SHARE,
       );
-      if (event.translationY > limit || event.velocityY > DISMISS_VELOCITY) {
+      if (pulled > limit || (pulled > 0 && event.velocityY > DISMISS_VELOCITY)) {
         closing.set(true);
         scheduleOnRN(requestClose);
         return;
@@ -151,6 +178,7 @@ const BottomPanel = ({
       );
     },
     onFinalize: () => {
+      dragFrom.set(-1);
       if (!closing.value && drag.value > 0)
         drag.set(withSpring(0, AnimationService.snap));
     },
@@ -172,6 +200,7 @@ const BottomPanel = ({
 
   const handleContentLayout = (event: LayoutChangeEvent) => {
     const measured = event.nativeEvent.layout.height;
+    setFrame({ width: event.nativeEvent.layout.width, height: measured });
     const previous = contentHeight.get();
     contentHeight.set(measured);
     if (!visible || measured <= previous) return;
@@ -195,6 +224,68 @@ const BottomPanel = ({
 
   if (!isRendered) return null;
 
+  const grip = (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.grip, { backgroundColor: skin.panel.ink }]}
+    />
+  );
+
+  const sheet = (
+    <Animated.View
+      style={[
+        styles.panel,
+        {
+          backgroundColor: glassy ? "transparent" : skin.panel.fill,
+          borderTopLeftRadius: skin.panel.radius,
+          borderTopRightRadius: skin.panel.radius,
+        },
+        animatedStyle,
+      ]}
+    >
+      {glassy && (
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          {Platform.OS === "android" && (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: skin.colors.ground }]} />
+          )}
+          <BlurView
+            blurTarget={glassTarget!}
+            intensity={Platform.OS === "android" ? TINTLESS : glass.blur}
+            blurReductionFactor={(TINTLESS * glass.androidReduction) / Math.max(1, glass.blur)}
+            blurMethod="dimezisBlurViewSdk31Plus"
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: skin.panel.veil ?? skin.panel.fill, opacity: glass.veil },
+            ]}
+          />
+        </View>
+      )}
+      <View
+        onLayout={handleContentLayout}
+        style={[
+          styles.content,
+          { paddingBottom: skin.spacing.section + insets.bottom },
+          tall && { maxHeight: WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top },
+          {
+            borderColor: "transparent",
+            borderTopLeftRadius: skin.panel.radius,
+            borderTopRightRadius: skin.panel.radius,
+          },
+        ]}
+      >
+        {grip}
+        <PanelScrollContext.Provider value={{ pan, scrollY }}>
+          <PanelSkin>{children}</PanelSkin>
+        </PanelScrollContext.Provider>
+      </View>
+      <PanelStroke width={frame.width} height={frame.height} />
+    </Animated.View>
+  );
+
   return (
     <View style={styles.root}>
       <AnimatedPressable
@@ -206,39 +297,7 @@ const BottomPanel = ({
           backdropStyle,
         ]}
       />
-      <GestureDetector gesture={pan}>
-        <Animated.View
-          style={[
-            styles.panel,
-            {
-              backgroundColor: skin.panel.fill,
-              borderTopLeftRadius: skin.panel.radius,
-              borderTopRightRadius: skin.panel.radius,
-            },
-            animatedStyle,
-          ]}
-        >
-          <View
-            onLayout={handleContentLayout}
-            style={[
-              styles.content,
-              { paddingBottom: skin.spacing.section + insets.bottom },
-              {
-                borderColor: skin.panel.line,
-                borderTopLeftRadius: skin.panel.radius,
-                borderTopRightRadius: skin.panel.radius,
-              },
-            ]}
-          >
-            <View
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              style={[styles.grip, { backgroundColor: skin.panel.ink }]}
-            />
-            <PanelSkin>{children}</PanelSkin>
-          </View>
-        </Animated.View>
-      </GestureDetector>
+      <GestureDetector gesture={pan}>{sheet}</GestureDetector>
     </View>
   );
 };

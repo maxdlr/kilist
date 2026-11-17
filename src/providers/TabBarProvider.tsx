@@ -72,6 +72,8 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
 export const useTabBarVisibility = () => React.useContext(TabBarContext);
 
 export const SceneInset = createContext(0);
+export const GlassTargetScope = createContext(false);
+export const useInsideGlassTarget = () => React.useContext(GlassTargetScope);
 export const useSceneInset = () => React.useContext(SceneInset);
 
 export const useHideTabBar = (shouldHide: boolean) => {

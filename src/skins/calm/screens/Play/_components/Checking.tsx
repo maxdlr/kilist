@@ -47,99 +47,101 @@ const Checking = ({ game }: { game: SwipeGame }) => {
   }, [canNudge, touches]);
 
   return (
-    <GlassScene fade={false}>
-      <Animated.View
-        onTouchStart={() => setTouches((count) => count + 1)}
-        style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }, tabBarRoom]}
-      >
-        <View style={styles.header}>
-          <View style={styles.between}>
-            <View style={styles.headerStart}>
-              <Press
-                accessibilityRole="button"
-                accessibilityLabel={T.close}
-                hitSlop={skin.spacing.small}
-                onPress={goBack}
-                style={withPressed(styles.close)}
-              >
-                <XmarkIcon
-                  size={skin.size.icon.action}
-                  color={C.textSoft}
-                  strokeWidth={1.8}
-                />
-              </Press>
-              <UndoButton enabled={game.canUndo} onPress={game.undo} />
-            </View>
-            <View style={styles.hint} accessibilityLiveRegion="polite">
-              {game.hint && (
-                <CText weight="bold" size={skin.type.label} color={intentColor[game.hint]}>
-                  {T.intent[game.hint]}
-                </CText>
-              )}
-            </View>
-            <View style={styles.headerEnd}>
-              <CText size={skin.type.label} color={C.textSoft}>
-                {T.play.position(
-                  Math.min(game.position + 1, game.total),
-                  game.total,
+    <View style={styles.root}>
+      <GlassScene fade={false}>
+        <Animated.View
+          onTouchStart={() => setTouches((count) => count + 1)}
+          style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }, tabBarRoom]}
+        >
+          <View style={styles.header}>
+            <View style={styles.between}>
+              <View style={styles.headerStart}>
+                <Press
+                  accessibilityRole="button"
+                  accessibilityLabel={T.close}
+                  hitSlop={skin.spacing.small}
+                  onPress={goBack}
+                  style={withPressed(styles.close)}
+                >
+                  <XmarkIcon
+                    size={skin.size.icon.action}
+                    color={C.textSoft}
+                    strokeWidth={1.8}
+                  />
+                </Press>
+                <UndoButton enabled={game.canUndo} onPress={game.undo} />
+              </View>
+              <View style={styles.hint} accessibilityLiveRegion="polite">
+                {game.hint && (
+                  <CText weight="bold" size={skin.type.label} color={intentColor[game.hint]}>
+                    {T.intent[game.hint]}
+                  </CText>
                 )}
-              </CText>
-              <Press
-                accessibilityRole="switch"
-                accessibilityLabel={T.play.showLabels}
-                accessibilityState={{ checked: labels }}
-                hitSlop={skin.spacing.small}
-                onPress={() => setLabels((on) => !on)}
-                style={withPressed(styles.info)}
-              >
-                <InfoIcon
-                  size={skin.size.icon.action}
-                  color={labels ? C.text : C.textSoft}
-                  strokeWidth={1.8}
-                />
-              </Press>
+              </View>
+              <View style={styles.headerEnd}>
+                <CText size={skin.type.label} color={C.textSoft}>
+                  {T.play.position(
+                    Math.min(game.position + 1, game.total),
+                    game.total,
+                  )}
+                </CText>
+                <Press
+                  accessibilityRole="switch"
+                  accessibilityLabel={T.play.showLabels}
+                  accessibilityState={{ checked: labels }}
+                  hitSlop={skin.spacing.small}
+                  onPress={() => setLabels((on) => !on)}
+                  style={withPressed(styles.info)}
+                >
+                  <InfoIcon
+                    size={skin.size.icon.action}
+                    color={labels ? C.text : C.textSoft}
+                    strokeWidth={1.8}
+                  />
+                </Press>
+              </View>
+            </View>
+            <View
+              accessibilityRole="progressbar"
+              accessibilityValue={{ min: 0, max: total, now: game.position }}
+              style={styles.track}
+            >
+              <View
+                style={[
+                  styles.fill,
+                  { width: `${(game.position / total) * 100}%` },
+                ]}
+              />
             </View>
           </View>
-          <View
-            accessibilityRole="progressbar"
-            accessibilityValue={{ min: 0, max: total, now: game.position }}
-            style={styles.track}
-          >
-            <View
-              style={[
-                styles.fill,
-                { width: `${(game.position / total) * 100}%` },
-              ]}
+          <View style={styles.flex}>
+            <SwipeDeck
+              items={game.foods}
+              keyOf={(food) => food.id}
+              allowUp
+              background="transparent"
+              stamps={{}}
+              nudging={nudging}
+              returnFrom={game.returning}
+              flingRef={game.flingRef}
+              onIntent={game.setIntent}
+              onSwipe={game.handleSwipe}
+              onLongPress={game.askRemove}
+              renderSheet={(food, depth) => (
+                <CheckCard
+                  food={food}
+                  intent={depth === 0 ? game.intent : null}
+                  labels={labels}
+                  behind={depth > 0}
+                  onFling={depth === 0 ? game.fling : undefined}
+                />
+              )}
             />
           </View>
-        </View>
-        <View style={styles.flex}>
-          <SwipeDeck
-            items={game.foods}
-            keyOf={(food) => food.id}
-            allowUp
-            background="transparent"
-            stamps={{}}
-            nudging={nudging}
-            returnFrom={game.returning}
-            flingRef={game.flingRef}
-            onIntent={game.setIntent}
-            onSwipe={game.handleSwipe}
-            onLongPress={game.askRemove}
-            renderSheet={(food, depth) => (
-              <CheckCard
-                food={food}
-                intent={depth === 0 ? game.intent : null}
-                labels={labels}
-                behind={depth > 0}
-                onFling={depth === 0 ? game.fling : undefined}
-              />
-            )}
-          />
-        </View>
-        <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
-      </Animated.View>
-    </GlassScene>
+        </Animated.View>
+      </GlassScene>
+      <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
+    </View>
   );
 };
 

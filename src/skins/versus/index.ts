@@ -71,6 +71,18 @@ const versus: SkinSource = {
     ghost: { fill: "transparent", ink: white, line: "transparent" },
     attached: { fill: "#E3E0F2", ink: ground, line: "#E3E0F2" },
   },
+  bottomPanel: {
+    glassSettings: {
+      enabled: true,
+      blur: 30,
+      androidReduction: 4,
+      veil: 0.8,
+    },
+    border: {
+      gradientStroke: { start: white, end: panel, midPoint: 0.5 },
+      width: 2,
+    },
+  },
   panel: {
     fill: panel,
     ink: white,

@@ -63,9 +63,25 @@ export const elements: CalmElements = {
   },
   onLevel: base[5],
   scrim: colors.veil,
+  bottomPanel: {
+    glassSettings: {
+      enabled: true,
+      blur: 30,
+      androidReduction: 4,
+      veil: 0.8,
+    },
+    border: {
+      gradientStroke: {
+        start: base[5],
+        end: emphasis[40],
+        midPoint: 0.5,
+      },
+      width: 1,
+    },
+  },
   em: {
     ground: emphasis[70],
-    card: base[70],
+    card: base[80],
     tint: emphasis[50],
     text: base[5],
     textSoft: base[20],

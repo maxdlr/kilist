@@ -23,6 +23,7 @@ export const localize = (source: SkinSource, lang: Lang, themeId?: string | null
     colors: paint.colors,
     actions: paint.actions,
     panel: { ...rest.panel, ...paint.panel },
+    bottomPanel: paint.bottomPanel,
     shape: { ...rest.shape, shadow: { ...rest.shape.shadow, color: paint.shadow } },
   });
   const base: Skin = {

@@ -1,5 +1,5 @@
 import type { Lang } from "@/i18n";
-import type { LevelNumber, Skin, SkinPaint, SkinThemeSource } from "@/skins/types";
+import type { BottomPanelLook, LevelNumber, Skin, SkinPaint, SkinThemeSource } from "@/skins/types";
 
 type CalmBase = {
   statusBar: "light" | "dark";
@@ -24,6 +24,7 @@ type CalmBase = {
   levels: Record<LevelNumber, string>;
   onLevel: string;
   scrim: string;
+  bottomPanel: BottomPanelLook;
 };
 
 type EmphasisKey =
@@ -89,6 +90,7 @@ const paintOf = (e: CalmElements, em = onPanel(e)): SkinPaint => ({
     attached: { fill: e.card, ink: e.text, line: e.fieldLine },
   },
   panel: { fill: em.card, ink: em.text, title: em.text, line: em.line },
+  bottomPanel: em.bottomPanel,
   shadow: e.text,
 });
 

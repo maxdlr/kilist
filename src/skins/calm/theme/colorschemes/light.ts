@@ -55,4 +55,24 @@ export const elements: CalmElements = {
   },
   onLevel: colors.ink,
   scrim: colors.veil,
+  bottomPanel: {
+    glassSettings: {
+      enabled: true,
+      blur: 30,
+      androidReduction: 4,
+      veil: 0.3,
+    },
+    border: {
+      gradientStroke: {
+        start: colors.white,
+        end: colors.ink,
+        midPoint: 0.8,
+      },
+      width: 2,
+    },
+  },
+  em: {
+    card: colors.paper,
+    line: colors.white,
+  },
 };

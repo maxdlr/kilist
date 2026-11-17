@@ -1,5 +1,5 @@
 import ActionPanel from "@/components/elements/ActionPanel";
-import BottomPanel from "@/components/elements/BottomPanel";
+import BottomPanel, { PanelScrollView } from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import Press from "@/components/elements/Press";
 import Suggestions from "@/components/elements/Suggestions";
@@ -13,7 +13,7 @@ import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
-import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -89,7 +89,7 @@ const AisleRow = ({
         onPress={onToggle}
         style={withPressed([styles.head, aisle && !open && styles.headDone])}
       >
-        <CText size={skin.type.body} numberOfLines={1} style={styles.name}>
+        <CText size={skin.type.lead} numberOfLines={1} style={styles.name}>
           {food.name}
         </CText>
         {aisle && <CheckIcon size={skin.size.icon.action - 4} color={C.positive} strokeWidth={2} />}
@@ -155,7 +155,7 @@ const AisleManager = ({ manager }: { manager: Manager }) => {
         <CText weight="medium" size={skin.type.headline} accessibilityRole="header">
           {T.shop.aislesTitle}
         </CText>
-        <ScrollView
+        <PanelScrollView
           style={styles.list}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -170,7 +170,7 @@ const AisleManager = ({ manager }: { manager: Manager }) => {
               onPick={(aisle) => manager.pick(food.id, aisle)}
             />
           ))}
-        </ScrollView>
+        </PanelScrollView>
         <View style={styles.dock}>
           <CButton label={T.shop.aislesDone} onPress={manager.done} />
         </View>

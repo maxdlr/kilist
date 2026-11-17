@@ -90,7 +90,6 @@ const fr: CommonText = {
       purchaseConfirm: "Reçus d'achat",
     } as Record<string, string>,
     guest: "Sans compte, Kilist ne peut te prévenir que par notification.",
-    back: "Retour",
   },
   emailCode: {
     menu: "Confirmer mon e-mail",

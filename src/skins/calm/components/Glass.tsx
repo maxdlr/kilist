@@ -1,5 +1,6 @@
 import {
   type GlassTarget,
+  GlassTargetScope,
   SceneInset,
   useTabBarVisibility,
 } from "@/providers/TabBarProvider";
@@ -261,18 +262,20 @@ export const GlassScene = ({
   return (
     <BlurTargetView ref={target} style={[styles.root, styles.glassTarget]}>
       <View style={[StyleSheet.absoluteFill, styles.glassTarget]} />
-      <DockInset.Provider value={glassHeight}>
-        {fade && glassHeight > 0 ? (
-          <MaskedView
-            style={glassStyles.grow}
-            maskElement={<ContentFadeMask id={fadeId} height={fadeHeight} look={look} />}
-          >
-            {children}
-          </MaskedView>
-        ) : (
-          children
-        )}
-      </DockInset.Provider>
+      <GlassTargetScope.Provider value>
+        <DockInset.Provider value={glassHeight}>
+          {fade && glassHeight > 0 ? (
+            <MaskedView
+              style={glassStyles.grow}
+              maskElement={<ContentFadeMask id={fadeId} height={fadeHeight} look={look} />}
+            >
+              {children}
+            </MaskedView>
+          ) : (
+            children
+          )}
+        </DockInset.Provider>
+      </GlassTargetScope.Provider>
     </BlurTargetView>
   );
 };

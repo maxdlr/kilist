@@ -7,6 +7,7 @@ import ThemeModal from "./_components/ThemeModal";
 import EmailCodeModal from "./_components/EmailCodeModal";
 import HouseholdNameModal from "./_components/HouseholdNameModal";
 import NameModal from "./_components/NameModal";
+import NotificationsModal from "./_components/NotificationsModal";
 import SwitchHouseholdModal from "./_components/SwitchHouseholdModal";
 
 const AccountPanels = ({ account }: { account: Account }) => {
@@ -24,6 +25,7 @@ const AccountPanels = ({ account }: { account: Account }) => {
       <ThemeModal visible={openPanel === "theme"} onClose={closePanel} />
       <EmailCodeModal visible={openPanel === "emailCode"} onClose={closePanel} />
       <NameModal visible={openPanel === "name"} onClose={closePanel} />
+      <NotificationsModal visible={openPanel === "notifications"} onClose={closePanel} />
       <HouseholdNameModal
         visible={openPanel === "householdName"}
         current={account.householdName ?? ""}

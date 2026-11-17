@@ -1,5 +1,6 @@
 import type { Lang } from "@/i18n";
 import type { RoastCopy } from "./roast/copy/en";
+import type { PanelGlass } from "@/components/elements/BottomPanel/panelGlass";
 
 export type SkinCopy = RoastCopy;
 
@@ -62,6 +63,11 @@ export interface SkinDisplayFont {
 
 export type TextCase = "upper" | "none";
 
+export type BottomPanelLook = {
+  glassSettings?: Partial<PanelGlass>;
+  border: { gradientStroke: { start: string; end: string; midPoint?: number }; width?: number };
+};
+
 export interface Skin {
   id: string;
   name: string;
@@ -102,8 +108,10 @@ export interface Skin {
     sheets: { fill: string; ink: string }[];
   };
   actions: Record<ActionKind, ActionColors>;
+  bottomPanel: BottomPanelLook;
   panel: {
     fill: string;
+    veil?: string;
     ink: string;
     title: string;
     line: string;
@@ -137,6 +145,7 @@ export type SkinPaint = Pick<
   "statusBarOnGround" | "colors" | "actions"
 > & {
   panel: Pick<Skin["panel"], "fill" | "ink" | "title" | "line">;
+  bottomPanel: BottomPanelLook;
   shadow: string;
 };
 
