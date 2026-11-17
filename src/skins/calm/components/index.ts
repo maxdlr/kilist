@@ -7,7 +7,6 @@ export {
   GlassBackdrop,
   GlassScene,
   GlassScrollView,
-  useDockCover,
   useDockInset,
   useTabBarInset,
 } from "./Glass";

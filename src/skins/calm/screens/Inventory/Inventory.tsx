@@ -12,7 +12,7 @@ import { StyleSheet, View } from "react-native";
 import { PlusIcon, SearchIcon, TrashIcon, XmarkIcon } from "@/components/icons";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, DockSpacer, Screen, useDockCover } from "@/skins/calm/components";
+import { CButton, CText, DockSpacer, Screen } from "@/skins/calm/components";
 import { CalmLoading } from "../States";
 import FoodRow from "./_components/FoodRow";
 
@@ -25,7 +25,6 @@ const CalmInventory = () => {
   const shelf = useInventoryShelf();
   const { foods, query, isEmpty, noResults, isDeleteMode, deleteIds } = shelf;
   const [searching, setSearching] = useState(false);
-  const dockCover = useDockCover();
   if (shelf.isLoading) return <CalmLoading />;
 
   const canSearch = !isEmpty && !isDeleteMode;
@@ -87,7 +86,6 @@ const CalmInventory = () => {
       <Screen
         padded={false}
         glass
-        cover={dockCover.cover}
         dock={searchOpen ? searchRow : actions}
       >
         <View style={styles.titleRow}>
@@ -116,7 +114,6 @@ const CalmInventory = () => {
             refreshing={shelf.isFoodLoading}
             keyboardShouldPersistTaps="handled"
             ListFooterComponent={DockSpacer}
-            {...dockCover.listProps}
             renderItem={({ item }) => (
               <FoodRow
                 food={item}

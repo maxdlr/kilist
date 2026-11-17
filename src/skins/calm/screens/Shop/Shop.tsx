@@ -17,7 +17,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import AnimationService from "@/services/animation";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "@/skins/calm/components";
+import { CButton, CText, DockSpacer, Dot, Screen } from "@/skins/calm/components";
 import { CalmLoading, CalmMessage } from "../States";
 import AisleManager from "./_components/AisleManager";
 import Circle from "./_components/Circle";
@@ -67,8 +67,6 @@ const CalmShop = () => {
   });
   const [touches, setTouches] = useState(0);
   const [idleFor, setIdleFor] = useState<string | null>(null);
-  const startCover = useDockCover();
-  const runCover = useDockCover();
   const canNudge = run.isStarted && run.handled === 0 && remaining.length > 0;
   const activity = `${touches}:${run.panel}`;
   const nudging = canNudge && !run.panel && idleFor === activity;
@@ -177,7 +175,6 @@ const CalmShop = () => {
             )
           }
           glass
-          cover={startCover.cover}
         >
           <View style={[styles.flex, styles.list]}>
             <View style={styles.startHead}>
@@ -234,7 +231,6 @@ const CalmShop = () => {
               style={styles.tagScroll}
               contentContainerStyle={styles.sections}
               refreshControl={refresher}
-              {...startCover.listProps}
             >
               {sections.map((section) => (
                 <View key={section.id} style={styles.section}>
@@ -307,7 +303,7 @@ const CalmShop = () => {
       style={styles.flex}
       onTouchStart={() => setTouches((count) => count + 1)}
     >
-      <Screen padded={false} glass cover={runCover.cover} dock={dockWith(common.shop.finish, run.finish)}>
+      <Screen padded={false} glass dock={dockWith(common.shop.finish, run.finish)}>
         <View style={styles.head}>
           <View style={styles.titleRow}>
             <CText
@@ -341,7 +337,6 @@ const CalmShop = () => {
           style={styles.flex}
           contentContainerStyle={styles.list}
           refreshControl={refresher}
-          {...runCover.listProps}
         >
           {run.suggestion && (
             <View style={styles.next}>

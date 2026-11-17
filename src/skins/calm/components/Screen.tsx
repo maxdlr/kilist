@@ -5,7 +5,7 @@ import type { Skin } from "@/skins/types";
 import { type ComponentRef, ReactNode, useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import Animated, { type SharedValue, useAnimatedStyle } from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors } from "../theme/useCalmColors";
 import { GlassBackdrop, GlassScene, useTabBarInset } from "./Glass";
@@ -17,18 +17,19 @@ const tabBarHeadroom = (s: Skin) => {
   return (s.size.tabBar - (icon + s.spacing.tight + label)) / 2;
 };
 
+const dockGlassHeight = (s: Skin) =>
+  s.spacing.stack + s.size.button.md + Math.max(0, s.spacing.stack - tabBarHeadroom(s));
+
 export const Screen = ({
   children,
   dock,
   padded = true,
   glass = false,
-  cover,
 }: {
   children: ReactNode;
   dock?: ReactNode;
   padded?: boolean;
   glass?: boolean;
-  cover?: SharedValue<number>;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -39,7 +40,9 @@ export const Screen = ({
   const tabBar = useTabBarInset();
   const dockLift = useAnimatedStyle(() => ({ bottom: tabBar.offset.value }));
   const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value }));
-  const docked = glass && Boolean(dock) && insideTabs;
+  const tabbed = insideTabs && tabBar.inset > 0;
+  const hasGlassDock = Boolean(dock) || tabbed;
+  const docked = glass && hasGlassDock && insideTabs;
   useStatusBarStyle(skin.statusBarOnGround);
 
   useFocusEffect(
@@ -65,18 +68,19 @@ export const Screen = ({
   if (glass) {
     return (
       <View style={styles.root}>
-        <GlassScene target={target} extraInset={dock ? dockHeight : 0}>
+        <GlassScene target={target} extraInset={hasGlassDock ? dockHeight : 0}>
           <View style={[content, !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom }]}>
             {children}
           </View>
         </GlassScene>
-        {dock && (
+        {hasGlassDock && (
           <Animated.View
-            style={[styles.glassDock, dockLift]}
+            pointerEvents={dock ? "auto" : "none"}
+            style={[styles.glassDock, tabbed && { minHeight: dockGlassHeight(skin) }, dockLift]}
             onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
           >
-            <GlassBackdrop target={target} cover={cover} />
-            <View style={[dockRow, styles.glassRow]}>{dock}</View>
+            <GlassBackdrop target={target} />
+            {dock && <View style={[dockRow, styles.glassRow]}>{dock}</View>}
           </Animated.View>
         )}
       </View>

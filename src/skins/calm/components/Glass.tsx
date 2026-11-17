@@ -21,7 +21,6 @@ import {
   useRef,
 } from "react";
 import {
-  LayoutChangeEvent,
   Platform,
   ScrollView,
   type ScrollViewProps,
@@ -31,13 +30,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { useKeyboardState } from "react-native-keyboard-controller";
-import Animated, {
-  type SharedValue,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
@@ -64,44 +57,6 @@ export const GlassScrollView = ({
       ]}
     />
   );
-};
-
-const COVER_FADE = 24;
-
-export const useDockCover = () => {
-  const cover = useSharedValue(0);
-  const content = useSharedValue(0);
-  const frame = useSharedValue(0);
-  const offset = useSharedValue(0);
-
-  const update = () => {
-    "worklet";
-    const hidden = content.value - offset.value - frame.value;
-    cover.set(Math.max(0, Math.min(1, hidden / COVER_FADE)));
-  };
-
-  const onScroll = useAnimatedScrollHandler((event) => {
-    content.set(event.contentSize.height);
-    frame.set(event.layoutMeasurement.height);
-    offset.set(event.contentOffset.y);
-    update();
-  });
-
-  return {
-    cover,
-    listProps: {
-      onScroll,
-      scrollEventThrottle: 16,
-      onContentSizeChange: (_width: number, height: number) => {
-        content.set(height);
-        update();
-      },
-      onLayout: (event: LayoutChangeEvent) => {
-        frame.set(event.nativeEvent.layout.height);
-        update();
-      },
-    },
-  };
 };
 
 const GLASS_BLUR = 30;
@@ -181,11 +136,9 @@ const ContentFadeMask = ({ id, height }: { id: string; height: number }) => (
 
 export const GlassBackdrop = ({
   target,
-  cover,
   featherFrom = 0,
 }: {
   target: GlassTarget;
-  cover?: SharedValue<number>;
   featherFrom?: number;
 }) => {
   const C = useCalmColors();
@@ -201,13 +154,10 @@ export const GlassBackdrop = ({
       style={StyleSheet.absoluteFill}
     />
   );
-  const coverStyle = useAnimatedStyle(() => ({
-    opacity: cover ? cover.value : 1,
-  }));
 
   return (
     <>
-      <Animated.View style={[StyleSheet.absoluteFill, coverStyle]}>
+      <View style={StyleSheet.absoluteFill}>
         {featherLeft > 0 ? (
           <MaskedView
             style={StyleSheet.absoluteFill}
@@ -226,7 +176,7 @@ export const GlassBackdrop = ({
         ) : (
           blur
         )}
-      </Animated.View>
+      </View>
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Feather
           id={`veil${id}`}
