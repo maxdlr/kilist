@@ -4,8 +4,10 @@ import axios from "@/services/axios";
 import { notifyToast } from "@/services/toastBridge";
 import { KilistApiError } from "@/types/api";
 
+export const isQuietError = (err?: KilistApiError) => err?.status === 0 || err?.status === 401;
+
 export const onError = (err: KilistApiError) => {
-  if (err?.status === 0) return;
+  if (isQuietError(err)) return;
   notifyToast(err?.message || common.unexpected);
 };
 

@@ -36,6 +36,7 @@ const KilToggleButton = <T extends string>({
   const segmentWidth = useSharedValue(0);
   const selectedIndex = options.findIndex((option) => option.value === value);
   const border = skin.shape.border;
+  const radius = skin.shape.pill ? skin.size.input / 2 : skin.shape.radius;
 
   const handleLayout = (event: LayoutChangeEvent) => {
     segmentWidth.value =
@@ -60,14 +61,14 @@ const KilToggleButton = <T extends string>({
       style={[
         styles.track,
         {
-          borderColor: idleInk,
-          borderRadius: skin.shape.radius,
+          borderColor: skin.colors.fieldLine ?? idleInk,
+          borderRadius: radius,
           borderWidth: border,
         },
       ]}
     >
       <Animated.View
-        style={[styles.highlight, { backgroundColor: fill }, highlightStyle]}
+        style={[styles.highlight, { backgroundColor: fill, borderRadius: Math.max(0, radius - border) }, highlightStyle]}
       />
       {options.map((option) => {
         const isSelected = option.value === value;
@@ -98,7 +99,7 @@ const createStyles = (s: Skin) =>
   StyleSheet.create({
     track: {
       flexDirection: "row",
-      height: s.size.toggle,
+      height: s.size.input,
       overflow: "hidden",
     },
     segment: {

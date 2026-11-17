@@ -9,6 +9,8 @@ import {
   CheckCircle as CheckCircleBase,
   Clock as ClockBase,
   EditPencil as EditPencilBase,
+  Eye as EyeBase,
+  EyeClosed as EyeClosedBase,
   HelpCircle as HelpCircleBase,
   HelpCircleSolid as HelpCircleSolidBase,
   HomeSimple as HomeBase,
@@ -22,6 +24,7 @@ import {
   Play as PlayBase,
   PlaySolid as PlaySolidBase,
   Plus as PlusBase,
+  QrCode as QrCodeBase,
   Refresh as RefreshBase,
   Search as SearchBase,
   Settings as SettingsBase,
@@ -59,6 +62,8 @@ export const CheckIcon = sized(CheckBase);
 export const CheckCircleIcon = sized(CheckCircleBase);
 export const ClockIcon = sized(ClockBase);
 export const EditPencilIcon = sized(EditPencilBase);
+export const EyeIcon = sized(EyeBase);
+export const EyeClosedIcon = sized(EyeClosedBase);
 export const HelpCircleIcon = sized(HelpCircleBase);
 export const HelpCircleSolidIcon = sized(HelpCircleSolidBase);
 export const HomeIcon = sized(HomeBase);
@@ -71,6 +76,7 @@ export const NavArrowDownIcon = sized(NavArrowDownBase);
 export const NavArrowRightIcon = sized(NavArrowRightBase);
 export const PlayIcon = sized(PlayBase);
 export const PlusIcon = sized(PlusBase);
+export const QrCodeIcon = sized(QrCodeBase);
 export const RefreshIcon = sized(RefreshBase);
 export const SearchIcon = sized(SearchBase);
 export const SettingsIcon = sized(SettingsBase);

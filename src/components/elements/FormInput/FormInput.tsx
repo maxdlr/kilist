@@ -1,10 +1,9 @@
-import Press from "@/components/elements/Press";
-import withPressed from "@/utils/withPressed";
+import KilButton from "@/components/elements/KilButton";
+import { EyeClosedIcon, EyeIcon, type Icon } from "@/components/icons";
 import common from "@/i18n/common";
-import type { Skin } from "@/skins/types";
+import type { ActionKind, Skin } from "@/skins/types";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { caseFor } from "@/skins";
 import { useState } from "react";
 import {
   Platform,
@@ -40,14 +39,13 @@ const FormInput = ({
   labelColor?: string;
   bordered?: boolean;
   type?: FormInputType;
-  action?: { label: string; onPress: () => void };
+  action?: { label: string; onPress: () => void; icon: Icon; variant?: ActionKind };
   style?: TextInputProps["style"];
 } & Omit<TextInputProps, "style" | "secureTextEntry" | "keyboardType">) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const isPassword = type === "password";
-  const attached = skin.actions.attached;
   const pill = skin.shape.pill === true;
   const radius = pill ? skin.size.input / 2 : skin.shape.radius;
 
@@ -55,8 +53,10 @@ const FormInput = ({
     action ??
     (isPassword
       ? {
-          label: caseFor(skin, isPasswordVisible ? common.hide : common.show),
+          label: isPasswordVisible ? common.hidePassword : common.showPassword,
           onPress: () => setIsPasswordVisible((visible) => !visible),
+          icon: isPasswordVisible ? EyeClosedIcon : EyeIcon,
+          variant: "secondary" as ActionKind,
         }
       : undefined);
 
@@ -81,8 +81,8 @@ const FormInput = ({
                 : skin.shape.fieldBorder,
               borderBottomLeftRadius: radius,
               borderTopLeftRadius: radius,
-              borderBottomRightRadius: sideAction ? 0 : radius,
-              borderTopRightRadius: sideAction ? 0 : radius,
+              borderBottomRightRadius: radius,
+              borderTopRightRadius: radius,
               color: skin.colors.onPaper,
               fontFamily: skin.fonts.mono,
             },
@@ -100,36 +100,13 @@ const FormInput = ({
           {...rest}
         />
         {sideAction && (
-          <Press
-            onPress={sideAction.onPress}
-            style={withPressed([
-              styles.action,
-              {
-                backgroundColor: attached.fill,
-                borderColor: attached.line,
-                borderWidth: skin.shape.border,
-                borderBottomRightRadius: radius,
-                borderTopRightRadius: radius,
-              },
-              pill && styles.pillAction,
-            ])}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isPassword
-                ? isPasswordVisible
-                  ? common.hidePassword
-                  : common.showPassword
-                : sideAction.label
-            }
-          >
-            <ThemedText
-              allowFontScaling={false}
-              size={skin.type.label}
-              color={attached.ink}
-            >
-              {sideAction.label}
-            </ThemedText>
-          </Press>
+          <KilButton
+            height={skin.size.input}
+            variant={sideAction.variant ?? "primary"}
+            accessibilityLabel={sideAction.label}
+            icon={(color) => <sideAction.icon size={skin.size.icon.action} color={color} />}
+            onTouch={sideAction.onPress}
+          />
         )}
       </View>
     </View>
@@ -142,7 +119,9 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.hair,
     },
     row: {
+      alignItems: "center",
       flexDirection: "row",
+      gap: s.spacing.small,
     },
     input: {
       flex: 1,
@@ -151,14 +130,7 @@ const createStyles = (s: Skin) =>
       minWidth: 0,
       paddingHorizontal: s.spacing.inline,
     },
-    action: {
-      alignItems: "center",
-      height: s.size.input,
-      justifyContent: "center",
-      paddingHorizontal: s.spacing.inline,
-    },
     pillInput: { paddingHorizontal: s.spacing.stack + 2 },
-    pillAction: { paddingLeft: s.spacing.inline, paddingRight: s.spacing.stack + 2 },
   });
 
 export default FormInput;

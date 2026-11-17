@@ -12,6 +12,7 @@ import useToast from "@/providers/ToastProvider";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { QrCodeIcon } from "@/components/icons";
 
 const SWAP_DURATION = 200;
 
@@ -101,7 +102,7 @@ const SwitchHouseholdForm = ({
           onChangeText={setJoinCode}
           autoCapitalize="characters"
           maxLength={6}
-          action={{ label: login.scan, onPress: () => setShowScanner(true) }}
+          action={{ label: login.scan, onPress: () => setShowScanner(true), icon: QrCodeIcon }}
         />
       </Animated.View>
     );

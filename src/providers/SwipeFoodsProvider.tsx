@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import useSWR, { SWRConfiguration } from "swr";
+import { isQuietError } from "@/services/fetcher";
 
 export type SwipeGameType = {
   level: number;
@@ -87,8 +88,7 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: (err) =>
-        showToast(err?.message || common.unexpected),
+      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,

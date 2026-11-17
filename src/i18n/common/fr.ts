@@ -28,7 +28,16 @@ const fr: CommonText = {
     label: "Nom du foyer",
     line: "Tout le foyer voit ce nom.",
   },
-  passwordsDiffer: "Les mots de passe ne correspondent pas",
+  passwordRules: {
+    length: "8 caractères min.",
+    upper: "Majuscule",
+    lower: "Minuscule",
+    number: "Chiffre",
+    symbol: "Symbole",
+    match: "Mots de passe identiques",
+  },
+  emailInvalid: "Cette adresse e-mail ne semble pas valide",
+  nameLength: (min: number, max: number) => `De ${min} à ${max} caractères`,
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
   inventoryNotReady:
     "Ton inventaire n'est pas encore prêt, réessaie dans un instant",

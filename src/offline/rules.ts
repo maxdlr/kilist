@@ -21,6 +21,7 @@ export type Rules = {
   };
   shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number; buyBelow?: number };
   products: { maxBarcodes: number; quantityLength: number };
+  accounts?: { usernameMin: number; usernameMax: number };
 };
 
 const SECTIONS = ["suggestions", "swipe", "tickets", "shop", "products"] as const;

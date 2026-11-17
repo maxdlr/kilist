@@ -9,6 +9,7 @@ import { FoodType } from "@/types/model";
 import { putFoodLevel } from "@/utils/foodLevel";
 import React, { createContext, ReactNode, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
+import { isQuietError } from "@/services/fetcher";
 
 export type InventoryContextType = {
   foods?: FoodType[];
@@ -60,7 +61,7 @@ export const InventoryProvider = ({
     },
     {
       onSuccess: () => {},
-      onError: (err) => showToast(err?.message || common.unexpected),
+      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateIfStale: true,
       revalidateOnReconnect: true,

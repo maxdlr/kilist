@@ -6,6 +6,7 @@ import axios from "@/services/axios";
 import { HouseholdWithMembersType } from "@/types/model";
 import React, { createContext, ReactNode } from "react";
 import useSWR, { useSWRConfig } from "swr";
+import { isQuietError } from "@/services/fetcher";
 
 export type HouseholdContextType = {
   household?: HouseholdWithMembersType;
@@ -35,8 +36,7 @@ export const HouseholdProvider = ({ children }: { children: ReactNode }) => {
   } = useSWR<HouseholdWithMembersType>(
     { url: "/households/me" },
     {
-      onError: (err) =>
-        showToast(err?.message || common.unexpected),
+      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
     },
   );

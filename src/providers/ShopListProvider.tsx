@@ -4,6 +4,7 @@ import useToast from "@/providers/ToastProvider";
 import { FoodType, ShopListType } from "@/types/model";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import useSWR, { SWRConfiguration } from "swr";
+import { isQuietError } from "@/services/fetcher";
 
 export type ShopListContextType = {
   foods?: FoodType[];
@@ -58,7 +59,7 @@ export const ShopListProvider = ({ children }: { children: ReactNode }) => {
     },
     {
       onSuccess: () => {},
-      onError: (err) => showToast(err?.message || common.unexpected),
+      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
