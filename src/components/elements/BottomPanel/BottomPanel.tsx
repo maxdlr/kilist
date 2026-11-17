@@ -69,6 +69,7 @@ const BottomPanel = ({
   const insets = useSafeAreaInsets();
   const { glassTarget } = useTabBarVisibility();
   const insideTarget = useInsideGlassTarget();
+  const gripLook = skin.bottomPanel.grip;
   const glass = { ...PANEL_GLASS, ...skin.bottomPanel.glassSettings, ...glassOverride };
   const glassy = glass.enabled && Boolean(glassTarget) && !insideTarget;
   const offset = useSharedValue(SCREEN_HEIGHT);
@@ -228,7 +229,15 @@ const BottomPanel = ({
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.grip, { backgroundColor: skin.panel.ink }]}
+      style={[
+        styles.grip,
+        {
+          backgroundColor: gripLook?.color ?? skin.panel.ink,
+          ...(gripLook?.width !== undefined && { width: gripLook.width }),
+          ...(gripLook?.height !== undefined && { height: gripLook.height, borderRadius: gripLook.height / 2 }),
+          ...(gripLook?.opacity !== undefined && { opacity: gripLook.opacity }),
+        },
+      ]}
     />
   );
 

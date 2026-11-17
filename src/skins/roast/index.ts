@@ -82,6 +82,12 @@ const roast: SkinSource = {
       gradientStroke: { start: white, end: acid, midPoint: 0.5 },
       width: 6,
     },
+    grip: {
+      width: 48,
+      height: 5,
+      color: white,
+      opacity: 0.3,
+    },
   },
   panel: {
     fill: ink,

@@ -82,6 +82,12 @@ const versus: SkinSource = {
       gradientStroke: { start: white, end: panel, midPoint: 0.5 },
       width: 2,
     },
+    grip: {
+      width: 48,
+      height: 5,
+      color: white,
+      opacity: 0.3,
+    },
   },
   panel: {
     fill: panel,

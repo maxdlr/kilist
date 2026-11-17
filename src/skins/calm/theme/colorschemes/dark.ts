@@ -78,6 +78,12 @@ export const elements: CalmElements = {
       },
       width: 1,
     },
+    grip: {
+      width: 48,
+      height: 5,
+      color: base[5],
+      opacity: 0.3,
+    },
   },
   em: {
     ground: emphasis[70],

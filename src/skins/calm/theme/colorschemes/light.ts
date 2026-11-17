@@ -70,6 +70,12 @@ export const elements: CalmElements = {
       },
       width: 2,
     },
+    grip: {
+      width: 48,
+      height: 5,
+      color: colors.ink,
+      opacity: 0.3,
+    },
   },
   em: {
     card: colors.paper,

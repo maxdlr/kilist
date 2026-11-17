@@ -66,6 +66,7 @@ export type TextCase = "upper" | "none";
 export type BottomPanelLook = {
   glassSettings?: Partial<PanelGlass>;
   border: { gradientStroke: { start: string; end: string; midPoint?: number }; width?: number };
+  grip?: { width?: number; height?: number; color?: string; opacity?: number };
 };
 
 export interface Skin {

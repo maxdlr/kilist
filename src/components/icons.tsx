@@ -96,7 +96,7 @@ const solid = (draw: (color: string, mask: string) => ReactNode, hole?: ReactNod
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         {hole && (
           <Defs>
-            <Mask id={id}>
+            <Mask id={id} maskUnits="userSpaceOnUse" x={0} y={0} width={24} height={24}>
               <Rect width={24} height={24} fill="white" />
               {hole}
             </Mask>
