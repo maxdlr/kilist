@@ -1,9 +1,17 @@
 import { PlayIcon } from "@/components/icons";
 import { useSkin } from "@/providers/SkinProvider";
-import { VButton } from "@/skins/versus/components";
+import { VButton, VText } from "@/skins/versus/components";
+import { versusPalette as P } from "@/skins/versus/theme/palette";
 
-const PlayAgainButton = ({ onPress }: { onPress: () => void }) => {
+const PlayAgainButton = ({ onPress, allSorted }: { onPress: () => void; allSorted: boolean }) => {
   const skin = useSkin();
+  if (allSorted) {
+    return (
+      <VText face="bold" size={skin.type.lead} color={P.agree} style={{ textAlign: "center" }}>
+        {skin.copy.swipe.allChecked}
+      </VText>
+    );
+  }
   return (
     <VButton
       variant="secondary"

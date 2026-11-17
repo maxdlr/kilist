@@ -10,7 +10,7 @@ import { versusPalette as P } from "@/skins/versus/theme/palette";
 import { Card, Chip, Kicker, memberColor, Screen, VButton, VText, WORD } from "@/skins/versus/components";
 import PlayAgainButton from "./PlayAgainButton";
 
-const Results = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => void }) => {
+const Results = ({ game, onPlayAgain, allSorted }: { game: RaceGame; onPlayAgain: () => void; allSorted: boolean }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -27,7 +27,7 @@ const Results = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => voi
       dock={
         <>
           <VButton big label={V.play.goShoppingCount(toBuy)} href="/shop" />
-          <PlayAgainButton onPress={onPlayAgain} />
+          <PlayAgainButton onPress={onPlayAgain} allSorted={allSorted} />
           <VButton variant="ghost" label={V.play.doneToday} onPress={game.reset} />
         </>
       }

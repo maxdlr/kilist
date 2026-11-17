@@ -33,6 +33,7 @@ const useSwipeGame = () => {
   const { mark } = useMark();
   const [removing, setRemoving] = useState<FoodType | null>(null);
   const [mode, setMode] = useState<SwipeMode>("daily");
+  const [allSorted, setAllSorted] = useState(false);
   const {
     foods,
     game,
@@ -129,6 +130,7 @@ const useSwipeGame = () => {
       return () => {
         commitHeld();
         setPhase((current) => (current === "done" ? "idle" : current));
+        setAllSorted(false);
       };
     }, [mutateFoods, mutateGame, commitHeld]),
   );
@@ -138,7 +140,7 @@ const useSwipeGame = () => {
   const playDeck = async (next: Exclude<SwipeMode, "daily">) => {
     const count = await loadDeck(next);
     if (count === 0) {
-      if (next === "again") showToast(skin.copy.swipe.allChecked);
+      if (next === "again") setAllSorted(true);
       return false;
     }
     setMode(next);
@@ -295,6 +297,7 @@ const useSwipeGame = () => {
     begin,
     replay: () => playDeck("replay"),
     playAgain: () => playDeck("again"),
+    allSorted,
     isReplay: mode === "replay",
     mode,
     recap,

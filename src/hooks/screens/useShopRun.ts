@@ -203,6 +203,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     findFood,
     addFood,
     refreshEmpty,
+    refreshPreview,
     selected,
     toggleSelect,
     clearSelection: () => setSelected([]),

@@ -11,7 +11,7 @@ import { Screen, VButton, VText } from "@/skins/versus/components";
 import { VersusLoading } from "@/skins/versus/screens/States";
 import FoodCard from "./FoodCard";
 
-const ExtraRound = ({ onLeave }: { onLeave: () => void }) => {
+const ExtraRound = ({ onLeave, onAllSorted }: { onLeave: () => void; onAllSorted: () => void }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.swipe;
@@ -23,8 +23,8 @@ const ExtraRound = ({ onLeave }: { onLeave: () => void }) => {
   useEffect(() => {
     if (asked.current) return;
     asked.current = true;
-    playAgain().then((started) => (started ? setReady(true) : onLeave()));
-  }, [playAgain, onLeave]);
+    playAgain().then((started) => (started ? setReady(true) : onAllSorted()));
+  }, [playAgain, onAllSorted]);
 
   if (!ready || game.screen === "loading") return <VersusLoading />;
 

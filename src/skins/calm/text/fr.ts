@@ -7,7 +7,7 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", {
 });
 
 const foods = (count: number) =>
-  `${count} ${count <= 1 ? "aliment" : "aliments"}`;
+  `${count} ${count <= 1 ? "produit" : "produits"}`;
 
 const joined = (names: string[]) => {
   const words = names.map((name, index) =>
@@ -63,6 +63,21 @@ const fr: CalmText = {
   },
   shop: {
     otherAisle: "Autres",
+    manageAisles: "Gérer",
+    manageAislesAria: "Donner un rayon aux produits de Autres",
+    aislesTitle: "Range-les dans un rayon",
+    aisleSearch: "Nom d'un rayon ou d'un produit",
+    aisleNoMatch: "Aucun rayon trouvé.",
+    aisleClear: "Effacer la recherche",
+    aisleOpen: (name: string) => `Choisir un rayon pour ${name}`,
+    aislePicked: (name: string, aisle: string) => `${name}, ${aisle}. Changer le rayon`,
+    aislesDone: "Terminé",
+    aislesConfirmTitle: "Garder les rayons choisis ?",
+    aislesConfirmLine: (count: number) =>
+      count === 1 ? "1 produit a un nouveau rayon." : `${count} produits ont un nouveau rayon.`,
+    aislesConfirmKeep: "Continuer",
+    aislesConfirmSave: "Les garder",
+    aislesConfirmDiscard: "Tout annuler",
     title: "Liste",
     toBuy: (count: number) => `${count} à acheter`,
     hint: "Glisse à droite quand c'est dans le panier, à gauche pour la prochaine fois.",
@@ -85,7 +100,7 @@ const fr: CalmText = {
     addQuery: (query: string) => `Ajouter « ${query} »`,
     noResultsLine: "Ajoute-le et Kilist commencera à le suivre.",
     emptyLine:
-      "Ajoute les aliments que tu achètes d'habitude, et Kilist tient la liste pour toi.",
+      "Ajoute les produits que tu achètes d'habitude, et Kilist tient la liste pour toi.",
   },
   tutorial: {
     skip: "Passer",
@@ -159,10 +174,10 @@ const fr: CalmText = {
       `${foods(count)} dans ton inventaire au départ.`,
     reviewTitle: "Affine ta sélection",
     reviewLine:
-      "Choisis d'après tes réponses. Touche un aliment pour l'ajouter ou le retirer.",
-    refineTitle: "Tes aliments",
+      "Choisis d'après tes réponses. Touche un produit pour l'ajouter ou le retirer.",
+    refineTitle: "Tes produits",
     refineLine:
-      "Les aliments que tu as déjà sont sélectionnés. Touche un aliment pour l'ajouter ou le retirer.",
+      "Les produits que tu as déjà sont sélectionnés. Touche un produit pour l'ajouter ou le retirer.",
     refineCount: (add: number, remove: number) =>
       add + remove === 0
         ? "Aucun changement pour l'instant."
@@ -170,7 +185,7 @@ const fr: CalmText = {
             .filter(Boolean)
             .join(", ") + ".",
     profileOffline:
-      "La liste d'aliments n'est pas encore téléchargée. Tu pourras ajouter tes aliments plus tard depuis l'inventaire.",
+      "La liste de produits n'est pas encore téléchargée. Tu pourras ajouter tes produits plus tard depuis l'inventaire.",
     profileDone: "Terminé",
     profileAdding: "Ajout…",
     samples: ["Bananes", "Lait", "Riz", "Œufs", "Café"],
@@ -198,7 +213,7 @@ const fr: CalmText = {
     doneLabel: "Entraînement terminé",
     doneTitle: "C'est tout ce qu'il y a à savoir.",
     doneSteps: [
-      "Chaque jour, trie 10 aliments.",
+      "Chaque jour, trie 10 produits.",
       "Ce qui manque arrive sur ta liste.",
       "Au magasin, \nglisse tes produits dans ton panier.",
     ],

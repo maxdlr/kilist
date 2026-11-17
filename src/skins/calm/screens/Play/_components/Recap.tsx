@@ -32,17 +32,25 @@ const Recap = ({ game }: { game: SwipeGame }) => {
               />
             )}
           />
-          <CButton
-            label={skin.copy.swipe.playAgain}
-            onPress={game.playAgain}
-            icon={(color) => (
-              <PlayIcon
-                size={skin.size.icon.action}
-                color={color}
-                strokeWidth={1.8}
-              />
-            )}
-          />
+          {game.allSorted ? (
+            <View style={styles.allSorted}>
+              <CText weight="medium" size={skin.type.body} color={C.positive}>
+                {skin.copy.swipe.allChecked}
+              </CText>
+            </View>
+          ) : (
+            <CButton
+              label={skin.copy.swipe.playAgain}
+              onPress={game.playAgain}
+              icon={(color) => (
+                <PlayIcon
+                  size={skin.size.icon.action}
+                  color={color}
+                  strokeWidth={1.8}
+                />
+              )}
+            />
+          )}
         </>
       }
     >
@@ -92,6 +100,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     },
     doneText: { gap: s.spacing.small },
     doneHead: { flexDirection: "row" },
+    allSorted: { flex: 1, justifyContent: "center" },
     row: {
       alignItems: "center",
       borderTopColor: C.line,

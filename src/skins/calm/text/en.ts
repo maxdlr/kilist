@@ -4,7 +4,7 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
   month: "long",
 });
 
-const foods = (count: number) => `${count} ${count === 1 ? "food" : "foods"}`;
+const foods = (count: number) => `${count} ${count === 1 ? "item" : "items"}`;
 
 const joined = (names: string[]) => {
   const words = names.map((name, index) =>
@@ -61,6 +61,21 @@ const en = {
   },
   shop: {
     otherAisle: "Other",
+    manageAisles: "Manage",
+    manageAislesAria: "Give an aisle to the items in Other",
+    aislesTitle: "Give them an aisle",
+    aisleSearch: "Aisle or item name",
+    aisleNoMatch: "No aisle matches.",
+    aisleClear: "Clear search",
+    aisleOpen: (name: string) => `Choose an aisle for ${name}`,
+    aislePicked: (name: string, aisle: string) => `${name}, ${aisle}. Change the aisle`,
+    aislesDone: "Done",
+    aislesConfirmTitle: "Keep the aisles you picked?",
+    aislesConfirmLine: (count: number) =>
+      count === 1 ? "1 item has a new aisle." : `${count} items have a new aisle.`,
+    aislesConfirmKeep: "Keep editing",
+    aislesConfirmSave: "Save them",
+    aislesConfirmDiscard: "Discard all",
     title: "List",
     toBuy: (count: number) => `${count} to buy`,
     hint: "Swipe right when it's in the basket, left for next time.",
@@ -83,7 +98,7 @@ const en = {
     addQuery: (query: string) => `Add “${query}”`,
     noResultsLine: "Add it and Kilist will start keeping track of it.",
     emptyLine:
-      "Add the foods you usually buy, and Kilist keeps the list for you.",
+      "Add the items you usually buy, and Kilist keeps the list for you.",
   },
   tutorial: {
     skip: "Skip",
@@ -149,10 +164,10 @@ const en = {
     profileCount: (count: number) =>
       `${foods(count)} will be added to your inventory.`,
     reviewTitle: "Refine your selection",
-    reviewLine: "Picked from your answers. Tap any food to add or remove it.",
-    refineTitle: "Your foods",
+    reviewLine: "Picked from your answers. Tap any item to add or remove it.",
+    refineTitle: "Your items",
     refineLine:
-      "The foods you already have are selected. Tap any food to add or remove it.",
+      "The items you already have are selected. Tap any item to add or remove it.",
     refineCount: (add: number, remove: number) =>
       add + remove === 0
         ? "No changes yet."
@@ -160,7 +175,7 @@ const en = {
             .filter(Boolean)
             .join(", ") + ".",
     profileOffline:
-      "The food list isn't downloaded yet. You can add your foods later from the inventory.",
+      "The item list isn't downloaded yet. You can add your items later from the inventory.",
     profileDone: "Done",
     profileAdding: "Adding…",
     samples: ["Bananas", "Milk", "Rice", "Eggs", "Coffee"],
@@ -188,7 +203,7 @@ const en = {
     doneLabel: "Practice done",
     doneTitle: "That's all there is to it.",
     doneSteps: [
-      "Each day, sort 10 foods.",
+      "Each day, sort 10 items.",
       "What you're out of lands on your list.",
       "In the store,\nswipe products to your basket.",
     ],

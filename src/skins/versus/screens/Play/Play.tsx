@@ -15,11 +15,22 @@ import Closed from "./_components/Closed";
 const VersusPlay = () => {
   const game = useRaceGame();
   const [extra, setExtra] = useState(false);
+  const [allSorted, setAllSorted] = useState(false);
   const suggestion = useDailySuggestion(game.screen === "done" && !extra);
   const playAgain = () => setExtra(true);
 
   const body = () => {
-    if (extra) return <ExtraRound onLeave={() => setExtra(false)} />;
+    if (extra) {
+      return (
+        <ExtraRound
+          onLeave={() => setExtra(false)}
+          onAllSorted={() => {
+            setAllSorted(true);
+            setExtra(false);
+          }}
+        />
+      );
+    }
     if (suggestion.item) return <SuggestionStep suggestion={suggestion} />;
 
     switch (game.screen) {
@@ -28,9 +39,9 @@ const VersusPlay = () => {
       case "play":
         return <Arena game={game} />;
       case "done":
-        return <Results game={game} onPlayAgain={playAgain} />;
+        return <Results game={game} onPlayAgain={playAgain} allSorted={allSorted} />;
       case "closed":
-        return <Closed game={game} onPlayAgain={playAgain} />;
+        return <Closed game={game} onPlayAgain={playAgain} allSorted={allSorted} />;
       case "empty":
         return (
           <VersusEmpty

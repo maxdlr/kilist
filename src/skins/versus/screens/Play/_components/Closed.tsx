@@ -9,7 +9,7 @@ import { versusPalette as P } from "@/skins/versus/theme/palette";
 import { Avatar, Card, Kicker, memberColor, Screen, VButton, VText } from "@/skins/versus/components";
 import PlayAgainButton from "./PlayAgainButton";
 
-const Closed = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => void }) => {
+const Closed = ({ game, onPlayAgain, allSorted }: { game: RaceGame; onPlayAgain: () => void; allSorted: boolean }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { user } = useAuth();
@@ -24,7 +24,7 @@ const Closed = ({ game, onPlayAgain }: { game: RaceGame; onPlayAgain: () => void
       dock={
         <>
           <VButton big label={V.play.goShopping} href="/shop" />
-          <PlayAgainButton onPress={onPlayAgain} />
+          <PlayAgainButton onPress={onPlayAgain} allSorted={allSorted} />
         </>
       }
     >

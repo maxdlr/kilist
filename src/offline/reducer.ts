@@ -206,6 +206,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       const target = food(payload.foodId);
       if (!target) return null;
       if (payload.name !== undefined) target.name = payload.name;
+      if (typeof payload.aisle === "string") target.aisle = payload.aisle;
       return target;
     }
 

@@ -1,9 +1,10 @@
 import Press from "@/components/elements/Press";
 import ShopPanels from "@/components/features/Shop/ShopPanels";
+import useAisleManager from "@/hooks/screens/useAisleManager";
 import useShopRun from "@/hooks/screens/useShopRun";
 import { getLang } from "@/i18n";
 import common from "@/i18n/common";
-import { aisleList, aisleOf } from "@/offline/foodNames";
+import { aisleList, aisleName, aisleOf } from "@/offline/foodNames";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -18,6 +19,7 @@ import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CButton, CText, DockSpacer, Dot, Screen, useDockCover } from "@/skins/calm/components";
 import { CalmLoading, CalmMessage } from "../States";
+import AisleManager from "./_components/AisleManager";
 import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
 
@@ -52,6 +54,17 @@ const CalmShop = () => {
       setResult({ bought, left: Math.max(0, run.total - bought) }),
   });
   const remaining = run.foods ?? [];
+  const aisles = useAisleManager({
+    foods: run.preview,
+    text: {
+      confirmTitle: T.shop.aislesConfirmTitle,
+      confirmLine: T.shop.aislesConfirmLine,
+      confirmKeep: T.shop.aislesConfirmKeep,
+      confirmSave: T.shop.aislesConfirmSave,
+      confirmDiscard: T.shop.aislesConfirmDiscard,
+    },
+    onSaved: run.refreshPreview,
+  });
   const [touches, setTouches] = useState(0);
   const [idleFor, setIdleFor] = useState<string | null>(null);
   const startCover = useDockCover();
@@ -136,14 +149,14 @@ const CalmShop = () => {
     const sections = [
       ...known.map((aisle) => ({
         id: aisle.id,
-        label: aisle.names[lang] ?? aisle.names.en ?? aisle.id,
+        label: aisleName(aisle, lang),
         foods: byAisle.get(aisle.id)!,
       })),
       ...(rest.length > 0
         ? [
             {
               id: OTHER_AISLE,
-              label: known.length > 0 ? T.shop.otherAisle : null,
+              label: T.shop.otherAisle,
               foods: rest.flatMap((id) => byAisle.get(id)!),
             },
           ]
@@ -225,7 +238,7 @@ const CalmShop = () => {
             >
               {sections.map((section) => (
                 <View key={section.id} style={styles.section}>
-                  {section.label && (
+                  <View style={styles.sectionHead}>
                     <CText
                       size={skin.type.label}
                       color={C.textSoft}
@@ -233,7 +246,16 @@ const CalmShop = () => {
                     >
                       {section.label}
                     </CText>
-                  )}
+                    {section.id === OTHER_AISLE && aisles.canManage && !selecting && (
+                      <CButton
+                        small
+                        variant="text"
+                        label={T.shop.manageAisles}
+                        accessibilityLabel={T.shop.manageAislesAria}
+                        onPress={aisles.open}
+                      />
+                    )}
+                  </View>
                   <View style={styles.tags}>
                     {section.foods.map((food) => {
                       const picked = run.selected.includes(food.id);
@@ -262,6 +284,7 @@ const CalmShop = () => {
           </View>
         </Screen>
         <ShopPanels run={run} />
+        <AisleManager manager={aisles} />
       </View>
     );
   }
@@ -425,6 +448,12 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     tagScroll: { flex: 1 },
     sections: { gap: s.spacing.section },
     section: { gap: s.spacing.small },
+    sectionHead: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      minHeight: s.size.button.xs,
+    },
     tags: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     tag: {
       alignItems: "center",

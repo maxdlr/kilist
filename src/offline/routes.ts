@@ -269,6 +269,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
       const food = enqueue("food.edit", {
         foodId: Number(match[1]),
         name: body.name,
+        ...(typeof body.aisle === "string" && { aisle: body.aisle }),
       });
       return food ? toFood(food) : null;
     },

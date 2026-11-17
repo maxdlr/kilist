@@ -9,7 +9,7 @@ const en = {
   marks: {
     added: (name: string) => `${name} added`,
     removed: (count: number) =>
-      count > 1 ? `${count} foods removed` : "Removed",
+      count > 1 ? `${count} items removed` : "Removed",
     saved: "Saved",
   },
   guestRename: {
@@ -70,7 +70,7 @@ const en = {
     alwaysTitle: "Always by email",
     reminder: {
       title: "Today's 10 are waiting",
-      body: "Sort ten foods and keep your list in shape.",
+      body: "Sort ten items and keep your list in shape.",
     },
     ask: {
       title: "Want a nudge?",
@@ -145,8 +145,8 @@ const en = {
     stopKeep: "Keep shopping",
     selected: (count: number) => `${count} selected`,
     buyLater: (count: number) => `Buy later (${count})`,
-    add: "Add a food",
-    addTitle: "Add a food",
+    add: "Add an item",
+    addTitle: "Add an item",
     addName: "Name",
     addLine: "It's saved to your inventory. Did you buy it today?",
     addExists: (name: string) =>
@@ -197,7 +197,7 @@ const en = {
     admin: "Admin",
     createAccount: "Create an account to sync and share",
     confirmEmail: "Confirm your email to share your household",
-    teasers: { versus: "Race your housemates on the same 10 foods." } as Record<
+    teasers: { versus: "Race your housemates on the same 10 items." } as Record<
       string,
       string
     >,
@@ -228,9 +228,9 @@ const en = {
   code: (code: string) => `Code: ${code}`,
   shareHouseholdAria: "Share household code",
   qrHouseholdAria: "Show household QR code",
-  searchFoods: "Search your foods",
-  skipFood: "Skip this food",
-  addFood: "Add this food",
+  searchFoods: "Search your items",
+  skipFood: "Skip this item",
+  addFood: "Add this item",
   stopShopping: "Stop shopping",
   reverseOrder: "Reverse the order",
   ariaOut: "Out of stock",

@@ -11,7 +11,7 @@ const fr: CommonText = {
   marks: {
     added: (name: string) => `${name} ajouté`,
     removed: (count: number) =>
-      count > 1 ? `${count} aliments retirés` : "Retiré",
+      count > 1 ? `${count} produits retirés` : "Retiré",
     saved: "Enregistré",
   },
   guestRename: {
@@ -32,7 +32,7 @@ const fr: CommonText = {
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
   inventoryNotReady:
     "Ton inventaire n'est pas encore prêt, réessaie dans un instant",
-  addFailed: "Impossible d'ajouter cet aliment",
+  addFailed: "Impossible d'ajouter ce produit",
   shareMessage: (code: string) =>
     `Rejoins mon foyer sur Kilist avec ce code : ${code}`,
   shareFailed: "Impossible d'ouvrir le partage",
@@ -73,7 +73,7 @@ const fr: CommonText = {
     alwaysTitle: "Toujours par e-mail",
     reminder: {
       title: "Tes 10 du jour t'attendent",
-      body: "Trie dix aliments et garde ta liste à jour.",
+      body: "Trie dix produits et garde ta liste à jour.",
     },
     ask: {
       title: "Un petit rappel ?",
@@ -148,8 +148,8 @@ const fr: CommonText = {
     stopKeep: "Continuer les courses",
     selected: (count: number) => `${count} ${count === 1 ? "sélectionné" : "sélectionnés"}`,
     buyLater: (count: number) => `Plus tard (${count})`,
-    add: "Ajouter un aliment",
-    addTitle: "Ajouter un aliment",
+    add: "Ajouter un produit",
+    addTitle: "Ajouter un produit",
     addName: "Nom",
     addLine:
       "Il est enregistré dans ton inventaire. Tu l'as acheté aujourd'hui ?",
@@ -203,7 +203,7 @@ const fr: CommonText = {
     createAccount: "Crée un compte pour synchroniser et partager",
     confirmEmail: "Confirme ton e-mail pour partager ton foyer",
     teasers: {
-      versus: "Fais la course avec ton foyer sur les 10 mêmes aliments.",
+      versus: "Fais la course avec ton foyer sur les 10 mêmes produits.",
     } as Record<string, string>,
     prizesAria: "Ouvrir le comptoir des lots",
   },
@@ -233,9 +233,9 @@ const fr: CommonText = {
   code: (code: string) => `Code : ${code}`,
   shareHouseholdAria: "Partager le code du foyer",
   qrHouseholdAria: "Afficher le QR code du foyer",
-  searchFoods: "Chercher tes aliments",
-  skipFood: "Passer cet aliment",
-  addFood: "Ajouter cet aliment",
+  searchFoods: "Chercher tes produits",
+  skipFood: "Passer ce produit",
+  addFood: "Ajouter ce produit",
   stopShopping: "Arrêter les courses",
   reverseOrder: "Inverser l'ordre",
   ariaOut: "Plus en stock",

@@ -1,6 +1,6 @@
 import type { AisleType, FoodBankItemType } from "@/types/model";
 
-type Suggestion = { name: string; plain: string };
+type Suggestion = { name: string; plain: string; aisle?: string };
 
 const MIN_QUERY = 2;
 
@@ -32,7 +32,7 @@ export const setFoodBanks = (
     const normalized = normalizeName(name);
     if (aisle && !aisleByName.has(normalized)) aisleByName.set(normalized, aisle);
     const list = suggestions.get(lang) ?? [];
-    list.push({ name, plain: plainName(name) });
+    list.push({ name, plain: plainName(name), aisle });
     suggestions.set(lang, list);
   };
 
@@ -90,16 +90,45 @@ export const aisleOf = (food: { name: string; aisle?: string | null }) => {
   return null;
 };
 
-export const suggestNames = (query: string, lang: string, limit: number) => {
-  const typed = plainName(query);
-  if (typed.length < MIN_QUERY) return [];
-  const starts: Suggestion[] = [];
-  const inside: Suggestion[] = [];
-  for (const entry of suggestions.get(lang) ?? []) {
-    if (entry.plain === typed) continue;
+const ranked = <T extends { plain: string }>(typed: string, entries: T[], skipExact: boolean) => {
+  const starts: T[] = [];
+  const inside: T[] = [];
+  for (const entry of entries) {
+    if (skipExact && entry.plain === typed) continue;
     if (entry.plain.startsWith(typed)) starts.push(entry);
     else if (entry.plain.includes(` ${typed}`)) inside.push(entry);
   }
-  const shortest = (a: Suggestion, b: Suggestion) => a.plain.length - b.plain.length;
-  return [...starts.sort(shortest), ...inside.sort(shortest)].slice(0, limit).map((entry) => entry.name);
+  const shortest = (a: T, b: T) => a.plain.length - b.plain.length;
+  return [...starts.sort(shortest), ...inside.sort(shortest)];
+};
+
+export const suggestNames = (query: string, lang: string, limit: number) => {
+  const typed = plainName(query);
+  if (typed.length < MIN_QUERY) return [];
+  return ranked(typed, suggestions.get(lang) ?? [], true)
+    .slice(0, limit)
+    .map((entry) => entry.name);
+};
+
+export const aisleName = (aisle: AisleType, lang: string) => aisle.names[lang] ?? aisle.names.en ?? aisle.id;
+
+export const suggestAisles = (query: string, lang: string, limit: number) => {
+  const typed = plainName(query);
+  if (!typed) return [];
+  const byName = ranked(
+    typed,
+    aisles.map((aisle) => ({ aisle, plain: plainName(aisleName(aisle, lang)) })),
+    false,
+  ).map((entry) => entry.aisle.id);
+  const byFood =
+    typed.length < MIN_QUERY
+      ? []
+      : ranked(typed, (suggestions.get(lang) ?? []).filter((entry) => entry.aisle), false).map(
+          (entry) => entry.aisle!,
+        );
+  const ids = [...new Set([...byName, ...byFood])];
+  return ids
+    .map((id) => aisles.find((aisle) => aisle.id === id))
+    .filter((aisle): aisle is AisleType => Boolean(aisle))
+    .slice(0, limit);
 };

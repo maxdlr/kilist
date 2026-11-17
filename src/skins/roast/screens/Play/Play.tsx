@@ -50,14 +50,20 @@ const SwipeFoodGame = () => {
               label={copy.overShop}
               href="/shop"
             />
-            <KilButton
-              variant="secondary"
-              height={skin.size.button.sm}
-              fontSize={skin.type.body}
-              label={copy.playAgain}
-              icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
-              onTouch={game.playAgain}
-            />
+            {game.allSorted ? (
+              <ThemedText size={skin.type.lead} color={skin.colors.accent} style={styles.allSorted}>
+                {copy.allChecked}
+              </ThemedText>
+            ) : (
+              <KilButton
+                variant="secondary"
+                height={skin.size.button.sm}
+                fontSize={skin.type.body}
+                label={copy.playAgain}
+                icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
+                onTouch={game.playAgain}
+              />
+            )}
             <KilButton
               variant="ghost"
               height={skin.size.button.xs}
@@ -206,14 +212,20 @@ const SwipeFoodGame = () => {
               label={copy.tomorrowAction}
               href="/shop"
             />
-            <KilButton
-              variant="secondary"
-              height={skin.size.button.sm}
-              fontSize={skin.type.body}
-              label={copy.playAgain}
-              icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
-              onTouch={game.playAgain}
-            />
+            {game.allSorted ? (
+              <ThemedText size={skin.type.lead} style={styles.allSorted}>
+                {copy.allChecked}
+              </ThemedText>
+            ) : (
+              <KilButton
+                variant="secondary"
+                height={skin.size.button.sm}
+                fontSize={skin.type.body}
+                label={copy.playAgain}
+                icon={(color) => <PlayIcon size={skin.size.icon.action} color={color} />}
+                onTouch={game.playAgain}
+              />
+            )}
           </Dock>
         }
       >
@@ -273,6 +285,7 @@ const createStyles = (s: Skin) =>
     flex: {
       flex: 1,
     },
+    allSorted: { textAlign: "center" },
     metaRow: {
       alignItems: "flex-start",
       flexDirection: "row",

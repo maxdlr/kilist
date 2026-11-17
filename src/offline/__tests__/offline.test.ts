@@ -12,7 +12,7 @@ const { applySyncResponse, getState, hasSession, pendingCount, pendingOps, reset
   await import("../store");
 const { GHOST_RACE_ID, matchLocal, offlineRaceView, queueRaceAnswer } = await import("../routes");
 const { calculateScore, nextSuggestion, starterFoods, swipeDeck, swipeGame } = await import("../domain");
-const { aisleOf, setFoodBanks, shownName, suggestNames } = await import("../foodNames");
+const { aisleOf, setFoodBanks, shownName, suggestAisles, suggestNames } = await import("../foodNames");
 
 const food = (id: number, score = 0.25, extra = {}) => ({
   id,
@@ -432,6 +432,14 @@ describe("the inventory offline", () => {
     expect(getState()!.foods.find((entry) => entry.id === 50)!.name).toBe("Oat");
   });
 
+  it("sets an aisle through a food edit", () => {
+    pull();
+    call("put", "foods/edit/1", { aisle: "dairy" });
+
+    expect(pendingOps()[0]!.payload).toEqual({ foodId: 1, aisle: "dairy" });
+    expect(getState()!.foods.find((entry) => entry.id === 1)!.aisle).toBe("dairy");
+  });
+
   it("rewrites queued operations that use the temporary id", () => {
     pull();
     const created = call("post", "foods/create", { name: "Oat milk", listId: 1 });
@@ -659,6 +667,23 @@ describe("aisles and name suggestions", () => {
     expect(suggestNames("milk", "en", 5)).toEqual(["Oat milk drinks"]);
     expect(suggestNames("creme", "fr", 5)).toEqual(["Crèmes dessert"]);
     expect(suggestNames("y", "en", 5)).toEqual([]);
+    setFoodBanks(null);
+  });
+
+  it("suggests aisles from an aisle name or a food name", () => {
+    setFoodBanks(
+      { en: [{ key: "milk", name: "Milk", aisle: "dairy" }] },
+      { en: { drinks: ["Oat milk drinks"] } },
+      [
+        { id: "dairy", names: { en: "Dairy & eggs" } },
+        { id: "drinks", names: { en: "Drinks" } },
+      ],
+    );
+
+    expect(suggestAisles("dr", "en", 5).map((aisle) => aisle.id)).toEqual(["drinks"]);
+    expect(suggestAisles("eggs", "en", 5).map((aisle) => aisle.id)).toEqual(["dairy"]);
+    expect(suggestAisles("milk", "en", 5).map((aisle) => aisle.id)).toEqual(["dairy", "drinks"]);
+    expect(suggestAisles(" ", "en", 5)).toEqual([]);
     setFoodBanks(null);
   });
 });

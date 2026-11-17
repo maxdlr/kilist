@@ -2,7 +2,7 @@ import countRange from "@/utils/countRange";
 import type { SkinCopy } from "../../types";
 
 const fr: SkinCopy = {
-  tagline: "Mêmes aliments. Le plus rapide gagne.",
+  tagline: "Mêmes produits. Le plus rapide gagne.",
   levels: {
     1: "À acheter",
     2: "Bientôt",
@@ -67,13 +67,13 @@ const fr: SkinCopy = {
     login: "Se connecter",
     later: "Pas maintenant",
     householdTitle: "Ramène tes rivaux",
-    householdLine: "Partager une liste demande un compte. Tes aliments et tes stats te suivent.",
+    householdLine: "Partager une liste demande un compte. Tes produits et tes stats te suivent.",
     versusTitle: "Les rivaux ont un compte",
     versusLine: "Versus défie ton foyer, il faut donc un compte. Tout te suit, et Versus se débloque avec les tickets gagnés après ton inscription.",
     reminderTitle: "Verrouille tes stats",
     reminderLine: "Une semaine de jeu et Kilist connaît tes habitudes. Un compte les garde si tu changes de téléphone.",
     mergeTitle: "Ramener les stats de ce téléphone ?",
-    mergeLine: "Ajouter les aliments et habitudes de ce téléphone à ton foyer ? Les aliments du même nom sont fusionnés.",
+    mergeLine: "Ajouter les produits et habitudes de ce téléphone à ton foyer ? Les produits du même nom sont fusionnés.",
     mergeKeep: "Les ramener",
     mergeDiscard: "Les laisser",
   },
@@ -125,13 +125,13 @@ const fr: SkinCopy = {
     shop: "Faire les courses",
     swipe: "Les 10 du jour",
     tally: (foods: number, shops: number, swipes: number) =>
-      `${foods} aliments · ${shops} courses · ${swipes} parties`,
+      `${foods} produits · ${shops} courses · ${swipes} parties`,
   },
   swipe: {
     startLabel: (level: number) => `Jour ${level}`,
-    startTitle: "Les mêmes 10 aliments. Le plus rapide gagne.",
+    startTitle: "Les mêmes 10 produits. Le plus rapide gagne.",
     startLine: (count: number) =>
-      `${count} aliments. Chaque swipe imprime des tickets, les swipes rapides en impriment plus.`,
+      `${count} produits. Chaque swipe imprime des tickets, les swipes rapides en impriment plus.`,
     start: "Relever le défi",
     dignity: "Progression",
     stampIn: "J'en ai",
@@ -155,9 +155,9 @@ const fr: SkinCopy = {
     tomorrowAction: "Voir quoi acheter",
     emptyLabel: "Rien à swiper",
     emptyTitle: "Tout est vérifié !",
-    emptyLine: "Reviens demain, ou ajoute des aliments.",
+    emptyLine: "Reviens demain, ou ajoute des produits.",
     playAgain: "Rejouer",
-    allChecked: "Tout est vérifié aujourd'hui !",
+    allChecked: "Tout est trié. Carton plein !",
   },
   shop: {
     toGo: (count: number) => `Encore ${count}`,
@@ -186,11 +186,11 @@ const fr: SkinCopy = {
     delete: "Supprimer",
     add: "Ajouter",
     deleteCount: (count: number) => `Supprimer ${count}`,
-    emptyLabel: "0 aliment",
-    emptyTitle: "Pas encore d'aliments",
+    emptyLabel: "0 produit",
+    emptyTitle: "Pas encore de produits",
     addSuggested: "Ajouter des suggestions",
     addOwn: "Ajouter les miens",
-    addTitle: "Ajouter un aliment",
+    addTitle: "Ajouter un produit",
     editTitle: (name: string) => `Modifier ${name}`,
     name: "Nom",
     removeIt: "Le retirer",
@@ -200,18 +200,18 @@ const fr: SkinCopy = {
     discardKeep: "Continuer",
     removeOne: (name: string) => `Retirer ${name} ?`,
     removeMany: (count: number) =>
-      count <= 1 ? "Retirer cet aliment ?" : `Retirer ${count} aliments ?`,
+      count <= 1 ? "Retirer ce produit ?" : `Retirer ${count} produits ?`,
     removeLine: "Il quitte la course pour toute la maison. Ses votes aussi.",
   },
   intro: {
     steps: [
       { title: "Kilist garde la maison approvisionnée.", line: "Tout le monde répond. La liste reste juste." },
-      { title: "Une course de 10 aliments par jour.", line: "J'en ai ou à acheter. Le plus rapide de la maison gagne." },
+      { title: "Une course de 10 produits par jour.", line: "J'en ai ou à acheter. Le plus rapide de la maison gagne." },
       { title: "La maison vote.", line: "La majorité décide de ce qui va sur la liste." },
       { title: "Gagne des tickets.", line: "Courses et achats rapportent des tickets. Les tickets débloquent des styles." },
     ],
     next: "Suivant",
-    start: "Choisir nos aliments",
+    start: "Choisir nos produits",
     skip: "Passer",
   },
   account: {
@@ -223,7 +223,7 @@ const fr: SkinCopy = {
     you: " (toi)",
     switch: "Changer de maison",
     suggested: "Revoir l'intro",
-    refine: "Affiner tes aliments",
+    refine: "Affiner tes produits",
     logout: "Se déconnecter",
     credits: "Crédits",
     creditsTitle: "Crédits",
@@ -234,7 +234,7 @@ const fr: SkinCopy = {
     delete: "Supprimer mon compte",
     deleteTitle: "Supprimer ton compte ?",
     deleteLine:
-      "C'est définitif. Tes votes, records et tickets partent aussi. Si tu es le dernier de la maison, ses aliments sont supprimés aussi.",
+      "C'est définitif. Tes votes, records et tickets partent aussi. Si tu es le dernier de la maison, ses produits sont supprimés aussi.",
     deleteKeep: "Le garder",
     deleteAction: "Le supprimer",
     qrTitle: "Invite un rival",
