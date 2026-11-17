@@ -90,7 +90,7 @@ const fr: CalmText = {
     usuallyNext: "D'habitude juste après",
     result: (bought: number, left: number) =>
       `${bought} ${bought <= 1 ? "acheté" : "achetés"}${left ? `, ${left} pour la prochaine fois` : ""}.`,
-    backToday: "Retour à l'accueil",
+    closeRun: "Terminé",
     legendBasket: "Au panier",
     howAria: "Comment ça marche",
     selectToEdit: "Sélectionne pour modifier",

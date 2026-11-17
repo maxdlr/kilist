@@ -88,11 +88,11 @@ const CalmShop = () => {
     run.snooze(food.id);
   };
 
-  const leave = () => {
+  const close = () => {
     setBasket([]);
     setLater([]);
     setResult(null);
-    run.leave();
+    run.reset();
   };
 
   if (result) {
@@ -102,7 +102,7 @@ const CalmShop = () => {
         mark="done"
         title={T.done}
         line={T.shop.result(result.bought, result.left)}
-        dock={<CButton label={T.shop.backToday} onPress={leave} />}
+        dock={<CButton label={T.shop.closeRun} onPress={close} />}
       />
     );
   }

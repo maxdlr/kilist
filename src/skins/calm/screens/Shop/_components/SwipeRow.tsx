@@ -6,7 +6,14 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CText, Dot } from "@/skins/calm/components";
@@ -79,7 +86,7 @@ const SwipeRow = ({
         </CText>
       </View>
       <Animated.View style={[styles.behind, styles.behindLater, laterStyle]}>
-        <CText weight="medium" size={skin.type.label + 1} color={C.textSoft}>
+        <CText weight="medium" size={skin.type.label + 1} color={C.text}>
           {T.shop.later}
         </CText>
       </Animated.View>

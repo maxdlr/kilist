@@ -101,15 +101,15 @@ const VersusShop = () => {
     refreshRecords();
   };
 
-  const leave = () => {
+  const close = () => {
     resetRun();
-    run.leave();
+    run.reset();
   };
 
   if (result) {
     const beat = !record || result.ms < record.ms;
     return (
-      <Screen dock={<VButton big label={V.shop.backHome} onPress={leave} />}>
+      <Screen dock={<VButton big label={V.shop.closeRun} onPress={close} />}>
         <View style={styles.centered}>
           <Kicker>{V.shop.kicker}</Kicker>
           <VText face="display" size={skin.type.display.lg} color={beat ? P.you : P.mates[0]} style={styles.centerText}>

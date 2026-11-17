@@ -102,9 +102,9 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     leave();
   };
 
-  const stop = async () => {
+  const close = async () => {
     await cancelShopList();
-    leave();
+    reset();
   };
 
   const foods = shop.foods;
@@ -190,7 +190,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     buy,
     snooze,
     start,
-    stop,
+    close,
     finish,
     discard,
     leave,

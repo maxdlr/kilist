@@ -114,7 +114,7 @@ const en = {
     notBought: "not bought yet",
     nextTime: "Next time",
     yourRecord: "your record",
-    backHome: "Back home",
+    closeRun: "Done",
     kicker: "Shopping race",
     newRecord: "New record!",
     holdsIt: (name?: string) => `${name ?? "Record"} holds it`,

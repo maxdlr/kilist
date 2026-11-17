@@ -88,7 +88,7 @@ const en = {
     usuallyNext: "Usually next",
     result: (bought: number, left: number) =>
       `${bought} bought${left ? `, ${left} left for next time` : ""}.`,
-    backToday: "Back home",
+    closeRun: "Done",
     legendBasket: "In the basket",
     howAria: "How it works",
     selectToEdit: "Select products to edit",

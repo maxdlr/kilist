@@ -37,7 +37,6 @@ const ShopList = () => {
     orderedBy,
     buy: handleBuy,
     snooze: handleSnooze,
-    stop: handleStop,
     refreshEmpty: handleRefreshEmpty,
     bought,
     handled,
@@ -132,7 +131,7 @@ const ShopList = () => {
                 height={skin.size.button.xl}
                 fontSize={skin.type.headline}
                 label={copy.doneAction}
-                onTouch={handleStop}
+                onTouch={run.close}
               />
             </Dock>
           }

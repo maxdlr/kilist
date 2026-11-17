@@ -116,7 +116,7 @@ const fr: VersusText = {
     notBought: "pas encore acheté",
     nextTime: "La prochaine fois",
     yourRecord: "ton record",
-    backHome: "Retour à l'accueil",
+    closeRun: "Terminé",
     kicker: "Course aux courses",
     newRecord: "Nouveau record !",
     holdsIt: (name?: string) => `${name ?? "Le record"} tient bon`,
