@@ -1,5 +1,7 @@
 import type { Lang } from "@/i18n";
 import type { BottomPanelLook, LevelNumber, Skin, SkinPaint, SkinThemeSource } from "@/skins/types";
+import { CUSTOM_THEME_ID } from "@/skins/customTheme";
+import { CUSTOM_NAME, customElements } from "./custom";
 
 export type GameCardButtonLook = { fill: string; border: string; ink: string };
 
@@ -15,6 +17,15 @@ export type GameCardLook = {
     haveItIcon: string;
     unsure: { idle: GameCardButtonLook; active: GameCardButtonLook };
   };
+};
+
+export type SortCardLook = {
+  fill: string;
+  border: string;
+  title: string;
+  facts: string;
+  icon: string;
+  arrow: string;
 };
 
 export type GameHeaderLook = {
@@ -53,6 +64,7 @@ type CalmBase = {
   bottomPanel: BottomPanelLook;
   gameCard: GameCardLook;
   gameHeader: GameHeaderLook;
+  sortCard: SortCardLook;
 };
 
 type EmphasisKey =
@@ -126,6 +138,14 @@ const files = require.context("./colorschemes", false, /\.ts$/);
 
 const idOf = (path: string) => path.replace(/^.*\//, "").replace(/\.ts$/, "");
 
+const themeOf = (id: string, name: Record<Lang, string>, elements: CalmElements): SkinThemeSource => ({
+  id,
+  name,
+  elements,
+  paint: paintOf(elements),
+  panel: { elements: onPanel(elements), paint: paintOf(onPanel(elements)) },
+});
+
 export const CALM_THEMES: SkinThemeSource[] = files
   .keys()
   .map((path) => ({ id: idOf(path), file: files(path) as ThemeFile }))
@@ -136,13 +156,10 @@ export const CALM_THEMES: SkinThemeSource[] = files
         ? 1
         : a.id.localeCompare(b.id),
   )
-  .map(({ id, file }) => ({
-    id,
-    name: file.name,
-    elements: file.elements,
-    paint: paintOf(file.elements),
-    panel: { elements: onPanel(file.elements), paint: paintOf(onPanel(file.elements)) },
-  }));
+  .map(({ id, file }) => themeOf(id, file.name, file.elements));
+
+export const calmCustomTheme = (color: string) =>
+  themeOf(CUSTOM_THEME_ID, CUSTOM_NAME, customElements(color));
 
 const fallback = CALM_THEMES[0];
 

@@ -55,6 +55,7 @@ const useSwipeGame = () => {
   const recap = roundRecap?.day === today ? roundRecap : undefined;
 
   const [phase, setPhase] = useState<"idle" | "play" | "done">("idle");
+  const [quit, setQuit] = useState(false);
   const [swiped, setSwiped] = useState(0);
   const [outFoods, setOutFoods] = useState<FoodType[]>([]);
   const [intent, setIntentState] = useState<SwipeDirection | null>(null);
@@ -166,7 +167,15 @@ const useSwipeGame = () => {
     heldRef.current = null;
     setCanUndo(false);
     setReturning(null);
+    setQuit(false);
     setPhase("play");
+  };
+
+  const leave = () => {
+    commitHeld();
+    setIntent(null);
+    setQuit(true);
+    setPhase("idle");
   };
 
   const collect = (reward: SwipeReward | null) => {
@@ -268,7 +277,7 @@ const useSwipeGame = () => {
         ? "loading"
         : phase === "play" && foods?.length
           ? "play"
-          : game?.playedToday
+          : game?.playedToday || quit
             ? "closed"
             : !foods?.length
               ? "empty"
@@ -295,6 +304,7 @@ const useSwipeGame = () => {
     flingRef,
     fling,
     begin,
+    leave,
     replay: () => playDeck("replay"),
     playAgain: () => playDeck("again"),
     allSorted,

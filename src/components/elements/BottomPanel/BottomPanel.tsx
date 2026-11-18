@@ -51,6 +51,7 @@ const BottomPanel = ({
   dismissible = false,
   canClose,
   tall = false,
+  veil = true,
   glass: glassOverride,
   children,
 }: {
@@ -59,6 +60,7 @@ const BottomPanel = ({
   dismissible?: boolean;
   canClose?: () => boolean;
   tall?: boolean;
+  veil?: boolean;
   glass?: Partial<GlassSettings>;
   children: ReactNode;
 }) => {
@@ -75,6 +77,7 @@ const BottomPanel = ({
   const offset = useSharedValue(SCREEN_HEIGHT);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
+  const veilOpacity = useSharedValue(veil ? 1 : 0);
   const drag = useSharedValue(0);
   const scrollY = useSharedValue(0);
   const dragFrom = useSharedValue(-1);
@@ -139,6 +142,10 @@ const BottomPanel = ({
       }),
     );
   }, [visible, offset, contentHeight, backdropOpacity, drag, closing, self]);
+
+  useEffect(() => {
+    veilOpacity.set(withTiming(veil ? 1 : 0, AnimationService.config));
+  }, [veil, veilOpacity]);
 
   const requestClose = useCallback(() => {
     if (latest.current.canClose && !latest.current.canClose()) {
@@ -220,6 +227,7 @@ const BottomPanel = ({
   const backdropStyle = useAnimatedStyle(() => ({
     opacity:
       backdropOpacity.value *
+      veilOpacity.value *
       (1 - Math.min(1, drag.value / Math.max(1, contentHeight.value))),
   }));
 

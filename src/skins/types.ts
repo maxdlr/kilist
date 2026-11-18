@@ -134,12 +134,12 @@ export interface Skin {
   size: SkinSizes;
   type: SkinType;
   copy: SkinCopy;
-  themes: { id: string; name: string }[];
+  themes: { id: string; name: string; custom?: boolean; color?: string }[];
   theme: SkinTheme | null;
   onPanel: Skin | null;
 }
 
-export type SkinTheme = { id: string; name: string; elements: unknown };
+export type SkinTheme = { id: string; name: string; elements: unknown; color?: string };
 
 export type SkinPaint = Pick<
   Skin,
@@ -162,4 +162,5 @@ export type SkinSource = Omit<Skin, "copy" | "tagline" | "themes" | "theme" | "o
   copies: Record<Lang, SkinCopy>;
   themes?: SkinThemeSource[];
   defaultTheme?: string;
+  custom?: { make: (color: string) => SkinThemeSource; initial: string; name: Record<Lang, string> };
 };

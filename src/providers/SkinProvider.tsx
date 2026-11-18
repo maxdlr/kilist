@@ -1,5 +1,6 @@
 import { DEFAULT_SKIN_ID, findSkin, Skin } from "@/skins";
-import { savedTheme, saveTheme } from "@/skins/themeChoice";
+import { CUSTOM_THEME_ID } from "@/skins/customTheme";
+import { savedColor, saveColor, savedTheme, saveTheme } from "@/skins/themeChoice";
 import axios from "@/services/axios";
 import { useLanguage } from "./LanguageProvider";
 import { UserType } from "@/types/model";
@@ -16,12 +17,16 @@ type SkinContextType = {
   skin: Skin;
   setSkin: (id: string) => Promise<boolean>;
   setTheme: (id: string) => void;
+  previewColor: (color: string | null) => void;
+  setCustomColor: (color: string) => void;
 };
 
 const SkinContext = createContext<SkinContextType>({
   skin: findSkin(DEFAULT_SKIN_ID),
   setSkin: async () => false,
   setTheme: () => {},
+  previewColor: () => {},
+  setCustomColor: () => {},
 });
 
 export const SkinProvider = ({ children }: { children: ReactNode }) => {
@@ -33,14 +38,32 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
   const { lang } = useLanguage();
 
   const [picked, setPicked] = useState<Record<string, string>>({});
+  const [colors, setColors] = useState<Record<string, string>>({});
+  const [preview, setPreview] = useState<string | null>(null);
 
   const skinId = findSkin(pendingId ?? user?.skin, lang).id;
-  const skin = findSkin(skinId, lang, picked[skinId] ?? savedTheme(skinId));
+  const skin = findSkin(
+    skinId,
+    lang,
+    preview ? CUSTOM_THEME_ID : (picked[skinId] ?? savedTheme(skinId)),
+    preview ?? colors[skinId] ?? savedColor(skinId),
+  );
 
   const setTheme = useCallback(
     (id: string) => {
       saveTheme(skinId, id);
       setPicked((current) => ({ ...current, [skinId]: id }));
+    },
+    [skinId],
+  );
+
+  const setCustomColor = useCallback(
+    (color: string) => {
+      saveColor(skinId, color);
+      saveTheme(skinId, CUSTOM_THEME_ID);
+      setColors((current) => ({ ...current, [skinId]: color }));
+      setPicked((current) => ({ ...current, [skinId]: CUSTOM_THEME_ID }));
+      setPreview(null);
     },
     [skinId],
   );
@@ -61,7 +84,10 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
     [mutate],
   );
 
-  const value = useMemo(() => ({ skin, setSkin, setTheme }), [skin, setSkin, setTheme]);
+  const value = useMemo(
+    () => ({ skin, setSkin, setTheme, previewColor: setPreview, setCustomColor }),
+    [skin, setSkin, setTheme, setCustomColor],
+  );
 
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
 };
@@ -69,7 +95,7 @@ export const SkinProvider = ({ children }: { children: ReactNode }) => {
 export const SkinOverride = ({ id, children }: { id: string; children: ReactNode }) => {
   const parent = React.useContext(SkinContext);
   const { lang } = useLanguage();
-  const value = useMemo(() => ({ ...parent, skin: findSkin(id, lang, savedTheme(id)) }), [parent, id, lang]);
+  const value = useMemo(() => ({ ...parent, skin: findSkin(id, lang, savedTheme(id), savedColor(id)) }), [parent, id, lang]);
 
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
 };

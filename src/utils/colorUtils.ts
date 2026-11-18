@@ -5,9 +5,10 @@ export const transparentColor = (hex: string, opacity: number): string => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
-type HSL = { h: number; s: number; l: number };
+export type HSL = { h: number; s: number; l: number };
+export type HSV = { h: number; s: number; v: number };
 
-const hexToHsl = (hex: string): HSL => {
+export const hexToHsl = (hex: string): HSL => {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
   const b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -40,7 +41,7 @@ const hexToHsl = (hex: string): HSL => {
   return { h, s, l };
 };
 
-const hslToHex = ({ h, s, l }: HSL): string => {
+export const hslToHex = ({ h, s, l }: HSL): string => {
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
@@ -126,4 +127,16 @@ export const generateColorGradient = (from: string, to: string): ColorScale => {
       return [step, `#${mixed.join("")}`];
     }),
   ) as ColorScale;
+};
+
+export const hsvToHex = ({ h, s, v }: HSV): string => {
+  const l = v * (1 - s / 2);
+  const sl = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
+  return hslToHex({ h: Math.min(359.999, Math.max(0, h)), s: sl, l });
+};
+
+export const hexToHsv = (hex: string): HSV => {
+  const { h, s, l } = hexToHsl(hex);
+  const v = l + s * Math.min(l, 1 - l);
+  return { h, s: v === 0 ? 0 : 2 * (1 - l / v), v };
 };

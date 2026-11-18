@@ -11,6 +11,7 @@ export const CButton = ({
   onPress,
   href,
   variant = "primary",
+  bold = false,
   accessibilityLabel,
   icon,
   small = false,
@@ -22,6 +23,7 @@ export const CButton = ({
   variant?: "primary" | "secondary" | "text" | "danger";
   accessibilityLabel?: string;
   small?: boolean;
+  bold?: boolean;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
@@ -54,7 +56,9 @@ export const CButton = ({
       {icon?.(look.ink)}
       {label && (
         <CText
-          weight={variant === "text" || small ? "regular" : "medium"}
+          weight={
+            bold ? "bold" : variant === "text" || small ? "regular" : "medium"
+          }
           size={small ? skin.type.label : skin.type.label + 1}
           color={look.ink}
           numberOfLines={1}

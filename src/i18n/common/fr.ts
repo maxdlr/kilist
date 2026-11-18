@@ -57,6 +57,12 @@ const fr: CommonText = {
   languagePhone: "Téléphone",
   languageCurrent: "actuelle",
   themeCurrent: "actuel",
+  themeCustomTitle: "Choisis une couleur",
+  themeCustomLine: "L'app change en direct.",
+  themeCustomApply: "Garder cette couleur",
+  themeCustomEdit: "Modifier la couleur",
+  themeHue: "Teinte",
+  themeShade: "Nuance",
   notifications: {
     title: "Me tenir au courant",
     menu: "Notifications",

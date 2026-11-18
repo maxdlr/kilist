@@ -1,9 +1,8 @@
-import type { Skin } from "@/skins/types";
 import BottomPanel from "@/components/elements/BottomPanel";
-import KilButton from "@/components/elements/KilButton";
-import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
+import Title from "@/components/elements/Title";
 import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
+import type { Skin } from "@/skins/types";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
@@ -32,15 +31,14 @@ const InviteQrModal = ({
           backgroundColor={skin.colors.paper}
         />
       </View>
-      <ThemedText mono size={skin.type.mono} color={skin.panel.ink} style={styles.code}>
+      <ThemedText
+        mono
+        size={skin.type.headline}
+        color={skin.panel.ink}
+        style={styles.code}
+      >
         {joinCode}
       </ThemedText>
-      <KilButton
-        height={skin.size.button.md}
-        fontSize={skin.type.lead}
-        label={skin.copy.common.close}
-        onTouch={onClose}
-      />
     </BottomPanel>
   );
 };
@@ -50,6 +48,7 @@ const createStyles = (s: Skin) =>
     qr: {
       alignSelf: "center",
       padding: s.spacing.inline,
+      borderRadius: 10,
     },
     code: {
       textAlign: "center",

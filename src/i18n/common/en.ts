@@ -54,6 +54,12 @@ const en = {
   languagePhone: "Phone",
   languageCurrent: "current",
   themeCurrent: "current",
+  themeCustomTitle: "Pick a color",
+  themeCustomLine: "The app changes as you go.",
+  themeCustomApply: "Use this color",
+  themeCustomEdit: "Edit color",
+  themeHue: "Hue",
+  themeShade: "Shade",
   notifications: {
     title: "Keep me posted",
     menu: "Notifications",

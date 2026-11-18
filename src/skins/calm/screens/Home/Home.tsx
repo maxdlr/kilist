@@ -14,11 +14,22 @@ import { useCallback, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import AddFoodPanel from "@/components/features/Inventory/AddFoodPanel";
-import { CartIcon, ClockIcon, NavArrowRightIcon, PlayIcon, SparksIcon } from "@/components/icons";
+import {
+  ArcadeIcon,
+  CartIcon,
+  ClockIcon,
+  NavArrowRightIcon,
+  SparksIcon,
+} from "@/components/icons";
 import useSWR from "swr";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, GlassScrollView, Screen } from "@/skins/calm/components";
+import {
+  CButton,
+  CText,
+  GlassScrollView,
+  Screen,
+} from "@/skins/calm/components";
 import { StockBars } from "./_components/StockBars";
 import useCheckPending from "@/skins/calm/hooks/useCheckPending";
 import { CalmError, CalmLoading } from "../States";
@@ -45,7 +56,10 @@ const CalmHome = () => {
   const { count: toCheck, pending } = useCheckPending();
   const links = useHomeLinks();
   const [adding, setAdding] = useState(false);
-  const shortcuts = useHomeShortcuts({ withNotice: true, onAdd: () => setAdding(true) });
+  const shortcuts = useHomeShortcuts({
+    withNotice: true,
+    onAdd: () => setAdding(true),
+  });
   const range = useBuyRange();
 
   useFocusEffect(
@@ -72,7 +86,11 @@ const CalmHome = () => {
   const sentence = `${names.join(", ")}${needed.length > PREVIEW ? "…" : "."}`;
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior="padding" automaticOffset>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior="padding"
+      automaticOffset
+    >
       <Screen
         padded={false}
         glass
@@ -123,11 +141,7 @@ const CalmHome = () => {
                   count: range.low,
                   color: skin.colors.levels[1],
                   icon: (
-                    <CartIcon
-                      size={18}
-                      color={C.positive}
-                      strokeWidth={1.8}
-                    />
+                    <CartIcon size={18} color={C.positive} strokeWidth={1.8} />
                   ),
                 },
               ]}
@@ -141,35 +155,47 @@ const CalmHome = () => {
               onPress={() => router.navigate("/swipe")}
               style={withPressed(styles.card)}
             >
-              <PlayIcon
+              <ArcadeIcon
                 size={skin.size.icon.action + 2}
-                color={C.positive}
+                color={C.sortCard.icon}
                 strokeWidth={1.8}
               />
               <View style={styles.cardText}>
-                <CText weight="medium" size={skin.type.body}>
+                <CText
+                  weight="medium"
+                  size={skin.type.body}
+                  color={C.sortCard.title}
+                >
                   {T.home.toCheck(toCheck)}
                 </CText>
                 <View style={styles.cardFacts}>
                   <View style={styles.fact}>
-                    <ClockIcon size={14} color={C.textSoft} strokeWidth={1.8} />
-                    <CText size={skin.type.label} color={C.textSoft}>
+                    <ClockIcon
+                      size={14}
+                      color={C.sortCard.facts}
+                      strokeWidth={1.8}
+                    />
+                    <CText size={skin.type.label} color={C.sortCard.facts}>
                       {T.home.sortTime}
                     </CText>
                   </View>
                   <View style={styles.fact}>
                     <SparksIcon
                       size={14}
-                      color={C.textSoft}
+                      color={C.sortCard.facts}
                       strokeWidth={1.8}
                     />
-                    <CText size={skin.type.label} color={C.textSoft}>
+                    <CText size={skin.type.label} color={C.sortCard.facts}>
                       {T.home.sortPoints(toCheck * rules().tickets.perSwipe)}
                     </CText>
                   </View>
                 </View>
               </View>
-              <NavArrowRightIcon size={18} color={C.textFaint} strokeWidth={2} />
+              <NavArrowRightIcon
+                size={18}
+                color={C.sortCard.arrow}
+                strokeWidth={2}
+              />
             </Press>
           )}
 
@@ -194,6 +220,7 @@ const CalmHome = () => {
                   {links.prizesTitle}
                 </CText>
                 <CButton
+                  bold
                   small
                   label={links.discoverLabel}
                   onPress={links.openPrizes}
@@ -256,8 +283,8 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     onList: { gap: s.spacing.inline },
     card: {
       alignItems: "center",
-      backgroundColor: C.card,
-      borderColor: C.line,
+      backgroundColor: C.sortCard.fill,
+      borderColor: C.sortCard.border,
       borderRadius: s.shape.radius + 2,
       borderWidth: s.shape.border,
       flexDirection: "row",

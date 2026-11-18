@@ -5,7 +5,6 @@ import { SwipeGame } from "@/hooks/screens/useSwipeGame";
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
-import goBack from "@/utils/goBack";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -61,7 +60,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
                   accessibilityRole="button"
                   accessibilityLabel={T.close}
                   hitSlop={skin.spacing.small}
-                  onPress={goBack}
+                  onPress={game.leave}
                   style={withPressed(styles.close)}
                 >
                   <XmarkIcon

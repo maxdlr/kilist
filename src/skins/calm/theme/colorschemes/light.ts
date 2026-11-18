@@ -80,6 +80,14 @@ export const elements: CalmElements = {
     hint: { out: colors.ink, unsure: colors.stone700, haveIt: colors.sage700 },
     progress: { track: colors.stone200, fill: colors.ink, height: 2 },
   },
+  sortCard: {
+    fill: colors.white,
+    border: colors.stone200,
+    title: colors.ink,
+    facts: colors.stone700,
+    icon: colors.sage700,
+    arrow: colors.stone500,
+  },
   bottomPanel: {
     glassSettings: {
       enabled: true,
