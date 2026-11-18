@@ -316,3 +316,25 @@ export const nextSuggestion = (
     }) ?? null
   );
 };
+
+export type PartnerAnswer = { name: string; isInStock: boolean | null };
+
+export const partnerAnswersToday = (
+  food: Pick<LocalFood, "histories">,
+  members: { id: number; username: string }[],
+  myId: number,
+  now: number,
+  tzOffset: number,
+): PartnerAnswer[] => {
+  const today = toLocalDay(new Date(now), tzOffset);
+  const latest = new Map<number, HistoryEntry>();
+  for (const entry of food.histories) {
+    if (!entry.by || entry.by === myId || toLocalDay(entry.at, tzOffset) !== today) continue;
+    const seen = latest.get(entry.by);
+    if (!seen || time(entry.at) >= time(seen.at)) latest.set(entry.by, entry);
+  }
+  return members
+    .filter((member) => latest.has(member.id))
+    .map((member) => ({ name: member.username, isInStock: latest.get(member.id)!.isInStock }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+};

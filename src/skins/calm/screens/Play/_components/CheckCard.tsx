@@ -9,6 +9,7 @@ import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { useDeckCardLook } from "@/skins/calm/components/deckCard";
 import { CardPads, CText } from "@/skins/calm/components";
+import usePartnerAnswers from "@/hooks/usePartnerAnswers";
 
 const CheckCard = ({
   food,
@@ -27,6 +28,7 @@ const CheckCard = ({
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const look = useDeckCardLook(behind);
+  const partners = usePartnerAnswers(food.id);
   return (
     <View style={styles.cardSlot}>
       <Animated.View style={[styles.card, look.cardStyle]}>
@@ -50,6 +52,16 @@ const CheckCard = ({
               >
                 {T.play.question}
               </CText>
+              {partners.length > 0 && (
+                <CText
+                  size={skin.type.label}
+                  color={C.gameCard.question}
+                  style={[styles.center, styles.partners]}
+                  accessibilityLiveRegion="polite"
+                >
+                  {partners.map((partner) => T.play.partnerSaid(partner.name, partner.isInStock)).join(" · ")}
+                </CText>
+              )}
             </View>
           </View>
           <CardPads intent={intent} labels={labels} onFling={onFling} />
@@ -62,6 +74,7 @@ const CheckCard = ({
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
     center: { textAlign: "center" },
+    partners: { opacity: 0.8 },
     cardSlot: {
       flex: 1,
       paddingHorizontal: s.spacing.gutter,

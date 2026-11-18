@@ -1,7 +1,7 @@
 import type { Rules } from "./rules";
 import type { AisleType, EaterProfileType, FoodBankItemType, HouseholdWithMembersType, ListType, UserType } from "@/types/model";
 
-export type HistoryEntry = { isInStock: boolean | null; at: string };
+export type HistoryEntry = { isInStock: boolean | null; at: string; by?: number | null };
 
 export type LocalFood = {
   id: number;

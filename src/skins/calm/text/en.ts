@@ -49,6 +49,8 @@ const en = {
   stock: { sure: "To buy", maybe: "Maybe", stocked: "In stock" },
   play: {
     question: "Do you still have some?",
+    partnerSaid: (name: string, isInStock: boolean | null) =>
+      `${name}: ${isInStock === null ? "not sure" : isInStock ? "still some" : "none left"}`,
     position: (at: number, total: number) => `${at} of ${total}`,
     showLabels: "Show button labels",
     undo: "Undo the last card",

@@ -50,6 +50,8 @@ const fr: CalmText = {
   stock: { sure: "À acheter", maybe: "Peut-être", stocked: "En stock" },
   play: {
     question: "Il t'en reste ?",
+    partnerSaid: (name: string, isInStock: boolean | null) =>
+      `${name} : ${isInStock === null ? "pas sûr·e" : isInStock ? "il en reste" : "plus rien"}`,
     position: (at: number, total: number) => `${at} sur ${total}`,
     showLabels: "Afficher le nom des boutons",
     undo: "Annuler la dernière carte",
