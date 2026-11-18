@@ -38,7 +38,7 @@ const NewsScreen = () => {
                 describeNewsUrl(news.url),
               ].join(" · ")
             }
-            value={news.status === "sent" ? `${news.delivered} sent` : undefined}
+            value={news.status === "sent" ? `${news.delivered} sent\n${news.engagement.opened} opened` : undefined}
             onPress={news.status === "sending" ? undefined : () => open(news)}
           />
         ))}

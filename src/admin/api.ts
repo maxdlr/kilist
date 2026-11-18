@@ -247,6 +247,7 @@ export type AdminNews = {
   sentAt: string | null;
   delivered: number;
   failed: number;
+  engagement: { opened: number; pushOpens: number; cardOpens: number; closed: number };
   author: { id: number; username: string } | null;
 };
 

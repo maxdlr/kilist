@@ -7,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { AppState } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { openNewsUrl } from "./actions";
+import { reportNewsEvent } from "./newsEvents";
 import {
   configureNotifications,
   onPermissionGranted,
@@ -19,8 +20,10 @@ const NO_PLAYS: string[] = [];
 const playedAt = () => getState()?.playedAt ?? NO_PLAYS;
 
 const openFrom = (response: Notifications.NotificationResponse | null) => {
-  const url = response?.notification.request.content.data?.url;
-  if (typeof url === "string") openNewsUrl(url);
+  const data = response?.notification.request.content.data;
+  const newsId = Number(data?.newsId);
+  if (Number.isInteger(newsId) && newsId > 0) reportNewsEvent(newsId, "push_open");
+  if (typeof data?.url === "string") openNewsUrl(data.url);
 };
 
 const NotificationsBridge = () => {

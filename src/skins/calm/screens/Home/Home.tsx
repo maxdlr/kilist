@@ -33,6 +33,7 @@ import {
   GlassScrollView,
   Screen,
 } from "@/skins/calm/components";
+import { NewsSlide } from "./_components/NewsSlide";
 import { StockBars } from "./_components/StockBars";
 import useCheckPending from "@/skins/calm/hooks/useCheckPending";
 import { CalmError, CalmLoading } from "../States";
@@ -152,47 +153,49 @@ const CalmHome = () => {
             />
           )}
 
-          {news && (
-            <View style={styles.news}>
-              <Press
-                accessibilityRole={news.url ? "button" : undefined}
-                accessibilityLabel={`${common.news.label}. ${news.title}. ${news.body}`}
-                disabled={!news.url}
-                onPress={openNews}
-                style={withPressed(styles.newsMain)}
-              >
-                <SparksIcon
-                  size={skin.size.icon.action + 2}
-                  color={C.newsCard.icon}
-                  strokeWidth={1.8}
-                />
-                <View style={styles.cardText}>
-                  <CText weight="medium" size={skin.type.body} color={C.newsCard.title}>
-                    {news.title}
-                  </CText>
-                  <CText size={skin.type.label} color={C.newsCard.body}>
-                    {news.body}
-                  </CText>
-                </View>
-                {news.url && (
-                  <NavArrowRightIcon size={18} color={C.newsCard.close} strokeWidth={2} />
-                )}
-              </Press>
-              <Press
-                accessibilityRole="button"
-                accessibilityLabel={common.news.dismiss}
-                hitSlop={skin.spacing.small}
-                onPress={dismissNews}
-                style={withPressed(styles.newsClose)}
-              >
-                <XmarkIcon
-                  size={skin.size.icon.action - 4}
-                  color={C.newsCard.close}
-                  strokeWidth={1.8}
-                />
-              </Press>
-            </View>
-          )}
+          <NewsSlide news={news} gap={skin.spacing.section + 4}>
+            {(news) => (
+              <View style={styles.news}>
+                <Press
+                  accessibilityRole={news.url ? "button" : undefined}
+                  accessibilityLabel={`${common.news.label}. ${news.title}. ${news.body}`}
+                  disabled={!news.url}
+                  onPress={openNews}
+                  style={withPressed(styles.newsMain)}
+                >
+                  <SparksIcon
+                    size={skin.size.icon.action + 2}
+                    color={C.newsCard.icon}
+                    strokeWidth={1.8}
+                  />
+                  <View style={styles.cardText}>
+                    <CText weight="medium" size={skin.type.body} color={C.newsCard.title}>
+                      {news.title}
+                    </CText>
+                    <CText size={skin.type.label} color={C.newsCard.body}>
+                      {news.body}
+                    </CText>
+                  </View>
+                  {news.url && (
+                    <NavArrowRightIcon size={18} color={C.newsCard.close} strokeWidth={2} />
+                  )}
+                </Press>
+                <Press
+                  accessibilityRole="button"
+                  accessibilityLabel={common.news.dismiss}
+                  hitSlop={skin.spacing.small}
+                  onPress={dismissNews}
+                  style={withPressed(styles.newsClose)}
+                >
+                  <XmarkIcon
+                    size={skin.size.icon.action - 4}
+                    color={C.newsCard.close}
+                    strokeWidth={1.8}
+                  />
+                </Press>
+              </View>
+                      )}
+          </NewsSlide>
 
           {pending && (
             <Press

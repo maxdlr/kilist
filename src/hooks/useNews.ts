@@ -2,6 +2,7 @@ import db from "@/offline/db";
 import { useLanguage } from "@/providers/LanguageProvider";
 import axios from "@/services/axios";
 import { openNewsUrl } from "@/notifications/actions";
+import { reportNewsEvent } from "@/notifications/newsEvents";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { AppState } from "react-native";
@@ -80,17 +81,24 @@ const useNews = () => {
     }, []),
   );
 
-  const dismiss = () => {
+  const hide = () => {
     if (!news) return;
     const next = [news.id, ...state.dismissed].slice(0, KEEP_DISMISSED);
     db.saveValue(KEY_DISMISSED, next);
     setState({ dismissed: next });
   };
 
+  const dismiss = () => {
+    if (!news) return;
+    reportNewsEvent(news.id, "card_close");
+    hide();
+  };
+
   const open = () => {
     if (!news?.url) return;
     const url = news.url;
-    dismiss();
+    reportNewsEvent(news.id, "card_open");
+    hide();
     openNewsUrl(url);
   };
 

@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import { describeNewsUrl, isWebUrl, NEWS_VIEWS, newsUrl, parseNewsUrl, WEB_LINK } from "../actions";
 
 vi.mock("react-native", () => ({ Linking: { openURL: vi.fn() } }));
 vi.mock("expo-router", () => ({ router: { navigate: vi.fn() } }));
-
-import { describeNewsUrl, isWebUrl, NEWS_VIEWS, newsUrl, parseNewsUrl, WEB_LINK } from "../actions";
 
 const API_PATTERN = /^\/[A-Za-z0-9_\-/]*(\?[A-Za-z0-9_\-=&]*)?$/;
 

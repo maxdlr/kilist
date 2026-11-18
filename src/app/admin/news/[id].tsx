@@ -45,6 +45,22 @@ const PastNews = ({ news }: { news: AdminNews }) => {
         <ARow label="Action" value={describeNewsUrl(news.url)} />
         {news.author && <ARow label="By" value={news.author.username} />}
       </ASection>
+      <ASection
+        title="Who took the bait"
+        note="Counted once per phone. Home card opens don't need the push, so they can outnumber phones reached."
+      >
+        <ARow first label="Opened" value={String(news.engagement.opened)} />
+        <ARow
+          label="From the push"
+          value={
+            news.delivered > 0
+              ? `${news.engagement.pushOpens} (${Math.round((news.engagement.pushOpens / news.delivered) * 100)}% of phones reached)`
+              : String(news.engagement.pushOpens)
+          }
+        />
+        <ARow label="From the Home card" value={String(news.engagement.cardOpens)} />
+        <ARow label="Closed without opening" value={String(news.engagement.closed)} />
+      </ASection>
       {LANGS.map((lang) => {
         const title = news[lang.title];
         const body = news[lang.body];
