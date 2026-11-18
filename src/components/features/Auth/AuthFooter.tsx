@@ -1,5 +1,5 @@
 import Dock from "@/components/elements/Dock";
-import { GlassLayer, glassWith } from "@/components/elements/Glass";
+import { DEFAULT_SCENE_GLASS, FeatheredGlass } from "@/components/elements/Glass";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/elements/ThemedText";
 import type { AuthFlow } from "@/hooks/screens/useAuthFlow";
@@ -12,7 +12,6 @@ import { router } from "expo-router";
 import { Fragment } from "react";
 import { type LayoutChangeEvent, StyleSheet, View } from "react-native";
 import useKeyboardOpen from "@/hooks/useKeyboardOpen";
-import { AUTH_FOOTER_GLASS } from "./authLook";
 
 type Link = { label: string; onTouch: () => void };
 
@@ -44,7 +43,7 @@ const AuthFooter = ({
 
   return (
     <View style={styles.footer} onLayout={onLayout}>
-      <GlassLayer target={target} settings={glassWith(AUTH_FOOTER_GLASS)} veil={pageFill} />
+      {flow.isSignup && <FeatheredGlass target={target} look={DEFAULT_SCENE_GLASS} veil={pageFill} />}
       <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
         <KilButton
           height={skin.size.button.lg}

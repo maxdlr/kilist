@@ -20,7 +20,10 @@ import {
   ClockIcon,
   NavArrowRightIcon,
   SparksIcon,
+  XmarkIcon,
 } from "@/components/icons";
+import common from "@/i18n/common";
+import useNews from "@/hooks/useNews";
 import useSWR from "swr";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
@@ -61,6 +64,7 @@ const CalmHome = () => {
     onAdd: () => setAdding(true),
   });
   const range = useBuyRange();
+  const { news, open: openNews, dismiss: dismissNews } = useNews();
 
   useFocusEffect(
     useCallback(() => {
@@ -146,6 +150,48 @@ const CalmHome = () => {
                 },
               ]}
             />
+          )}
+
+          {news && (
+            <View style={styles.news}>
+              <Press
+                accessibilityRole={news.url ? "button" : undefined}
+                accessibilityLabel={`${common.news.label}. ${news.title}. ${news.body}`}
+                disabled={!news.url}
+                onPress={openNews}
+                style={withPressed(styles.newsMain)}
+              >
+                <SparksIcon
+                  size={skin.size.icon.action + 2}
+                  color={C.newsCard.icon}
+                  strokeWidth={1.8}
+                />
+                <View style={styles.cardText}>
+                  <CText weight="medium" size={skin.type.body} color={C.newsCard.title}>
+                    {news.title}
+                  </CText>
+                  <CText size={skin.type.label} color={C.newsCard.body}>
+                    {news.body}
+                  </CText>
+                </View>
+                {news.url && (
+                  <NavArrowRightIcon size={18} color={C.newsCard.close} strokeWidth={2} />
+                )}
+              </Press>
+              <Press
+                accessibilityRole="button"
+                accessibilityLabel={common.news.dismiss}
+                hitSlop={skin.spacing.small}
+                onPress={dismissNews}
+                style={withPressed(styles.newsClose)}
+              >
+                <XmarkIcon
+                  size={skin.size.icon.action - 4}
+                  color={C.newsCard.close}
+                  strokeWidth={1.8}
+                />
+              </Press>
+            </View>
           )}
 
           {pending && (
@@ -292,6 +338,28 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       padding: s.spacing.stack,
     },
     cardText: { flex: 1, gap: s.spacing.hair, minWidth: 0 },
+    news: {
+      backgroundColor: C.newsCard.fill,
+      borderColor: C.newsCard.border,
+      borderRadius: s.shape.radius + 2,
+      borderWidth: s.shape.border,
+    },
+    newsMain: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      padding: s.spacing.stack,
+      paddingRight: s.spacing.stack + s.size.button.xs,
+    },
+    newsClose: {
+      alignItems: "center",
+      height: s.size.button.xs,
+      justifyContent: "center",
+      position: "absolute",
+      right: s.spacing.tight,
+      top: s.spacing.tight,
+      width: s.size.button.xs,
+    },
     cardFacts: { flexDirection: "row", gap: s.spacing.inline },
     fact: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight },
     prizes: {

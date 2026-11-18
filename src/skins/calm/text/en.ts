@@ -30,6 +30,7 @@ const en = {
   tryAgain: "Try again",
   errorTitle: "Couldn't connect.",
   errorLine: "Check your connection and try again. Nothing was lost.",
+  tabNews: (tab: string) => `${tab}, there is news`,
   tabWaiting: (tab: string) => `${tab}, a sort is waiting`,
   intent: { left: "Need it", up: "Not sure", right: "Have it" },
   home: {

@@ -229,3 +229,46 @@ export const useAdminCall = () => {
 
   return { call, busy };
 };
+
+export type AdminNewsStatus = "draft" | "scheduled" | "sending" | "sent" | "failed" | "cancelled";
+
+export const EDITABLE_NEWS: AdminNewsStatus[] = ["draft", "scheduled"];
+
+export type AdminNews = {
+  id: number;
+  titleEn: string;
+  bodyEn: string;
+  titleFr: string;
+  bodyFr: string;
+  url: string | null;
+  langs: string[];
+  sendAt: string;
+  status: AdminNewsStatus;
+  sentAt: string | null;
+  delivered: number;
+  failed: number;
+  author: { id: number; username: string } | null;
+};
+
+export const newsName = (news: Pick<AdminNews, "titleEn" | "titleFr">) => news.titleEn || news.titleFr || "Untitled";
+
+const NEWS_STATUS: Record<AdminNewsStatus, string> = {
+  draft: "Draft",
+  scheduled: "Scheduled",
+  sending: "Sending",
+  sent: "Sent",
+  failed: "Failed",
+  cancelled: "Cancelled",
+};
+
+export const newsStatus = (news: Pick<AdminNews, "status" | "sentAt">) =>
+  news.status === "cancelled" && news.sentAt ? "Hidden" : NEWS_STATUS[news.status];
+
+export const newsDate = (value: string) =>
+  new Date(value).toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });

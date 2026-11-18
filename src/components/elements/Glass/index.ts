@@ -1,3 +1,4 @@
+export { default as FeatheredGlass } from "./FeatheredGlass";
 export { default as GlassBlur } from "./GlassBlur";
 export { default as GlassLayer } from "./GlassLayer";
 export {

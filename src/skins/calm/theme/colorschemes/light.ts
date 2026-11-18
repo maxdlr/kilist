@@ -80,6 +80,14 @@ export const elements: CalmElements = {
     hint: { out: colors.ink, unsure: colors.stone700, haveIt: colors.sage700 },
     progress: { track: colors.stone200, fill: colors.ink, height: 2 },
   },
+  newsCard: {
+    fill: colors.stone100,
+    border: colors.stone300,
+    title: colors.ink,
+    body: colors.stone700,
+    icon: colors.sage700,
+    close: colors.stone500,
+  },
   sortCard: {
     fill: colors.white,
     border: colors.stone200,

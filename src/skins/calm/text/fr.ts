@@ -31,6 +31,7 @@ const fr: CalmText = {
   tryAgain: "Réessayer",
   errorTitle: "Connexion impossible.",
   errorLine: "Vérifie ta connexion et réessaie. Rien n'est perdu.",
+  tabNews: (tab: string) => `${tab}, une nouveauté t'attend`,
   tabWaiting: (tab: string) => `${tab}, un tri attend`,
   intent: { left: "Il en faut", up: "Je ne sais pas", right: "J'en ai" },
   home: {

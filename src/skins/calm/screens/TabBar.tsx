@@ -30,6 +30,7 @@ import { calmColors, useCalmColors } from "../theme/useCalmColors";
 import { CText, Dot, GlassBackdrop, glassTargetKey } from "../components";
 import DockHost from "../components/DockHost";
 import useCheckPending from "../hooks/useCheckPending";
+import { useNewsRefresh, useUnreadNews } from "@/hooks/useNews";
 
 const ORDER = MAIN_TABS;
 
@@ -50,6 +51,8 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const insets = useSafeAreaInsets();
   const { isHidden, glassTarget, glassDockHeight, glassLook } = useTabBarVisibility();
   const { pending } = useCheckPending();
+  const unreadNews = useUnreadNews();
+  useNewsRefresh(state.index);
   const fullHeight = skin.size.tabBar + insets.bottom;
   const height = useSharedValue(fullHeight);
 
@@ -83,7 +86,9 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
           const label = skin.copy.tabs[name];
           if (!label) return null;
           const isCurrent = currentName === route.name;
-          const badge = name === "swipe" && pending && !isCurrent;
+          const sortWaiting = name === "swipe" && pending;
+          const newsWaiting = name === "index" && unreadNews !== null;
+          const badge = (sortWaiting || newsWaiting) && !isCurrent;
           const icons = ICONS[name] ?? ICONS.index!;
           const TabIcon = isCurrent ? icons.selected : icons.idle;
 
@@ -91,7 +96,9 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
             <Press
               key={route.key}
               accessibilityRole="tab"
-              accessibilityLabel={badge ? T.tabWaiting(label) : label}
+              accessibilityLabel={
+                !badge ? label : newsWaiting ? T.tabNews(label) : T.tabWaiting(label)
+              }
               accessibilityState={{ selected: isCurrent }}
               onPress={() => {
                 const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });

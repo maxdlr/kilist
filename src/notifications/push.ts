@@ -1,5 +1,7 @@
 import common from "@/i18n/common";
 import db from "@/offline/db";
+import { getLang } from "@/i18n";
+import { installId } from "@/offline/stats";
 import axios from "@/services/axios";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
@@ -61,6 +63,18 @@ export const registerPushToken = async () => {
   if (!(await Notifications.getPermissionsAsync()).granted) return false;
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: projectId() });
   await axios.post("/me/push-token", { token, platform: Platform.OS }, { network: true } as object);
+  db.saveValue(KEY_TOKEN, token);
+  return true;
+};
+
+export const registerGuestPushToken = async (news: boolean) => {
+  if (!(await Notifications.getPermissionsAsync()).granted) return false;
+  const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: projectId() });
+  await axios.post(
+    "/devices/push-token",
+    { installId: installId(), token, platform: Platform.OS, lang: getLang(), news },
+    { network: true } as object,
+  );
   db.saveValue(KEY_TOKEN, token);
   return true;
 };

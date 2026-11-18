@@ -9,19 +9,23 @@ import Title from "@/components/elements/Title";
 import { HouseholdChoice } from "@/providers/AuthProvider";
 import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
-import { useState } from "react";
+import { type MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { QrCodeIcon } from "@/components/icons";
 
 const SWAP_DURATION = 200;
 
+type CloseGuard = MutableRefObject<() => boolean>;
+
 const SwitchHouseholdForm = ({
   onSubmit,
   onClose,
+  guardRef,
 }: {
   onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
   onClose: () => void;
+  guardRef: CloseGuard;
 }) => {
   const skin = usePanelSkin();
   const styles = useSkinStyles(createStyles);
@@ -33,6 +37,16 @@ const SwitchHouseholdForm = ({
   const [joinCode, setJoinCode] = useState("");
   const [householdName, setHouseholdName] = useState("");
   const [showScanner, setShowScanner] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const isDirty = joinCode.trim() !== "" || householdName.trim() !== "";
+
+  useEffect(() => {
+    guardRef.current = () => {
+      if (!isDirty || confirming) return true;
+      setConfirming(true);
+      return false;
+    };
+  }, [guardRef, isDirty, confirming]);
 
   const handleSubmit = async () => {
     if (choice === "join") {
@@ -108,6 +122,33 @@ const SwitchHouseholdForm = ({
     );
   };
 
+  if (confirming) {
+    return (
+      <>
+        <Title size={skin.type.headline} lines={3} color={skin.panel.title}>
+          {skin.copy.inventory.discardTitle}
+        </Title>
+        <View style={styles.actions}>
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            variant={skin.panel.secondary}
+            label={skin.copy.inventory.discardLeave}
+            onTouch={onClose}
+          />
+          <KilButton
+            flex={1}
+            height={skin.size.button.md}
+            fontSize={skin.type.lead}
+            label={skin.copy.inventory.discardKeep}
+            onTouch={() => setConfirming(false)}
+          />
+        </View>
+      </>
+    );
+  }
+
   return (
     <>
       <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
@@ -131,14 +172,6 @@ const SwitchHouseholdForm = ({
           flex={1}
           height={skin.size.button.md}
           fontSize={skin.type.lead}
-          variant={skin.panel.secondary}
-          label={skin.copy.common.cancel}
-          onTouch={onClose}
-        />
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
           label={copy.switchAction}
           onTouch={handleSubmit}
         />
@@ -155,11 +188,16 @@ const SwitchHouseholdModal = ({
   visible: boolean;
   onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
   onClose: () => void;
-}) => (
-  <BottomPanel visible={visible} onClose={onClose}>
-    <SwitchHouseholdForm onSubmit={onSubmit} onClose={onClose} />
-  </BottomPanel>
-);
+}) => {
+  const guardRef = useRef(() => true);
+  const canClose = useCallback(() => guardRef.current(), []);
+
+  return (
+    <BottomPanel visible={visible} onClose={onClose} dismissible canClose={canClose}>
+      <SwitchHouseholdForm onSubmit={onSubmit} onClose={onClose} guardRef={guardRef} />
+    </BottomPanel>
+  );
+};
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({

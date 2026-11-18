@@ -19,6 +19,15 @@ export type GameCardLook = {
   };
 };
 
+export type NewsCardLook = {
+  fill: string;
+  border: string;
+  title: string;
+  body: string;
+  icon: string;
+  close: string;
+};
+
 export type SortCardLook = {
   fill: string;
   border: string;
@@ -64,6 +73,7 @@ type CalmBase = {
   bottomPanel: BottomPanelLook;
   gameCard: GameCardLook;
   gameHeader: GameHeaderLook;
+  newsCard: NewsCardLook;
   sortCard: SortCardLook;
 };
 

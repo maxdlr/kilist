@@ -63,6 +63,10 @@ const fr: CommonText = {
   themeCustomEdit: "Modifier la couleur",
   themeHue: "Teinte",
   themeShade: "Nuance",
+  news: {
+    dismiss: "Masquer cette nouveauté",
+    label: "Nouveauté",
+  },
   notifications: {
     title: "Me tenir au courant",
     menu: "Notifications",

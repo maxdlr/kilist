@@ -36,6 +36,7 @@ const DRAG_START = 12;
 const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
+const BOTTOM_ROOM = 32;
 
 const handoff: { owner: object | null; until: number } = {
   owner: null,
@@ -273,7 +274,7 @@ const BottomPanel = ({
         onLayout={handleContentLayout}
         style={[
           styles.content,
-          { paddingBottom: skin.spacing.section + insets.bottom },
+          { paddingBottom: skin.spacing.section + insets.bottom + BOTTOM_ROOM },
           tall && { maxHeight: WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top },
           {
             borderColor: "transparent",

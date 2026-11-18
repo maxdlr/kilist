@@ -7,6 +7,7 @@ import useTickets from "@/providers/TicketsProvider";
 import useToast from "@/providers/ToastProvider";
 import { LANGUAGE_NAMES } from "@/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { ACCOUNT_LINK_PANELS } from "@/notifications/actions";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Linking, Share } from "react-native";
@@ -43,6 +44,9 @@ const useAccount = () => {
   if (requestedPanel !== handledPanel) {
     setHandledPanel(requestedPanel);
     if (requestedPanel === "emailCode" && needsEmailCode) setPanel("emailCode");
+    if ((ACCOUNT_LINK_PANELS as readonly string[]).includes(requestedPanel ?? "")) {
+      setPanel(requestedPanel as AccountPanel);
+    }
   }
 
   useEffect(() => {

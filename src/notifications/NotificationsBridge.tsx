@@ -3,23 +3,35 @@ import { choiceOf } from "@/offline/notifications";
 import { getState, subscribeStore } from "@/offline/store";
 import useAuth from "@/providers/AuthProvider";
 import * as Notifications from "expo-notifications";
-import { router } from "expo-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { AppState } from "react-native";
-import { configureNotifications, onPermissionGranted, registerPushToken, scheduleReminders } from "./push";
+import { useLanguage } from "@/providers/LanguageProvider";
+import { openNewsUrl } from "./actions";
+import {
+  configureNotifications,
+  onPermissionGranted,
+  registerGuestPushToken,
+  registerPushToken,
+  scheduleReminders,
+} from "./push";
 
 const NO_PLAYS: string[] = [];
 const playedAt = () => getState()?.playedAt ?? NO_PLAYS;
 
 const openFrom = (response: Notifications.NotificationResponse | null) => {
   const url = response?.notification.request.content.data?.url;
-  if (typeof url === "string" && url.startsWith("/")) router.push(url as never);
+  if (typeof url === "string") openNewsUrl(url);
 };
 
 const NotificationsBridge = () => {
   const { user, isGuest } = useAuth();
   const plays = useSyncExternalStore(subscribeStore, playedAt, playedAt);
-  const reminderEvent = getCatalog()?.notifications?.events.find((event) => event.id === "dailyReminder");
+  const events = getCatalog()?.notifications?.events;
+  const reminderEvent = events?.find((event) => event.id === "dailyReminder");
+  const newsEvent = events?.find((event) => event.id === "productNews");
+  const newsChoice = newsEvent && user ? choiceOf(user.notifications, newsEvent, isGuest) : "none";
+  const news = newsChoice === "push" || newsChoice === "both";
+  const { lang } = useLanguage();
   const reminderChoice = reminderEvent && user ? choiceOf(user.notifications, reminderEvent, isGuest) : "none";
   const remind = reminderChoice === "push" || reminderChoice === "both";
   const lastPlay = plays[plays.length - 1] ?? "";
@@ -41,9 +53,9 @@ const NotificationsBridge = () => {
   }, []);
 
   useEffect(() => {
-    if (userId === undefined || isGuest) return;
-    registerPushToken().catch(() => {});
-  }, [userId, isGuest, refresh]);
+    if (userId === undefined) return;
+    (isGuest ? registerGuestPushToken(news) : registerPushToken()).catch(() => {});
+  }, [userId, isGuest, news, lang, refresh]);
 
   useEffect(() => {
     if (userId === undefined) return;

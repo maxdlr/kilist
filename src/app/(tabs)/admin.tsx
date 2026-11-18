@@ -49,6 +49,7 @@ const AdminHome = () => {
       </ASection>
       <ASection title="Tools">
         <ARow first label="Emails" value="Templates, history" href="/admin/emails" left={<Icon d="M3 6h18v12H3zM3 7l9 6 9-6" />} />
+        <ARow label="News" value="Push and Home card" href="/admin/news" left={<Icon d="M4 10v4h3l5 4V6L7 10zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12" />} />
         <ARow label="Jobs and action log" href="/admin/jobs" left={<Icon d="M14 6l4 4M4 20l9-9M13 5l6 6-3 3-6-6z" />} />
       </ASection>
       <View />

@@ -45,7 +45,7 @@ const uuid = () =>
     return (char === "x" ? random : (random & 0x3) | 0x8).toString(16);
   });
 
-const installId = () => {
+export const installId = () => {
   const saved = loadValue<string>(KEY_INSTALL);
   if (saved) return saved;
   const id = uuid();

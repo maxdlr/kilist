@@ -60,6 +60,10 @@ const en = {
   themeCustomEdit: "Edit color",
   themeHue: "Hue",
   themeShade: "Shade",
+  news: {
+    dismiss: "Dismiss this news",
+    label: "News",
+  },
   notifications: {
     title: "Keep me posted",
     menu: "Notifications",

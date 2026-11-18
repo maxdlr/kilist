@@ -8,7 +8,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { BlurTargetView } from "expo-blur";
-import { DEFAULT_SCENE_GLASS, GlassBlur, type SceneGlass } from "@/components/elements/Glass";
+import { DEFAULT_SCENE_GLASS, FeatheredGlass, type SceneGlass } from "@/components/elements/Glass";
 import MaskedViewBase from "@react-native-masked-view/masked-view";
 import { useFocusEffect } from "expo-router";
 import {
@@ -86,40 +86,6 @@ const MaskedView = MaskedViewBase as unknown as ComponentType<{
   children: ReactNode;
 }>;
 
-const Feather = ({
-  id,
-  color,
-  from,
-  to,
-  height,
-}: {
-  id: string;
-  color: string;
-  from: number;
-  to: number;
-  height: number;
-}) => (
-  <View style={StyleSheet.absoluteFill}>
-    {height > 0 && (
-      <Svg width="100%" height={height} style={glassStyles.feather}>
-        <Defs>
-          <LinearGradient id={id} x1={0} y1={0} x2={0} y2={1}>
-            <Stop offset={0} stopColor={color} stopOpacity={from} />
-            <Stop offset={1} stopColor={color} stopOpacity={to} />
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill={`url(#${id})`} />
-      </Svg>
-    )}
-    <View
-      style={[
-        glassStyles.veil,
-        { backgroundColor: color, opacity: to, top: height },
-      ]}
-    />
-  </View>
-);
-
 const ContentFadeMask = ({ id, height, look }: { id: string; height: number; look: GlassLook }) => (
   <View style={StyleSheet.absoluteFill}>
     <View style={[glassStyles.solid, glassStyles.grow]} />
@@ -151,44 +117,7 @@ export const GlassBackdrop = ({
   look?: GlassLook;
 }) => {
   const C = useCalmColors();
-  const id = useId().replace(/:/g, "");
-  const featherLeft = Math.max(0, look.feather - featherFrom);
-  const featherStart = look.feather > 0 ? 1 - featherLeft / look.feather : 1;
-  const blur = <GlassBlur target={target} settings={look} />;
-
-  return (
-    <>
-      <View style={StyleSheet.absoluteFill}>
-        {featherLeft > 0 ? (
-          <MaskedView
-            style={StyleSheet.absoluteFill}
-            maskElement={
-              <Feather
-                id={`mask${id}`}
-                color="black"
-                from={featherStart}
-                to={1}
-                height={featherLeft}
-              />
-            }
-          >
-            {blur}
-          </MaskedView>
-        ) : (
-          blur
-        )}
-      </View>
-      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <Feather
-          id={`veil${id}`}
-          color={C.ground}
-          from={featherStart * look.veil}
-          to={look.veil}
-          height={featherLeft}
-        />
-      </View>
-    </>
-  );
+  return <FeatheredGlass target={target} look={look} veil={C.ground} featherFrom={featherFrom} />;
 };
 
 export const useTabBarInset = () => {
@@ -268,8 +197,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
   });
 
 const glassStyles = StyleSheet.create({
-  feather: { left: 0, position: "absolute", right: 0, top: 0 },
-  veil: { bottom: 0, left: 0, position: "absolute", right: 0 },
   solid: { backgroundColor: "black" },
   grow: { flex: 1 },
 });

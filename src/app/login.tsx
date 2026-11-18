@@ -58,6 +58,7 @@ const LoginScreen = () => {
     <AvoidKeyboard>
       <View style={[styles.flex, { backgroundColor: pageFill }]}>
         <BlurTargetView ref={blurTarget} style={[styles.flex, { backgroundColor: pageFill }]}>
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: pageFill }]} />
           <ScrollView
             contentContainerStyle={[
               styles.form,

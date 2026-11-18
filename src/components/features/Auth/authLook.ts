@@ -1,4 +1,3 @@
-import type { GlassSettings } from "@/components/elements/Glass";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { FadeIn, FadeInDown, FadeOut, FadeOutDown } from "react-native-reanimated";
@@ -17,12 +16,6 @@ export const hintAnimation = {
     .easing(AnimationService.easeOut)
     .withInitialValues({ transform: [{ translateY: HINT_SLIDE }] }),
   exiting: FadeOutDown.duration(AnimationService.exit.duration).easing(AnimationService.easeOut),
-};
-
-export const AUTH_FOOTER_GLASS: Partial<GlassSettings> = {
-  blur: 30,
-  androidReduction: 4,
-  veil: 0.2,
 };
 
 export const signupSheet = (skin: Skin) =>

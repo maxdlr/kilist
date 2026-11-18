@@ -97,6 +97,14 @@ export const customElements = (color: string): CalmElements => {
       hint: { out: base[5], unsure: base[20], haveIt: base[20] },
       progress: { track: base[70], fill: base[5], height: 2 },
     },
+    newsCard: {
+      fill: base[60],
+      border: base[40],
+      title: base[5],
+      body: base[20],
+      icon: colors.sage300,
+      close: base[30],
+    },
     sortCard: {
       fill: base[5],
       border: base[30],

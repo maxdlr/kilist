@@ -296,6 +296,9 @@ export const AField = ({
   keyboardType,
   secure = false,
   autoFocus = false,
+  multiline = false,
+  autoCapitalize = "none",
+  maxLength,
 }: {
   label: string;
   value: string;
@@ -304,6 +307,9 @@ export const AField = ({
   keyboardType?: KeyboardTypeOptions;
   secure?: boolean;
   autoFocus?: boolean;
+  multiline?: boolean;
+  autoCapitalize?: "none" | "sentences";
+  maxLength?: number;
 }) => (
   <View style={styles.field}>
     <AText size={14} color={A.mid}>{label}</AText>
@@ -315,10 +321,13 @@ export const AField = ({
       accessibilityLabel={label}
       keyboardType={keyboardType}
       secureTextEntry={secure}
-      autoCapitalize="none"
-      autoCorrect={false}
+      autoCapitalize={autoCapitalize}
+      autoCorrect={autoCapitalize !== "none"}
       autoFocus={autoFocus}
-      style={styles.input}
+      multiline={multiline}
+      maxLength={maxLength}
+      textAlignVertical={multiline ? "top" : undefined}
+      style={[styles.input, multiline && styles.inputMulti]}
     />
   </View>
 );
@@ -387,6 +396,61 @@ export const ASheet = ({
         </KeyboardAvoidingView>
       </GestureHandlerRootView>
     </Modal>
+  );
+};
+
+export const ASelect = <T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  placeholder = "Choose",
+}: {
+  label: string;
+  value: T | null;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+  placeholder?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const current = options.find((option) => option.value === value);
+  const pick = (next: T) => {
+    setOpen(false);
+    onChange(next);
+  };
+  return (
+    <View style={styles.field}>
+      <AText size={14} color={A.mid}>{label}</AText>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${current?.label ?? placeholder}`}
+        onPress={() => setOpen(true)}
+        style={withPressed([styles.input, styles.select])}
+      >
+        <AText color={current ? A.ink : A.faint} numberOfLines={1} style={styles.flex}>
+          {current?.label ?? placeholder}
+        </AText>
+        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={A.soft} strokeWidth={2} strokeLinecap="round">
+          <Path d="M6 9l6 6 6-6" />
+        </Svg>
+      </Pressable>
+      <ASheet visible={open} title={label} onClose={() => setOpen(false)}>
+        <ScrollView style={styles.selectList}>
+          <View style={styles.card}>
+            {options.map((option, index) => (
+              <ARow
+                key={option.value}
+                first={index === 0}
+                label={option.label}
+                tone={option.value === value ? "action" : "plain"}
+                onPress={() => pick(option.value)}
+                accessibilityLabel={`${option.label}${option.value === value ? ", selected" : ""}`}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </ASheet>
+    </View>
   );
 };
 
@@ -510,6 +574,9 @@ const styles = StyleSheet.create({
   button: { alignItems: "center", borderRadius: 12, borderWidth: 1, justifyContent: "center", paddingHorizontal: 16 },
   field: { gap: 6 },
   input: { borderColor: A.field, borderRadius: 10, borderWidth: 1, color: A.ink, fontFamily: FONT.regular, fontSize: 15, height: 44, paddingHorizontal: 12 },
+  inputMulti: { height: 96, paddingTop: 10 },
+  select: { alignItems: "center", flexDirection: "row", gap: 8 },
+  selectList: { flexGrow: 0 },
   flexOnly: { flex: 1 },
   sheetRoot: { flex: 1, justifyContent: "flex-end" },
   scrim: { backgroundColor: A.scrim },

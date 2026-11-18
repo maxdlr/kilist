@@ -8,8 +8,8 @@ import useMark from "@/providers/MarkProvider";
 import useToast from "@/providers/ToastProvider";
 import axios from "@/services/axios";
 import { FoodType, ListType } from "@/types/model";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
 
 export type ShopAddAction = "buy" | "later" | "list";
@@ -24,6 +24,17 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const [isResuming, setIsResuming] = useState(true);
   const [panel, setPanel] = useState<"stop" | "add" | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+  const { panel: requestedPanel } = useLocalSearchParams<{ panel?: string }>();
+  const [handledPanel, setHandledPanel] = useState<string | undefined>();
+
+  if (requestedPanel !== handledPanel) {
+    setHandledPanel(requestedPanel);
+    if (requestedPanel === "add") setPanel("add");
+  }
+
+  useEffect(() => {
+    if (requestedPanel) router.setParams({ panel: undefined });
+  }, [requestedPanel]);
   const { data: preview, mutate: refreshPreview } = useSWR<FoodType[]>({ url: "shop-list/preview" });
   const { data: mainList } = useSWR<ListType>({ url: "lists/read?main=true" });
 
