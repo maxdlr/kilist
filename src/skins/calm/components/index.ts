@@ -2,6 +2,7 @@ export { CButton } from "./CButton";
 export { CardPads } from "./CardPads";
 export { CText, type Weight } from "./CText";
 export { Dot } from "./Dot";
+export { HelpTip } from "./HelpTip";
 export {
   DEFAULT_GLASS,
   DockSpacer,

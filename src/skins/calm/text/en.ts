@@ -58,6 +58,8 @@ const en = {
     replay: "Replay today's round",
     sorted: "Sorted",
     today: "For today.",
+    playAgainTip: "Play another game to sort more items",
+    howAria: "How it works",
   },
   shop: {
     otherAisle: "Other",

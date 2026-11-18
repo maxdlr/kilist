@@ -60,6 +60,8 @@ const fr: CalmText = {
     replay: "Rejouer la partie du jour",
     sorted: "Trié",
     today: "Pour aujourd'hui.",
+    playAgainTip: "Fais une autre partie pour trier plus de produits",
+    howAria: "Comment ça marche",
   },
   shop: {
     otherAisle: "Autres",

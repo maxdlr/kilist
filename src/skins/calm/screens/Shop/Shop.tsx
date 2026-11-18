@@ -12,20 +12,17 @@ import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
-import { InfoCircleIcon, InfoCircleSolidIcon, PlusIcon, XmarkIcon } from "@/components/icons";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import AnimationService from "@/services/animation";
+import { PlusIcon, XmarkIcon } from "@/components/icons";
+import Animated from "react-native-reanimated";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, DockSpacer, Dot, Screen } from "@/skins/calm/components";
+import { CButton, CText, DockSpacer, Dot, HelpTip, Screen } from "@/skins/calm/components";
 import { CalmLoading, CalmMessage } from "../States";
 import AisleManager from "./_components/AisleManager";
 import Circle from "./_components/Circle";
 import SwipeRow from "./_components/SwipeRow";
 import GLASS from "./glass";
 
-
-const HINT_SLIDE = 28;
 
 const OTHER_AISLE = "other";
 
@@ -35,16 +32,7 @@ const CalmShop = () => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
-  const [showHow, setShowHow] = useState(false);
-  const hint = useSharedValue(0);
-  const hintStyle = useAnimatedStyle(() => ({
-    opacity: hint.value,
-    transform: [{ translateX: (1 - hint.value) * HINT_SLIDE }],
-  }));
-
-  useEffect(() => {
-    hint.set(withTiming(showHow ? 1 : 0, AnimationService.config));
-  }, [showHow, hint]);
+  const [previewTouches, setPreviewTouches] = useState(0);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
@@ -163,7 +151,10 @@ const CalmShop = () => {
         : []),
     ];
     return (
-      <View style={styles.flex}>
+      <View
+        style={styles.flex}
+        onTouchStart={() => setPreviewTouches((count) => count + 1)}
+      >
         <Screen
           padded={false}
           glassLook={GLASS}
@@ -196,39 +187,11 @@ const CalmShop = () => {
                     {common.shop.selected(run.selected.length)}
                   </CText>
                 ) : (
-                <View style={styles.howCluster}>
-                  <Animated.View
-                    pointerEvents="none"
-                    accessibilityElementsHidden={!showHow}
-                    importantForAccessibility={showHow ? "auto" : "no-hide-descendants"}
-                    style={hintStyle}
-                  >
-                    <CText size={12} color={C.textSoft} accessibilityLiveRegion="polite" numberOfLines={1}>
-                      {T.shop.selectToEdit}
-                    </CText>
-                  </Animated.View>
-                  <Press
-                    accessibilityRole="button"
+                  <HelpTip
+                    text={T.shop.selectToEdit}
                     accessibilityLabel={T.shop.howAria}
-                    accessibilityState={{ expanded: showHow }}
-                    hitSlop={skin.spacing.small}
-                    onPress={() => setShowHow((shown) => !shown)}
-                    style={withPressed(styles.info)}
-                  >
-                    {showHow ? (
-                      <InfoCircleSolidIcon
-                        size={skin.size.icon.action + 2}
-                        color={C.text}
-                      />
-                    ) : (
-                      <InfoCircleIcon
-                        size={skin.size.icon.action + 2}
-                        color={C.textSoft}
-                        strokeWidth={1.6}
-                      />
-                    )}
-                  </Press>
-                </View>
+                    activity={previewTouches}
+                  />
                 )}
               </View>
             </View>
@@ -440,12 +403,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       minHeight: s.size.row.shop,
     },
     startHead: { gap: s.spacing.inline, paddingBottom: s.spacing.section },
-    info: {
-      alignItems: "center",
-      height: s.size.button.xs,
-      justifyContent: "center",
-      width: s.size.button.xs,
-    },
     tagScroll: { flex: 1 },
     sections: { gap: s.spacing.section },
     section: { gap: s.spacing.small },
@@ -467,7 +424,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingVertical: s.spacing.small,
     },
     tagPicked: { backgroundColor: C.fill, borderColor: C.fill },
-    howCluster: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
     headSide: {
       alignItems: "center",
       flexDirection: "row",
