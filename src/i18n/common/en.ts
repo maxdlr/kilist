@@ -138,6 +138,12 @@ const en = {
     done: "Password changed. Log in with it.",
     weak: "Use 8+ characters with a capital, a number and a symbol.",
   },
+  aisleFamilies: {
+    market: "Fresh market",
+    cold: "Chilled & frozen",
+    groceries: "Groceries",
+    nonFood: "Non-food",
+  } as Record<string, string>,
   summary: {
     decimal: ".",
     about: "about {f}",

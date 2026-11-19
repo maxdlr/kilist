@@ -27,6 +27,15 @@ beforeEach(() => {
     tickets: { perSwipe: 10, speedBonus: 5, speedWindowMs: 2000, paidSwipesPerDay: 10, payWindowHours: 24 },
     shop: { snoozeHours: 24, sameTripMinutes: 30, suggestBelow: 0.625, buyBelow: 0.375 },
     products: { maxBarcodes: 20, quantityLength: 40, noteLength: 300 },
+    aisleGroups: {
+      maxItems: 3,
+      families: [
+        { key: "market", aisles: ["produce", "bakery", "meat", "fish"] },
+        { key: "cold", aisles: ["dairy", "meals", "frozen"] },
+        { key: "groceries", aisles: ["pantry", "sweet", "drinks"] },
+        { key: "nonFood", aisles: ["household", "baby", "pets"] },
+      ],
+    },
     summary: {
       minPurchases: 3,
       maxSpread: 0.5,

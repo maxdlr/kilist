@@ -5,6 +5,7 @@ import useAisleManager from "@/hooks/screens/useAisleManager";
 import useShopRun from "@/hooks/screens/useShopRun";
 import { getLang } from "@/i18n";
 import common from "@/i18n/common";
+import { groupSmallAisles } from "@/offline/aisleGroups";
 import { aisleList, aisleName, aisleOf } from "@/offline/foodNames";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -136,7 +137,7 @@ const CalmShop = () => {
     const rest = [...byAisle.keys()].filter(
       (id) => !known.some((aisle) => aisle.id === id),
     );
-    const sections = [
+    const sections = groupSmallAisles([
       ...known.map((aisle) => ({
         id: aisle.id,
         label: aisleName(aisle, lang),
@@ -151,7 +152,7 @@ const CalmShop = () => {
             },
           ]
         : []),
-    ];
+    ], common.aisleFamilies);
     return (
       <View
         style={styles.flex}

@@ -141,6 +141,12 @@ const fr: CommonText = {
     done: "Mot de passe changé. Connecte-toi avec.",
     weak: "8 caractères minimum, avec une majuscule, un chiffre et un symbole.",
   },
+  aisleFamilies: {
+    market: "Marché",
+    cold: "Frais et surgelés",
+    groceries: "Épicerie",
+    nonFood: "Hors alimentaire",
+  },
   summary: {
     decimal: ",",
     about: "environ {f}",

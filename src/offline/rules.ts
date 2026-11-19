@@ -37,6 +37,7 @@ export type Rules = {
   };
   shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number; buyBelow?: number };
   products: { maxBarcodes: number; quantityLength: number; noteLength?: number };
+  aisleGroups?: { maxItems: number; families: { key: string; aisles: string[] }[] };
   summary?: {
     minPurchases: number;
     maxSpread: number;
