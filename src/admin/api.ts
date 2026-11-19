@@ -71,6 +71,14 @@ export type AdminFood = AdminFoodRow & {
   lists: { id: number; title: string; isMain: boolean }[];
   usuallyNext: { id: number; name: string; times: number }[];
   actions: AdminAction[];
+  frequencyDays?: number | null;
+  scoring?: {
+    cycleDays: number;
+    halfLifeDays: number;
+    answers: number;
+    score: number;
+    estimates: { source: "declared" | "rhythm" | "pack" | "fallback"; days: number; trust: number }[];
+  };
 };
 
 export type AdminListRow = { id: number; title: string; isMain: boolean; foods: number; household: Ref | null };

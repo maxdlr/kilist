@@ -4,7 +4,9 @@ import common from "@/i18n/common";
 import type { ActionKind, Skin } from "@/skins/types";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { useState } from "react";
+import { PanelScrollContext } from "@/components/elements/BottomPanel/panelScroll";
+import { useContext, useState, type ComponentRef, type Ref } from "react";
+import { TextInput as PanelTextInput } from "react-native-gesture-handler";
 import {
   Platform,
   StyleSheet,
@@ -33,8 +35,10 @@ const FormInput = ({
   type = "text",
   action,
   style,
+  ref,
   ...rest
 }: {
+  ref?: Ref<ComponentRef<typeof TextInput>>;
   label?: string;
   labelColor?: string;
   bordered?: boolean;
@@ -45,6 +49,8 @@ const FormInput = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const panel = useContext(PanelScrollContext);
+  const Input = panel ? PanelTextInput : TextInput;
   const isPassword = type === "password";
   const pill = skin.shape.pill === true;
   const radius = pill ? skin.size.input / 2 : skin.shape.radius;
@@ -68,7 +74,9 @@ const FormInput = ({
         </ThemedText>
       )}
       <View style={styles.row}>
-        <TextInput
+        <Input
+          {...(panel && { block: panel.pan })}
+          ref={ref}
           accessibilityLabel={label ?? rest.placeholder}
           placeholderTextColor={skin.colors.placeholder}
           style={[

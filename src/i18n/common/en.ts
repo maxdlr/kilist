@@ -138,6 +138,11 @@ const en = {
     done: "Password changed. Log in with it.",
     weak: "Use 8+ characters with a capital, a number and a symbol.",
   },
+  frequency: {
+    label: "Frequency",
+    hint: "How often you usually buy it. Auto learns it from your purchases.",
+    options: { auto: "Auto", "7": "Weekly", "14": "2 weeks", "30": "Monthly" },
+  },
   tabs: {
     index: "Home",
     inventory: "Inventory",

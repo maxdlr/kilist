@@ -98,7 +98,8 @@ const fr: CalmText = {
     closeRun: "Terminé",
     legendBasket: "Au panier",
     howAria: "Comment ça marche",
-    selectToEdit: "Sélectionne pour modifier",
+    selectToEdit: "Touche pour reporter, maintiens pour modifier",
+    holdToEdit: "Maintiens pour modifier",
   },
   inventory: {
     closeSearch: "Fermer la recherche",

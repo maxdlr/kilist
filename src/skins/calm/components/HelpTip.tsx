@@ -4,7 +4,8 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import withPressed from "@/utils/withPressed";
-import { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useCalmColors } from "../theme/useCalmColors";
@@ -24,7 +25,9 @@ export const HelpTip = ({ text, accessibilityLabel, activity }: Props) => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const [shown, setShown] = useState(false);
+  const [focused, setFocused] = useState(false);
   const touched = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hint = useSharedValue(0);
   const hintStyle = useAnimatedStyle(() => ({
     opacity: hint.value,
@@ -35,13 +38,28 @@ export const HelpTip = ({ text, accessibilityLabel, activity }: Props) => {
     hint.set(withTiming(shown ? 1 : 0, AnimationService.config));
   }, [shown, hint]);
 
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => {
+        if (timer.current) clearTimeout(timer.current);
+        hint.set(0);
+        touched.current = false;
+        setFocused(false);
+        setShown(false);
+      };
+    }, [hint]),
+  );
+
   useEffect(() => {
-    if (touched.current) return;
-    const timer = setTimeout(() => {
+    if (touched.current || !focused) return;
+    timer.current = setTimeout(() => {
       if (!touched.current) setShown(true);
     }, AUTO_SHOW_MS);
-    return () => clearTimeout(timer);
-  }, [activity]);
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [activity, focused]);
 
   const toggle = () => {
     touched.current = true;
@@ -54,9 +72,9 @@ export const HelpTip = ({ text, accessibilityLabel, activity }: Props) => {
         pointerEvents="none"
         accessibilityElementsHidden={!shown}
         importantForAccessibility={shown ? "auto" : "no-hide-descendants"}
-        style={hintStyle}
+        style={[styles.hint, hintStyle]}
       >
-        <CText size={12} color={C.textSoft} accessibilityLiveRegion="polite" numberOfLines={1}>
+        <CText size={12} color={C.textSoft} accessibilityLiveRegion="polite" numberOfLines={2} style={styles.hintText}>
           {text}
         </CText>
       </Animated.View>
@@ -80,7 +98,9 @@ export const HelpTip = ({ text, accessibilityLabel, activity }: Props) => {
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
-    cluster: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: s.spacing.small },
+    cluster: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: s.spacing.small, minWidth: 0 },
+    hint: { flexShrink: 1, minWidth: 0 },
+    hintText: { textAlign: "right" },
     info: {
       alignItems: "center",
       height: s.size.button.xs,

@@ -57,7 +57,7 @@ export const CButton = ({
       {label && (
         <CText
           weight={
-            bold ? "bold" : variant === "text" || small ? "regular" : "medium"
+            bold ? "black" : variant === "text" ? "medium" : small ? "semibold" : "bold"
           }
           size={small ? skin.type.label : skin.type.label + 1}
           color={look.ink}

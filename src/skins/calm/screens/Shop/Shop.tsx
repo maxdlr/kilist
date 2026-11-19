@@ -1,4 +1,5 @@
 import Press from "@/components/elements/Press";
+import EditFoodPanel from "@/components/features/Inventory/EditFoodPanel";
 import ShopPanels from "@/components/features/Shop/ShopPanels";
 import useAisleManager from "@/hooks/screens/useAisleManager";
 import useShopRun from "@/hooks/screens/useShopRun";
@@ -33,6 +34,7 @@ const CalmShop = () => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const [previewTouches, setPreviewTouches] = useState(0);
+  const [editing, setEditing] = useState<FoodType | null>(null);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
@@ -231,10 +233,17 @@ const CalmShop = () => {
                           accessibilityLabel={`${food.name}, ${skin.copy.levels[level]}`}
                           accessibilityState={{ selected: picked }}
                           onPress={() => run.toggleSelect(food)}
+                          onLongPress={() => setEditing(food)}
+                          accessibilityHint={T.shop.holdToEdit}
                           style={withPressed([styles.tag, picked && styles.tagPicked])}
                         >
                           <Dot color={picked ? C.onFill : skin.colors.levels[level]} />
-                          <CText size={skin.type.body} color={picked ? C.onFill : C.text} numberOfLines={1}>
+                          <CText
+                            size={skin.type.body}
+                            weight={picked ? "semibold" : "regular"}
+                            color={picked ? C.onFill : C.text}
+                            numberOfLines={1}
+                          >
                             {food.name}
                           </CText>
                         </Press>
@@ -249,6 +258,7 @@ const CalmShop = () => {
         </Screen>
         <ShopPanels run={run} />
         <AisleManager manager={aisles} />
+        <EditFoodPanel food={editing} onClose={() => setEditing(null)} />
       </View>
     );
   }

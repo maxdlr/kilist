@@ -29,6 +29,7 @@ const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
         formKey={editingFood?.id}
         title={copy.editTitle(editingFood ? caseFor(skin, editingFood.name) : "")}
         initialName={editingFood?.name}
+        initialFrequency={editingFood?.frequencyDays}
         initialLevel={editingFood ? levelOf(editingFood.inStockScore) : undefined}
         onSubmit={async (data) => {
           if (!editingFood) return false;

@@ -116,7 +116,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               </View>
               <CText
                 allowFontScaling={false}
-                weight={isCurrent ? "semibold" : "regular"}
+                weight={isCurrent ? "bold" : "regular"}
                 size={skin.type.caption - 1}
                 color={C.text}
                 numberOfLines={1}

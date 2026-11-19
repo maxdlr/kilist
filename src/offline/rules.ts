@@ -19,6 +19,14 @@ export type Rules = {
     historyLimit: number;
     onboardingScore: number;
   };
+  score?: {
+    defaultCycleDays: number;
+    bigPackCycleDays: number;
+    halfLifeShare: number;
+    minHalfLifeDays: number;
+    trust: { declared: number; perPurchaseGap: number; pack: number; fallback: number };
+    frequencyDays: { min: number; max: number };
+  };
   rhythm?: { minPurchases: number; keep: number; share: number; minDays: number; sameBuyHours: number };
   tickets: {
     perSwipe: number;

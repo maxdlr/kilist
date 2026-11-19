@@ -25,6 +25,7 @@ import {
   saveValue,
 } from "./store";
 import { rules } from "./rules";
+import { isFrequencyDays } from "./scoring";
 import type { LocalFood, LocalState, RaceAnswer } from "./types";
 
 export const GHOST_RACE_ID = -1;
@@ -258,6 +259,7 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
           icon: typeof body.icon === "string" ? body.icon : undefined,
           ...(body.needed === true && { needed: true }),
           ...(body.product && typeof body.product === "object" && { product: body.product }),
+          ...(isFrequencyDays(body.frequencyDays) && { frequencyDays: body.frequencyDays }),
         }),
       );
     },
@@ -270,6 +272,9 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
         foodId: Number(match[1]),
         name: body.name,
         ...(typeof body.aisle === "string" && { aisle: body.aisle }),
+        ...((body.frequencyDays === null || isFrequencyDays(body.frequencyDays)) && {
+          frequencyDays: body.frequencyDays,
+        }),
       });
       return food ? toFood(food) : null;
     },

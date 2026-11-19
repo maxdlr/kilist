@@ -440,6 +440,27 @@ describe("the inventory offline", () => {
     expect(getState()!.foods.find((entry) => entry.id === 1)!.aisle).toBe("dairy");
   });
 
+  it("sets and clears a declared frequency through a food edit", () => {
+    pull();
+    call("put", "foods/edit/1", { frequencyDays: 7 });
+    expect(getState()!.foods.find((entry) => entry.id === 1)!.frequencyDays).toBe(7);
+
+    call("put", "foods/edit/1", { frequencyDays: 9999 });
+    expect(getState()!.foods.find((entry) => entry.id === 1)!.frequencyDays).toBe(7);
+
+    call("put", "foods/edit/1", { frequencyDays: null });
+    expect(getState()!.foods.find((entry) => entry.id === 1)!.frequencyDays).toBeNull();
+    expect(pendingOps().map((op) => op.payload.frequencyDays)).toEqual([7, undefined, null]);
+  });
+
+  it("creates a food with a declared frequency", () => {
+    pull();
+    const created = call("post", "foods/create", { name: "Yogurt", listId: 1, frequencyDays: 14 });
+
+    expect(created.frequencyDays).toBe(14);
+    expect(pendingOps()[0]!.payload.frequencyDays).toBe(14);
+  });
+
   it("rewrites queued operations that use the temporary id", () => {
     pull();
     const created = call("post", "foods/create", { name: "Oat milk", listId: 1 });

@@ -12,6 +12,7 @@ import {
 } from "./domain";
 import { foodKey } from "./foodNames";
 import { rules } from "./rules";
+import { isFrequencyDays } from "./scoring";
 import type { LocalFood, LocalShopList, LocalState, Op, Reward, Snapshot } from "./types";
 
 const USERNAME_LENGTH = 30;
@@ -152,7 +153,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       }
 
       target.histories = target.histories.filter((entry) => time(entry.at) > atMs);
-      target.inStockScore = calculateScore(target.histories);
+      target.inStockScore = calculateScore(target.histories, target);
       if (time(target.lastBoughtAt) < atMs) target.lastBoughtAt = at;
       target.boughtDates = addBoughtDate(target.boughtDates, at);
 
@@ -183,6 +184,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         state.localAliases[String(payload.tempId)] = twin.id;
         if (!twin.lists.includes(listId)) twin.lists.push(listId);
         attachProduct(twin, payload.product);
+        if (isFrequencyDays(payload.frequencyDays)) twin.frequencyDays = payload.frequencyDays;
         if (payload.needed === true) addHistory(twin, { isInStock: false, at });
         return twin;
       }
@@ -197,6 +199,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         histories: [],
       };
       attachProduct(created, payload.product);
+      if (isFrequencyDays(payload.frequencyDays)) created.frequencyDays = payload.frequencyDays;
       state.foods.push(created);
       if (payload.needed === true) addHistory(created, { isInStock: false, at });
       return created;
@@ -207,6 +210,10 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (!target) return null;
       if (payload.name !== undefined) target.name = payload.name;
       if (typeof payload.aisle === "string") target.aisle = payload.aisle;
+      if (payload.frequencyDays === null || isFrequencyDays(payload.frequencyDays)) {
+        target.frequencyDays = payload.frequencyDays;
+        target.inStockScore = calculateScore(target.histories, target);
+      }
       return target;
     }
 

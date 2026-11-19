@@ -141,6 +141,11 @@ const fr: CommonText = {
     done: "Mot de passe changé. Connecte-toi avec.",
     weak: "8 caractères minimum, avec une majuscule, un chiffre et un symbole.",
   },
+  frequency: {
+    label: "Fréquence",
+    hint: "À quel rythme tu l'achètes d'habitude. Auto l'apprend de tes achats.",
+    options: { auto: "Auto", "7": "Semaine", "14": "2 semaines", "30": "Mois" },
+  },
   tabs: {
     index: "Accueil",
     inventory: "Inventaire",

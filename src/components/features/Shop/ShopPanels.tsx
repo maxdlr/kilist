@@ -12,11 +12,13 @@ import type { ScanResult } from "@/hooks/useProductScan";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
+import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState, type ComponentRef } from "react";
+import { StyleSheet, View, type TextInput } from "react-native";
 
 const LOOKUP_DELAY_MS = 250;
+const KEYBOARD_DELAY_MS = AnimationService.config.duration + 50;
 
 const AddFoodForm = ({ run }: { run: ShopRun }) => {
   const skin = useSkin();
@@ -30,6 +32,13 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
   const [found, setFound] = useState<ScanResult | null>(null);
   const { findFood } = run;
   const hasName = Boolean(name.trim());
+  const nameInput = useRef<ComponentRef<typeof TextInput>>(null);
+
+  useEffect(() => {
+    if (scanning) return;
+    const timer = setTimeout(() => nameInput.current?.focus(), KEYBOARD_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [scanning]);
 
   useEffect(() => {
     let active = true;
@@ -76,6 +85,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
       <View style={styles.nameRow}>
         <View style={styles.nameField}>
           <FormInput
+            ref={nameInput}
             placeholder={skin.copy.placeholders.foodName}
             labelColor={skin.panel.ink}
             value={name}

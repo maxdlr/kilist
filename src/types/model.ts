@@ -15,6 +15,7 @@ export interface FoodType {
   barcodes?: string[];
   quantity?: string | null;
   aisle?: string | null;
+  frequencyDays?: number | null;
   lists: ListType[] | number[];
   inStockScore: number;
   snoozedUntil?: Date;

@@ -103,7 +103,7 @@ const KilButton = ({
           numberOfLines={1}
           size={small ? skin.type.label : pill ? skin.type.label + 1 : (fontSize ?? skin.type.title)}
           color={ink}
-          style={styles.label}
+          style={[styles.label, skin.fonts.body?.bold && { fontFamily: skin.fonts.body.bold }]}
         >
           {label}
         </ThemedText>

@@ -15,6 +15,7 @@ export type LocalFood = {
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
   boughtDates?: string[];
+  frequencyDays?: number | null;
   lists: number[];
   histories: HistoryEntry[];
 };

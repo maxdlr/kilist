@@ -1,9 +1,10 @@
 import type { FoodBankItemType } from "@/types/model";
 import { foodKey, namesOf, normalizeName } from "./foodNames";
 import { rules, type Rules } from "./rules";
+import { buyGapDays, cycleOf, packSize, scoreFood, type CycleFood } from "./scoring";
 import type { HistoryEntry, LocalFood, LocalShopList, LocalState, RaceAnswer, Reward } from "./types";
 
-export { normalizeName };
+export { normalizeName, buyGapDays, packSize };
 
 const DAY_MS = 24 * 3600000;
 const LEVELS = [0, 0.25, 0.5, 0.75, 1] as const;
@@ -15,11 +16,7 @@ const time = (value?: string | null) => (value ? Date.parse(value) : 0);
 export const toLocalDay = (date: Date | string, tzOffset: number) =>
   new Date(new Date(date).getTime() - tzOffset * 60000).toISOString().slice(0, 10);
 
-export const calculateScore = (histories: HistoryEntry[]) => {
-  if (histories.length === 0) return 1;
-  const inStock = histories.filter((entry) => entry.isInStock).length;
-  return Number((inStock / histories.length).toFixed(2));
-};
+export const calculateScore = (histories: HistoryEntry[], food: CycleFood = {}) => scoreFood(food, histories);
 
 export const addHistory = (food: LocalFood, entry: HistoryEntry, replace = false) => {
   if (time(food.lastBoughtAt) > time(entry.at)) return;
@@ -30,20 +27,10 @@ export const addHistory = (food: LocalFood, entry: HistoryEntry, replace = false
   food.histories = [...kept, entry]
     .sort((a, b) => time(a.at) - time(b.at))
     .slice(-rules().swipe.historyLimit);
-  food.inStockScore = calculateScore(food.histories);
+  food.inStockScore = calculateScore(food.histories, food);
 };
-
-const UNITS: Record<string, number> = { kg: 1000, g: 1, l: 1000, cl: 10, ml: 1 };
-const PACK = /(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|l|cl|ml)\b/i;
 
 export type ScannedProduct = { barcode?: string; icon?: string; quantity?: string; aisle?: string };
-
-export const packSize = (quantity?: string | null): number | null => {
-  const match = quantity?.match(PACK);
-  if (!match) return null;
-  const count = match[1] ? Number(match[1]) : 1;
-  return count * Number(match[2]!.replace(",", ".")) * UNITS[match[3]!.toLowerCase()]!;
-};
 
 export const staleDaysFor = (quantity?: string | null) => {
   const { bigPackSize, bigPackStaleDays, staleDays } = rules().swipe;
@@ -63,21 +50,11 @@ export const addBoughtDate = (dates: string[] | undefined, at: string) => {
   return kept.slice(-rhythm.keep).map((date) => new Date(date).toISOString());
 };
 
-export const buyGapDays = (dates?: string[]) => {
-  const rhythm = rules().rhythm;
-  const times = (dates ?? []).map(time).sort((a, b) => a - b);
-  if (!rhythm || times.length < rhythm.minPurchases) return null;
-  const gaps = times.slice(1).map((date, index) => date - times[index]!).sort((a, b) => a - b);
-  const middle = Math.floor(gaps.length / 2);
-  const median = gaps.length % 2 ? gaps[middle]! : (gaps[middle - 1]! + gaps[middle]!) / 2;
-  return median / DAY_MS;
-};
-
-export const waitDaysFor = (food: Pick<LocalFood, "quantity" | "boughtDates">) => {
-  const gap = buyGapDays(food.boughtDates);
-  return gap === null
-    ? staleDaysFor(food.quantity)
-    : Math.max(rules().rhythm!.minDays, gap * rules().rhythm!.share);
+export const waitDaysFor = (food: Pick<LocalFood, "quantity" | "boughtDates" | "frequencyDays">) => {
+  const cycle = cycleOf(food);
+  return cycle.known && cycle.days !== null && rules().rhythm
+    ? Math.max(rules().rhythm!.minDays, cycle.days * rules().rhythm!.share)
+    : staleDaysFor(food.quantity);
 };
 
 export const isBarcode = (value: unknown): value is string =>
@@ -261,7 +238,7 @@ export const setLevel = (food: LocalFood, level: number, at: string) => {
   food.histories = [...reset, ...later]
     .sort((a, b) => time(a.at) - time(b.at))
     .slice(-rules().swipe.historyLimit);
-  food.inStockScore = calculateScore(food.histories);
+  food.inStockScore = calculateScore(food.histories, food);
 };
 
 export const verdictOf = (answers: RaceAnswer[]) => {

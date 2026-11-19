@@ -4,6 +4,7 @@ import type { Skin } from "@/skins/types";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -38,21 +39,26 @@ const KilToggleButton = <T extends string>({
   const border = skin.shape.border;
   const radius = skin.shape.pill ? skin.size.input / 2 : skin.shape.radius;
 
+  const offset = useSharedValue(0);
+  const width = useRef(0);
+
   const handleLayout = (event: LayoutChangeEvent) => {
-    segmentWidth.value =
-      (event.nativeEvent.layout.width - 2 * border) / options.length;
+    width.current = (event.nativeEvent.layout.width - 2 * border) / options.length;
+    segmentWidth.value = width.current;
+    offset.value = selectedIndex * width.current;
   };
+
+  useEffect(() => {
+    if (width.current === 0) return;
+    offset.value = withTiming(selectedIndex * width.current, {
+      duration: SLIDE_DURATION,
+      easing: AnimationService.config.easing,
+    });
+  }, [selectedIndex, offset]);
 
   const highlightStyle = useAnimatedStyle(() => ({
     width: segmentWidth.value,
-    transform: [
-      {
-        translateX: withTiming(selectedIndex * segmentWidth.value, {
-          duration: SLIDE_DURATION,
-          easing: AnimationService.config.easing,
-        }),
-      },
-    ],
+    transform: [{ translateX: offset.value }],
   }));
 
   return (
@@ -85,6 +91,7 @@ const KilToggleButton = <T extends string>({
               numberOfLines={1}
               size={skin.type.label}
               color={isSelected ? ink : idleInk}
+              style={isSelected && skin.fonts.body?.bold ? { fontFamily: skin.fonts.body.bold } : undefined}
             >
               {option.label}
             </ThemedText>

@@ -96,7 +96,8 @@ const en = {
     closeRun: "Done",
     legendBasket: "In the basket",
     howAria: "How it works",
-    selectToEdit: "Select products to edit",
+    selectToEdit: "Tap to postpone, hold to edit",
+    holdToEdit: "Hold to edit",
   },
   inventory: {
     closeSearch: "Close search",

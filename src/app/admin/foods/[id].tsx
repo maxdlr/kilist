@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 
 const ANSWER = { have: "have it", need: "need it", unsure: "not sure" } as const;
+const SOURCE = { declared: "Set by the household", rhythm: "Learned from purchases", pack: "Big pack guess", fallback: "Default guess" } as const;
 
 const FoodScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,6 +78,24 @@ const FoodScreen = () => {
         />
         <ARow label={'Clear "next time"'} tone={snoozed ? "action" : "disabled"} onPress={() => run("post", "/unsnooze", undefined, "Back on the list")} />
       </ASection>
+
+      {food.scoring && (
+        <ASection title="How the score is built">
+          <ARow
+            first
+            label="Lasts about"
+            value={`${food.scoring.cycleDays} days · answers fade by half every ${food.scoring.halfLifeDays} days`}
+          />
+          {food.scoring.estimates.map((estimate) => (
+            <ARow
+              key={estimate.source}
+              label={SOURCE[estimate.source]}
+              value={`${Number(estimate.days.toFixed(1))} days · weight ${estimate.trust}`}
+            />
+          ))}
+          <ARow label="Answers kept" value={`${food.scoring.answers} · score ${food.scoring.score}`} />
+        </ASection>
+      )}
 
       <ASection title={`Last answers in ${home}`}>
         {food.history.length === 0 && <ARow first label="Never checked" tone="disabled" />}
