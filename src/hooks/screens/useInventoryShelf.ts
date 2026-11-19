@@ -116,6 +116,7 @@ const useInventoryShelf = () => {
     ...list,
     createFood,
     editFood,
+    saveDetails: list.editFood,
     isLoading: list.isFoodLoading && foods === undefined,
     query,
     isEmpty: !hasFoods && !query,

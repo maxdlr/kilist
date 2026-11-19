@@ -453,6 +453,29 @@ describe("the inventory offline", () => {
     expect(pendingOps().map((op) => op.payload.frequencyDays)).toEqual([7, undefined, null]);
   });
 
+  it("saves a note and a quantity quietly, one field at a time", () => {
+    pull();
+    call("put", "foods/edit/1", { quantity: " 1 L " });
+    call("put", "foods/edit/1", { note: "Blue cap" });
+    const food = getState()!.foods.find((entry) => entry.id === 1)!;
+    expect(food).toMatchObject({ quantity: "1 L", note: "Blue cap" });
+
+    call("put", "foods/edit/1", { note: "   ", quantity: null });
+    expect(getState()!.foods.find((entry) => entry.id === 1)).toMatchObject({ quantity: null, note: null });
+    expect(pendingOps().map((op) => [op.payload.quantity, op.payload.note])).toEqual([
+      [" 1 L ", undefined],
+      [undefined, "Blue cap"],
+      [null, "   "],
+    ]);
+  });
+
+  it("creates a food with a note and a quantity", () => {
+    pull();
+    const created = call("post", "foods/create", { name: "Butter", listId: 1, note: "Salted", quantity: "250 g" });
+
+    expect(getState()!.foods.find((entry) => entry.id === created.id)).toMatchObject({ note: "Salted", quantity: "250 g" });
+  });
+
   it("creates a food with a declared frequency", () => {
     pull();
     const created = call("post", "foods/create", { name: "Yogurt", listId: 1, frequencyDays: 14 });

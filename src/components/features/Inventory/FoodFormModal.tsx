@@ -1,20 +1,18 @@
 import BottomPanel from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
-import KilToggleButton from "@/components/elements/KilToggleButton";
-import Press from "@/components/elements/Press";
-import { ThemedText } from "@/components/elements/ThemedText";
 import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title";
 import { BarcodeIcon } from "@/components/icons";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
+import { summarize } from "@/offline/summary";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import useToast from "@/providers/ToastProvider";
 import AnimationService from "@/services/animation";
-import withPressed from "@/utils/withPressed";
-import type { LevelNumber, Skin } from "@/skins/types";
+import type { Skin } from "@/skins/types";
+import type { FoodType } from "@/types/model";
 import {
   useCallback,
   useEffect,
@@ -24,44 +22,53 @@ import {
   type MutableRefObject,
 } from "react";
 import { StyleSheet, View, type TextInput } from "react-native";
+import FoodDetails, { type DetailKey, type FoodDetailValues } from "./FoodDetails";
+import FoodSummary from "./FoodSummary";
 
-type FoodFormData = {
-  name: string;
-  product?: ScannedProduct;
-  level?: LevelNumber;
-  frequencyDays?: number | null;
-};
+export type FoodDetailChanges = Partial<FoodDetailValues>;
 
-const FREQUENCIES = ["auto", "7", "14", "30"] as const;
-type Frequency = (typeof FREQUENCIES)[number];
-
-const toFrequency = (days?: number | null): Frequency =>
-  FREQUENCIES.find((option) => option === String(days)) ?? "auto";
+type FoodFormData = { name: string; product?: ScannedProduct } & FoodDetailChanges;
 
 const KEYBOARD_DELAY_MS = AnimationService.config.duration + 50;
+const QUIET_SAVE_MS = 600;
+const TEXT_KEYS = ["quantity", "note"] as const;
 
 type CloseGuard = MutableRefObject<() => boolean>;
 
+const valuesOf = (food?: FoodType | null): FoodDetailValues => ({
+  frequencyDays: food?.frequencyDays ?? null,
+  quantity: food?.quantity ?? null,
+  note: food?.note ?? null,
+});
+
+const textOf = (value: string | null) => (value ?? "").trim() || null;
+
 const FoodForm = ({
   title,
+  food,
   initialName,
-  initialFrequency,
   onSubmit,
+  onQuietSave,
   onRemove,
   onClose,
   scannable,
   guardRef,
   creating,
+  expanded,
+  setExpandable,
 }: {
   creating: boolean;
   title: string;
+  food?: FoodType | null;
   initialName: string;
-  initialFrequency?: number | null;
   scannable: boolean;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onQuietSave?: (changes: FoodDetailChanges) => void;
   onRemove?: () => void;
   onClose: () => void;
   guardRef: CloseGuard;
+  expanded: boolean;
+  setExpandable: (expandable: boolean) => void;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -71,25 +78,26 @@ const FoodForm = ({
   const [scanning, setScanning] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
-  const startFrequency = toFrequency(initialFrequency);
-  const [frequency, setFrequency] = useState<Frequency>(startFrequency);
-  const [showFrequency, setShowFrequency] = useState(false);
+  const [values, setValues] = useState<FoodDetailValues>(() => valuesOf(food));
+  const [added, setAdded] = useState<DetailKey[]>([]);
+  const saved = useRef<FoodDetailValues>(valuesOf(food));
   const nameInput = useRef<ComponentRef<typeof TextInput>>(null);
-  const isCreating = creating;
+  const quiet = !creating && Boolean(onQuietSave);
 
-  const isDirty =
-    name !== initialName ||
-    product !== undefined ||
-    frequency !== startFrequency;
+  const detailsTouched =
+    values.frequencyDays !== null || textOf(values.quantity) !== null || textOf(values.note) !== null;
+  const isDirty = name !== initialName || product !== undefined || (creating && detailsTouched);
+  const sentence = summarize({ boughtDates: food?.boughtDates, quantity: values.quantity }, common.summary);
 
   useEffect(() => {
-    if (!isCreating || scanning) return;
-    const timer = setTimeout(
-      () => nameInput.current?.focus(),
-      KEYBOARD_DELAY_MS,
-    );
+    setExpandable(!scanning && !confirming);
+  }, [scanning, confirming, setExpandable]);
+
+  useEffect(() => {
+    if (!creating || scanning) return;
+    const timer = setTimeout(() => nameInput.current?.focus(), KEYBOARD_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [isCreating, scanning]);
+  }, [creating, scanning]);
 
   useEffect(() => {
     guardRef.current = () => {
@@ -99,18 +107,72 @@ const FoodForm = ({
     };
   }, [guardRef, isDirty, confirming]);
 
+  const flush = useCallback(
+    (key: (typeof TEXT_KEYS)[number], value: string | null) => {
+      const next = textOf(value);
+      if (!quiet || next === saved.current[key]) return;
+      saved.current = { ...saved.current, [key]: next };
+      onQuietSave?.({ [key]: next });
+    },
+    [quiet, onQuietSave],
+  );
+
+  const latestValues = useRef(values);
+
+  useEffect(() => {
+    latestValues.current = values;
+  }, [values]);
+
+  useEffect(() => {
+    if (!quiet) return;
+    const timer = setTimeout(() => {
+      for (const key of TEXT_KEYS) flush(key, latestValues.current[key]);
+    }, QUIET_SAVE_MS);
+    return () => clearTimeout(timer);
+  }, [quiet, values.quantity, values.note, flush]);
+
+  useEffect(
+    () => () => {
+      for (const key of TEXT_KEYS) flush(key, latestValues.current[key]);
+    },
+    [flush],
+  );
+
+  const setFrequency = (frequencyDays: number | null) => {
+    setValues((current) => ({ ...current, frequencyDays }));
+    if (!quiet || frequencyDays === saved.current.frequencyDays) return;
+    saved.current = { ...saved.current, frequencyDays };
+    onQuietSave?.({ frequencyDays });
+  };
+
+  const setText = (key: (typeof TEXT_KEYS)[number], text: string) =>
+    setValues((current) => ({ ...current, [key]: text }));
+
+  const addDetail = (key: DetailKey) => setAdded((keys) => (keys.includes(key) ? keys : [...keys, key]));
+
+  const removeDetail = (key: DetailKey) => {
+    setAdded((keys) => keys.filter((entry) => entry !== key));
+    if (key === "frequencyDays") {
+      setFrequency(null);
+      return;
+    }
+    setValues((current) => ({ ...current, [key]: null }));
+    flush(key, null);
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       showToast(skin.copy.errors.nameMissing);
       return;
     }
-    const frequencyDays = frequency === "auto" ? null : Number(frequency);
-    const success = await onSubmit({
-      name: name.trim(),
-      ...(product && { product }),
-      ...(frequency !== startFrequency &&
-        (isCreating ? frequencyDays !== null : true) && { frequencyDays }),
-    });
+    const details: FoodDetailChanges = creating
+      ? {
+          ...(values.frequencyDays !== null && { frequencyDays: values.frequencyDays }),
+          ...(textOf(values.quantity) && { quantity: textOf(values.quantity) }),
+          ...(textOf(values.note) && { note: textOf(values.note) }),
+        }
+      : {};
+    const success = await onSubmit({ name: name.trim(), ...(product && { product }), ...details });
     if (success) onClose();
   };
 
@@ -147,9 +209,28 @@ const FoodForm = ({
         onFound={(result) => {
           setName(result.name);
           setProduct(result.product);
+          const scanned = typeof result.product?.quantity === "string" ? result.product.quantity : null;
+          if (scanned) setValues((current) => (textOf(current.quantity) ? current : { ...current, quantity: scanned }));
           setScanning(false);
         }}
         onCancel={() => setScanning(false)}
+      />
+    );
+  }
+
+  if (expanded) {
+    return (
+      <FoodDetails
+        name={name.trim() || title}
+        sentence={sentence}
+        values={values}
+        added={added}
+        focusKey={added[added.length - 1]}
+        quiet={quiet}
+        onAdd={addDetail}
+        onRemove={removeDetail}
+        onFrequency={setFrequency}
+        onText={setText}
       />
     );
   }
@@ -176,54 +257,13 @@ const FoodForm = ({
             height={skin.size.input}
             variant={name.trim() ? skin.panel.secondary : "primary"}
             accessibilityLabel={common.shop.scan}
-            icon={(color) => (
-              <BarcodeIcon size={skin.size.icon.action} color={color} />
-            )}
+            icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
             onTouch={() => setScanning(true)}
           />
         )}
       </View>
-      {isCreating && <NameSuggestions query={name} onPick={setName} />}
-
-      <View style={styles.frequency}>
-        <Press
-          accessibilityRole="button"
-          accessibilityState={{ expanded: showFrequency }}
-          hitSlop={skin.spacing.small}
-          onPress={() => setShowFrequency((shown) => !shown)}
-          style={withPressed(styles.frequencyToggle)}
-        >
-          <ThemedText size={skin.type.label} color={skin.panel.ink}>
-            {common.frequency.label}
-            {" · "}
-            <ThemedText
-              size={skin.type.label}
-              color={skin.panel.ink}
-              style={{
-                fontFamily: skin.fonts.body?.bold ?? skin.fonts.display.family,
-              }}
-            >
-              {common.frequency.options[frequency]}
-            </ThemedText>
-          </ThemedText>
-        </Press>
-        {showFrequency && (
-          <View style={styles.frequencyPicker}>
-            <KilToggleButton
-              value={frequency}
-              onChange={setFrequency}
-              onDark={skin.panel.ink === skin.colors.onGround}
-              options={FREQUENCIES.map((option) => ({
-                label: common.frequency.options[option],
-                value: option,
-              }))}
-            />
-            <ThemedText size={skin.type.caption} color={skin.panel.ink}>
-              {common.frequency.hint}
-            </ThemedText>
-          </View>
-        )}
-      </View>
+      {creating && <NameSuggestions query={name} onPick={setName} />}
+      {sentence && <FoodSummary parts={sentence} />}
 
       <View style={styles.actions}>
         {onRemove && (
@@ -253,10 +293,10 @@ const FoodFormModal = ({
   visible,
   title,
   formKey,
-  initialName = "",
-  initialFrequency,
-  initialLevel,
+  food,
+  initialName = food?.name ?? "",
   onSubmit,
+  onQuietSave,
   onRemove,
   onClose,
   scannable = false,
@@ -267,15 +307,26 @@ const FoodFormModal = ({
   scannable?: boolean;
   title: string;
   formKey?: string | number;
+  food?: FoodType | null;
   initialName?: string;
-  initialFrequency?: number | null;
-  initialLevel?: LevelNumber;
   onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onQuietSave?: (changes: FoodDetailChanges) => void;
   onRemove?: () => void;
   onClose: () => void;
 }) => {
   const guardRef = useRef(() => true);
   const canClose = useCallback(() => guardRef.current(), []);
+  const [expanded, setExpanded] = useState(false);
+  const [expandable, setExpandable] = useState(true);
+  const expand = useCallback(() => setExpanded(true), []);
+  const collapse = useCallback(() => setExpanded(false), []);
+
+  const [shownFor, setShownFor] = useState({ visible, formKey });
+
+  if (shownFor.visible !== visible || shownFor.formKey !== formKey) {
+    setShownFor({ visible, formKey });
+    setExpanded(false);
+  }
 
   return (
     <BottomPanel
@@ -283,19 +334,25 @@ const FoodFormModal = ({
       onClose={onClose}
       dismissible
       canClose={canClose}
+      expanded={expanded}
+      onExpand={expandable ? expand : undefined}
+      onCollapse={collapse}
+      expandHint={common.details.pullUp}
     >
       <FoodForm
         key={formKey}
         title={title}
+        food={food}
         initialName={initialName}
-        initialFrequency={initialFrequency}
-        initialLevel={initialLevel}
         onSubmit={onSubmit}
+        onQuietSave={onQuietSave}
         onRemove={onRemove}
         onClose={onClose}
         scannable={scannable}
         guardRef={guardRef}
         creating={creating}
+        expanded={expanded}
+        setExpandable={setExpandable}
       />
     </BottomPanel>
   );
@@ -309,12 +366,6 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.inline,
     },
     nameField: { flex: 1, minWidth: 0 },
-    frequency: { gap: s.spacing.small },
-    frequencyToggle: {
-      alignSelf: "flex-start",
-      paddingVertical: s.spacing.hair,
-    },
-    frequencyPicker: { gap: s.spacing.small },
     actions: {
       flexDirection: "row",
       flexWrap: "wrap",

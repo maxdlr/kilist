@@ -7,11 +7,14 @@ import AnimationService from "@/services/animation";
 import PANEL_GLASS from "./panelGlass";
 import { GlassLayer, glassWith, type GlassSettings } from "@/components/elements/Glass";
 import PanelStroke from "./PanelStroke";
+import Press from "@/components/elements/Press";
+import { ThemedText } from "@/components/elements/ThemedText";
 import { PanelScrollContext } from "./panelScroll";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Dimensions,
+  Keyboard,
   Pressable,
   StyleSheet,
   View,
@@ -37,6 +40,8 @@ const DISMISS_DISTANCE = 120;
 const DISMISS_SHARE = 0.3;
 const DISMISS_VELOCITY = 900;
 const BOTTOM_ROOM = 32;
+const EXPAND_DISTANCE = 56;
+const EXPAND_VELOCITY = -700;
 
 const handoff: { owner: object | null; until: number } = {
   owner: null,
@@ -54,6 +59,10 @@ const BottomPanel = ({
   tall = false,
   veil = true,
   glass: glassOverride,
+  expanded = false,
+  onExpand,
+  onCollapse,
+  expandHint,
   children,
 }: {
   visible: boolean;
@@ -63,6 +72,10 @@ const BottomPanel = ({
   tall?: boolean;
   veil?: boolean;
   glass?: Partial<GlassSettings>;
+  expanded?: boolean;
+  onExpand?: () => void;
+  onCollapse?: () => void;
+  expandHint?: string;
   children: ReactNode;
 }) => {
   const skin = useSkin();
@@ -83,7 +96,14 @@ const BottomPanel = ({
   const scrollY = useSharedValue(0);
   const dragFrom = useSharedValue(-1);
   const closing = useSharedValue(false);
-  const latest = useRef({ visible, onClose, canClose });
+  const lift = useSharedValue(0);
+  const grow = useSharedValue(expanded ? 1 : 0);
+  const canExpand = useSharedValue(Boolean(onExpand) && !expanded);
+  const isExpanded = useSharedValue(expanded);
+  const keyboard = useSharedValue(0);
+  const morphing = useRef(false);
+  const fullHeight = WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top;
+  const latest = useRef({ visible, onClose, canClose, onExpand, onCollapse });
   const [self] = useState(() => ({}));
   const [isRendered, setIsRendered] = useState(visible);
   const [frame, setFrame] = useState({ width: 0, height: 0 });
@@ -93,8 +113,36 @@ const BottomPanel = ({
   }
 
   useEffect(() => {
-    latest.current = { visible, onClose, canClose };
-  }, [visible, onClose, canClose]);
+    latest.current = { visible, onClose, canClose, onExpand, onCollapse };
+  }, [visible, onClose, canClose, onExpand, onCollapse]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const shown = Keyboard.addListener("keyboardDidShow", (event) =>
+      keyboard.set(withTiming(event.endCoordinates.height + insets.bottom + BOTTOM_ROOM, AnimationService.config)),
+    );
+    const hidden = Keyboard.addListener("keyboardDidHide", () => keyboard.set(withTiming(0, AnimationService.config)));
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, [visible, keyboard, insets.bottom]);
+
+  const endMorph = useCallback(() => {
+    morphing.current = false;
+  }, []);
+
+  useEffect(() => {
+    canExpand.set(Boolean(onExpand) && !expanded);
+    isExpanded.set(expanded);
+    morphing.current = true;
+    grow.set(
+      withTiming(expanded ? 1 : 0, AnimationService.config, () => {
+        "worklet";
+        scheduleOnRN(endMorph);
+      }),
+    );
+  }, [expanded, onExpand, canExpand, isExpanded, grow, endMorph]);
 
   useFocusEffect(
     useCallback(
@@ -148,6 +196,9 @@ const BottomPanel = ({
     veilOpacity.set(withTiming(veil ? 1 : 0, AnimationService.config));
   }, [veil, veilOpacity]);
 
+  const expand = useCallback(() => latest.current.onExpand?.(), []);
+  const collapse = useCallback(() => latest.current.onCollapse?.(), []);
+
   const requestClose = useCallback(() => {
     if (latest.current.canClose && !latest.current.canClose()) {
       closing.set(false);
@@ -159,7 +210,7 @@ const BottomPanel = ({
 
   const pan = usePanGesture({
     enabled: visible,
-    activeOffsetY: [-1000, DRAG_START],
+    activeOffsetY: onExpand && !expanded ? [-DRAG_START, DRAG_START] : [-1000, DRAG_START],
     failOffsetX: [-24, 24],
     onUpdate: (event) => {
       if (scrollY.value > 0) {
@@ -168,15 +219,28 @@ const BottomPanel = ({
         return;
       }
       if (dragFrom.value < 0) dragFrom.set(event.translationY);
-      drag.set(Math.max(0, event.translationY - dragFrom.value));
+      const moved = event.translationY - dragFrom.value;
+      drag.set(Math.max(0, moved));
+      lift.set(canExpand.value ? Math.max(0, -moved) : 0);
     },
     onDeactivate: (event) => {
       const pulled = drag.value;
+      const lifted = lift.value;
       dragFrom.set(-1);
+      lift.set(0);
+      if (lifted > EXPAND_DISTANCE || (lifted > 0 && event.velocityY < EXPAND_VELOCITY)) {
+        scheduleOnRN(expand);
+        return;
+      }
       const limit = Math.min(
         DISMISS_DISTANCE,
         contentHeight.value * DISMISS_SHARE,
       );
+      if (isExpanded.value && (pulled > DISMISS_DISTANCE || (pulled > 0 && event.velocityY > DISMISS_VELOCITY))) {
+        drag.set(withTiming(0, AnimationService.config));
+        scheduleOnRN(collapse);
+        return;
+      }
       if (pulled > limit || (pulled > 0 && event.velocityY > DISMISS_VELOCITY)) {
         closing.set(true);
         scheduleOnRN(requestClose);
@@ -199,20 +263,21 @@ const BottomPanel = ({
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        requestClose();
+        if (expanded && latest.current.onCollapse) latest.current.onCollapse();
+        else requestClose();
         return true;
       },
     );
 
     return () => subscription.remove();
-  }, [visible, requestClose]);
+  }, [visible, requestClose, expanded]);
 
   const handleContentLayout = (event: LayoutChangeEvent) => {
     const measured = event.nativeEvent.layout.height;
     setFrame({ width: event.nativeEvent.layout.width, height: measured });
     const previous = contentHeight.get();
     contentHeight.set(measured);
-    if (!visible || measured <= previous) return;
+    if (morphing.current || isExpanded.get() || !visible || measured <= previous) return;
     offset.set(previous === 0 ? measured : offset.get() + measured - previous);
     offset.set(
       withDelay(
@@ -224,6 +289,13 @@ const BottomPanel = ({
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: offset.value + drag.value }],
+  }));
+  const growStyle = useAnimatedStyle(() => ({
+    minHeight: grow.value * Math.max(0, fullHeight - keyboard.value),
+  }));
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: 1 - Math.min(1, lift.value / EXPAND_DISTANCE) * 0.6,
+    transform: [{ translateY: -Math.min(lift.value, EXPAND_DISTANCE) * 0.15 }],
   }));
   const backdropStyle = useAnimatedStyle(() => ({
     opacity:
@@ -270,9 +342,10 @@ const BottomPanel = ({
           backing={skin.colors.ground}
         />
       )}
-      <View
+      <Animated.View
         onLayout={handleContentLayout}
         style={[
+          growStyle,
           styles.content,
           { paddingBottom: skin.spacing.section + insets.bottom + BOTTOM_ROOM },
           tall && { maxHeight: WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top },
@@ -284,10 +357,24 @@ const BottomPanel = ({
         ]}
       >
         {grip}
+        {expandHint && onExpand && !expanded && (
+          <Animated.View style={[styles.hint, hintStyle]}>
+            <Press
+              accessibilityRole="button"
+              accessibilityLabel={expandHint}
+              hitSlop={skin.spacing.small}
+              onPress={onExpand}
+            >
+              <ThemedText size={skin.type.caption} color={skin.panel.ink} style={styles.hintText}>
+                {expandHint}
+              </ThemedText>
+            </Press>
+          </Animated.View>
+        )}
         <PanelScrollContext.Provider value={{ pan, scrollY }}>
           <PanelSkin>{children}</PanelSkin>
         </PanelScrollContext.Provider>
-      </View>
+      </Animated.View>
       <PanelStroke width={frame.width} height={frame.height} />
     </Animated.View>
   );
@@ -335,6 +422,8 @@ const createStyles = (s: Skin) =>
       paddingHorizontal: s.spacing.gutter,
       paddingVertical: s.spacing.section,
     },
+    hint: { alignSelf: "center", marginTop: -s.spacing.small },
+    hintText: { opacity: 0.7, textAlign: "center" },
     grip: {
       alignSelf: "center",
       borderRadius: s.spacing.tight,

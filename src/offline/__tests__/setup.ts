@@ -26,6 +26,24 @@ beforeEach(() => {
     rhythm: { minPurchases: 3, keep: 8, share: 0.5, minDays: 2, sameBuyHours: 12 },
     tickets: { perSwipe: 10, speedBonus: 5, speedWindowMs: 2000, paidSwipesPerDay: 10, payWindowHours: 24 },
     shop: { snoozeHours: 24, sameTripMinutes: 30, suggestBelow: 0.625, buyBelow: 0.375 },
-    products: { maxBarcodes: 20, quantityLength: 40 },
+    products: { maxBarcodes: 20, quantityLength: 40, noteLength: 300 },
+    summary: {
+      minPurchases: 3,
+      maxSpread: 0.5,
+      staleFactor: 3,
+      staleExtraDays: 14,
+      buckets: [
+        { maxDays: 1.5, key: "daily", hedged: true },
+        { maxDays: 2.5, key: "otherDay", hedged: false },
+        { maxDays: 4.5, key: "twiceWeek", hedged: false },
+        { maxDays: 9, key: "weekly", hedged: false },
+        { maxDays: 12, key: "weekOrTwo", hedged: true },
+        { maxDays: 18, key: "twoWeeks", hedged: false },
+        { maxDays: 25, key: "threeWeeks", hedged: false },
+        { maxDays: 45, key: "monthly", hedged: false },
+        { maxDays: 75, key: "monthOrTwo", hedged: true },
+        { maxDays: 120, key: "fewMonths", hedged: true },
+      ],
+    },
   });
 });

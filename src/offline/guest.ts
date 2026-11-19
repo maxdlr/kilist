@@ -58,6 +58,7 @@ export const exportGuestState = (state: LocalState, importId: string) => {
       lastBoughtAt: food.lastBoughtAt ?? null,
       boughtDates: food.boughtDates ?? [],
       frequencyDays: food.frequencyDays ?? null,
+      note: food.note ?? null,
       onList: food.lists.length > 0,
       histories: food.histories,
     })),

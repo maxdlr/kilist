@@ -10,6 +10,7 @@ export type LocalFood = {
   icon?: string | null;
   barcodes?: string[];
   quantity?: string | null;
+  note?: string | null;
   aisle?: string | null;
   inStockScore: number;
   snoozedUntil?: string | null;

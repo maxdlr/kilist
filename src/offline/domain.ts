@@ -60,6 +60,16 @@ export const waitDaysFor = (food: Pick<LocalFood, "quantity" | "boughtDates" | "
 export const isBarcode = (value: unknown): value is string =>
   typeof value === "string" && /^\d{8,14}$/.test(value);
 
+const cleanText = (value: unknown, max: number): string | null | undefined => {
+  if (value === null) return null;
+  if (typeof value !== "string") return undefined;
+  return value.trim().slice(0, max) || null;
+};
+
+export const cleanNote = (value: unknown) => cleanText(value, rules().products.noteLength ?? 300);
+
+export const cleanQuantity = (value: unknown) => cleanText(value, rules().products.quantityLength);
+
 export const attachProduct = (food: LocalFood, product?: ScannedProduct | null) => {
   if (!product || typeof product !== "object") return;
   const { maxBarcodes, quantityLength } = rules().products;

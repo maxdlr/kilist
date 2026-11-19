@@ -8,6 +8,8 @@ import {
   suggestionKey,
   toLocalDay,
   attachProduct,
+  cleanNote,
+  cleanQuantity,
   setLevel,
 } from "./domain";
 import { foodKey } from "./foodNames";
@@ -19,6 +21,13 @@ const USERNAME_LENGTH = 30;
 const NO_REWARD: Reward = { earned: 0, bonus: 0, balance: null };
 
 const time = (value?: string | null) => (value ? Date.parse(value) : 0);
+
+const attachDetails = (food: LocalFood, payload: Record<string, unknown>) => {
+  const note = cleanNote(payload.note);
+  if (note) food.note = note;
+  const quantity = cleanQuantity(payload.quantity);
+  if (quantity) food.quantity = quantity;
+};
 
 const stockOf = (answer: string) => (answer === "in" ? true : answer === "out" ? false : null);
 
@@ -185,6 +194,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
         if (!twin.lists.includes(listId)) twin.lists.push(listId);
         attachProduct(twin, payload.product);
         if (isFrequencyDays(payload.frequencyDays)) twin.frequencyDays = payload.frequencyDays;
+        attachDetails(twin, payload);
         if (payload.needed === true) addHistory(twin, { isInStock: false, at });
         return twin;
       }
@@ -200,6 +210,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       };
       attachProduct(created, payload.product);
       if (isFrequencyDays(payload.frequencyDays)) created.frequencyDays = payload.frequencyDays;
+      attachDetails(created, payload);
       state.foods.push(created);
       if (payload.needed === true) addHistory(created, { isInStock: false, at });
       return created;
@@ -210,8 +221,13 @@ export const applyOp = (state: LocalState, op: Op): any => {
       if (!target) return null;
       if (payload.name !== undefined) target.name = payload.name;
       if (typeof payload.aisle === "string") target.aisle = payload.aisle;
-      if (payload.frequencyDays === null || isFrequencyDays(payload.frequencyDays)) {
-        target.frequencyDays = payload.frequencyDays;
+      const note = cleanNote(payload.note);
+      if (note !== undefined) target.note = note;
+      const quantity = cleanQuantity(payload.quantity);
+      if (quantity !== undefined) target.quantity = quantity;
+      const frequencyChanged = payload.frequencyDays === null || isFrequencyDays(payload.frequencyDays);
+      if (frequencyChanged) target.frequencyDays = payload.frequencyDays;
+      if (frequencyChanged || quantity !== undefined) {
         target.inStockScore = calculateScore(target.histories, target);
       }
       return target;

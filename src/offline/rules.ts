@@ -36,7 +36,14 @@ export type Rules = {
     payWindowHours: number;
   };
   shop: { snoozeHours: number; sameTripMinutes: number; suggestBelow: number; buyBelow?: number };
-  products: { maxBarcodes: number; quantityLength: number };
+  products: { maxBarcodes: number; quantityLength: number; noteLength?: number };
+  summary?: {
+    minPurchases: number;
+    maxSpread: number;
+    staleFactor: number;
+    staleExtraDays: number;
+    buckets: { maxDays: number; key: string; hedged: boolean }[];
+  };
   accounts?: {
     usernameMin: number;
     usernameMax: number;

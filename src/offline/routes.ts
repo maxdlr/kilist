@@ -260,6 +260,8 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
           ...(body.needed === true && { needed: true }),
           ...(body.product && typeof body.product === "object" && { product: body.product }),
           ...(isFrequencyDays(body.frequencyDays) && { frequencyDays: body.frequencyDays }),
+          ...(typeof body.note === "string" && { note: body.note }),
+          ...(typeof body.quantity === "string" && { quantity: body.quantity }),
         }),
       );
     },
@@ -275,6 +277,8 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
         ...((body.frequencyDays === null || isFrequencyDays(body.frequencyDays)) && {
           frequencyDays: body.frequencyDays,
         }),
+        ...((body.note === null || typeof body.note === "string") && { note: body.note }),
+        ...((body.quantity === null || typeof body.quantity === "string") && { quantity: body.quantity }),
       });
       return food ? toFood(food) : null;
     },
