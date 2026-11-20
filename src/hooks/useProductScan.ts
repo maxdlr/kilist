@@ -1,7 +1,7 @@
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import useHousehold from "@/providers/HouseholdProvider";
-import useToast from "@/providers/ToastProvider";
+import { problemOf, type Problem } from "@/utils/problem";
 import axios from "@/services/axios";
 import type { FoodType } from "@/types/model";
 
@@ -9,9 +9,7 @@ export type ScanResult = { name: string; product: ScannedProduct; conflicts: str
 
 const useProductScan = () => {
   const { household } = useHousehold();
-  const { showToast } = useToast();
-
-  return async (scanned: string): Promise<ScanResult | null> => {
+  return async (scanned: string): Promise<ScanResult | Problem> => {
     const barcode = scanned.replace(/\D/g, "");
     const { data: known } = await axios
       .get<FoodType | null>("foods/find", { params: { barcode } })
@@ -29,9 +27,8 @@ const useProductScan = () => {
         product: { barcode, icon: data.icon, quantity: data.quantity, aisle: data.aisle },
         conflicts: (data.tags ?? []).filter((tag) => avoided.includes(tag)),
       };
-    } catch (error: any) {
-      showToast(error?.response?.data?.message || common.shop.scanFailed);
-      return null;
+    } catch (error) {
+      return problemOf(error, common.feedback.notFound);
     }
   };
 };

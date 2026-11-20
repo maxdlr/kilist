@@ -1,4 +1,6 @@
+import { FeedbackCard, type Feedback } from "@/components/elements/Feedback";
 import KilButton from "@/components/elements/KilButton";
+import { isProblem } from "@/utils/problem";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
@@ -25,13 +27,22 @@ const ProductScanner = ({
   const findProduct = useProductScan();
   const [searching, setSearching] = useState(false);
   const [warning, setWarning] = useState<ScanResult | null>(null);
+  const [problem, setProblem] = useState<Feedback | null>(null);
 
   const scanned = async (barcode: string) => {
     setSearching(true);
+    setProblem(null);
     const result = await findProduct(barcode);
     setSearching(false);
-    if (!result) onCancel();
-    else if (result.conflicts.length > 0) setWarning(result);
+    if (isProblem(result)) {
+      const offline = result.message === common.needsConnection;
+      setProblem({
+        tone: offline ? "note" : "error",
+        title: offline ? common.needsConnection : common.feedback.notFound,
+        body: offline ? undefined : common.feedback.notFoundLine,
+        action: { label: common.feedback.typeName, onPress: onCancel },
+      });
+    } else if (result.conflicts.length > 0) setWarning(result);
     else onFound(result);
   };
 
@@ -72,6 +83,7 @@ const ProductScanner = ({
       </Title>
       <ThemedText color={skin.panel.ink}>{searching ? T.scanSearching : T.scanLine}</ThemedText>
       {!searching && <QrCodeScanner barcodeTypes={PRODUCT_CODES} notice={T.scanCamera} onScanned={scanned} />}
+      <FeedbackCard feedback={problem} collapse={skin.spacing.stack} />
       <KilButton
         height={skin.size.button.md}
         fontSize={skin.type.lead}

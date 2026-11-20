@@ -1,6 +1,7 @@
 import { BarcodeIcon } from "@/components/icons";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
+import { ActionNote, FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import NameSuggestions from "@/components/elements/NameSuggestions";
@@ -11,7 +12,6 @@ import type { ShopAddAction, ShopRun } from "@/hooks/screens/useShopRun";
 import type { ScanResult } from "@/hooks/useProductScan";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import { useEffect, useRef, useState, type ComponentRef } from "react";
@@ -24,8 +24,8 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const T = common.shop;
-  const { showToast } = useToast();
-  const [name, setName] = useState("");
+  const form = useFormFeedback(["name"] as const);
+  const [name, setNameValue] = useState("");
   const [existing, setExisting] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -52,17 +52,24 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
     };
   }, [name, findFood]);
 
+  const setName = (next: string) => {
+    setNameValue(next);
+    form.touch("name");
+  };
+
   const submit = async (action: ShopAddAction) => {
-    if (busy) return;
+    if (busy || !run.inventoryReady) return;
     if (!hasName) {
-      showToast(T.addMissing);
+      form.fail("name", T.addMissing);
+      nameInput.current?.focus();
       return;
     }
     setBusy(true);
-    const added = await run.addFood(name.trim(), action, found?.product);
+    const failed = await run.addFood(name.trim(), action, found?.product);
     setBusy(false);
-    if (added) run.closePanel();
+    if (form.settle(failed, common.feedback.addFailed(name.trim()))) run.closePanel();
   };
+  const held = run.inventoryReady ? null : common.feedback.inventoryWait;
 
   if (scanning) {
     return (
@@ -90,6 +97,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
             labelColor={skin.panel.ink}
             value={name}
             onChangeText={setName}
+            error={form.of("name")}
           />
         </View>
         <KilButton
@@ -101,6 +109,8 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
         />
       </View>
       <NameSuggestions query={name} onPick={setName} />
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
+      <ActionNote reason={held} collapse={skin.spacing.stack} />
       {!run.isStarted ? (
         <>
           <ThemedText size={12} color={skin.panel.ink} style={styles.note}>
@@ -112,6 +122,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
             variant={hasName ? "primary" : skin.panel.secondary}
             label={T.addToList}
             onTouch={() => submit("list")}
+            disabled={Boolean(held)}
           />
         </>
       ) : (
@@ -127,6 +138,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
               variant={skin.panel.secondary}
               label={T.addLater}
               onTouch={() => submit("later")}
+              disabled={Boolean(held)}
             />
             <KilButton
               flex={1}
@@ -135,6 +147,7 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
               variant={hasName ? "primary" : skin.panel.secondary}
               label={T.addBought}
               onTouch={() => submit("buy")}
+              disabled={Boolean(held)}
             />
           </View>
         </>

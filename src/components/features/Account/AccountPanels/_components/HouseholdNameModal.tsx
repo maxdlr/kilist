@@ -7,7 +7,8 @@ import common from "@/i18n/common";
 import useHousehold from "@/providers/HouseholdProvider";
 import useMark from "@/providers/MarkProvider";
 import { useSkin } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
+import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
+import { problemOf } from "@/utils/problem";
 import { useState } from "react";
 
 const NAME_LENGTH = 40;
@@ -16,7 +17,7 @@ const HouseholdNameForm = ({ current, onClose }: { current: string; onClose: () 
   const skin = useSkin();
   const T = common.householdRename;
   const { renameHousehold } = useHousehold();
-  const { showToast } = useToast();
+  const form = useFormFeedback(["name"] as const);
   const { mark } = useMark();
   const [name, setName] = useState(current);
 
@@ -25,8 +26,8 @@ const HouseholdNameForm = ({ current, onClose }: { current: string; onClose: () 
       await renameHousehold(name.trim());
       onClose();
       mark("saved", common.marks.saved);
-    } catch (err: any) {
-      showToast(err?.response?.data?.message || common.unexpected);
+    } catch (err) {
+      form.settle(problemOf(err), common.feedback.saveFailed);
     }
   };
 
@@ -44,8 +45,13 @@ const HouseholdNameForm = ({ current, onClose }: { current: string; onClose: () 
         labelColor={skin.panel.ink}
         maxLength={NAME_LENGTH}
         value={name}
-        onChangeText={setName}
+        onChangeText={(next) => {
+          setName(next);
+          form.touch("name");
+        }}
+        error={form.of("name")}
       />
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
       <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={skin.copy.common.save} onTouch={save} />
     </>
   );

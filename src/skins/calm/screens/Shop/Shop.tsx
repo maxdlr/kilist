@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import Press from "@/components/elements/Press";
 import EditFoodPanel from "@/components/features/Inventory/EditFoodPanel";
 import ShopPanels from "@/components/features/Shop/ShopPanels";
@@ -13,8 +14,8 @@ import { FoodType } from "@/types/model";
 import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, View } from "react-native";
-import { PlusIcon, XmarkIcon } from "@/components/icons";
+import { AccessibilityInfo, RefreshControl, StyleSheet, View } from "react-native";
+import { PlusIcon, UndoIcon, XmarkIcon } from "@/components/icons";
 import Animated from "react-native-reanimated";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
@@ -38,6 +39,7 @@ const CalmShop = () => {
   const [editing, setEditing] = useState<FoodType | null>(null);
   const [basket, setBasket] = useState<FoodType[]>([]);
   const [later, setLater] = useState<FoodType[]>([]);
+  const [returned, setReturned] = useState<{ id: number; side: "left" | "right" } | null>(null);
   const [result, setResult] = useState<{ bought: number; left: number } | null>(
     null,
   );
@@ -69,14 +71,20 @@ const CalmShop = () => {
     return () => clearTimeout(timer);
   }, [canNudge, activity]);
 
-  const tick = (food: FoodType) => {
+  const tick = async (food: FoodType) => {
+    setReturned(null);
     setBasket((list) => [...list, food]);
-    run.buy(food.id);
+    const done = await run.buy(food.id);
+    if (!done) setBasket((list) => list.filter((entry) => entry.id !== food.id));
+    return done;
   };
 
-  const postpone = (food: FoodType) => {
+  const postpone = async (food: FoodType) => {
+    setReturned(null);
     setLater((list) => [...list, food]);
-    run.snooze(food.id);
+    const done = await run.snooze(food.id);
+    if (!done) setLater((list) => list.filter((entry) => entry.id !== food.id));
+    return done;
   };
 
   const close = () => {
@@ -108,8 +116,27 @@ const CalmShop = () => {
     />
   );
 
-  const dockWith = (label: string, onPress: () => void) => (
+  const undoLast = async () => {
+    const undone = await run.undo();
+    if (!undone) return;
+    const name = [...basket, ...later].find((food) => food.id === undone.foodId)?.name;
+    setBasket((list) => list.filter((food) => food.id !== undone.foodId));
+    setLater((list) => list.filter((food) => food.id !== undone.foodId));
+    setReturned({ id: undone.foodId, side: undone.action === "buy" ? "right" : "left" });
+    if (name) AccessibilityInfo.announceForAccessibility(common.shop.undone(name));
+  };
+
+  const dockWith = (label: string, onPress: () => void, withUndo = false) => (
     <>
+      {withUndo && (
+        <CButton
+          variant="secondary"
+          accessibilityLabel={common.shop.undo}
+          onPress={undoLast}
+          disabled={!run.canUndo}
+          icon={(color) => <UndoIcon size={skin.size.icon.action} color={color} strokeWidth={1.8} />}
+        />
+      )}
       <CButton
         variant="secondary"
         accessibilityLabel={common.shop.add}
@@ -203,6 +230,7 @@ const CalmShop = () => {
               contentContainerStyle={styles.sections}
               refreshControl={refresher}
             >
+              <FeedbackSlot place="list" collapse={skin.spacing.section} />
               {sections.map((section) => (
                 <View key={section.id} style={styles.section}>
                   <View style={styles.sectionHead}>
@@ -272,7 +300,9 @@ const CalmShop = () => {
           title={skin.copy.shop.emptyTitle}
           line={skin.copy.shop.emptyLine}
           onRefresh={run.refreshEmpty}
-        />
+        >
+          <FeedbackSlot place="list" />
+        </CalmMessage>
         <ShopPanels run={run} />
       </View>
     );
@@ -283,7 +313,7 @@ const CalmShop = () => {
       style={styles.flex}
       onTouchStart={() => setTouches((count) => count + 1)}
     >
-      <Screen padded={false} glass glassLook={GLASS} dock={dockWith(common.shop.finish, run.finish)}>
+      <Screen padded={false} glass glassLook={GLASS} dock={dockWith(common.shop.finish, run.finish, true)}>
         <View style={styles.head}>
           <View style={styles.titleRow}>
             <CText
@@ -318,6 +348,7 @@ const CalmShop = () => {
           contentContainerStyle={styles.list}
           refreshControl={refresher}
         >
+          <FeedbackSlot place="list" />
           {run.suggestion && (
             <View style={styles.next}>
               <CText size={skin.type.caption} color={C.textSoft}>
@@ -326,8 +357,11 @@ const CalmShop = () => {
               <SwipeRow
                 food={run.suggestion}
                 nudging={nudging}
+                returnFrom={returned?.id === run.suggestion.id ? returned.side : undefined}
                 onBuy={() => tick(run.suggestion!)}
                 onLater={() => postpone(run.suggestion!)}
+                error={run.rowError(run.suggestion.id)?.message}
+                onRetry={() => tick(run.suggestion!)}
               />
             </View>
           )}
@@ -336,8 +370,11 @@ const CalmShop = () => {
               key={food.id}
               food={food}
               nudging={nudging && !run.suggestion && index === 0}
+              returnFrom={returned?.id === food.id ? returned.side : undefined}
               onBuy={() => tick(food)}
               onLater={() => postpone(food)}
+              error={run.rowError(food.id)?.message}
+              onRetry={() => tick(food)}
             />
           ))}
           {basket.length > 0 && (

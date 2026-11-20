@@ -1,4 +1,7 @@
+import { FeedbackSlot, Presence } from "@/components/elements/Feedback";
 import { SwipeGame } from "@/hooks/screens/useSwipeGame";
+import common from "@/i18n/common";
+import { caseFor } from "@/skins";
 import { DrawnMark } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
@@ -16,6 +19,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
   const styles = useSkinStyles(createStyles);
   const recap = game.recap;
   const added = recap?.added ?? [];
+  const kept = recap?.kept ?? [];
   const [touches, setTouches] = useState(0);
 
   return (
@@ -82,7 +86,13 @@ const Recap = ({ game }: { game: SwipeGame }) => {
             </View>
             {recap ? (
               <CText size={skin.type.body} color={C.textSoft}>
-                {added.length ? T.play.added(added.length) : T.play.nothingNew}
+                {recap.checking
+                  ? common.feedback.checking
+                  : added.length
+                    ? T.play.added(added.length)
+                    : kept.length
+                      ? common.feedback.recapKept
+                      : T.play.nothingNew}
               </CText>
             ) : (
               <CText size={skin.type.body} color={C.textSoft}>
@@ -90,7 +100,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
               </CText>
             )}
           </View>
-          {added.length > 0 && (
+          <Presence visible={added.length > 0} collapse={skin.spacing.section}>
             <View>
               {added.map((food) => (
                 <View key={food.id} style={styles.row}>
@@ -99,7 +109,37 @@ const Recap = ({ game }: { game: SwipeGame }) => {
                 </View>
               ))}
             </View>
-          )}
+          </Presence>
+          <Presence visible={kept.length > 0} collapse={skin.spacing.section}>
+            <View style={styles.kept}>
+              {added.length > 0 && (
+                <CText weight="medium" size={skin.type.label} color={C.text}>
+                  {common.feedback.recapKept}
+                </CText>
+              )}
+              <CText size={skin.type.label} color={C.textSoft}>
+                {common.feedback.recapKeptLine}
+              </CText>
+              <View>
+                {kept.map((food) => (
+                  <View key={food.id} style={styles.row}>
+                    <Dot color={skin.colors.levels[3]} />
+                    <CText size={skin.type.body} style={styles.flex}>
+                      {food.name}
+                    </CText>
+                    <CButton
+                      variant="secondary"
+                      small
+                      label={common.feedback.addAnyway}
+                      accessibilityLabel={`${common.feedback.addAnyway} ${caseFor(skin, food.name)}`}
+                      onPress={() => game.addAnyway(food)}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
+          </Presence>
+          <FeedbackSlot place="play" collapse={skin.spacing.section} />
         </GlassScrollView>
       </Screen>
     </View>
@@ -118,6 +158,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     doneHead: { alignItems: "center", flexDirection: "row" },
     tip: { alignItems: "flex-end", flex: 1, marginLeft: s.spacing.small },
     allSorted: { flex: 1, justifyContent: "center" },
+    kept: { gap: s.spacing.small },
     row: {
       alignItems: "center",
       borderTopColor: C.line,

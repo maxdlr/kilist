@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import V from "@/skins/versus/text";
@@ -13,7 +14,7 @@ import { FoodType } from "@/types/model";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { XmarkIcon } from "@/components/icons";
+import { UndoIcon, XmarkIcon } from "@/components/icons";
 import { versusPalette as P } from "@/skins/versus/theme/palette";
 import { Card, Kicker, Screen, VButton, VText } from "@/skins/versus/components";
 import { VersusEmpty, VersusLoading } from "../States";
@@ -86,12 +87,23 @@ const VersusShop = () => {
 
   const buy = async (food: FoodType) => {
     setBought((list) => [...list, food]);
-    await run.buy(food.id);
+    const done = await run.buy(food.id);
+    if (!done) setBought((list) => list.filter((entry) => entry.id !== food.id));
+    return done;
   };
 
   const skipForNow = async (food: FoodType) => {
     setLater((list) => [...list, food]);
-    await run.snooze(food.id);
+    const done = await run.snooze(food.id);
+    if (!done) setLater((list) => list.filter((entry) => entry.id !== food.id));
+    return done;
+  };
+
+  const undoLast = async () => {
+    const undone = await run.undo();
+    if (!undone) return;
+    setBought((list) => list.filter((food) => food.id !== undone.foodId));
+    setLater((list) => list.filter((food) => food.id !== undone.foodId));
   };
 
   const conclude = () => {
@@ -147,18 +159,26 @@ const VersusShop = () => {
 
   if (run.isEmpty && bought.length === 0 && later.length === 0) {
     return (
-      <VersusEmpty
-        kicker={V.shop.kicker}
-        title={V.shop.emptyTitle}
-        line={V.shop.emptyLine}
-        action={{ label: V.home.raceToday, onPress: () => router.navigate("/swipe") }}
-      />
+      <View style={styles.flex}>
+        <VersusEmpty
+          kicker={V.shop.kicker}
+          title={V.shop.emptyTitle}
+          line={V.shop.emptyLine}
+          action={{ label: V.home.raceToday, onPress: () => router.navigate("/swipe") }}
+        />
+        <View style={styles.problemFloat}>
+          <FeedbackSlot place="list" />
+        </View>
+      </View>
     );
   }
 
   if (!run.isStarted) {
     return (
       <View style={styles.flex}>
+        <View style={styles.problemFloat}>
+          <FeedbackSlot place="list" />
+        </View>
         <StartLine
           foods={run.preview}
           record={record}
@@ -180,6 +200,13 @@ const VersusShop = () => {
       padded={false}
       dock={
         <View style={styles.actions}>
+          <VButton
+            variant="secondary"
+            accessibilityLabel={common.shop.undo}
+            onPress={undoLast}
+            disabled={!run.canUndo}
+            icon={(color) => <UndoIcon size={skin.size.icon.action} color={color} strokeWidth={2} />}
+          />
           <VButton flex={1} variant="secondary" label={common.shop.add} onPress={run.openAdd} />
           <VButton flex={1.6} label={allDone ? V.shop.stopClock : V.shop.finish(remaining.length)} onPress={run.finish} />
         </View>
@@ -225,14 +252,28 @@ const VersusShop = () => {
         <VText size={skin.type.caption} color={P.muted}>{`${V.shop.bought} →`}</VText>
       </View>
       <ScrollView style={styles.flex} contentContainerStyle={styles.list}>
+        <FeedbackSlot place="list" />
         {run.suggestion && (
           <View style={styles.next}>
             <VText size={skin.type.caption} color={P.muted}>{V.shop.usuallyNext}</VText>
-            <SwipeRow food={run.suggestion} onBuy={() => buy(run.suggestion!)} onLater={() => skipForNow(run.suggestion!)} />
+            <SwipeRow
+              food={run.suggestion}
+              onBuy={() => buy(run.suggestion!)}
+              onLater={() => skipForNow(run.suggestion!)}
+              error={run.rowError(run.suggestion.id)?.message}
+              onRetry={() => buy(run.suggestion!)}
+            />
           </View>
         )}
         {run.rows.map((food) => (
-          <SwipeRow key={food.id} food={food} onBuy={() => buy(food)} onLater={() => skipForNow(food)} />
+          <SwipeRow
+            key={food.id}
+            food={food}
+            onBuy={() => buy(food)}
+            onLater={() => skipForNow(food)}
+            error={run.rowError(food.id)?.message}
+            onRetry={() => buy(food)}
+          />
         ))}
         {bought.map((food) => (
           <Row key={`bought-${food.id}`} food={food} done />
@@ -248,6 +289,7 @@ export default VersusShop;
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    problemFloat: { left: s.spacing.gutter, position: "absolute", right: s.spacing.gutter, top: s.spacing.page * 2, zIndex: 2 },
     flex: { flex: 1, minWidth: 0 },
     between: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
     centered: { alignItems: "center", gap: s.spacing.tight, paddingTop: s.spacing.section },

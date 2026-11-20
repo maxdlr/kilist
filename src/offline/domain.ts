@@ -148,6 +148,12 @@ export const shopCandidates = (foods: LocalFood[], now: number) => {
   );
 };
 
+export const joinOpenRun = (state: LocalState, food: LocalFood, now: number) => {
+  const run = state.openShopList;
+  if (!run || run.startFoodIds.includes(food.id)) return;
+  if (shopCandidates([food], now).length > 0) run.startFoodIds.push(food.id);
+};
+
 export const remainingShopFoods = (foods: LocalFood[], list: LocalShopList, now: number) => {
   const byId = new Map(foods.map((food) => [food.id, food]));
   return list.startFoodIds

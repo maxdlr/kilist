@@ -29,6 +29,7 @@ const LoginForm = ({ flow, onForgot }: { flow: AuthFlow; onForgot: () => void })
         autoCapitalize="none"
         value={flow.username}
         onChangeText={flow.setUsername}
+        error={flow.fieldError("username")}
       />
       <FormInput
         placeholder={skin.copy.placeholders.password}
@@ -37,6 +38,7 @@ const LoginForm = ({ flow, onForgot }: { flow: AuthFlow; onForgot: () => void })
         onSubmitEditing={flow.submit}
         value={flow.password}
         onChangeText={flow.setPassword}
+        error={flow.fieldError("password")}
       />
       <KilButton
         variant="ghost"

@@ -1,3 +1,4 @@
+import { feedbackLook } from "../feedback";
 import type { SkinSource } from "../types";
 import roastCopy from "./copy";
 
@@ -89,6 +90,14 @@ const roast: SkinSource = {
       opacity: 0.3,
     },
   },
+  feedback: feedbackLook(
+    { ink: white, soft: "#B0B0B0", line: white, danger: orange, success: acid },
+    { radius: 0, border: 3, edge: 6 },
+    {
+      card: { error: { fill: orange, line: ink, ink, soft: ink, icon: ink } },
+      field: { fill: orange, line: orange, message: orange },
+    },
+  ),
   panel: {
     fill: ink,
     ink: white,

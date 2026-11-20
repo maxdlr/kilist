@@ -6,27 +6,33 @@ import { Lang, LANGS, LANGUAGE_NAMES } from "@/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
-import useToast from "@/providers/ToastProvider";
+import { FeedbackCard, type Feedback } from "@/components/elements/Feedback";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 const LanguageModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const { choice, setLanguage } = useLanguage();
-  const { showToast } = useToast();
+  const [problem, setProblem] = useState<Feedback | null>(null);
   const options: { value: Lang | null; label: string }[] = [
     { value: null, label: common.languagePhone },
     ...LANGS.map((lang) => ({ value: lang, label: LANGUAGE_NAMES[lang] })),
   ];
 
-  const pick = async (value: Lang | null) => {
+  const close = () => {
+    setProblem(null);
     onClose();
-    if (value === choice) return;
-    if (!(await setLanguage(value))) showToast(common.unexpected);
+  };
+
+  const pick = async (value: Lang | null) => {
+    if (value === choice) return close();
+    if (await setLanguage(value)) return close();
+    setProblem({ tone: "error", title: common.feedback.saveFailed, body: common.feedback.flippedBack });
   };
 
   return (
-    <BottomPanel visible={visible} onClose={onClose} dismissible>
+    <BottomPanel visible={visible} onClose={close} dismissible>
       <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
         {common.language}
       </Title>
@@ -46,6 +52,7 @@ const LanguageModal = ({ visible, onClose }: { visible: boolean; onClose: () => 
           ))}
         </View>
       </ButtonKindOverride.Provider>
+      <FeedbackCard feedback={problem} collapse={skin.spacing.stack} />
     </BottomPanel>
   );
 };

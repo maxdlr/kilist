@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import SuggestionStep from "@/components/features/Play/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import common from "@/i18n/common";
@@ -93,9 +94,18 @@ const SwipeFoodGame = () => {
           )}
           <CashOut earned={game.earned} bonus={game.bonus} swipes={position} />
           <Title size={skin.type.title} lines={2} color={skin.colors.onGround} header={false}>
-            {game.outFoods.length ? copy.overWelcome : copy.overNothing}
+            {caseFor(
+              skin,
+              game.recap?.checking
+                ? common.feedback.checking
+                : (game.recap?.added.length ?? 0) > 0
+                  ? copy.overWelcome
+                  : (game.recap?.kept.length ?? 0) > 0
+                    ? common.feedback.recapKept
+                    : copy.overNothing,
+            )}
           </Title>
-          {game.outFoods.map((food) => (
+          {(game.recap?.added ?? []).map((food) => (
             <View key={food.id} style={styles.outFood}>
               <Title
                 size={skin.type.headline}
@@ -109,6 +119,20 @@ const SwipeFoodGame = () => {
               <FoodIcon name={food.icon} size={skin.size.icon.row} />
             </View>
           ))}
+          {(game.recap?.kept.length ?? 0) > 0 && (
+            <ThemedText size={skin.type.body} color={skin.colors.muted}>
+              {caseFor(skin, common.feedback.recapKeptLine)}
+            </ThemedText>
+          )}
+          {(game.recap?.kept ?? []).map((food) => (
+            <View key={food.id} style={styles.outFood}>
+              <Title size={skin.type.headline} lines={1} color={skin.colors.onGround} header={false} style={styles.flex}>
+                {caseFor(skin, food.name)}
+              </Title>
+              <KilButton small label={caseFor(skin, common.feedback.addAnyway)} onTouch={() => game.addAnyway(food)} />
+            </View>
+          ))}
+          <FeedbackSlot place="play" />
           <ThemedText size={skin.type.body} color={skin.colors.onGround}>
             {copy.overNext(game.level + 1)}
           </ThemedText>
@@ -168,6 +192,9 @@ const SwipeFoodGame = () => {
               </View>
             </View>
           )}
+        </View>
+        <View style={styles.problem}>
+          <FeedbackSlot place="play" />
         </View>
         <Dock row>
           <KilButton
@@ -240,13 +267,18 @@ const SwipeFoodGame = () => {
 
   if (screen === "empty") {
     return (
-      <EmptyData
-        label={copy.emptyLabel}
-        title={copy.emptyTitle}
-        line={copy.emptyLine}
-        fill={skin.colors.accent}
-        onRefresh={game.refreshFoods}
-      />
+      <View style={styles.flex}>
+        <EmptyData
+          label={copy.emptyLabel}
+          title={copy.emptyTitle}
+          line={copy.emptyLine}
+          fill={skin.colors.accent}
+          onRefresh={game.refreshFoods}
+        />
+        <View style={styles.problemFloat}>
+          <FeedbackSlot place="play" />
+        </View>
+      </View>
     );
   }
 
@@ -282,6 +314,8 @@ export default SwipeFoodGame;
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    problem: { paddingHorizontal: s.spacing.gutter },
+    problemFloat: { bottom: s.spacing.page * 2, left: s.spacing.gutter, position: "absolute", right: s.spacing.gutter },
     flex: {
       flex: 1,
     },

@@ -1,4 +1,5 @@
 import BottomPanel from "@/components/elements/BottomPanel";
+import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import NameSuggestions from "@/components/elements/NameSuggestions";
@@ -9,10 +10,10 @@ import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import { summarize } from "@/offline/summary";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
 import type { FoodType } from "@/types/model";
+import type { Problem } from "@/utils/problem";
 import {
   useCallback,
   useEffect,
@@ -62,7 +63,7 @@ const FoodForm = ({
   food?: FoodType | null;
   initialName: string;
   scannable: boolean;
-  onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onSubmit: (data: FoodFormData) => Promise<Problem | null>;
   onQuietSave?: (changes: FoodDetailChanges) => void;
   onRemove?: () => void;
   onClose: () => void;
@@ -73,8 +74,8 @@ const FoodForm = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.inventory;
-  const { showToast } = useToast();
-  const [name, setName] = useState(initialName);
+  const form = useFormFeedback(["name"] as const);
+  const [name, setNameValue] = useState(initialName);
   const [scanning, setScanning] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [product, setProduct] = useState<ScannedProduct | undefined>();
@@ -160,9 +161,15 @@ const FoodForm = ({
     flush(key, null);
   };
 
+  const setName = (next: string) => {
+    setNameValue(next);
+    form.touch("name");
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
-      showToast(skin.copy.errors.nameMissing);
+      form.fail("name", skin.copy.errors.nameMissing);
+      nameInput.current?.focus();
       return;
     }
     const details: FoodDetailChanges = creating
@@ -172,8 +179,8 @@ const FoodForm = ({
           ...(textOf(values.note) && { note: textOf(values.note) }),
         }
       : {};
-    const success = await onSubmit({ name: name.trim(), ...(product && { product }), ...details });
-    if (success) onClose();
+    const failed = await onSubmit({ name: name.trim(), ...(product && { product }), ...details });
+    if (form.settle(failed, creating ? common.feedback.addFailed(name.trim()) : common.feedback.saveFailed)) onClose();
   };
 
   if (confirming) {
@@ -250,6 +257,7 @@ const FoodForm = ({
             labelColor={skin.panel.ink}
             value={name}
             onChangeText={setName}
+            error={form.of("name")}
           />
         </View>
         {scannable && (
@@ -264,6 +272,8 @@ const FoodForm = ({
       </View>
       {creating && <NameSuggestions query={name} onPick={setName} />}
       {sentence && <FoodSummary parts={sentence} />}
+
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
 
       <View style={styles.actions}>
         {onRemove && (
@@ -280,9 +290,8 @@ const FoodForm = ({
           flex={1}
           height={skin.size.button.md}
           fontSize={skin.type.lead}
-          label={skin.copy.common.save}
+          label={form.problem ? common.feedback.retry : skin.copy.common.save}
           onTouch={handleSubmit}
-          disabled={!name.trim()}
         />
       </View>
     </>
@@ -309,7 +318,7 @@ const FoodFormModal = ({
   formKey?: string | number;
   food?: FoodType | null;
   initialName?: string;
-  onSubmit: (data: FoodFormData) => Promise<boolean>;
+  onSubmit: (data: FoodFormData) => Promise<Problem | null>;
   onQuietSave?: (changes: FoodDetailChanges) => void;
   onRemove?: () => void;
   onClose: () => void;

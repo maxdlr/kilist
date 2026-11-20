@@ -29,7 +29,7 @@ const FoodPanels = ({ shelf }: { shelf: InventoryShelf }) => {
         title={copy.editTitle(editingFood ? caseFor(skin, editingFood.name) : "")}
         food={editingFood}
         onSubmit={async (data) => {
-          if (!editingFood) return false;
+          if (!editingFood) return null;
           return shelf.editFood(editingFood.id, data);
         }}
         onQuietSave={(changes) => {

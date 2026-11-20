@@ -4,7 +4,9 @@ import useSwipeFoods, { SwipeReward } from "@/providers/SwipeFoodsProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";
 import useMark from "@/providers/MarkProvider";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
+import { putFoodLevel } from "@/utils/foodLevel";
+import { problemOf } from "@/utils/problem";
 import axios from "@/services/axios";
 import { caseFor } from "@/skins";
 import common from "@/i18n/common";
@@ -29,7 +31,7 @@ export type SwipeGameScreen = "loading" | "start" | "play" | "done" | "closed" |
 const useSwipeGame = () => {
   const tickets = useTickets();
   const skin = useSkin();
-  const { showToast } = useToast();
+  const report = useReportFeedback();
   const { mark } = useMark();
   const [removing, setRemoving] = useState<FoodType | null>(null);
   const [mode, setMode] = useState<SwipeMode>("daily");
@@ -195,13 +197,53 @@ const useSwipeGame = () => {
     collectRef.current = collect;
   });
 
-  const finishRound = (added: FoodType[]) => {
+  const listedIds = async () => {
+    const { data: openId } = await axios.get<number | null>("shop-list/open");
+    const foods =
+      typeof openId === "number"
+        ? (await axios.get<{ foods: FoodType[] }>(`shop-list/${openId}`)).data?.foods
+        : (await axios.get<FoodType[]>("shop-list/preview")).data;
+    return new Set((foods ?? []).map((food) => food.id));
+  };
+
+  const checkRecap = async (out: FoodType[]) => {
+    try {
+      const listed = await listedIds();
+      setRoundRecap({
+        day: today,
+        added: out.filter((food) => listed.has(food.id)),
+        kept: out.filter((food) => !listed.has(food.id)),
+        checking: false,
+      });
+    } catch {
+      setRoundRecap({ day: today, added: out, kept: [], checking: false });
+    }
+  };
+
+  const finishRound = (out: FoodType[]) => {
     setFinishedAt(Date.now());
     setPhase("done");
-    setRoundRecap({ day: today, added });
+    setRoundRecap({ day: today, added: [], kept: [], checking: out.length > 0 });
     Promise.allSettled(pendingUpdates.current)
+      .then(() => checkRecap(out))
       .then(completeSession)
       .then(tickets.refresh);
+  };
+
+  const addAnyway = async (food: FoodType) => {
+    try {
+      await putFoodLevel(food.id, 1);
+      report("play", null);
+    } catch (error) {
+      report("play", {
+        tone: "error",
+        title: common.feedback.addFailed(caseFor(skin, food.name)),
+        body: problemOf(error).message,
+        action: { label: common.feedback.retry, onPress: () => addAnyway(food) },
+      });
+      return;
+    }
+    if (recap) await checkRecap([...recap.added, ...recap.kept]);
   };
 
   const handleSwipe = (food: FoodType, direction: SwipeDirection) => {
@@ -245,10 +287,16 @@ const useSwipeGame = () => {
       const { data: list } = await axios.get<ListType>("lists/read?main=true");
       if (!list?.id) throw new Error("no list");
       await axios.put(`lists/${list.id}/remove-foods`, { foodIds: [food.id] });
-    } catch {
-      showToast(common.unexpected);
+    } catch (error) {
+      report("play", {
+        tone: "error",
+        title: common.feedback.removeFailed(1),
+        body: problemOf(error).message,
+        action: { label: common.feedback.retry, onPress: () => remove(food) },
+      });
       return;
     }
+    report("play", null);
     mark("removed", common.marks.removed(1));
     const isLast = foods?.length === 1;
     swipe(food.id);
@@ -311,6 +359,7 @@ const useSwipeGame = () => {
     isReplay: mode === "replay",
     mode,
     recap,
+    addAnyway,
     handleSwipe,
     canUndo,
     undo,

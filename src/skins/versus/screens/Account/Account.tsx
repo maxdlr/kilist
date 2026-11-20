@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import common from "@/i18n/common";
 import V from "@/skins/versus/text";
 import AccountPanels from "@/components/features/Account/AccountPanels";
@@ -59,6 +60,7 @@ const VersusAccount = () => {
               </View>
             )}
           </View>
+          <FeedbackSlot place="account" />
 
           {solo ? (
             <Card dashed line={P.you}>

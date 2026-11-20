@@ -1,24 +1,13 @@
-import { ThemedText } from "@/components/elements/ThemedText";
+import { FeedbackChip } from "@/components/elements/Feedback";
+import { CloudXmarkIcon } from "@/components/icons";
 import useSyncStatus from "@/offline/useSyncStatus";
 import { useSkin } from "@/providers/SkinProvider";
-import type { StyleProp, TextStyle } from "react-native";
 
-const SyncNote = ({ color, style }: { color?: string; style?: StyleProp<TextStyle> }) => {
+const SyncNote = ({ collapse }: { collapse?: number }) => {
   const skin = useSkin();
-  const { waiting } = useSyncStatus();
+  const { waiting, pending } = useSyncStatus();
 
-  if (!waiting) return null;
-
-  return (
-    <ThemedText
-      accessibilityLiveRegion="polite"
-      size={skin.type.caption}
-      color={color ?? skin.colors.muted}
-      style={style}
-    >
-      {skin.copy.sync.waiting}
-    </ThemedText>
-  );
+  return <FeedbackChip label={waiting ? skin.copy.sync.waiting(pending) : null} icon={CloudXmarkIcon} collapse={collapse} />;
 };
 
 export default SyncNote;

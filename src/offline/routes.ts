@@ -19,6 +19,8 @@ import {
   allocateTempId,
   enqueue,
   getState,
+  releaseHeld,
+  undoHeld,
   loadCached,
   loadValue,
   resolveAlias,
@@ -328,10 +330,27 @@ const LOCAL_ROUTES: [string, RegExp, Handler][] = [
     "put",
     /^shop-list\/edit\/(-?\d+)$/,
     ({ body }, match) =>
-      enqueue(body.action === "buy" ? "shop.buy" : "shop.snooze", {
-        shopListId: Number(match[1]),
-        foodId: Number(body.foodId),
-      }),
+      enqueue(
+        body.action === "buy" ? "shop.buy" : "shop.snooze",
+        { shopListId: Number(match[1]), foodId: Number(body.foodId) },
+        { hold: true },
+      ),
+  ],
+  [
+    "post",
+    /^shop-list\/undo$/,
+    () => {
+      const undone = undoHeld();
+      return undone ? { action: undone.type === "shop.buy" ? "buy" : "snooze", foodId: undone.payload.foodId } : null;
+    },
+  ],
+  [
+    "post",
+    /^shop-list\/settle$/,
+    () => {
+      releaseHeld();
+      return null;
+    },
   ],
   [
     "post",

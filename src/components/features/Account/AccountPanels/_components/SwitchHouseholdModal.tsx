@@ -8,7 +8,8 @@ import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import Title from "@/components/elements/Title";
 import { HouseholdChoice } from "@/providers/AuthProvider";
 import { usePanelSkin, useSkinStyles } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
+import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
+import type { Problem } from "@/utils/problem";
 import { type MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -23,7 +24,7 @@ const SwitchHouseholdForm = ({
   onClose,
   guardRef,
 }: {
-  onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
+  onSubmit: (choice: HouseholdChoice) => Promise<Problem | null>;
   onClose: () => void;
   guardRef: CloseGuard;
 }) => {
@@ -31,11 +32,23 @@ const SwitchHouseholdForm = ({
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.account;
   const login = skin.copy.login;
-  const { showToast } = useToast();
+  const form = useFormFeedback(["joinCode", "name"] as const);
 
-  const [choice, setChoice] = useState<"join" | "create">("join");
-  const [joinCode, setJoinCode] = useState("");
-  const [householdName, setHouseholdName] = useState("");
+  const [choice, setChoiceValue] = useState<"join" | "create">("join");
+  const [joinCode, setJoinCodeValue] = useState("");
+  const [householdName, setHouseholdNameValue] = useState("");
+  const setChoice = (next: "join" | "create") => {
+    setChoiceValue(next);
+    form.touch();
+  };
+  const setJoinCode = (next: string) => {
+    setJoinCodeValue(next);
+    form.touch("joinCode");
+  };
+  const setHouseholdName = (next: string) => {
+    setHouseholdNameValue(next);
+    form.touch("name");
+  };
   const [showScanner, setShowScanner] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const isDirty = joinCode.trim() !== "" || householdName.trim() !== "";
@@ -51,19 +64,19 @@ const SwitchHouseholdForm = ({
   const handleSubmit = async () => {
     if (choice === "join") {
       if (!joinCode) {
-        showToast(common.householdCodeMissing);
+        form.fail("joinCode", common.householdCodeMissing);
         return;
       }
-      const success = await onSubmit({ householdChoice: "join", joinCode });
-      if (success) onClose();
+      const failed = await onSubmit({ householdChoice: "join", joinCode });
+      if (form.settle(failed, common.feedback.saveFailed)) onClose();
       return;
     }
 
-    const success = await onSubmit({
+    const failed = await onSubmit({
       householdChoice: "create",
       householdName: householdName || undefined,
     });
-    if (success) onClose();
+    if (form.settle(failed, common.feedback.saveFailed)) onClose();
   };
 
   const swap = {
@@ -81,6 +94,7 @@ const SwitchHouseholdForm = ({
             labelColor={skin.panel.ink}
             value={householdName}
             onChangeText={setHouseholdName}
+            error={form.of("name")}
           />
         </Animated.View>
       );
@@ -114,6 +128,7 @@ const SwitchHouseholdForm = ({
           labelColor={skin.panel.ink}
           value={joinCode}
           onChangeText={setJoinCode}
+          error={form.of("joinCode")}
           autoCapitalize="characters"
           maxLength={6}
           action={{ label: login.scan, onPress: () => setShowScanner(true), icon: QrCodeIcon }}
@@ -167,6 +182,8 @@ const SwitchHouseholdForm = ({
 
       {renderBody()}
 
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
+
       <View style={styles.actions}>
         <KilButton
           flex={1}
@@ -186,7 +203,7 @@ const SwitchHouseholdModal = ({
   onClose,
 }: {
   visible: boolean;
-  onSubmit: (choice: HouseholdChoice) => Promise<boolean>;
+  onSubmit: (choice: HouseholdChoice) => Promise<Problem | null>;
   onClose: () => void;
 }) => {
   const guardRef = useRef(() => true);

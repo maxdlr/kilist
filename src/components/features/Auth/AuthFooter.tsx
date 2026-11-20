@@ -1,4 +1,5 @@
 import Dock from "@/components/elements/Dock";
+import { FeedbackCard } from "@/components/elements/Feedback";
 import { DEFAULT_SCENE_GLASS, FeatheredGlass } from "@/components/elements/Glass";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/elements/ThemedText";
@@ -45,6 +46,9 @@ const AuthFooter = ({
     <View style={styles.footer} onLayout={onLayout}>
       {flow.isSignup && <FeatheredGlass target={target} look={DEFAULT_SCENE_GLASS} veil={pageFill} />}
       <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
+        <View style={styles.problem}>
+          <FeedbackCard feedback={flow.joinStep ? null : flow.problem} />
+        </View>
         <KilButton
           height={skin.size.button.lg}
           fontSize={skin.type.title}
@@ -93,6 +97,7 @@ const createStyles = (s: Skin) =>
       gap: s.spacing.hair,
       paddingBottom: s.spacing.section,
     },
+    problem: { alignSelf: "stretch", marginBottom: s.spacing.small },
     google: { marginBottom: s.spacing.small, marginTop: s.spacing.stack },
     links: {
       alignItems: "center",

@@ -5,7 +5,10 @@ import type { ActionKind, Skin } from "@/skins/types";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { PanelScrollContext } from "@/components/elements/BottomPanel/panelScroll";
-import { useContext, useState, type ComponentRef, type Ref } from "react";
+import { FieldMessage, useNudge, type FieldError } from "@/components/elements/Feedback";
+import AnimationService from "@/services/animation";
+import { useContext, useEffect, useState, type ComponentRef, type Ref } from "react";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { TextInput as PanelTextInput } from "react-native-gesture-handler";
 import {
   Platform,
@@ -36,8 +39,10 @@ const FormInput = ({
   action,
   style,
   ref,
+  error,
   ...rest
 }: {
+  error?: FieldError | string | null;
   ref?: Ref<ComponentRef<typeof TextInput>>;
   label?: string;
   labelColor?: string;
@@ -54,6 +59,18 @@ const FormInput = ({
   const isPassword = type === "password";
   const pill = skin.shape.pill === true;
   const radius = pill ? skin.size.input / 2 : skin.shape.radius;
+  const failure = typeof error === "string" ? { message: error, attempt: 1 } : (error ?? null);
+  const ring = useSharedValue(failure ? 1 : 0);
+  const nudge = useNudge(failure?.attempt ?? 0);
+  const look = skin.feedback.field;
+
+  const failing = Boolean(failure);
+
+  useEffect(() => {
+    ring.set(withTiming(failing ? 1 : 0, AnimationService.feedback.tint));
+  }, [failing, ring]);
+
+  const ringStyle = useAnimatedStyle(() => ({ opacity: ring.value }));
 
   const sideAction =
     action ??
@@ -73,7 +90,8 @@ const FormInput = ({
           {label}
         </ThemedText>
       )}
-      <View style={styles.row}>
+      <Animated.View style={[styles.row, nudge]}>
+        <View style={styles.field}>
         <Input
           {...(panel && { block: panel.pan })}
           ref={ref}
@@ -107,6 +125,20 @@ const FormInput = ({
           })}
           {...rest}
         />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: look.fill,
+              borderColor: look.line,
+              borderRadius: radius,
+              borderWidth: Math.max(look.width, skin.shape.fieldBorder),
+            },
+            ringStyle,
+          ]}
+        />
+        </View>
         {sideAction && (
           <KilButton
             height={skin.size.input}
@@ -116,7 +148,8 @@ const FormInput = ({
             onTouch={sideAction.onPress}
           />
         )}
-      </View>
+      </Animated.View>
+      <FieldMessage message={failure?.message} collapse={skin.spacing.hair} />
     </View>
   );
 };
@@ -131,8 +164,8 @@ const createStyles = (s: Skin) =>
       flexDirection: "row",
       gap: s.spacing.small,
     },
+    field: { flex: 1, minWidth: 0 },
     input: {
-      flex: 1,
       fontSize: s.type.mono,
       height: s.size.input,
       minWidth: 0,

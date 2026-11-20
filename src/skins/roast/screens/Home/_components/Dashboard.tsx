@@ -96,7 +96,7 @@ const Dashboard = ({
         <ThemedText size={skin.type.label} color={skin.colors.onGround} style={styles.tally}>
           {copy.tally(foods.total, shopLists.total, swipes.total)}
         </ThemedText>
-        <SyncNote color={skin.colors.onGround} style={styles.tally} />
+        <SyncNote />
       </View>
     </PullToRefresh>
   );

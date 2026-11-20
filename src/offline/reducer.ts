@@ -4,6 +4,7 @@ import {
   awardSwipe,
   calculateScore,
   isShopListDone,
+  joinOpenRun,
   nextFoods,
   suggestionKey,
   toLocalDay,
@@ -84,6 +85,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       const target = food(payload.foodId);
       if (!target) return NO_REWARD;
       addHistory(target, { isInStock: payload.isInStock, at }, payload.replay === true);
+      if (payload.isInStock === false) joinOpenRun(state, target, atMs);
       if (payload.replay === true) return { ...NO_REWARD, balance: state.prizes.balance };
       return awardSwipe(state, target.id, at);
     }
@@ -111,6 +113,7 @@ export const applyOp = (state: LocalState, op: Op): any => {
       });
       if (!target) return NO_REWARD;
       addHistory(target, { isInStock: stockOf(payload.answer), at });
+      if (stockOf(payload.answer) === false) joinOpenRun(state, target, atMs);
       return awardSwipe(state, target.id, at);
     }
 
@@ -235,7 +238,10 @@ export const applyOp = (state: LocalState, op: Op): any => {
 
     case "food.setLevel": {
       const target = food(payload.foodId);
-      if (target) setLevel(target, payload.level, at);
+      if (target) {
+        setLevel(target, payload.level, at);
+        joinOpenRun(state, target, atMs);
+      }
       return target ?? null;
     }
 

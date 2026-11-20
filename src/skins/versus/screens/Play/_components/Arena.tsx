@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import V from "@/skins/versus/text";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck";
 import { clock, seconds } from "@/skins/versus/hooks/api";
@@ -71,6 +72,7 @@ const Arena = ({ game }: { game: RaceGame }) => {
             ghost={target.kind === "best"}
           />
         )}
+        <FeedbackSlot place="play" />
       </View>
       <View style={styles.flex}>
         <SwipeDeck

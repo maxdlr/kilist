@@ -1,4 +1,5 @@
 import BottomPanel from "@/components/elements/BottomPanel";
+import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
 import FormInput from "@/components/elements/FormInput";
 import KilButton, { ButtonKindOverride } from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title";
@@ -18,14 +19,15 @@ const DeleteForm = ({ onClose }: { onClose: () => void }) => {
   const { user, deleteAccount } = useAuth();
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
+  const form = useFormFeedback();
   const ready = sameName(typed, user?.username ?? "") && !busy;
 
   const remove = async () => {
     if (!ready) return;
     setBusy(true);
-    const success = await deleteAccount();
+    const failed = await deleteAccount();
     setBusy(false);
-    if (!success) return;
+    if (!form.settle(failed, common.feedback.deleteFailed)) return;
     onClose();
     router.replace("/");
   };
@@ -44,8 +46,12 @@ const DeleteForm = ({ onClose }: { onClose: () => void }) => {
         autoCapitalize="none"
         autoCorrect={false}
         value={typed}
-        onChangeText={setTyped}
+        onChangeText={(next) => {
+          setTyped(next);
+          form.touch();
+        }}
       />
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
       <ButtonKindOverride.Provider value={null}>
         <KilButton
           height={skin.size.button.md}

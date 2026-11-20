@@ -57,8 +57,8 @@ const calmCopy: RoastCopy = {
     remove: "Remove",
   },
   sync: {
-    toast: "You're offline. Your changes are saved and will sync later.",
-    waiting: "Waiting to be back online",
+    waiting: (count: number) =>
+      count > 0 ? `Offline · ${count} change${count > 1 ? "s" : ""} waiting` : "Offline · nothing lost",
   },
   guest: {
     cardTitle: "Just you, on this phone",
@@ -292,7 +292,6 @@ const calmCopy: RoastCopy = {
     free: "Free",
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked.`,
-    failed: "Couldn't do that",
     sectionTitle: "Looks",
     progress: (have: number, price: number) => `${have} / ${price} points`,
     sectionLine: (count: number) => `${count} points. Every item you sort adds 10.`,

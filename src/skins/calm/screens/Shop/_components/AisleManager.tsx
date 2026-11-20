@@ -1,3 +1,4 @@
+import { FeedbackCard } from "@/components/elements/Feedback";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel, { PanelScrollView } from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
@@ -172,6 +173,7 @@ const AisleManager = ({ manager }: { manager: Manager }) => {
           ))}
         </PanelScrollView>
         <View style={styles.dock}>
+          <FeedbackCard feedback={manager.problem} collapse={skin.spacing.stack} />
           <CButton label={T.shop.aislesDone} onPress={manager.done} />
         </View>
       </BottomPanel>
@@ -200,7 +202,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     aisle: { flexShrink: 1, textAlign: "right" },
     body: { gap: s.spacing.small, paddingBottom: s.spacing.inline },
     searchRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
-    dock: { flexDirection: "row", justifyContent: "center" },
+    dock: { alignItems: "center", gap: s.spacing.stack },
   });
 
 export default AisleManager;

@@ -9,6 +9,8 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const FLING_DISTANCE = SCREEN_WIDTH * 1.5;
 const FLICK_VELOCITY = 500;
 
+export type SwipeOutcome = () => void | boolean | Promise<void | boolean>;
+
 export const useSwipeGesture = ({
   onSwipeLeft,
   onSwipeRight,
@@ -17,8 +19,8 @@ export const useSwipeGesture = ({
   swipeThreshold = DEFAULT_SWIPE_THRESHOLD,
   translation,
 }: {
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
+  onSwipeLeft?: SwipeOutcome;
+  onSwipeRight?: SwipeOutcome;
   onSwipingLeft?: (value: number) => void;
   onSwipingRight?: (value: number) => void;
   swipeThreshold?: number;
@@ -30,12 +32,11 @@ export const useSwipeGesture = ({
   const leaving = useSharedValue(false);
   const speed = useSharedValue(0);
 
-  const resolveSwipe = (direction: "left" | "right") => {
-    if (direction === "right") {
-      onSwipeRight?.();
-    } else {
-      onSwipeLeft?.();
-    }
+  const resolveSwipe = async (direction: "left" | "right") => {
+    const kept = await (direction === "right" ? onSwipeRight : onSwipeLeft)?.();
+    if (kept !== false) return;
+    translationX.set((direction === "right" ? 1 : -1) * FLING_DISTANCE);
+    translationX.set(withSpring(0, AnimationService.snap));
   };
 
   const pan = usePanGesture({

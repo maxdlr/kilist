@@ -1,6 +1,7 @@
 import type { Lang } from "@/i18n";
 import type { BottomPanelLook, LevelNumber, Skin, SkinPaint, SkinThemeSource } from "@/skins/types";
 import { CUSTOM_THEME_ID } from "@/skins/customTheme";
+import { feedbackLook, type FeedbackOverride } from "@/skins/feedback";
 import { CUSTOM_NAME, customElements } from "./custom";
 
 export type GameCardButtonLook = { fill: string; border: string; ink: string };
@@ -75,6 +76,7 @@ type CalmBase = {
   gameHeader: GameHeaderLook;
   newsCard: NewsCardLook;
   sortCard: SortCardLook;
+  feedback?: FeedbackOverride;
 };
 
 type EmphasisKey =
@@ -101,6 +103,8 @@ type ThemeFile = {
 
 export const DEFAULT_CALM_THEME = "light";
 
+export const CALM_FEEDBACK_SHAPE = { radius: 18, border: 1, edge: 3 };
+
 const onPanel = (e: CalmElements): CalmElements => ({ ...e, ...e.em });
 
 const paintOf = (e: CalmElements, em = onPanel(e)): SkinPaint => ({
@@ -115,7 +119,6 @@ const paintOf = (e: CalmElements, em = onPanel(e)): SkinPaint => ({
     onPaper: e.text,
     fieldLine: e.fieldLine,
     signup: { fill: e.ground, ink: e.text },
-    toast: { fill: e.fill, ink: e.onFill },
     placeholder: e.textFaint,
     scrim: e.scrim,
     danger: e.danger,
@@ -141,6 +144,11 @@ const paintOf = (e: CalmElements, em = onPanel(e)): SkinPaint => ({
   },
   panel: { fill: em.card, ink: em.text, title: em.text, line: em.line },
   bottomPanel: em.bottomPanel,
+  feedback: feedbackLook(
+    { ink: e.text, soft: e.textSoft, line: e.fieldLine, danger: e.danger, success: e.positive },
+    CALM_FEEDBACK_SHAPE,
+    e.feedback,
+  ),
   shadow: e.text,
 });
 

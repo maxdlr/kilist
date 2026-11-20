@@ -4,7 +4,8 @@ import useAuth from "@/providers/AuthProvider";
 import useHousehold from "@/providers/HouseholdProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import useTickets from "@/providers/TicketsProvider";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
+import useMark from "@/providers/MarkProvider";
 import { LANGUAGE_NAMES } from "@/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { ACCOUNT_LINK_PANELS } from "@/notifications/actions";
@@ -21,7 +22,8 @@ const useAccount = () => {
   const { user, isGuest, logout } = useAuth();
   const { requireAccount } = useAccountGate();
   const { household, switchHousehold } = useHousehold();
-  const { showToast } = useToast();
+  const report = useReportFeedback();
+  const { mark } = useMark();
   const { counter } = useTickets();
   const [openPanel, setPanel] = useState<AccountPanel | null>(null);
   const needsEmailCode = !isGuest && !!user && !user.emailConfirmedAt;
@@ -58,7 +60,18 @@ const useAccount = () => {
   const joinCode = (household?.joinCode ?? user?.household.joinCode) || HIDDEN_CODE;
 
   const logOut = async () => {
-    if (await logout()) router.replace("/");
+    const failed = await logout();
+    if (!failed) {
+      report("account", null);
+      router.replace("/");
+      return;
+    }
+    report("account", {
+      tone: "error",
+      title: common.feedback.logoutFailed,
+      body: failed.message,
+      action: { label: common.feedback.retry, onPress: logOut },
+    });
   };
 
   const shareCode = async () => {
@@ -74,23 +87,36 @@ const useAccount = () => {
       await Share.share({
         message: common.shareMessage(joinCode),
       });
+      report("account", null);
     } catch {
-      showToast(common.shareFailed);
+      report("account", {
+        tone: "error",
+        title: common.feedback.shareFallback,
+        body: common.feedback.shareFallbackLine,
+        action: {
+          label: common.feedback.showQr,
+          onPress: () => {
+            report("account", null);
+            setOpenPanel("qr");
+          },
+        },
+      });
     }
   };
 
   const openIconsSite = async () => {
     try {
       await Linking.openURL("https://icons8.com");
+      report("account", null);
     } catch {
-      showToast(common.linkFailed);
+      report("account", { tone: "error", title: common.feedback.linkFallback });
     }
   };
 
   const switchTo: typeof switchHousehold = async (choice) => {
-    const success = await switchHousehold(choice);
-    if (success) showToast(common.householdSwitched, "info");
-    return success;
+    const failed = await switchHousehold(choice);
+    if (!failed) mark("done", common.householdSwitched);
+    return failed;
   };
 
   return {

@@ -46,6 +46,7 @@ const calm: SkinSource = {
   actions: paint.actions,
   panel: { ...paint.panel, radius: 20, secondary: "secondaryOnLight" },
   bottomPanel: paint.bottomPanel,
+  feedback: paint.feedback,
   shape: {
     border: 1,
     divider: 1,

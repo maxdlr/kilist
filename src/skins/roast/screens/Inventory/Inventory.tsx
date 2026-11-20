@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import AnimatedListItem from "@/components/elements/AnimatedListItem";
@@ -111,6 +112,9 @@ const Inventory = () => {
             {copy.title}
           </Title>
         </View>
+        <View style={styles.problem}>
+          <FeedbackSlot place="inventory" />
+        </View>
 
         {noResults ? (
           <View
@@ -190,6 +194,7 @@ const Inventory = () => {
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    problem: { paddingHorizontal: s.spacing.gutter },
     flex: {
       flex: 1,
     },

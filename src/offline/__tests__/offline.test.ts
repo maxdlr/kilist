@@ -258,6 +258,67 @@ describe("shopping offline", () => {
     expect(pendingCount()).toBe(0);
   });
 
+  it("takes a food swiped out into the open run", () => {
+    pull(
+      {},
+      snapshot({
+        foods: [food(1), food(2, 1)],
+        openShopList: { id: 44, startFoodIds: [1], boughtFoodIds: [], buyLog: [], startedAt: null },
+      }),
+    );
+
+    call("put", "foods/swipe/edit/2", { isInStock: false });
+
+    expect(call("get", "shop-list/44").foods.map((entry: any) => entry.id)).toEqual([1, 2]);
+  });
+
+  it("leaves a steady food out of the open run after one stray answer", () => {
+    const day = 24 * 3600000;
+    const steady = [3, 2, 1].map((days) => ({ isInStock: true, at: new Date(Date.now() - days * day).toISOString() }));
+    pull(
+      {},
+      snapshot({
+        foods: [food(1), food(2, 1, { histories: steady })],
+        openShopList: { id: 44, startFoodIds: [1], boughtFoodIds: [], buyLog: [], startedAt: null },
+      }),
+    );
+
+    call("put", "foods/swipe/edit/2", { isInStock: false });
+
+    expect(call("get", "shop-list/44").foods.map((entry: any) => entry.id)).toEqual([1]);
+  });
+
+  it("holds the latest buy back from sync so it can be undone", () => {
+    pull();
+    const id = start();
+
+    call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 1 });
+
+    expect(pendingOps().map((op) => op.type)).toEqual(["shop.start"]);
+    expect(call("get", `shop-list/${id}`).foods.map((entry: any) => entry.id)).toEqual([2, 3]);
+
+    expect(call("post", "shop-list/undo")).toEqual({ action: "buy", foodId: 1 });
+    expect(call("get", `shop-list/${id}`).foods.map((entry: any) => entry.id).sort()).toEqual([1, 2, 3]);
+    expect(call("post", "shop-list/undo")).toBeNull();
+  });
+
+  it("releases a held buy when the next action comes or the run is left", () => {
+    pull();
+    const id = start();
+
+    call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 1 });
+    call("put", `shop-list/edit/${id}`, { action: "snooze", foodId: 2 });
+
+    expect(pendingOps().map((op) => op.type)).toEqual(["shop.start", "shop.buy"]);
+    expect(call("post", "shop-list/undo")).toEqual({ action: "snooze", foodId: 2 });
+
+    call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 3 });
+    call("post", "shop-list/settle");
+
+    expect(pendingOps().map((op) => op.type)).toEqual(["shop.start", "shop.buy", "shop.buy"]);
+    expect(call("post", "shop-list/undo")).toBeNull();
+  });
+
   it("buying resets the food and suggests the usual next one", () => {
     pull(
       {},
@@ -345,6 +406,7 @@ describe("shopping offline", () => {
     expect(resolveAlias(id)).toBe(44);
     expect(call("get", `shop-list/${id}`).foods).toHaveLength(3);
     call("put", `shop-list/edit/${id}`, { action: "buy", foodId: 1 });
+    call("post", "shop-list/settle");
     expect(pendingOps()[0]!.payload.shopListId).toBe(44);
   });
 

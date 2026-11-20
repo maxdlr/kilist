@@ -69,6 +69,18 @@ export type BottomPanelLook = {
   grip?: { width?: number; height?: number; color?: string; opacity?: number };
 };
 
+export type FeedbackTone = "error" | "note" | "success";
+
+export type FeedbackInk = { fill: string; line: string; ink: string; soft: string; icon: string };
+
+export type FeedbackLook = {
+  card: Record<FeedbackTone, FeedbackInk> & { radius: number; border: number };
+  chip: FeedbackInk & { border: number };
+  field: { line: string; fill: string; width: number; message: string };
+  row: { fill: string; edge: string; edgeWidth: number; message: string };
+  held: { opacity: number; reason: string };
+};
+
 export interface Skin {
   id: string;
   name: string;
@@ -97,7 +109,6 @@ export interface Skin {
     onPaper: string;
     fieldLine?: string;
     signup?: { fill: string; ink: string };
-    toast?: { fill: string; ink: string };
     placeholder: string;
     scrim: string;
     danger: string;
@@ -110,6 +121,7 @@ export interface Skin {
   };
   actions: Record<ActionKind, ActionColors>;
   bottomPanel: BottomPanelLook;
+  feedback: FeedbackLook;
   panel: {
     fill: string;
     veil?: string;
@@ -147,6 +159,7 @@ export type SkinPaint = Pick<
 > & {
   panel: Pick<Skin["panel"], "fill" | "ink" | "title" | "line">;
   bottomPanel: BottomPanelLook;
+  feedback: FeedbackLook;
   shadow: string;
 };
 

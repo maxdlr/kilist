@@ -1,5 +1,5 @@
 import axios from "@/services/axios";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
 import { useCallback, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
 
@@ -214,7 +214,7 @@ const reasonOf = (error: unknown) => {
 };
 
 export const useAdminCall = () => {
-  const { showToast } = useToast();
+  const report = useReportFeedback();
   const [busy, setBusy] = useState(false);
 
   const call = useCallback(
@@ -223,16 +223,16 @@ export const useAdminCall = () => {
       try {
         const res = await axios.request<T>({ method, url: `/admin${path}`, data: body });
         await refreshAdmin();
-        if (success) showToast(success, "success");
+        report("admin", success ? { tone: "success", title: success } : null);
         return res.data;
       } catch (error) {
-        showToast(reasonOf(error));
+        report("admin", { tone: "error", title: "Didn't work", body: reasonOf(error) });
         return null;
       } finally {
         setBusy(false);
       }
     },
-    [showToast],
+    [report],
   );
 
   return { call, busy };

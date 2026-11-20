@@ -63,6 +63,7 @@ const SignupStep = ({ flow }: { flow: AuthFlow }) => {
               maxLength={flow.nameLimits?.max}
               value={flow.username}
               onChangeText={flow.setUsername}
+              error={flow.fieldError("username")}
               {...nextOnSubmit}
             />
             {flow.nameLimits && (
@@ -80,6 +81,7 @@ const SignupStep = ({ flow }: { flow: AuthFlow }) => {
             type="email"
             value={flow.email}
             onChangeText={flow.setEmail}
+            error={flow.fieldError("email")}
             {...nextOnSubmit}
           />
         )}
@@ -92,6 +94,7 @@ const SignupStep = ({ flow }: { flow: AuthFlow }) => {
               type="password"
               value={flow.password}
               onChangeText={flow.setPassword}
+              error={flow.fieldError("password")}
             />
             <FormInput
               placeholder={skin.copy.placeholders.confirm}
@@ -135,6 +138,7 @@ const SignupStep = ({ flow }: { flow: AuthFlow }) => {
                 placeholder={skin.copy.placeholders.householdCode}
                 value={flow.joinCode}
                 onChangeText={flow.setJoinCode}
+                error={flow.fieldError("joinCode")}
                 autoCapitalize="characters"
                 maxLength={6}
                 action={{ label: copy.scan, onPress: () => setScanning(true), icon: QrCodeIcon }}

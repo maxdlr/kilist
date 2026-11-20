@@ -1,7 +1,7 @@
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import { aisleList, aisleOf } from "@/offline/foodNames";
-import useToast from "@/providers/ToastProvider";
+import type { Feedback } from "@/components/elements/Feedback";
 import axios from "@/services/axios";
 import { FoodType } from "@/types/model";
 import { useState } from "react";
@@ -28,7 +28,7 @@ const useAisleManager = ({
   text: AisleManagerText;
   onSaved: () => void;
 }) => {
-  const { showToast } = useToast();
+  const [problem, setProblem] = useState<Feedback | null>(null);
   const [visible, setVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [items, setItems] = useState<FoodType[]>([]);
@@ -41,6 +41,7 @@ const useAisleManager = ({
     setItems(unsorted);
     setPicks({});
     setOpenId(null);
+    setProblem(null);
     setVisible(true);
   };
 
@@ -55,19 +56,37 @@ const useAisleManager = ({
   };
 
   const save = async (chosen: Record<number, string>) => {
-    setVisible(false);
     setConfirming(false);
     const entries = Object.entries(chosen);
-    if (entries.length === 0) return;
+    if (entries.length === 0) {
+      setVisible(false);
+      return;
+    }
     const results = await Promise.allSettled(
       entries.map(([foodId, aisle]) => axios.put(`foods/edit/${foodId}`, { aisle })),
     );
-    if (results.some((result) => result.status === "rejected")) showToast(common.unexpected);
+    const failed = entries.filter((_, index) => results[index]!.status === "rejected");
     onSaved();
+    if (failed.length === 0) {
+      setProblem(null);
+      setVisible(false);
+      return;
+    }
+    const failedIds = new Set(failed.map(([foodId]) => Number(foodId)));
+    setItems((current) => current.filter((food) => failedIds.has(food.id)));
+    setPicks(Object.fromEntries(failed));
+    setOpenId(null);
+    setProblem({
+      tone: "error",
+      title: common.feedback.aislesFailed(failed.length, entries.length),
+      body: common.feedback.aislesFailedLine,
+    });
+    setVisible(true);
   };
 
   const discard = () => {
     setPicks({});
+    setProblem(null);
     setVisible(false);
   };
 
@@ -106,6 +125,7 @@ const useAisleManager = ({
     requestClose,
     confirmRequest,
     keepEditing,
+    problem,
   };
 };
 

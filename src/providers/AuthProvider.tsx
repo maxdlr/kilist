@@ -19,7 +19,7 @@ import {
 import axios from "@/services/axios";
 import { askGoogleIdToken } from "@/services/googleSignIn";
 import { DEFAULT_SKIN_ID } from "@/skins";
-import useToast from "@/providers/ToastProvider";
+import { problemOf, type Problem } from "@/utils/problem";
 import { UserType } from "@/types/model";
 import React, {
   createContext,
@@ -51,13 +51,13 @@ export type AuthContextType = {
   pendingIntro: boolean;
   consumeIntro: () => void;
   mergePending: boolean;
-  resolveMerge: (keep: boolean) => Promise<boolean>;
-  login: (username: string, password: string) => Promise<boolean | "merge">;
-  signup: (payload: SignupPayload) => Promise<boolean | "join">;
-  loginWithGoogle: () => Promise<boolean | "merge">;
-  completeJoin: (join: { joinCode: string; code: string } | null) => Promise<boolean>;
-  logout: () => Promise<boolean>;
-  deleteAccount: () => Promise<boolean>;
+  resolveMerge: (keep: boolean) => Promise<Problem | null>;
+  login: (username: string, password: string) => Promise<true | "merge" | Problem>;
+  signup: (payload: SignupPayload) => Promise<true | "join" | Problem>;
+  loginWithGoogle: () => Promise<boolean | "merge" | Problem>;
+  completeJoin: (join: { joinCode: string; code: string } | null) => Promise<Problem | null>;
+  logout: () => Promise<Problem | null>;
+  deleteAccount: () => Promise<Problem | null>;
   mutateUser: (data?: UserType) => unknown;
   guestName: string;
   rename: (username: string) => Promise<void>;
@@ -72,20 +72,19 @@ const AuthContext = createContext<AuthContextType>({
   pendingIntro: false,
   consumeIntro: () => {},
   mergePending: false,
-  resolveMerge: async () => false,
-  login: async () => false,
-  signup: async () => false,
+  resolveMerge: async () => null,
+  login: async () => problemOf(null),
+  signup: async () => problemOf(null),
   loginWithGoogle: async () => false,
-  completeJoin: async () => false,
-  logout: async () => false,
-  deleteAccount: async () => false,
+  completeJoin: async () => null,
+  logout: async () => null,
+  deleteAccount: async () => null,
   mutateUser: () => {},
   guestName: "",
   rename: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { showToast } = useToast();
   const { cache } = useSWRConfig();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const pendingIntro = useSyncExternalStore(subscribeStore, isIntroPending, isIntroPending);
@@ -141,10 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     const res = await postLogin({ username, password });
-    if (res.error) {
-      showToast(res.error.message || common.unexpected);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     if (isGuest && hasGuestData()) {
       setMergePending(true);
       return "merge" as const;
@@ -157,23 +153,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (keep) {
       try {
         await axios.post("/sync/import", exportGuest(), { network: true } as object);
-      } catch (error: any) {
-        showToast(error?.response?.data?.message || common.needsConnection);
-        return false;
+      } catch (error) {
+        return problemOf(error);
       }
     }
     await enterAccount();
-    return true;
+    return null;
   };
 
   const signup = async (payload: SignupPayload) => {
     const guest = isGuest && hasGuestData() ? exportGuest() : undefined;
     const joining = payload.householdChoice === "join";
     const res = await postSignup({ ...payload, ...(guest && !joining && { guest }) });
-    if (res.error) {
-      showToast(res.error.message || common.unexpected);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     countSignup();
     setNeedsOnboarding(!guest);
     if (joining) return "join" as const;
@@ -188,17 +180,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       const code = (error as { code?: string | number } | null)?.code;
       console.warn("Google sign-in failed", error);
-      showToast(code ? `${common.google.failed} (${code})` : common.google.failed);
-      return false;
+      return { message: code ? `${common.google.failed} (${code})` : common.google.failed, fields: [], code: "google" };
     }
     if (!idToken) return false;
 
     const guest = isGuest && hasGuestData() ? exportGuest() : undefined;
     const res = await postGoogle<{ created: boolean }>({ idToken, ...(guest && { guest }) });
-    if (res.error) {
-      showToast(res.error.message || common.unexpected);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     if (res.data?.created) {
       countSignup();
       setNeedsOnboarding(!guest);
@@ -221,13 +209,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await axios.post("/households/switch", { householdChoice: "join", joinCode: join.joinCode }, online);
       }
       if (isGuest && hasGuestData()) await axios.post("/sync/import", exportGuest(), online);
-    } catch (error: any) {
-      showToast(error?.response?.data?.message || common.needsConnection);
-      return false;
+    } catch (error) {
+      return problemOf(error);
     }
     emailConfirmed.current = false;
     await enterAccount();
-    return true;
+    return null;
   };
 
   const clearSession = async () => {
@@ -239,12 +226,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     await unregisterPushToken();
     const res = await postLogout({});
-    if (res.error) {
-      showToast(res.error.message || common.unexpected);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     await clearSession();
-    return true;
+    return null;
   };
 
   useEffect(() => {
@@ -255,12 +239,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteAccount = async () => {
     const res = await deleteUser({ params: { id: user?.id } });
-    if (res.error) {
-      showToast(res.error.message || common.unexpected);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     await clearSession();
-    return true;
+    return null;
   };
 
   return (

@@ -35,6 +35,7 @@ export const localize = (
     actions: paint.actions,
     panel: { ...rest.panel, ...paint.panel },
     bottomPanel: paint.bottomPanel,
+    feedback: paint.feedback,
     shape: { ...rest.shape, shadow: { ...rest.shape.shadow, color: paint.shadow } },
   });
   const base: Skin = {

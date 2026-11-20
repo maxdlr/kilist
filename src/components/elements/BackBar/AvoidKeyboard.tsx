@@ -1,11 +1,13 @@
-import { ReactNode } from "react";
+import { createContext, ReactNode } from "react";
 import { StyleSheet } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useBackBarOffset } from "./BackBar";
 
+export const KeyboardAvoided = createContext(false);
+
 const AvoidKeyboard = ({ children }: { children: ReactNode }) => (
   <KeyboardAvoidingView style={styles.flex} behavior="padding" keyboardVerticalOffset={useBackBarOffset()}>
-    {children}
+    <KeyboardAvoided.Provider value>{children}</KeyboardAvoided.Provider>
   </KeyboardAvoidingView>
 );
 

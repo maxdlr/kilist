@@ -32,11 +32,11 @@ const AddFoodForm = ({ visible, onClose }: { visible: boolean; onClose: () => vo
   }
 
   const add: typeof createFood = async (data) => {
-    const created = await createFood(data);
-    if (!created) return false;
+    const failed = await createFood(data);
+    if (failed) return failed;
     mark("added", common.marks.added(data.name.trim()));
     mutate((key) => typeof key === "object" && key !== null && (key as { url?: string }).url === "shop-list/preview");
-    return true;
+    return null;
   };
 
   return (

@@ -1,3 +1,4 @@
+import { KeyboardAvoided } from "@/components/elements/BackBar";
 import { ShopListProvider } from "@/providers/ShopListProvider";
 import { SkinScreen } from "@/skins/screens";
 import { StyleSheet } from "react-native";
@@ -7,7 +8,9 @@ const ShopScreen = () => {
   return (
     <ShopListProvider>
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
-        <SkinScreen slot="Shop" />
+        <KeyboardAvoided.Provider value>
+          <SkinScreen slot="Shop" />
+        </KeyboardAvoided.Provider>
       </KeyboardAvoidingView>
     </ShopListProvider>
   );

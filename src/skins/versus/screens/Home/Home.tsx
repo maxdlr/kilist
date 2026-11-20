@@ -67,7 +67,7 @@ const VersusHome = () => {
               <HomeShortcuts ink={P.white} fill={P.panel} />
             </View>
           </View>
-          <SyncNote />
+          <SyncNote collapse={skin.spacing.stack} />
           {solo ? <SoloHome /> : <HouseHome standings={standings.data} period={period} onPick={setPeriod} />}
           {home.dashboard && (
             <Card>

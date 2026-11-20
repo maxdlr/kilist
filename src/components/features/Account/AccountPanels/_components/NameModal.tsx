@@ -7,7 +7,8 @@ import common from "@/i18n/common";
 import useAuth from "@/providers/AuthProvider";
 import useMark from "@/providers/MarkProvider";
 import { useSkin } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
+import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
+import { problemOf } from "@/utils/problem";
 import { useState } from "react";
 
 const NAME_LENGTH = 30;
@@ -16,7 +17,7 @@ const NameForm = ({ onClose }: { onClose: () => void }) => {
   const skin = useSkin();
   const T = common.guestRename;
   const { user, isGuest, guestName, rename } = useAuth();
-  const { showToast } = useToast();
+  const form = useFormFeedback(["username"] as const);
   const { mark } = useMark();
   const [name, setName] = useState(isGuest ? guestName : (user?.username ?? ""));
 
@@ -25,8 +26,8 @@ const NameForm = ({ onClose }: { onClose: () => void }) => {
       await rename(name.trim());
       onClose();
       mark("saved", common.marks.saved);
-    } catch (err: any) {
-      showToast(err?.response?.data?.message || common.unexpected);
+    } catch (err) {
+      form.settle(problemOf(err), common.feedback.saveFailed);
     }
   };
 
@@ -44,8 +45,13 @@ const NameForm = ({ onClose }: { onClose: () => void }) => {
         labelColor={skin.panel.ink}
         maxLength={NAME_LENGTH}
         value={name}
-        onChangeText={setName}
+        onChangeText={(next) => {
+          setName(next);
+          form.touch("username");
+        }}
+        error={form.of("username")}
       />
+      <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
       <KilButton height={skin.size.button.md} fontSize={skin.type.lead} label={skin.copy.common.save} onTouch={save} />
     </>
   );

@@ -10,7 +10,9 @@ import PanelStroke from "./PanelStroke";
 import Press from "@/components/elements/Press";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { PanelScrollContext } from "./panelScroll";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardAvoided } from "@/components/elements/BackBar/AvoidKeyboard";
+import { ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 import {
   BackHandler,
   Dimensions,
@@ -42,6 +44,7 @@ const DISMISS_VELOCITY = 900;
 const BOTTOM_ROOM = 32;
 const EXPAND_DISTANCE = 56;
 const EXPAND_VELOCITY = -700;
+const MIN_SCREEN_SHARE = 0.66;
 
 const handoff: { owner: object | null; until: number } = {
   owner: null,
@@ -101,6 +104,11 @@ const BottomPanel = ({
   const canExpand = useSharedValue(Boolean(onExpand) && !expanded);
   const isExpanded = useSharedValue(expanded);
   const keyboard = useSharedValue(0);
+  const innerBottom = useSharedValue(0);
+  const avoided = useContext(KeyboardAvoided);
+  const { height: keyboardHeight } = useReanimatedKeyboardAnimation();
+  const minHeight = WINDOW_HEIGHT * MIN_SCREEN_SHARE;
+  const keyboardGap = skin.spacing.section;
   const morphing = useRef(false);
   const fullHeight = WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top;
   const latest = useRef({ visible, onClose, canClose, onExpand, onCollapse });
@@ -287,11 +295,14 @@ const BottomPanel = ({
     );
   };
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: offset.value + drag.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    const covered = -keyboardHeight.value;
+    const room = Math.max(0, contentHeight.value - innerBottom.value - keyboardGap);
+    const shift = avoided ? Math.min(covered, room) : -Math.max(0, covered - room);
+    return { transform: [{ translateY: offset.value + drag.value + shift }] };
+  });
   const growStyle = useAnimatedStyle(() => ({
-    minHeight: grow.value * Math.max(0, fullHeight - keyboard.value),
+    minHeight: Math.max(minHeight, grow.value * Math.max(0, fullHeight - keyboard.value)),
   }));
   const hintStyle = useAnimatedStyle(() => ({
     opacity: 1 - Math.min(1, lift.value / EXPAND_DISTANCE) * 0.6,
@@ -356,6 +367,10 @@ const BottomPanel = ({
           },
         ]}
       >
+        <View
+          style={styles.inner}
+          onLayout={(event) => innerBottom.set(event.nativeEvent.layout.y + event.nativeEvent.layout.height)}
+        >
         {grip}
         {expandHint && onExpand && !expanded && (
           <Animated.View style={[styles.hint, hintStyle]}>
@@ -374,6 +389,7 @@ const BottomPanel = ({
         <PanelScrollContext.Provider value={{ pan, scrollY }}>
           <PanelSkin>{children}</PanelSkin>
         </PanelScrollContext.Provider>
+        </View>
       </Animated.View>
       <PanelStroke width={frame.width} height={frame.height} />
     </Animated.View>
@@ -414,11 +430,11 @@ const createStyles = (s: Skin) =>
       right: 0,
       overflow: "hidden",
     },
+    inner: { flexShrink: 1, gap: s.spacing.stack, minHeight: 0 },
     content: {
       borderTopWidth: s.shape.accentBorder,
       borderLeftWidth: s.panel.radius > 0 ? s.shape.border : 0,
       borderRightWidth: s.panel.radius > 0 ? s.shape.border : 0,
-      gap: s.spacing.stack,
       paddingHorizontal: s.spacing.gutter,
       paddingVertical: s.spacing.section,
     },

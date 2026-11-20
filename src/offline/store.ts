@@ -40,6 +40,8 @@ let owner: number | null = null;
 let sessionEnded = false;
 let guest = false;
 let state: LocalState | null = null;
+let guestBeforeHeld: LocalState | null = null;
+let guestHeld: Op | null = null;
 const listeners = new Set<() => void>();
 
 const rebuild = () => {
@@ -67,7 +69,7 @@ const load = () => {
   nextTemp = db.loadValue<number>(KEY_NEXT_TEMP) ?? FIRST_TEMP_ID;
   owner = db.loadValue<number>(KEY_OWNER) ?? null;
   sessionEnded = db.loadValue<boolean>(KEY_ENDED) ?? false;
-  ops = db.loadOps();
+  ops = db.loadOps().map((op) => (op.held ? release(op) : op));
   guest = db.loadValue<boolean>(KEY_GUEST) ?? false;
   if (guest) {
     const saved = db.loadValue<LocalState>(KEY_GUEST_STATE);
@@ -76,6 +78,20 @@ const load = () => {
     return;
   }
   rebuild();
+};
+
+const release = (op: Op) => {
+  const ready = { ...op, held: false };
+  db.updateOp(ready);
+  return ready;
+};
+
+const releaseAll = () => {
+  guestBeforeHeld = null;
+  guestHeld = null;
+  if (!ops.some((op) => op.held)) return false;
+  ops = ops.map((op) => (op.held ? release(op) : op));
+  return true;
 };
 
 const persistGuest = () => db.saveValue(KEY_GUEST_STATE, state);
@@ -168,14 +184,53 @@ export const getHash = () => {
   return hash;
 };
 
+const readyOps = () => {
+  const firstHeld = ops.findIndex((op) => op.held);
+  return firstHeld === -1 ? ops : ops.slice(0, firstHeld);
+};
+
 export const pendingOps = (limit?: number) => {
   load();
-  return limit === undefined ? [...ops] : ops.slice(0, limit);
+  const ready = readyOps();
+  return limit === undefined ? [...ready] : ready.slice(0, limit);
 };
 
 export const pendingCount = () => {
   load();
-  return ops.length;
+  return readyOps().length;
+};
+
+export const heldOp = (): Op | null => {
+  load();
+  if (guest) return guestHeld;
+  const last = ops[ops.length - 1];
+  return last?.held ? last : null;
+};
+
+export const undoHeld = (): Op | null => {
+  load();
+  if (guest) {
+    if (!guestHeld || !guestBeforeHeld) return null;
+    const undone = guestHeld;
+    state = guestBeforeHeld;
+    guestBeforeHeld = null;
+    guestHeld = null;
+    persistGuest();
+    notify();
+    return undone;
+  }
+  const last = ops[ops.length - 1];
+  if (!last?.held) return null;
+  db.deleteOp(last.id);
+  ops = ops.slice(0, -1);
+  rebuild();
+  notify();
+  return last;
+};
+
+export const releaseHeld = () => {
+  load();
+  if (releaseAll()) notify();
 };
 
 export const allocateTempId = () => {
@@ -205,9 +260,10 @@ const recordStats = (type: OpType, payload: Record<string, any>, result: unknown
   if (state!.dashboard.shopLists.total > runsBefore) countStat("runs");
 };
 
-export const enqueue = (type: OpType, payload: Record<string, any>) => {
+export const enqueue = (type: OpType, payload: Record<string, any>, { hold = false }: { hold?: boolean } = {}) => {
   load();
   if (!state) throw new Error("Offline store has no state");
+  releaseAll();
   const runsBefore = state.dashboard.shopLists.total;
   const roundsBefore = state.playedAt.length;
   const op: Op = {
@@ -216,8 +272,13 @@ export const enqueue = (type: OpType, payload: Record<string, any>) => {
     at: new Date().toISOString(),
     payload: remap(payload),
     attempts: 0,
+    ...(hold && { held: true }),
   };
   if (guest) {
+    if (hold) {
+      guestBeforeHeld = JSON.parse(JSON.stringify(state)) as LocalState;
+      guestHeld = op;
+    }
     const result = applyOp(state, op);
     persistGuest();
     recordStats(type, payload, result, runsBefore, roundsBefore);

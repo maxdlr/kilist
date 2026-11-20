@@ -1,4 +1,6 @@
 import BottomPanel, { PanelScrollView } from "@/components/elements/BottomPanel";
+import { FeedbackCard, FieldMessage } from "@/components/elements/Feedback";
+import { BellOffIcon } from "@/components/icons";
 import KilSwitch from "@/components/elements/KilSwitch";
 import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
@@ -56,21 +58,22 @@ const Section = ({
   );
 };
 
-const Row = ({ label, children }: { label: string; children: ReactNode }) => {
+const Row = ({ label, error, children }: { label: string; error?: string | null; children: ReactNode }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   return (
-    <View
-      style={[styles.row, styles.line, { borderTopColor: skin.panel.line }]}
-    >
-      <ThemedText
-        size={skin.type.body}
-        color={skin.panel.ink}
-        style={styles.label}
-      >
-        {label}
-      </ThemedText>
-      {children}
+    <View style={[styles.line, { borderTopColor: skin.panel.line }]}>
+      <View style={styles.row}>
+        <ThemedText
+          size={skin.type.body}
+          color={skin.panel.ink}
+          style={styles.label}
+        >
+          {label}
+        </ThemedText>
+        {children}
+      </View>
+      <FieldMessage message={error} />
     </View>
   );
 };
@@ -100,6 +103,20 @@ const NotificationsModal = ({
       <ThemedText color={skin.panel.ink}>
         {settings.isGuest ? T.guest : T.line}
       </ThemedText>
+      <FeedbackCard
+        collapse={skin.spacing.stack}
+        feedback={
+          settings.pushBlocked
+            ? {
+                tone: "note",
+                icon: BellOffIcon,
+                title: common.feedback.pushOff,
+                body: settings.isGuest ? undefined : common.feedback.pushOffLine,
+                action: { label: common.feedback.openSettings, onPress: settings.openPhoneSettings },
+              }
+            : null
+        }
+      />
       <PanelScrollView
         style={styles.list}
         contentContainerStyle={styles.scroll}
@@ -109,7 +126,7 @@ const NotificationsModal = ({
           {settings.rows.map((row) => {
             const label = T.events[row.event.id] ?? row.event.id;
             return (
-              <Row key={row.event.id} label={label}>
+              <Row key={row.event.id} label={label} error={settings.rowError(row.event.id)}>
                 <Slot>
                   {row.canEmail && (
                     <KilSwitch

@@ -10,7 +10,7 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { useSwipeGesture } from "./useSwipeGesture";
+import { useSwipeGesture, type SwipeOutcome } from "./useSwipeGesture";
 import { scheduleOnRN } from "react-native-worklets";
 
 const SwipeGesture = ({
@@ -29,8 +29,8 @@ const SwipeGesture = ({
   styles: {
     box: StyleProp<ViewStyle>;
   };
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
+  onSwipeLeft?: SwipeOutcome;
+  onSwipeRight?: SwipeOutcome;
   onLongPress?: () => void;
   onSwipingLeft?: (value: number) => void;
   onSwipingRight?: (value: number) => void;

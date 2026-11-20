@@ -4,10 +4,12 @@ import {
   ArrowLeft as ArrowLeftBase,
   ArrowRight as ArrowRightBase,
   Barcode as BarcodeBase,
+  BellOff as BellOffBase,
   Cart as CartBase,
   Check as CheckBase,
   CheckCircle as CheckCircleBase,
   Clock as ClockBase,
+  CloudXmark as CloudXmarkBase,
   EditPencil as EditPencilBase,
   Eye as EyeBase,
   EyeClosed as EyeClosedBase,
@@ -57,10 +59,12 @@ export const ArrowDownIcon = sized(ArrowDownBase);
 export const ArrowLeftIcon = sized(ArrowLeftBase);
 export const ArrowRightIcon = sized(ArrowRightBase);
 export const BarcodeIcon = sized(BarcodeBase);
+export const BellOffIcon = sized(BellOffBase);
 export const CartIcon = sized(CartBase);
 export const CheckIcon = sized(CheckBase);
 export const CheckCircleIcon = sized(CheckCircleBase);
 export const ClockIcon = sized(ClockBase);
+export const CloudXmarkIcon = sized(CloudXmarkBase);
 export const EditPencilIcon = sized(EditPencilBase);
 export const EyeIcon = sized(EyeBase);
 export const EyeClosedIcon = sized(EyeClosedBase);

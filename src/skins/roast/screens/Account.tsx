@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import common from "@/i18n/common";
 import type { Skin } from "@/skins/types";
 import ActionRow from "@/components/elements/ActionRow";
@@ -48,6 +49,7 @@ const RoastAccount = () => {
             </View>
             <EditBadge />
           </Press>
+          <FeedbackSlot place="account" />
           <ThemedText mono size={skin.type.mono} color={skin.colors.onGround}>
             {user.email}
           </ThemedText>

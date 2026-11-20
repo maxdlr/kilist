@@ -1,3 +1,4 @@
+import { KeyboardAvoided } from "@/components/elements/BackBar";
 import Press from "@/components/elements/Press";
 import SyncNote from "@/components/elements/SyncNote";
 import { useHomeShortcuts } from "@/components/features/Home/HomeShortcuts";
@@ -96,6 +97,7 @@ const CalmHome = () => {
       behavior="padding"
       automaticOffset
     >
+      <KeyboardAvoided.Provider value>
       <Screen
         padded={false}
         glass
@@ -134,7 +136,7 @@ const CalmHome = () => {
                 {T.home.allSetLine}
               </CText>
             )}
-            <SyncNote color={C.textSoft} />
+            <SyncNote collapse={skin.spacing.small} />
           </View>
 
           {foods.length > 0 && (
@@ -316,6 +318,7 @@ const CalmHome = () => {
         </GlassScrollView>
       </Screen>
       <AddFoodPanel visible={adding} onClose={() => setAdding(false)} />
+      </KeyboardAvoided.Provider>
     </KeyboardAvoidingView>
   );
 };

@@ -57,8 +57,8 @@ const versusCopy: RoastCopy = {
     remove: "Remove",
   },
   sync: {
-    toast: "Offline. Couldn't sync, your answers are saved for the rematch.",
-    waiting: "Waiting to be back online",
+    waiting: (count: number) =>
+      count > 0 ? `Offline · ${count} move${count > 1 ? "s" : ""} saved for the rematch` : "Offline · nothing lost",
   },
   guest: {
     cardTitle: "No rivals yet",
@@ -290,7 +290,6 @@ const versusCopy: RoastCopy = {
     free: "Free",
     premium: "Premium",
     redeemed: (name: string) => `${name} unlocked!`,
-    failed: "Couldn't do that",
     sectionTitle: "Skins",
     progress: (have: number, price: number) => `${have} / ${price} tickets`,
     sectionLine: (count: number) => `${count} tickets. Every answer in a race earns more.`,

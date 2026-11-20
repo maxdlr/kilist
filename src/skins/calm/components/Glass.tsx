@@ -174,10 +174,10 @@ export const GlassScene = ({
       <View style={[StyleSheet.absoluteFill, styles.glassTarget]} />
       <GlassTargetScope.Provider value>
         <DockInset.Provider value={glassHeight}>
-          {fade && glassHeight > 0 ? (
+          {fade ? (
             <MaskedView
               style={glassStyles.grow}
-              maskElement={<ContentFadeMask id={fadeId} height={fadeHeight} look={look} />}
+              maskElement={<ContentFadeMask id={fadeId} height={glassHeight > 0 ? fadeHeight : 0} look={look} />}
             >
               {children}
             </MaskedView>

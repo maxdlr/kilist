@@ -1,6 +1,7 @@
+import { feedbackLook } from "../feedback";
 import type { SkinSource } from "../types";
 import versusCopy from "./copy";
-import { coral, ground, mint, panel, white, yellow } from "./theme/palette";
+import { coral, ground, mint, panel, versusPalette, white, yellow } from "./theme/palette";
 
 const NARROW = new Set([..."IJ1.,:;'!|()[]-"]);
 const WIDE = new Set([..."MW%@"]);
@@ -89,6 +90,16 @@ const versus: SkinSource = {
       opacity: 0.3,
     },
   },
+  feedback: feedbackLook(
+    {
+      ink: white,
+      soft: versusPalette.muted,
+      line: versusPalette.line,
+      danger: coral,
+      success: mint,
+    },
+    { radius: 18, border: 2, edge: 4 },
+  ),
   panel: {
     fill: panel,
     ink: white,

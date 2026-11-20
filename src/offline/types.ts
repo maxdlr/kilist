@@ -130,6 +130,7 @@ export type Op = {
   at: string;
   payload: Record<string, any>;
   attempts: number;
+  held?: boolean;
 };
 
 export type Reward = { earned: number; bonus: number; balance: number | null };

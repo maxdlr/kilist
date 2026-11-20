@@ -68,9 +68,11 @@ export const CalmMessage = ({
   mark,
   onRefresh,
   glassLook,
+  children,
 }: {
   title: string;
   line: string;
+  children?: React.ReactNode;
   dock?: React.ReactNode;
   mark?: MarkKind;
   onRefresh?: () => void | Promise<void>;
@@ -84,6 +86,7 @@ export const CalmMessage = ({
       {mark && <DrawnMark kind={mark} color={C.positive} />}
       <CText weight="medium" size={skin.type.display.md} accessibilityRole="header">{title}</CText>
       <CText size={skin.type.body} color={C.textSoft}>{line}</CText>
+      {children}
     </View>
   );
   return (

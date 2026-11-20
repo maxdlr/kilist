@@ -20,6 +20,13 @@ const AnimationService = {
   settle: { duration: 400, dampingRatio: 0.8 },
   snap: { duration: 300, dampingRatio: 1 },
   fling: { duration: 220, easing: EASE_OUT },
+  feedback: {
+    enter: { duration: 260, easing: EASE_OUT, rise: 8 },
+    exit: { duration: 180, easing: EASE_OUT, rise: 4 },
+    layout: { duration: 240, easing: EASE_SHEET },
+    tint: { duration: 200, easing: EASE_OUT },
+    nudge: { distance: 6, duration: 55, count: 2 },
+  },
 };
 
 export const CSS_EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);

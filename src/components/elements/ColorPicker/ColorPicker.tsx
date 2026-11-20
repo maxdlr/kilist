@@ -4,16 +4,30 @@ import { hexToHsv, hsvToHex, type HSV } from "@/utils/colorUtils";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
-import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 
-const AREA_HEIGHT = 168;
+const WHEEL = 220;
 const STRIP_HEIGHT = 28;
 const KNOB = 26;
-const AREA_RADIUS = 14;
+const SLICES = 72;
 const HUE_STEP = 15;
-const HUES = [0, 60, 120, 180, 240, 300, 360];
+const MIN_SHADE = 0.15;
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const R = WHEEL / 2;
+
+const slicePath = (index: number) => {
+  const from = ((index - 0.6) / SLICES) * Math.PI * 2;
+  const to = ((index + 0.6) / SLICES) * Math.PI * 2;
+  const point = (angle: number) => `${R + R * Math.cos(angle)} ${R + R * Math.sin(angle)}`;
+  return `M ${R} ${R} L ${point(from)} A ${R} ${R} 0 0 1 ${point(to)} Z`;
+};
+
+const SLICE_PATHS = Array.from({ length: SLICES }, (_, index) => ({
+  d: slicePath(index),
+  fill: hsvToHex({ h: (index / SLICES) * 360, s: 1, v: 1 }),
+}));
 
 type Props = {
   initial: string;
@@ -38,37 +52,39 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
     latest.current.onChange(hsvToHex(next));
   };
 
-  const pickShade = (x: number, y: number) => {
-    const { hsv: now, width: w } = latest.current;
-    if (!w) return;
-    update({ h: now.h, s: clamp(x / w), v: 1 - clamp(y / AREA_HEIGHT) });
+  const pickWheel = (x: number, y: number) => {
+    const dx = x - R;
+    const dy = y - R;
+    const hue = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+    update({ ...latest.current.hsv, h: hue, s: clamp(Math.hypot(dx, dy) / R) });
   };
 
-  const pickHue = (x: number) => {
+  const pickShade = (x: number) => {
     const { hsv: now, width: w } = latest.current;
     if (!w) return;
-    update({ ...now, h: clamp(x / w) * 359.999 });
+    update({ ...now, v: clamp(x / w, MIN_SHADE) });
   };
+
+  const wheelPan = usePanGesture({
+    runOnJS: true,
+    minDistance: 0,
+    onBegin: (event) => pickWheel(event.x, event.y),
+    onUpdate: (event) => pickWheel(event.x, event.y),
+  });
 
   const shadePan = usePanGesture({
     runOnJS: true,
     minDistance: 0,
-    onBegin: (event) => pickShade(event.x, event.y),
-    onUpdate: (event) => pickShade(event.x, event.y),
-  });
-
-  const huePan = usePanGesture({
-    runOnJS: true,
-    minDistance: 0,
-    onBegin: (event) => pickHue(event.x),
-    onUpdate: (event) => pickHue(event.x),
+    onBegin: (event) => pickShade(event.x),
+    onUpdate: (event) => pickShade(event.x),
   });
 
   const measure = (event: LayoutChangeEvent) => {
     latest.current.width = event.nativeEvent.layout.width;
     setWidth(event.nativeEvent.layout.width);
   };
-  const pure = hsvToHex({ h: hsv.h, s: 1, v: 1 });
+  const angle = (hsv.h * Math.PI) / 180;
+  const bright = hsvToHex({ h: hsv.h, s: hsv.s, v: 1 });
   const current = hsvToHex(hsv);
   const knob = (left: number, top: number, fill: string) => [
     styles.knob,
@@ -76,43 +92,8 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
   ];
 
   return (
-    <View style={styles.root} onLayout={measure}>
-      <GestureDetector gesture={shadePan}>
-        <View
-          accessible
-          accessibilityRole="adjustable"
-          accessibilityLabel={shadeLabel}
-          accessibilityValue={{ text: current }}
-          accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
-          onAccessibilityAction={(event) =>
-            update({
-              ...hsv,
-              v: clamp(hsv.v + (event.nativeEvent.actionName === "increment" ? 0.1 : -0.1)),
-            })
-          }
-          style={styles.area}
-        >
-          <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-            <Defs>
-              <LinearGradient id="white" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="#FFFFFF" stopOpacity={1} />
-                <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
-              </LinearGradient>
-              <LinearGradient id="black" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor="#000000" stopOpacity={0} />
-                <Stop offset="1" stopColor="#000000" stopOpacity={1} />
-              </LinearGradient>
-            </Defs>
-            <Rect width="100%" height="100%" rx={AREA_RADIUS} fill={pure} />
-            <Rect width="100%" height="100%" rx={AREA_RADIUS} fill="url(#white)" />
-            <Rect width="100%" height="100%" rx={AREA_RADIUS} fill="url(#black)" />
-          </Svg>
-          {width > 0 && (
-            <View pointerEvents="none" style={knob(hsv.s * width, (1 - hsv.v) * AREA_HEIGHT, current)} />
-          )}
-        </View>
-      </GestureDetector>
-      <GestureDetector gesture={huePan}>
+    <View style={styles.root}>
+      <GestureDetector gesture={wheelPan}>
         <View
           accessible
           accessibilityRole="adjustable"
@@ -125,24 +106,53 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
               h: (hsv.h + (event.nativeEvent.actionName === "increment" ? HUE_STEP : 360 - HUE_STEP)) % 360,
             })
           }
+          style={styles.wheel}
+        >
+          <Svg width={WHEEL} height={WHEEL}>
+            <Defs>
+              <RadialGradient id="center" cx="50%" cy="50%" r="50%">
+                <Stop offset="0" stopColor="#FFFFFF" stopOpacity={1} />
+                <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
+              </RadialGradient>
+            </Defs>
+            {SLICE_PATHS.map((slice) => (
+              <Path key={slice.d} d={slice.d} fill={slice.fill} />
+            ))}
+            <Circle cx={R} cy={R} r={R} fill="url(#center)" />
+            <Circle cx={R} cy={R} r={R} fill="#000000" opacity={1 - hsv.v} />
+          </Svg>
+          <View
+            pointerEvents="none"
+            style={knob(R + Math.cos(angle) * hsv.s * R, R + Math.sin(angle) * hsv.s * R, current)}
+          />
+        </View>
+      </GestureDetector>
+      <GestureDetector gesture={shadePan}>
+        <View
+          accessible
+          accessibilityRole="adjustable"
+          accessibilityLabel={shadeLabel}
+          accessibilityValue={{ text: current }}
+          accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+          onAccessibilityAction={(event) =>
+            update({
+              ...hsv,
+              v: clamp(hsv.v + (event.nativeEvent.actionName === "increment" ? 0.1 : -0.1), MIN_SHADE),
+            })
+          }
+          onLayout={measure}
           style={styles.strip}
         >
           <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
             <Defs>
-              <LinearGradient id="hues" x1="0" y1="0" x2="1" y2="0">
-                {HUES.map((hue) => (
-                  <Stop key={hue} offset={hue / 360} stopColor={hsvToHex({ h: hue % 360, s: 1, v: 1 })} />
-                ))}
+              <LinearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+                <Stop offset="0" stopColor="#000000" />
+                <Stop offset="1" stopColor={bright} />
               </LinearGradient>
             </Defs>
-            <Rect width="100%" height="100%" rx={STRIP_HEIGHT / 2} fill="url(#hues)" />
+            <Rect width="100%" height="100%" rx={STRIP_HEIGHT / 2} fill="url(#shade)" />
           </Svg>
-          {width > 0 && (
-            <View
-              pointerEvents="none"
-              style={knob((hsv.h / 360) * width, STRIP_HEIGHT / 2, pure)}
-            />
-          )}
+          {width > 0 && <View pointerEvents="none" style={knob(hsv.v * width, STRIP_HEIGHT / 2, current)} />}
         </View>
       </GestureDetector>
     </View>
@@ -151,8 +161,8 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
-    root: { gap: s.spacing.inline },
-    area: { height: AREA_HEIGHT },
+    root: { gap: s.spacing.section },
+    wheel: { alignSelf: "center", height: WHEEL, width: WHEEL },
     strip: { height: STRIP_HEIGHT },
     knob: {
       borderColor: "#FFFFFF",

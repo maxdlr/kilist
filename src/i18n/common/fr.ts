@@ -8,6 +8,56 @@ const fr: CommonText = {
   needsAccount: "Il te faut un compte pour ça.",
   notEnoughTickets: "Pas encore assez de tickets.",
   guestName: "Invité",
+  feedback: {
+    retry: "Réessayer",
+    load: {
+      inventory: "Impossible de charger tes produits",
+      list: "Impossible de charger ta liste",
+      household: "Impossible de charger ton foyer",
+      game: "Impossible de charger la partie du jour",
+    },
+    loadLine: "Ce qui est sur ton téléphone est toujours là.",
+    addFailed: (name: string) => `Impossible d'ajouter ${name}`,
+    removeFailed: (count: number) => (count > 1 ? `Impossible de retirer ${count} produits` : "Impossible de retirer ce produit"),
+    loginFailed: "Impossible de te connecter",
+    signupFailed: "Impossible de créer ton compte",
+    joinFailed: "Impossible de rejoindre le foyer",
+    deleteFailed: "Impossible de supprimer ton compte",
+    logoutFailed: "Impossible de te déconnecter",
+    saveFailed: "Impossible d'enregistrer",
+    nothingLost: "Rien n'est perdu. Réessaie.",
+    notInBasket: "Pas mis dans le panier",
+    notLater: "Pas reporté",
+    rowRetry: "Réessayer",
+    answerLost: "Ta dernière réponse n'a pas été enregistrée",
+    answerBack: (name: string) => `${name} revient en haut. Swipe-le encore.`,
+    googleLine: "Réessaie, ou utilise ton nom et ton mot de passe.",
+    passwordChanged: "Mot de passe changé",
+    passwordChangedLine: "Connecte-toi avec le nouveau.",
+    codeSent: (seconds: number) => `Nouveau code envoyé · renvoi dans ${seconds} s`,
+    pushOff: "Les notifications sont coupées pour Kilist",
+    pushOffLine: "Ton téléphone les bloque. Les e-mails arrivent quand même.",
+    openSettings: "Ouvrir les réglages",
+    flippedBack: "Pas enregistré. C'est revenu comme avant.",
+    shareFallback: "Impossible d'ouvrir le partage",
+    shareFallbackLine: "Montre plutôt le QR code à quelqu'un de ton foyer.",
+    showQr: "Montrer le QR code",
+    linkFallback: "Impossible d'ouvrir le lien.",
+    unlockFailed: (name: string) => `Impossible de débloquer ${name}`,
+    wearFailed: (name: string) => `Impossible de mettre ${name}`,
+    pointsKept: "Tes points n'ont pas été dépensés. Réessaie.",
+    notFound: "Produit introuvable",
+    notFoundLine: "Scanne-en un autre, ou tape son nom.",
+    typeName: "Taper son nom",
+    aislesFailed: (failed: number, total: number) =>
+      `${failed} rayon${failed > 1 ? "s" : ""} sur ${total} non enregistré${failed > 1 ? "s" : ""}`,
+    aislesFailedLine: "Les autres sont gardés. Appuie sur Terminé pour réessayer.",
+    inventoryWait: "Ton inventaire se prépare…",
+    recapKept: "Pas encore sur ta liste",
+    recapKeptLine: "D'habitude il t'en reste. Ajoute-les si tu n'en as vraiment plus.",
+    addAnyway: "Ajouter",
+    checking: "Vérification de ta liste…",
+  },
   marks: {
     added: (name: string) => `${name} ajouté`,
     removed: (count: number) =>
@@ -39,13 +89,9 @@ const fr: CommonText = {
   emailInvalid: "Cette adresse e-mail ne semble pas valide",
   nameLength: (min: number, max: number) => `De ${min} à ${max} caractères`,
   householdCodeMissing: "Entre un code de foyer pour le rejoindre",
-  inventoryNotReady:
-    "Ton inventaire n'est pas encore prêt, réessaie dans un instant",
   addFailed: "Impossible d'ajouter ce produit",
   shareMessage: (code: string) =>
     `Rejoins mon foyer sur Kilist avec ce code : ${code}`,
-  shareFailed: "Impossible d'ouvrir le partage",
-  linkFailed: "Impossible d'ouvrir le lien",
   householdSwitched: "Foyer changé",
   loading: "Chargement",
   scanQr: "Scanne le QR code d'un foyer",
@@ -100,8 +146,6 @@ const fr: CommonText = {
       yes: "Activer",
       later: "Plus tard",
     },
-    denied:
-      "Les notifications sont coupées pour Kilist. Active-les dans les réglages du téléphone.",
     required: {
       passwordReset: "Mot de passe oublié",
       signupConfirm: "Confirmation d'e-mail",
@@ -120,7 +164,6 @@ const fr: CommonText = {
     code: "Code",
     confirm: "Confirmer",
     resend: "Envoyer un nouveau code",
-    sent: "Nouveau code envoyé",
     done: "E-mail confirmé",
   },
   google: {
@@ -138,7 +181,6 @@ const fr: CommonText = {
     code: "Code",
     password: "Nouveau mot de passe",
     save: "Enregistrer",
-    done: "Mot de passe changé. Connecte-toi avec.",
     weak: "8 caractères minimum, avec une majuscule, un chiffre et un symbole.",
   },
   aisleFamilies: {
@@ -190,6 +232,8 @@ const fr: CommonText = {
     admin: "Admin",
   },
   shop: {
+    undo: "Annuler le dernier produit",
+    undone: (name: string) => `${name} est de retour sur ta liste`,
     startTitle: (low: number, high: number) =>
       `${countRange(low, high)} ${high === 1 ? "chose" : "choses"} à acheter`,
     startLabel: "Ta liste",
@@ -222,7 +266,6 @@ const fr: CommonText = {
     scanLine: "Vise le code-barres du produit avec la caméra.",
     scanCancel: "Taper plutôt le nom",
     scanSearching: "Recherche…",
-    scanFailed: "Produit introuvable. Tape plutôt son nom.",
     scanCamera:
       "L'accès à la caméra est nécessaire pour scanner un code-barres.",
     scanWarnTitle: (name: string) => `Attention : ${name}`,
@@ -304,7 +347,6 @@ const fr: CommonText = {
   sortByScore: "Trier par besoin",
   hidePassword: "Masquer le mot de passe",
   showPassword: "Afficher le mot de passe",
-  answerNotSaved: "Impossible d'enregistrer cette réponse",
   selected: "sélectionné",
 };
 

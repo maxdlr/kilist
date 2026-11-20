@@ -57,8 +57,8 @@ const fr: SkinCopy = {
     remove: "RETIRER",
   },
   sync: {
-    toast: "C'EST GARDÉ. INTERNET T'A LÂCHÉ.",
-    waiting: "EN ATTENTE DE RETOUR EN LIGNE",
+    waiting: (count: number) =>
+      count > 0 ? `HORS LIGNE. ${count} TRUC${count > 1 ? "S" : ""} GARDÉ${count > 1 ? "S" : ""} POUR PLUS TARD` : "HORS LIGNE. RIEN DE PERDU",
   },
   guest: {
     cardTitle: "PAS DE COMPTE. PAS DE COLOCS. JUSTE TOI.",
@@ -303,7 +303,6 @@ const fr: SkinCopy = {
     free: "GRATUIT",
     premium: "PREMIUM",
     redeemed: (name: string) => `${name} EST À TOI.`,
-    failed: "IMPOSSIBLE. C'EST PAS MA FAUTE.",
     sectionTitle: "LES STYLES. LE BON MATOS.",
     progress: (have: number, price: number) => `${have} / ${price} TICKETS`,
     sectionLine: (count: number) => `${count} TICKETS. CHAQUE SWIPE EN CRACHE D'AUTRES.`,

@@ -2,6 +2,8 @@ import StateFade from "@/components/elements/StateFade";
 import SuggestionStep from "@/components/features/Play/SuggestionStep";
 import useDailySuggestion from "@/hooks/screens/useDailySuggestion";
 import useSwipeGame from "@/hooks/screens/useSwipeGame";
+import common from "@/i18n/common";
+import { useFeedback } from "@/providers/FeedbackStore";
 import { useSkin } from "@/providers/SkinProvider";
 import { useEffect } from "react";
 import T from "@/skins/calm/text";
@@ -15,6 +17,7 @@ const CalmPlay = () => {
   const skin = useSkin();
   const game = useSwipeGame();
   const copy = skin.copy.swipe;
+  const problem = useFeedback("play");
   const { screen, begin } = game;
 
   const suggestion = useDailySuggestion(screen === "done" && game.mode === "daily");
@@ -36,14 +39,18 @@ const CalmPlay = () => {
         return (
           <CalmMessage
             glassLook={GLASS}
-            title={copy.emptyTitle}
-            line={copy.emptyLine}
+            title={problem ? problem.title : copy.emptyTitle}
+            line={problem ? common.feedback.loadLine : copy.emptyLine}
             dock={
-              <CButton
-                variant="text"
-                label={T.browseInventory}
-                href="/inventory"
-              />
+              problem?.action ? (
+                <CButton label={problem.action.label} onPress={problem.action.onPress} />
+              ) : (
+                <CButton
+                  variant="text"
+                  label={T.browseInventory}
+                  href="/inventory"
+                />
+              )
             }
           />
         );

@@ -9,7 +9,7 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-rean
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SWRConfig } from "swr";
 import { useSlideStackOptions } from "@/services/screenSlide";
-import fetcher, { onError } from "@/services/fetcher";
+import fetcher from "@/services/fetcher";
 
 import AuthGate from "@/components/guards/AuthGate";
 import { AnimatedSplashOverlay } from "@/components/navigation/AnimatedSplashOverlay";
@@ -17,7 +17,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { LanguageProvider, useLanguage } from "@/providers/LanguageProvider";
 import { SkinProvider, useSkin } from "@/providers/SkinProvider";
 import { MarkProvider } from "@/providers/MarkProvider";
-import { ToastProvider } from "@/providers/ToastProvider";
+import { FeedbackStoreProvider } from "@/providers/FeedbackStore";
 
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
@@ -48,7 +48,7 @@ const SkinnedApp = () => {
   return (
     <ThemeProvider value={navigationTheme}>
       <StatusBar style={skin.statusBarOnGround} />
-      <ToastProvider>
+      <FeedbackStoreProvider>
         <MarkProvider>
         <AnimatedSplashOverlay />
         <AuthProvider>
@@ -62,7 +62,7 @@ const SkinnedApp = () => {
           <AuthGate />
         </AuthProvider>
         </MarkProvider>
-      </ToastProvider>
+      </FeedbackStoreProvider>
     </ThemeProvider>
   );
 };
@@ -74,7 +74,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
-        <SWRConfig value={{ fetcher, onError }}>
+        <SWRConfig value={{ fetcher }}>
           <LanguageProvider>
           <SkinProvider>
             <SkinnedApp />

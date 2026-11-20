@@ -57,9 +57,8 @@ const fr: SkinCopy = {
     remove: "Retirer",
   },
   sync: {
-    toast:
-      "Tu es hors ligne. Tes changements sont gardés et seront synchronisés plus tard.",
-    waiting: "En attente de retour en ligne",
+    waiting: (count: number) =>
+      count > 0 ? `Hors ligne · ${count} modif${count > 1 ? "s" : ""} en attente` : "Hors ligne · rien de perdu",
   },
   guest: {
     cardTitle: "Juste toi, sur ce téléphone",
@@ -301,7 +300,6 @@ const fr: SkinCopy = {
     free: "Gratuit",
     premium: "Premium",
     redeemed: (name: string) => `${name} débloqué.`,
-    failed: "Impossible",
     sectionTitle: "Styles",
     progress: (have: number, price: number) => `${have} / ${price} points`,
     sectionLine: (count: number) =>

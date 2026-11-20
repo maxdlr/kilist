@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import AnimationService from "@/services/animation";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import V from "@/skins/versus/text";
@@ -87,6 +88,7 @@ const VersusInventory = () => {
               {skin.copy.inventory.title}
             </VText>
           </View>
+          <FeedbackSlot place="inventory" />
           {!isEmpty && !noResults && members.length > 1 && (
             <View style={styles.legend}>
               {(["out", "in"] as const).map((answer) => (

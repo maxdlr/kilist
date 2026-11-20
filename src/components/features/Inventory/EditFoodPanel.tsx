@@ -33,13 +33,13 @@ const EditFoodForm = ({ food, onClose }: Props) => {
       title={skin.copy.inventory.editTitle(food ? caseFor(skin, food.name) : "")}
       food={food}
       onSubmit={async (data) => {
-        if (!food) return false;
-        const saved = await editFood(food.id, data);
-        if (saved) refreshPreview();
-        return saved;
+        if (!food) return null;
+        const failed = await editFood(food.id, data);
+        if (!failed) refreshPreview();
+        return failed;
       }}
       onQuietSave={async (changes) => {
-        if (food && (await editFood(food.id, changes))) refreshPreview();
+        if (food && !(await editFood(food.id, changes))) refreshPreview();
       }}
       onClose={onClose}
     />

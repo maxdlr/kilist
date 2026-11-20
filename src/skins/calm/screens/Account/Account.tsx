@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import Press from "@/components/elements/Press";
 import common from "@/i18n/common";
 import T from "@/skins/calm/text";
@@ -33,6 +34,7 @@ const CalmAccount = () => {
       <Screen padded={false} glass glassLook={GLASS}>
         <GlassScrollView contentContainerStyle={styles.scroll}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
+          <FeedbackSlot place="account" />
 
           <Group label={T.settings.account}>
             <Press

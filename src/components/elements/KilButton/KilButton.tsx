@@ -136,7 +136,7 @@ const createStyles = (s: Skin) =>
       height: s.size.button.xs - 8,
     },
     disabled: {
-      opacity: 0.4,
+      opacity: s.feedback.held.opacity,
     },
     label: {
       includeFontPadding: false,

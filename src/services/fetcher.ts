@@ -1,15 +1,9 @@
 import common from "@/i18n/common";
 import type { AxiosError } from "axios";
 import axios from "@/services/axios";
-import { notifyToast } from "@/services/toastBridge";
 import { KilistApiError } from "@/types/api";
 
 export const isQuietError = (err?: KilistApiError) => err?.status === 0 || err?.status === 401;
-
-export const onError = (err: KilistApiError) => {
-  if (isQuietError(err)) return;
-  notifyToast(err?.message || common.unexpected);
-};
 
 const fetcher = async ({
   url,

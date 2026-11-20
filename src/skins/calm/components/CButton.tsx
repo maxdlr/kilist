@@ -1,7 +1,9 @@
 import Press from "@/components/elements/Press";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { Href, router } from "expo-router";
-import { ReactNode } from "react";
+import AnimationService from "@/services/animation";
+import { ReactNode, useEffect } from "react";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useCalmColors } from "../theme/useCalmColors";
 import { CText } from "./CText";
 import { createButtonStyles } from "./styles";
@@ -15,7 +17,9 @@ export const CButton = ({
   accessibilityLabel,
   icon,
   small = false,
+  disabled = false,
 }: {
+  disabled?: boolean;
   icon?: (color: string) => ReactNode;
   label?: string;
   onPress?: () => void;
@@ -35,9 +39,20 @@ export const CButton = ({
     danger: { fill: C.danger, ink: C.onFill, line: C.danger },
   }[variant];
   const round = !label;
+  const held = skin.feedback.held.opacity;
+  const dim = useSharedValue(disabled ? held : 1);
+
+  useEffect(() => {
+    dim.set(withTiming(disabled ? held : 1, AnimationService.feedback.tint));
+  }, [disabled, held, dim]);
+
+  const dimStyle = useAnimatedStyle(() => ({ opacity: dim.value }));
 
   return (
+    <Animated.View style={dimStyle}>
     <Press
+      disabled={disabled}
+      accessibilityState={{ disabled }}
       accessibilityRole="button"
       scale={variant !== "text"}
       accessibilityLabel={accessibilityLabel ?? label}
@@ -67,5 +82,6 @@ export const CButton = ({
         </CText>
       )}
     </Press>
+    </Animated.View>
   );
 };

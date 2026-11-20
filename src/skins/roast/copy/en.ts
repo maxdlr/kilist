@@ -55,8 +55,8 @@ const roastCopy = {
     remove: "REMOVE",
   },
   sync: {
-    toast: "I SAVED IT. THE INTERNET LEFT YOU.",
-    waiting: "WAITING TO BE BACK ONLINE",
+    waiting: (count: number) =>
+      count > 0 ? `OFFLINE. ${count} THING${count > 1 ? "S" : ""} SAVED FOR LATER` : "OFFLINE. NOTHING LOST",
   },
   guest: {
     cardTitle: "NO ACCOUNT. NO HOUSEMATES. JUST YOU.",
@@ -301,7 +301,6 @@ const roastCopy = {
     free: "FREE",
     premium: "PREMIUM",
     redeemed: (name: string) => `${name} IS YOURS.`,
-    failed: "COULDN'T DO THAT. NOT MY FAULT.",
     sectionTitle: "SKINS. THE GOOD STUFF.",
     progress: (have: number, price: number) => `${have} / ${price} TICKETS`,
     sectionLine: (count: number) => `${count} TICKETS. EVERY SWIPE PRINTS MORE.`,

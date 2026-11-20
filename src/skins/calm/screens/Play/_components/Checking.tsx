@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import ActionPanel from "@/components/elements/ActionPanel";
 import Press from "@/components/elements/Press";
 import SwipeDeck, { SwipeDirection } from "@/components/elements/SwipeDeck";
@@ -115,6 +116,9 @@ const Checking = ({ game }: { game: SwipeGame }) => {
               />
             </View>
           </View>
+          <View style={styles.problem}>
+            <FeedbackSlot place="play" />
+          </View>
           <View style={styles.flex}>
             <SwipeDeck
               items={game.foods}
@@ -148,6 +152,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
+    problem: { paddingHorizontal: s.spacing.gutter },
     root: { backgroundColor: C.ground, flex: 1 },
     flex: { flex: 1, minWidth: 0 },
     between: {

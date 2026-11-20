@@ -1,6 +1,7 @@
 import type { ActionPanelRequest } from "@/components/elements/ActionPanel";
 import common from "@/i18n/common";
 import useInventory from "@/providers/InventoryProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
 import useMark from "@/providers/MarkProvider";
 import { useSkin } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
@@ -13,6 +14,7 @@ const useInventoryShelf = () => {
   const copy = skin.copy.inventory;
   const list = useInventory();
   const { mark } = useMark();
+  const report = useReportFeedback();
   const { foods, search, mutateFood, removeFoodsFromList } = list;
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [deleteIds, setDeleteIds] = useState<number[]>([]);
@@ -76,9 +78,18 @@ const useInventoryShelf = () => {
           label: skin.copy.common.remove,
           destructive: true,
           onPress: async () => {
-            const removed = await removeFoodsFromList(ids);
+            const failed = await removeFoodsFromList(ids);
             exitDeleteMode();
-            if (removed) mark("removed", common.marks.removed(ids.length));
+            if (!failed) {
+              mark("removed", common.marks.removed(ids.length));
+              return;
+            }
+            report("inventory", {
+              tone: "error",
+              title: common.feedback.removeFailed(ids.length),
+              body: failed.message,
+              action: { label: common.feedback.retry, onPress: () => askRemove(ids, title) },
+            });
           },
         },
       ],
@@ -101,15 +112,15 @@ const useInventoryShelf = () => {
   const hasFoods = Boolean(foods?.length);
 
   const createFood: typeof list.createFood = async (data) => {
-    const created = await list.createFood(data);
-    if (created) mark("added", common.marks.added(data.name.trim()));
-    return created;
+    const failed = await list.createFood(data);
+    if (!failed) mark("added", common.marks.added(data.name.trim()));
+    return failed;
   };
 
   const editFood: typeof list.editFood = async (foodId, data) => {
-    const saved = await list.editFood(foodId, data);
-    if (saved) mark("saved", common.marks.saved);
-    return saved;
+    const failed = await list.editFood(foodId, data);
+    if (!failed) mark("saved", common.marks.saved);
+    return failed;
   };
 
   return {

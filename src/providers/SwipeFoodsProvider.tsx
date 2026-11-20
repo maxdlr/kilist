@@ -1,6 +1,7 @@
 import common from "@/i18n/common";
 import axios from "@/services/axios";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
+import { problemOf } from "@/utils/problem";
 import { FoodType } from "@/types/model";
 import React, {
   createContext,
@@ -28,6 +29,8 @@ export type SwipeReward = {
 export type SwipeRoundRecap = {
   day: string;
   added: FoodType[];
+  kept: FoodType[];
+  checking: boolean;
 };
 
 export type SwipeFoodsContextType = {
@@ -75,7 +78,7 @@ const SwipeFoodsContext = createContext<SwipeFoodsContextType>({
 });
 
 export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
-  const { showToast } = useToast();
+  const report = useReportFeedback();
   const [roundRecap, setRoundRecap] = useState<SwipeRoundRecap>();
 
   const {
@@ -87,8 +90,15 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
       url: "foods/swipe/browse",
     },
     {
-      onSuccess: () => {},
-      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
+      onSuccess: () => report("play", null),
+      onError: (err) =>
+        !isQuietError(err) &&
+        report("play", {
+          tone: "error",
+          title: common.feedback.load.game,
+          body: err?.message || common.feedback.loadLine,
+          action: { label: common.feedback.retry, onPress: () => mutateFoods() },
+        }),
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       retryCount: 3,
@@ -157,9 +167,10 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         `foods/swipe/edit/${payload.foodId}`,
         payload,
       );
+      report("play", null);
       return res.data ?? null;
-    } catch (err: any) {
-      showToast(err?.response?.data?.message || common.unexpected);
+    } catch (err) {
+      report("play", { tone: "error", title: common.feedback.answerLost, body: problemOf(err).message });
       return null;
     } finally {
       swipedIds.current.delete(payload.foodId);
@@ -172,8 +183,8 @@ export const SwipeFoodsProvider = ({ children }: { children: ReactNode }) => {
         tzOffset,
       });
       await mutateGame(res.data, { revalidate: false });
-    } catch (err: any) {
-      showToast(err?.response?.data?.message || common.unexpected);
+    } catch (err) {
+      report("play", { tone: "error", title: common.feedback.saveFailed, body: problemOf(err).message });
     }
   };
 

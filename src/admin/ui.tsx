@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import withPressed from "@/utils/withPressed";
 import { Href, router } from "expo-router";
 import { ReactNode, useState } from "react";
@@ -103,6 +104,7 @@ export const AScreen = ({
         {count !== undefined && <AText color={A.soft}>{String(count)}</AText>}
       </View>
       {subtitle ? <AText size={14} color={A.soft} style={styles.pad4}>{subtitle}</AText> : null}
+      <FeedbackSlot place="admin" />
       {header}
     </View>
   );

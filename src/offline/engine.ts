@@ -80,7 +80,7 @@ const pass = async () => {
     const { data } = await client.post<SyncResponse>(
       "/sync",
       {
-        ops: ops.map(({ attempts: _attempts, ...op }) => op),
+        ops: ops.map(({ attempts: _attempts, held: _held, ...op }) => op),
         sentAt: new Date().toISOString(),
         knownHash: getHash(),
       },

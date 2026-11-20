@@ -2,7 +2,8 @@ import common from "@/i18n/common";
 import axios from "@/services/axios";
 import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
+import { problemOf, type Problem } from "@/utils/problem";
 import type { ScannedProduct } from "@/offline/domain";
 import type { LevelNumber } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -17,9 +18,9 @@ export type InventoryContextType = {
   mutateFood: () => void;
   search: string;
   setSearch: (search: string) => void;
-  createFood: (data: { name: string; product?: ScannedProduct } & FoodDetails) => Promise<boolean>;
-  editFood: (foodId: number, data: { name?: string; level?: LevelNumber } & FoodDetails) => Promise<boolean>;
-  removeFoodsFromList: (foodIds: number[]) => Promise<boolean>;
+  createFood: (data: { name: string; product?: ScannedProduct } & FoodDetails) => Promise<Problem | null>;
+  editFood: (foodId: number, data: { name?: string; level?: LevelNumber } & FoodDetails) => Promise<Problem | null>;
+  removeFoodsFromList: (foodIds: number[]) => Promise<Problem | null>;
 };
 
 type FoodDetails = { frequencyDays?: number | null; quantity?: string | null; note?: string | null };
@@ -30,9 +31,9 @@ const InventoryContext = createContext<InventoryContextType>({
   mutateFood: () => {},
   search: "",
   setSearch: () => {},
-  createFood: async () => false,
-  editFood: async () => false,
-  removeFoodsFromList: async () => false,
+  createFood: async () => null,
+  editFood: async () => null,
+  removeFoodsFromList: async () => null,
 });
 
 export const InventoryProvider = ({
@@ -42,7 +43,7 @@ export const InventoryProvider = ({
   children: ReactNode;
   listIds?: number[];
 }) => {
-  const { showToast } = useToast();
+  const report = useReportFeedback();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
 
@@ -59,8 +60,15 @@ export const InventoryProvider = ({
       },
     },
     {
-      onSuccess: () => {},
-      onError: (err) => !isQuietError(err) && showToast(err?.message || common.unexpected),
+      onSuccess: () => report("inventory", null),
+      onError: (err) =>
+        !isQuietError(err) &&
+        report("inventory", {
+          tone: "error",
+          title: common.feedback.load.inventory,
+          body: err?.message || common.feedback.loadLine,
+          action: { label: common.feedback.retry, onPress: () => mutateFood() },
+        }),
       revalidateOnFocus: true,
       revalidateIfStale: true,
       revalidateOnReconnect: true,
@@ -76,18 +84,11 @@ export const InventoryProvider = ({
     listIds?.[0] ? `lists/${listIds[0]}/remove-foods` : "",
   );
 
-  const handleError = (message?: string) => {
-    showToast(message || common.unexpected);
-  };
-
   const createFood = async (data: { name: string; product?: ScannedProduct } & FoodDetails) => {
     const res = await postCreateFood({ ...data, listId: listIds?.[0] });
-    if (res.error) {
-      handleError(res.error.message);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     mutateFood();
-    return true;
+    return null;
   };
 
   const editFood = async (
@@ -98,21 +99,17 @@ export const InventoryProvider = ({
       await axios.put(`foods/edit/${foodId}`, data);
       if (level !== undefined) await putFoodLevel(foodId, level);
       mutateFood();
-      return true;
-    } catch (err: any) {
-      handleError(err?.response?.data?.message);
-      return false;
+      return null;
+    } catch (err) {
+      return problemOf(err);
     }
   };
 
   const removeFoodsFromList = async (foodIds: number[]) => {
     const res = await putRemoveFoods({ foodIds });
-    if (res.error) {
-      handleError(res.error.message);
-      return false;
-    }
+    if (res.error) return problemOf(res.error);
     mutateFood();
-    return true;
+    return null;
   };
 
   return (

@@ -1,5 +1,8 @@
 import V from "@/skins/versus/text";
+import { FeedbackRow } from "@/components/elements/Feedback";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
+import type { SwipeOutcome } from "@/components/gestures/SwipeGesture/useSwipeGesture";
+import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { FoodType } from "@/types/model";
@@ -13,16 +16,21 @@ const SwipeRow = ({
   food,
   onBuy,
   onLater,
+  error,
+  onRetry,
 }: {
   food: FoodType;
-  onBuy: () => void;
-  onLater: () => void;
+  onBuy: SwipeOutcome;
+  onLater: SwipeOutcome;
+  error?: string | null;
+  onRetry?: () => void;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const [buying, setBuying] = useState(true);
 
   return (
+    <FeedbackRow error={error} retryLabel={common.feedback.rowRetry} onRetry={onRetry}>
     <View
       accessibilityActions={[
         { name: "activate", label: V.shop.bought },
@@ -47,6 +55,7 @@ const SwipeRow = ({
         <Row food={food} done={false} />
       </SwipeGesture>
     </View>
+    </FeedbackRow>
   );
 };
 

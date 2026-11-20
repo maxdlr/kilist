@@ -7,7 +7,8 @@ import { getCatalog, refreshCatalog } from "@/offline/catalog";
 import { starterFoods } from "@/offline/domain";
 import { foodKey } from "@/offline/foodNames";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import useToast from "@/providers/ToastProvider";
+import { FeedbackCard, type Feedback } from "@/components/elements/Feedback";
+import { problemOf } from "@/utils/problem";
 import axios from "@/services/axios";
 import type { Skin } from "@/skins/types";
 import { FoodBankItemType, FoodType } from "@/types/model";
@@ -91,7 +92,7 @@ const ProfilePick = ({
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const copy = T.tutorial;
-  const { showToast } = useToast();
+  const [problem, setProblem] = useState<Feedback | null>(null);
   const [catalog, setCatalog] = useState(getCatalog());
   const { mutate } = useSWRConfig();
   const refine = owned !== undefined;
@@ -208,6 +209,7 @@ const ProfilePick = ({
 
   const finish = async () => {
     if (busy) return;
+    setProblem(null);
     if (profiles.length === 0 || !listId) return onDone([]);
     setBusy(true);
     try {
@@ -227,8 +229,13 @@ const ProfilePick = ({
       }
       if (refine) await mutate(() => true);
       onDone(selected);
-    } catch {
-      showToast(common.addFailed);
+    } catch (error) {
+      const failed = problemOf(error);
+      setProblem({
+        tone: failed.message === common.needsConnection ? "note" : "error",
+        title: common.addFailed,
+        body: failed.message === common.unexpected ? common.feedback.nothingLost : failed.message,
+      });
       setBusy(false);
     }
   };
@@ -343,6 +350,11 @@ const ProfilePick = ({
       glass
       dock={
         <>
+          {isLast && (
+            <View style={styles.full}>
+              <FeedbackCard feedback={problem} />
+            </View>
+          )}
           {isLast && (
             <CText
               size={skin.type.label + 1}

@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import AnimationService from "@/services/animation";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import T from "@/skins/calm/text";
@@ -96,6 +97,9 @@ const CalmInventory = () => {
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{skin.copy.inventory.title}</CText>
           <CText size={skin.type.label} color={C.textSoft}>{`${foods?.length ?? 0}`}</CText>
         </View>
+        <View style={styles.problem}>
+          <FeedbackSlot place="inventory" />
+        </View>
 
         {noResults ? (
           <View style={styles.message}>
@@ -138,6 +142,7 @@ export default CalmInventory;
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
+    problem: { paddingHorizontal: s.spacing.gutter },
     flex: { flex: 1, minWidth: 0 },
     titleRow: { alignItems: "baseline", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: s.spacing.gutter },
     list: { paddingBottom: s.spacing.stack, paddingHorizontal: s.spacing.gutter },

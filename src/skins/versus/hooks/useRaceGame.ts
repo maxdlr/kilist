@@ -2,7 +2,7 @@ import common from "@/i18n/common";
 import type { SwipeDeckFling, SwipeDirection } from "@/components/elements/SwipeDeck";
 import useAuth from "@/providers/AuthProvider";
 import useTickets from "@/providers/TicketsProvider";
-import useToast from "@/providers/ToastProvider";
+import { useReportFeedback } from "@/providers/FeedbackStore";
 import { FoodType } from "@/types/model";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -23,7 +23,7 @@ export type Reveal = {
 const useRaceGame = () => {
   const { user } = useAuth();
   const tickets = useTickets();
-  const { showToast } = useToast();
+  const report = useReportFeedback();
   const { data: race, isLoading, mutate } = useRace();
   const [phase, setPhase] = useState<"idle" | "play" | "done">("idle");
   const [answers, setAnswers] = useState<Record<number, RaceAnswer>>({});
@@ -111,14 +111,20 @@ const useRaceGame = () => {
         tickets.refresh();
         setPhase("done");
       }
-    } catch (error: any) {
+    } catch {
       setAnswers((current) => {
         const next = { ...current };
         delete next[food.id];
         return next;
       });
-      showToast(error?.response?.data?.message || common.answerNotSaved);
+      report("play", {
+        tone: "error",
+        title: common.feedback.answerLost,
+        body: common.feedback.answerBack(food.name),
+      });
+      return;
     }
+    report("play", null);
   };
 
   const target = race?.target ?? null;

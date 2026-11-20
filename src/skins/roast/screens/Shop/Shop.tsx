@@ -1,3 +1,4 @@
+import { FeedbackSlot } from "@/components/elements/Feedback";
 import Press from "@/components/elements/Press";
 import withPressed from "@/utils/withPressed";
 import common from "@/i18n/common";
@@ -18,7 +19,7 @@ import { FoodType } from "@/types/model";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { XmarkIcon } from "@/components/icons";
+import { UndoIcon, XmarkIcon } from "@/components/icons";
 import ShopListFoodRow from "./_components/ShopFoodRow";
 import ShopPanels from "@/components/features/Shop/ShopPanels";
 
@@ -93,6 +94,7 @@ const ShopList = () => {
         <Title size={skin.type.display.lg}>{caseFor(skin, common.shop.startTitle(run.range.low, run.range.high))}</Title>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startRight)}</ThemedText>
         <ThemedText size={skin.type.lead}>{caseFor(skin, common.shop.startLeft)}</ThemedText>
+        <FeedbackSlot place="list" />
         <ScrollView style={styles.tagScroll} contentContainerStyle={styles.tags}>
           {run.preview.map((food) => {
             const picked = run.selected.includes(food.id);
@@ -155,7 +157,7 @@ const ShopList = () => {
 
   const renderItem = ({ item }: { item: FoodType }) => (
     <AnimatedListItem key={item.id}>
-      <ShopListFoodRow food={item} onBuy={handleBuy} onDismiss={handleSnooze} />
+      <ShopListFoodRow food={item} onBuy={handleBuy} onDismiss={handleSnooze} error={run.rowError(item.id)?.message} />
     </AnimatedListItem>
   );
 
@@ -181,6 +183,9 @@ const ShopList = () => {
           <XmarkIcon size={skin.size.icon.action} color={skin.colors.muted} strokeWidth={2.5} />
         </Press>
       </View>
+      <View style={styles.problem}>
+        <FeedbackSlot place="list" />
+      </View>
 
       <Animated.FlatList
         style={styles.flex}
@@ -203,6 +208,7 @@ const ShopList = () => {
             food={suggestion}
             onBuy={handleBuy}
             onDismiss={handleSnooze}
+            error={run.rowError(suggestion.id)?.message}
           />
         </View>
       )}
@@ -217,6 +223,14 @@ const ShopList = () => {
           </ThemedText>
         </View>
         <View style={styles.controls}>
+          <KilButton
+            height={skin.size.button.sm}
+            variant="secondary"
+            accessibilityLabel={common.shop.undo}
+            icon={(color) => <UndoIcon size={skin.size.icon.action} color={color} strokeWidth={2.5} />}
+            onTouch={run.undo}
+            disabled={!run.canUndo}
+          />
           <KilButton
             flex={1}
             height={skin.size.button.sm}
@@ -263,6 +277,7 @@ const ShopList = () => {
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    problem: { paddingHorizontal: s.spacing.gutter },
     root: {
       flex: 1,
     },

@@ -1,3 +1,4 @@
+import { ActionNote, FeedbackCard } from "@/components/elements/Feedback";
 import KilButton from "@/components/elements/KilButton";
 import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
@@ -83,6 +84,8 @@ export const LookActions = ({ look, looks, withPreview = false }: { look: Look; 
 
   return (
     <View style={styles.actions}>
+      <FeedbackCard feedback={looks.problemOf(look)} collapse={skin.spacing.small} />
+      <ActionNote reason={looks.hintOf(look)} collapse={skin.spacing.small} />
       {(withPreview || canBuy) && (
         <View style={styles.actionRow}>
           {withPreview && (
@@ -96,7 +99,7 @@ export const LookActions = ({ look, looks, withPreview = false }: { look: Look; 
             />
           )}
           {canBuy && (
-            <KilButton {...button} flex={1} variant="attached" label={copy.buy(looks.price)} onTouch={looks.buy} />
+            <KilButton {...button} flex={1} variant="attached" label={copy.buy(looks.price)} onTouch={() => looks.buy(look)} />
           )}
         </View>
       )}
@@ -134,7 +137,7 @@ export const LookActions = ({ look, looks, withPreview = false }: { look: Look; 
           label={copy.locked(look.missing)}
           accessibilityLabel={`${look.skin.name} is locked. ${copy.locked(look.missing)}. ${copy.earnHint}`}
           icon={(color) => <LockIcon color={color} />}
-          onTouch={looks.earnMore}
+          onTouch={() => looks.earnMore(look)}
         />
       )}
     </View>

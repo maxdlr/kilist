@@ -57,8 +57,8 @@ const fr: SkinCopy = {
     remove: "Retirer",
   },
   sync: {
-    toast: "Hors ligne. Pas de synchro, tes réponses sont gardées pour la revanche.",
-    waiting: "En attente de retour en ligne",
+    waiting: (count: number) =>
+      count > 0 ? `Hors ligne · ${count} coup${count > 1 ? "s" : ""} gardé${count > 1 ? "s" : ""} pour la revanche` : "Hors ligne · rien de perdu",
   },
   guest: {
     cardTitle: "Pas encore de rivaux",
@@ -290,7 +290,6 @@ const fr: SkinCopy = {
     free: "Gratuit",
     premium: "Premium",
     redeemed: (name: string) => `${name} débloqué !`,
-    failed: "Impossible",
     sectionTitle: "Styles",
     progress: (have: number, price: number) => `${have} / ${price} tickets`,
     sectionLine: (count: number) => `${count} tickets. Chaque réponse en course en rapporte d'autres.`,

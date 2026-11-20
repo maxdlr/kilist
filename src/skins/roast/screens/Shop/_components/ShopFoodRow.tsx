@@ -1,6 +1,8 @@
 import type { Skin } from "@/skins/types";
 import FoodIcon from "@/components/elements/FoodIcon";
+import { FeedbackRow } from "@/components/elements/Feedback";
 import SwipeGesture from "@/components/gestures/SwipeGesture";
+import common from "@/i18n/common";
 import { ThemedText } from "@/components/elements/ThemedText";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { caseFor } from "@/skins";
@@ -13,10 +15,12 @@ const ShopListFoodRow = ({
   food,
   onBuy,
   onDismiss,
+  error,
 }: {
   food: FoodType;
-  onBuy: (foodId: number) => void;
-  onDismiss?: (foodId: number) => void;
+  onBuy: (foodId: number) => Promise<boolean> | void;
+  onDismiss?: (foodId: number) => Promise<boolean> | void;
+  error?: string | null;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
@@ -26,6 +30,7 @@ const ShopListFoodRow = ({
   const level = levelOf(inStockScore);
 
   return (
+    <FeedbackRow error={error} retryLabel={caseFor(skin, common.feedback.rowRetry)} onRetry={() => onBuy(id)}>
     <View
       style={[
         styles.container,
@@ -80,6 +85,7 @@ const ShopListFoodRow = ({
         </ThemedText>
       </SwipeGesture>
     </View>
+    </FeedbackRow>
   );
 };
 

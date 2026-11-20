@@ -80,7 +80,7 @@ const LoginScreen = () => {
           />
         )}
 
-        <ResetPasswordModal visible={resetOpen} onClose={() => setResetOpen(false)} />
+        <ResetPasswordModal visible={resetOpen} onClose={() => setResetOpen(false)} onDone={flow.passwordChanged} />
 
         <ActionPanel
           request={
