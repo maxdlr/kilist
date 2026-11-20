@@ -308,9 +308,6 @@ const en = {
     discover: "Discover",
     preview: "Preview",
     previewAria: (name: string) => `Preview ${name} with your data`,
-    slides: { Home: "Home", Play: "Game", Shop: "Shopping" },
-    slideOf: (label: string, position: number, total: number) =>
-      `${label} · ${position}/${total}`,
   },
   deleteAccount: {
     typeName: "Type your username to confirm",

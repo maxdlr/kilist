@@ -10,7 +10,14 @@ import { StyleSheet, View } from "react-native";
 import { ArcadeIcon, RefreshIcon } from "@/components/icons";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, Dot, GlassScrollView, HelpTip, Screen } from "@/skins/calm/components";
+import {
+  CButton,
+  CText,
+  Dot,
+  GlassScrollView,
+  HelpTip,
+  Screen,
+} from "@/skins/calm/components";
 import GLASS from "../glass";
 
 const Recap = ({ game }: { game: SwipeGame }) => {
@@ -23,7 +30,10 @@ const Recap = ({ game }: { game: SwipeGame }) => {
   const [touches, setTouches] = useState(0);
 
   return (
-    <View style={styles.flex} onTouchStart={() => setTouches((count) => count + 1)}>
+    <View
+      style={styles.flex}
+      onTouchStart={() => setTouches((count) => count + 1)}
+    >
       <Screen
         glass
         glassLook={GLASS}
@@ -63,6 +73,15 @@ const Recap = ({ game }: { game: SwipeGame }) => {
           </>
         }
       >
+        <View style={styles.topRow}>
+          {!recap && !game.allSorted && (
+            <HelpTip
+              text={T.play.playAgainTip}
+              accessibilityLabel={T.play.howAria}
+              activity={touches}
+            />
+          )}
+        </View>
         <GlassScrollView contentContainerStyle={styles.doneContent}>
           <View style={styles.doneText}>
             <View style={styles.doneHead}>
@@ -74,15 +93,6 @@ const Recap = ({ game }: { game: SwipeGame }) => {
               >
                 {T.play.sorted}
               </CText>
-              {!recap && !game.allSorted && (
-                <View style={styles.tip}>
-                  <HelpTip
-                    text={T.play.playAgainTip}
-                    accessibilityLabel={T.play.howAria}
-                    activity={touches}
-                  />
-                </View>
-              )}
             </View>
             {recap ? (
               <CText size={skin.type.body} color={C.textSoft}>
@@ -155,8 +165,16 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     },
     doneText: { gap: s.spacing.small },
     flex: { flex: 1 },
-    doneHead: { alignItems: "center", flexDirection: "row" },
-    tip: { alignItems: "flex-end", flex: 1, marginLeft: s.spacing.small },
+    doneHead: {
+      alignItems: "center",
+      flexDirection: "row",
+    },
+    topRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      minHeight: Math.round(s.type.display.md * 1.38),
+    },
     allSorted: { flex: 1, justifyContent: "center" },
     kept: { gap: s.spacing.small },
     row: {

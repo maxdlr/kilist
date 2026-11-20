@@ -5,7 +5,7 @@ import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
 import common from "@/i18n/common";
 import { useSkin } from "@/providers/SkinProvider";
-import { FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
+import { FeedbackCard, Presence, useFormFeedback } from "@/components/elements/Feedback";
 import { problemOf } from "@/utils/problem";
 import axios from "@/services/axios";
 import { useState } from "react";
@@ -69,11 +69,11 @@ const ResetPasswordModal = ({
       <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
         {T.title}
       </Title>
-      {!(isKeyboardOpen && step === "code") && (
+      <Presence visible={!(isKeyboardOpen && step === "code")} collapse={skin.spacing.stack}>
         <ThemedText size={skin.type.body} color={skin.panel.ink}>
           {step === "email" ? T.emailLine : T.codeLine(email.trim())}
         </ThemedText>
-      )}
+      </Presence>
       {step === "email" ? (
         <FormInput
           placeholder={T.email}

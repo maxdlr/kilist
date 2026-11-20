@@ -1,7 +1,9 @@
 import type { Skin } from "@/skins/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { ReactNode } from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 
@@ -20,22 +22,19 @@ const Dock = ({
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
   const { insideTabs } = useTabBarVisibility();
+  const { progress } = useReanimatedKeyboardAnimation();
+  const pad = (StyleSheet.flatten(style)?.paddingBottom as number | undefined) ?? skin.spacing.dock;
+  const safeArea = insideTabs ? 0 : insets.bottom;
+  const bottom = useAnimatedStyle(() => ({
+    paddingBottom: pad + safeArea * (overKeyboard ? 1 - progress.value : 1),
+  }));
 
   return (
-    <View
-      style={[
-        styles.dock,
-        { backgroundColor: skin.colors.ground },
-        row && styles.row,
-        style,
-        !insideTabs && !overKeyboard && {
-          paddingBottom:
-            (StyleSheet.flatten(style)?.paddingBottom as number | undefined ?? skin.spacing.dock) + insets.bottom,
-        },
-      ]}
+    <Animated.View
+      style={[styles.dock, { backgroundColor: skin.colors.ground }, row && styles.row, style, !insideTabs && bottom]}
     >
       {children}
-    </View>
+    </Animated.View>
   );
 };
 

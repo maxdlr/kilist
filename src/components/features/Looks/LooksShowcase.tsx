@@ -1,5 +1,6 @@
 import { ActionNote, FeedbackCard } from "@/components/elements/Feedback";
 import KilButton from "@/components/elements/KilButton";
+import { CheckIcon, EyeIcon } from "@/components/icons";
 import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
 import useLooks, { Look, Looks } from "@/hooks/screens/useLooks";
@@ -74,69 +75,73 @@ const Swatch = ({ look }: { look: Look }) => {
   );
 };
 
-export const LookActions = ({ look, looks, withPreview = false }: { look: Look; looks: Looks; withPreview?: boolean }) => {
+export const CompactLookActions = ({
+  look,
+  looks,
+  withPreview = false,
+  large = false,
+}: {
+  look: Look;
+  looks: Looks;
+  withPreview?: boolean;
+  large?: boolean;
+}) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.prizes;
   const busy = looks.busy === look.prize.id;
-  const button = { height: skin.size.button.sm, fontSize: skin.type.label };
-  const canBuy = look.state === "locked" || look.state === "unlockable";
+  const check = (color: string) => <CheckIcon size={skin.size.icon.action - 4} color={color} strokeWidth={2} />;
+  const lock = (color: string) => <LockIcon color={color} />;
+  const size = large ? { height: skin.size.button.md, fontSize: skin.type.label } : { small: true };
 
   return (
-    <View style={styles.actions}>
-      <FeedbackCard feedback={looks.problemOf(look)} collapse={skin.spacing.small} />
-      <ActionNote reason={looks.hintOf(look)} collapse={skin.spacing.small} />
-      {(withPreview || canBuy) && (
-        <View style={styles.actionRow}>
-          {withPreview && (
-            <KilButton
-              {...button}
-              flex={1}
-              variant="attached"
-              label={common.looks.preview}
-              accessibilityLabel={common.looks.previewAria(look.skin.name)}
-              onTouch={() => looks.preview(look)}
-            />
-          )}
-          {canBuy && (
-            <KilButton {...button} flex={1} variant="attached" label={copy.buy(looks.price)} onTouch={() => looks.buy(look)} />
-          )}
-        </View>
+    <View style={[styles.compact, large && styles.large]}>
+      {withPreview && (
+        <KilButton
+          {...size}
+          variant="attached"
+          accessibilityLabel={common.looks.previewAria(look.skin.name)}
+          icon={(color) => <EyeIcon size={skin.size.icon.action - 4} color={color} strokeWidth={2} />}
+          onTouch={() => looks.preview(look)}
+        />
+      )}
+      {(look.state === "locked" || look.state === "unlockable") && (
+        <KilButton {...size} flex={large ? 1 : undefined} label={copy.buy(looks.price)} onTouch={() => looks.buy(look)} />
       )}
       {look.state === "current" && (
-        <KilButton {...button} variant="attached" label={copy.wearing} onTouch={() => undefined} />
+        <KilButton {...size} accessibilityLabel={copy.wearing} icon={check} onTouch={() => undefined} />
       )}
       {look.state === "owned" && (
-        <KilButton {...button} label={busy ? "…" : copy.wear} onTouch={() => looks.wear(look)} />
+        <KilButton {...size} disabled={busy} accessibilityLabel={copy.wear} icon={check} onTouch={() => looks.wear(look)} />
       )}
       {look.wearableAnyway && (
         <KilButton
-          {...button}
+          {...size}
           variant="attached"
-          label={busy ? "…" : copy.wear}
+          disabled={busy}
           accessibilityLabel={`${copy.wear} ${look.skin.name} without unlocking it`}
+          icon={check}
           onTouch={() => looks.wear(look)}
         />
       )}
       {look.state === "unlockable" && (
-        <KilButton {...button} label={busy ? "…" : copy.redeem(look.prize.price)} onTouch={() => looks.unlock(look)} />
+        <KilButton {...size} flex={large ? 1 : undefined} disabled={busy} label={copy.redeem(look.prize.price)} onTouch={() => looks.unlock(look)} />
       )}
       {look.state === "account" && (
         <KilButton
-          {...button}
+          {...size}
           variant="attached"
-          label={copy.needsAccount}
-          icon={(color) => <LockIcon color={color} />}
+          accessibilityLabel={copy.needsAccount}
+          icon={lock}
           onTouch={() => looks.unlock(look)}
         />
       )}
       {look.state === "locked" && (
         <KilButton
-          {...button}
+          {...size}
           variant="attached"
-          label={copy.locked(look.missing)}
           accessibilityLabel={`${look.skin.name} is locked. ${copy.locked(look.missing)}. ${copy.earnHint}`}
-          icon={(color) => <LockIcon color={color} />}
+          icon={lock}
           onTouch={() => looks.earnMore(look)}
         />
       )}
@@ -167,12 +172,14 @@ const LookCard = ({ look, looks, onPlaced }: { look: Look; looks: Looks; onPlace
       <Swatch look={look} />
       <View style={styles.cardText}>
         <View style={styles.nameRow}>
-          <ThemedText size={skin.type.lead} color={skin.colors.onPaper} numberOfLines={1} style={styles.name}>
-            {look.skin.name}
-          </ThemedText>
-          <ThemedText size={skin.type.caption} color={skin.colors.onPaper}>
-            {look.state === "current" ? copy.wearing : look.prize.price === 0 ? copy.free : copy.premium}
-          </ThemedText>
+          <View style={styles.name}>
+            <ThemedText size={skin.type.lead} color={skin.colors.onPaper} numberOfLines={1}>
+              {look.skin.name}
+            </ThemedText>
+            <ThemedText size={skin.type.caption} color={skin.colors.onPaper}>
+              {look.state === "current" ? copy.wearing : look.prize.price === 0 ? copy.free : copy.premium}
+            </ThemedText>
+          </View>
         </View>
         <ThemedText size={skin.type.caption} color={skin.colors.onPaper} numberOfLines={2}>
           {look.skin.tagline}
@@ -190,7 +197,9 @@ const LookCard = ({ look, looks, onPlaced }: { look: Look; looks: Looks; onPlace
           </ThemedText>
         </View>
       )}
-      <LookActions look={look} looks={looks} withPreview />
+      <FeedbackCard feedback={looks.problemOf(look)} collapse={skin.spacing.inline} />
+      <ActionNote reason={looks.hintOf(look)} collapse={skin.spacing.inline} />
+      <CompactLookActions look={look} looks={looks} withPreview large />
     </View>
   );
 };
@@ -269,18 +278,13 @@ const createStyles = (s: Skin) =>
     level: { borderRadius: s.spacing.small, height: s.spacing.stack, width: s.spacing.stack },
     pill: { borderWidth: 1, height: s.spacing.section, width: s.size.button.lg + s.spacing.section },
     cardText: { gap: s.spacing.hair },
-    nameRow: { alignItems: "baseline", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
-    name: { flexShrink: 1 },
+    nameRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline, justifyContent: "space-between" },
+    name: { flex: 1, minWidth: 0 },
     progress: { gap: s.spacing.tight },
     track: { borderRadius: 2, height: 4, overflow: "hidden" },
     fill: { borderRadius: 2, height: 4 },
-    actions: { gap: s.spacing.small },
-    actionRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: s.spacing.small,
-      justifyContent: "center",
-    },
+    compact: { alignItems: "center", flexDirection: "row", gap: s.spacing.tight },
+    large: { gap: s.spacing.small, justifyContent: "center" },
   });
 
 export default LooksShowcase;

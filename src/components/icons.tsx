@@ -13,6 +13,7 @@ import {
   EditPencil as EditPencilBase,
   Eye as EyeBase,
   EyeClosed as EyeClosedBase,
+  FloppyDisk as FloppyDiskBase,
   HelpCircle as HelpCircleBase,
   HelpCircleSolid as HelpCircleSolidBase,
   HomeSimple as HomeBase,
@@ -68,6 +69,7 @@ export const CloudXmarkIcon = sized(CloudXmarkBase);
 export const EditPencilIcon = sized(EditPencilBase);
 export const EyeIcon = sized(EyeBase);
 export const EyeClosedIcon = sized(EyeClosedBase);
+export const FloppyDiskIcon = sized(FloppyDiskBase);
 export const HelpCircleIcon = sized(HelpCircleBase);
 export const HelpCircleSolidIcon = sized(HelpCircleSolidBase);
 export const HomeIcon = sized(HomeBase);

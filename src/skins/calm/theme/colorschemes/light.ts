@@ -57,7 +57,11 @@ export const elements: CalmElements = {
   scrim: colors.veil,
   gameCard: {
     front: { fill: colors.white, border: colors.stone200 },
-    behind: { fill: colors.stone100, border: colors.stone100, contentOpacity: 0.35 },
+    behind: {
+      fill: colors.stone100,
+      border: colors.stone100,
+      contentOpacity: 0.35,
+    },
     border: { width: 1, radius: 39 },
     title: colors.ink,
     question: colors.stone700,
@@ -66,7 +70,11 @@ export const elements: CalmElements = {
       active: { fill: colors.ink, border: colors.ink, ink: colors.paper },
       haveItIcon: colors.sage700,
       unsure: {
-        idle: { fill: "transparent", border: colors.stone300, ink: colors.stone700 },
+        idle: {
+          fill: "transparent",
+          border: colors.stone300,
+          ink: colors.stone700,
+        },
         active: { fill: "transparent", border: colors.ink, ink: colors.ink },
       },
     },

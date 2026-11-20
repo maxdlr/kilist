@@ -6,9 +6,9 @@ const GLASS: GlassLook = {
   androidReduction: 4,
   veil: 0.5,
   feather: 64,
-  fadeFloor: 0.35,
+  fadeFloor: 0.15,
   fadeLead: 0,
-  fadeCurve: 2,
+  fadeCurve: 3,
 };
 
 export default GLASS;

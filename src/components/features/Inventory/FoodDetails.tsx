@@ -8,9 +8,11 @@ import common from "@/i18n/common";
 import type { SummaryPart } from "@/offline/summary";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
+import AnimationService from "@/services/animation";
 import withPressed from "@/utils/withPressed";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, { FadeIn, LayoutAnimationConfig, LinearTransition } from "react-native-reanimated";
 import FoodSummary from "./FoodSummary";
 
 export type FoodDetailValues = {
@@ -23,6 +25,8 @@ export type DetailKey = keyof FoodDetailValues;
 
 const ORDER: DetailKey[] = ["frequencyDays", "quantity", "note"];
 const FREQUENCIES = ["7", "14", "30"] as const;
+const MOVE = LinearTransition.duration(AnimationService.enter.duration).easing(AnimationService.easeOut);
+const SHOW = FadeIn.duration(AnimationService.enter.duration).easing(AnimationService.easeOut);
 
 const copyOf = (key: DetailKey) => (key === "frequencyDays" ? common.details.frequency : common.details[key]);
 
@@ -55,7 +59,7 @@ const FoodDetails = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const shown = ORDER.filter((key) => isSet(values, key) || added.includes(key));
-  const menu = ORDER.filter((key) => !shown.includes(key));
+  const [order] = useState(() => [...shown, ...ORDER.filter((key) => !shown.includes(key))]);
   const T = common.details;
   const bold = { fontFamily: skin.fonts.body?.bold ?? skin.fonts.display.family };
 
@@ -88,70 +92,74 @@ const FoodDetails = ({
   };
 
   return (
-    <>
+    <LayoutAnimationConfig skipEntering>
       <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {name}
       </Title>
       {sentence ? (
         <FoodSummary parts={sentence} />
       ) : (
-        shown.length === 0 && (
-          <ThemedText size={skin.type.label} color={skin.panel.ink}>
-            {T.intro}
-          </ThemedText>
-        )
+        <ThemedText size={skin.type.label} color={skin.panel.ink}>
+          {T.intro}
+        </ThemedText>
       )}
 
-      {shown.map((key) => (
-        <View key={key} style={[styles.module, { borderColor: skin.panel.line }]}>
-          <View style={styles.moduleHead}>
-            <ThemedText size={skin.type.label} color={skin.panel.title} style={bold}>
-              {copyOf(key).title}
-            </ThemedText>
-            <Press
-              accessibilityRole="button"
-              accessibilityLabel={T.remove(copyOf(key).title)}
-              hitSlop={skin.spacing.small}
-              onPress={() => onRemove(key)}
-              style={withPressed(styles.remove)}
-            >
-              <XmarkIcon size={skin.size.icon.action - 4} color={skin.panel.ink} strokeWidth={2} />
-            </Press>
-          </View>
-          {body(key)}
-        </View>
+      {order.map((key) => (
+        <Animated.View key={key} layout={MOVE} style={styles.slot}>
+          {shown.includes(key) ? (
+            <Animated.View key="open" entering={SHOW} style={[styles.module, { borderColor: skin.panel.line }]}>
+              <View style={styles.moduleHead}>
+                <ThemedText size={skin.type.label} color={skin.panel.title} style={bold}>
+                  {copyOf(key).title}
+                </ThemedText>
+                <Press
+                  accessibilityRole="button"
+                  accessibilityLabel={T.remove(copyOf(key).title)}
+                  hitSlop={skin.spacing.small}
+                  onPress={() => onRemove(key)}
+                  style={withPressed(styles.remove)}
+                >
+                  <XmarkIcon size={skin.size.icon.action - 4} color={skin.panel.ink} strokeWidth={2} />
+                </Press>
+              </View>
+              {body(key)}
+            </Animated.View>
+          ) : (
+            <Animated.View key="closed" entering={SHOW}>
+              <Press
+                accessibilityRole="button"
+                onPress={() => onAdd(key)}
+                style={withPressed([styles.add, { borderColor: skin.colors.fieldLine ?? skin.panel.line }])}
+              >
+                <View style={[styles.plus, { borderColor: skin.colors.fieldLine ?? skin.panel.line }]}>
+                  <PlusIcon size={skin.size.icon.action - 4} color={skin.panel.ink} strokeWidth={2} />
+                </View>
+                <View style={styles.addText}>
+                  <ThemedText size={skin.type.body} color={skin.panel.title} style={bold}>
+                    {copyOf(key).title}
+                  </ThemedText>
+                  <ThemedText size={skin.type.caption} color={skin.panel.ink}>
+                    {copyOf(key).hint}
+                  </ThemedText>
+                </View>
+              </Press>
+            </Animated.View>
+          )}
+        </Animated.View>
       ))}
 
-      {menu.map((key) => (
-        <Press
-          key={key}
-          accessibilityRole="button"
-          onPress={() => onAdd(key)}
-          style={withPressed([styles.add, { borderColor: skin.colors.fieldLine ?? skin.panel.line }])}
-        >
-          <View style={[styles.plus, { borderColor: skin.colors.fieldLine ?? skin.panel.line }]}>
-            <PlusIcon size={skin.size.icon.action - 4} color={skin.panel.ink} strokeWidth={2} />
-          </View>
-          <View style={styles.addText}>
-            <ThemedText size={skin.type.body} color={skin.panel.title} style={bold}>
-              {copyOf(key).title}
-            </ThemedText>
-            <ThemedText size={skin.type.caption} color={skin.panel.ink}>
-              {copyOf(key).hint}
-            </ThemedText>
-          </View>
-        </Press>
-      ))}
-
-      <ThemedText size={skin.type.caption} color={skin.panel.ink} style={styles.footer}>
-        {quiet ? T.savedAsYouGo : T.savedWithItem}
-      </ThemedText>
-    </>
+      <Animated.View layout={MOVE}>
+        <ThemedText size={skin.type.caption} color={skin.panel.ink} style={styles.footer}>
+          {quiet ? T.savedAsYouGo : T.savedWithItem}
+        </ThemedText>
+      </Animated.View>
+    </LayoutAnimationConfig>
   );
 };
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    slot: { overflow: "hidden" },
     module: {
       borderRadius: s.shape.radius + 6,
       borderWidth: s.shape.border,

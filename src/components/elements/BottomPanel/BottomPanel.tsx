@@ -16,7 +16,6 @@ import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller
 import {
   BackHandler,
   Dimensions,
-  Keyboard,
   Pressable,
   StyleSheet,
   View,
@@ -25,6 +24,7 @@ import {
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withDelay,
   withSpring,
@@ -103,12 +103,13 @@ const BottomPanel = ({
   const grow = useSharedValue(expanded ? 1 : 0);
   const canExpand = useSharedValue(Boolean(onExpand) && !expanded);
   const isExpanded = useSharedValue(expanded);
-  const keyboard = useSharedValue(0);
+  const growTarget = useSharedValue(expanded ? 1 : 0);
   const innerBottom = useSharedValue(0);
   const avoided = useContext(KeyboardAvoided);
-  const { height: keyboardHeight } = useReanimatedKeyboardAnimation();
+  const { height: keyboardHeight, progress: keyboardProgress } = useReanimatedKeyboardAnimation();
   const minHeight = WINDOW_HEIGHT * MIN_SCREEN_SHARE;
   const keyboardGap = skin.spacing.section;
+  const bottomPad = skin.spacing.section + insets.bottom + BOTTOM_ROOM;
   const morphing = useRef(false);
   const fullHeight = WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top;
   const latest = useRef({ visible, onClose, canClose, onExpand, onCollapse });
@@ -124,18 +125,6 @@ const BottomPanel = ({
     latest.current = { visible, onClose, canClose, onExpand, onCollapse };
   }, [visible, onClose, canClose, onExpand, onCollapse]);
 
-  useEffect(() => {
-    if (!visible) return;
-    const shown = Keyboard.addListener("keyboardDidShow", (event) =>
-      keyboard.set(withTiming(event.endCoordinates.height + insets.bottom + BOTTOM_ROOM, AnimationService.config)),
-    );
-    const hidden = Keyboard.addListener("keyboardDidHide", () => keyboard.set(withTiming(0, AnimationService.config)));
-    return () => {
-      shown.remove();
-      hidden.remove();
-    };
-  }, [visible, keyboard, insets.bottom]);
-
   const endMorph = useCallback(() => {
     morphing.current = false;
   }, []);
@@ -143,14 +132,17 @@ const BottomPanel = ({
   useEffect(() => {
     canExpand.set(Boolean(onExpand) && !expanded);
     isExpanded.set(expanded);
+    const target = expanded ? 1 : 0;
+    if (growTarget.get() === target) return;
+    growTarget.set(target);
     morphing.current = true;
     grow.set(
-      withTiming(expanded ? 1 : 0, AnimationService.config, () => {
+      withTiming(target, AnimationService.panel.expand, () => {
         "worklet";
         scheduleOnRN(endMorph);
       }),
     );
-  }, [expanded, onExpand, canExpand, isExpanded, grow, endMorph]);
+  }, [expanded, onExpand, canExpand, isExpanded, grow, growTarget, endMorph]);
 
   useFocusEffect(
     useCallback(
@@ -165,7 +157,7 @@ const BottomPanel = ({
     backdropOpacity.set(
       withTiming(
         visible ? 1 : 0,
-        visible ? AnimationService.config : AnimationService.panelClose,
+        visible ? AnimationService.panel.open : AnimationService.panel.close,
       ),
     );
 
@@ -177,7 +169,7 @@ const BottomPanel = ({
           offset.set(
             withDelay(
               handoffWait(self),
-              withTiming(0, AnimationService.config),
+              withTiming(0, AnimationService.panel.open),
             ),
           );
         }
@@ -187,11 +179,11 @@ const BottomPanel = ({
 
     if (offset.get() < contentHeight.get()) {
       handoff.owner = self;
-      handoff.until = Date.now() + AnimationService.panelClose.duration;
+      handoff.until = Date.now() + AnimationService.panel.close.duration;
     }
 
     offset.set(
-      withTiming(contentHeight.get() || SCREEN_HEIGHT, AnimationService.panelClose, (finished) => {
+      withTiming(contentHeight.get() || SCREEN_HEIGHT, AnimationService.panel.close, (finished) => {
         "worklet";
         if (finished) {
           scheduleOnRN(setIsRendered, false);
@@ -201,7 +193,7 @@ const BottomPanel = ({
   }, [visible, offset, contentHeight, backdropOpacity, drag, closing, self]);
 
   useEffect(() => {
-    veilOpacity.set(withTiming(veil ? 1 : 0, AnimationService.config));
+    veilOpacity.set(withTiming(veil ? 1 : 0, AnimationService.panel.open));
   }, [veil, veilOpacity]);
 
   const expand = useCallback(() => latest.current.onExpand?.(), []);
@@ -210,12 +202,28 @@ const BottomPanel = ({
   const requestClose = useCallback(() => {
     if (latest.current.canClose && !latest.current.canClose()) {
       closing.set(false);
-      drag.set(withSpring(0, AnimationService.snap));
+      drag.set(withSpring(0, AnimationService.panel.snap));
       return;
     }
     latest.current.onClose();
   }, [closing, drag]);
 
+  const keyboardFit = useDerivedValue(() => {
+    const progress = keyboardProgress.value;
+    const covered = progress > 0 ? -keyboardHeight.value / progress : 0;
+    const natural = innerBottom.value + bottomPad;
+    const heightWith = (keyboardLift: number) => {
+      const room = Math.max(0, fullHeight - keyboardLift);
+      const rest = Math.max(natural, minHeight);
+      const held = Math.min(room, rest + lift.value);
+      return Math.min(tall ? fullHeight : Infinity, Math.max(rest, held, Math.min(1, grow.value) * room));
+    };
+    const open = heightWith(0);
+    const shut = heightWith(covered > 0 ? covered + insets.bottom + BOTTOM_ROOM : 0);
+    const room = Math.max(0, shut - innerBottom.value - keyboardGap);
+    const shift = avoided ? Math.min(covered, room) : -Math.max(0, covered - room);
+    return { height: open + (shut - open) * progress, shift: shift * progress };
+  });
   const pan = usePanGesture({
     enabled: visible,
     activeOffsetY: onExpand && !expanded ? [-DRAG_START, DRAG_START] : [-1000, DRAG_START],
@@ -235,33 +243,47 @@ const BottomPanel = ({
       const pulled = drag.value;
       const lifted = lift.value;
       dragFrom.set(-1);
-      lift.set(0);
+      const covered = -keyboardHeight.value;
+      const keyboardLift = covered > 0 ? covered + (insets.bottom + BOTTOM_ROOM) * keyboardProgress.value : 0;
+      const room = Math.max(1, fullHeight - keyboardLift);
+      const carry = { ...AnimationService.panel.snap, overshootClamping: true };
       if (lifted > EXPAND_DISTANCE || (lifted > 0 && event.velocityY < EXPAND_VELOCITY)) {
+        grow.set(Math.min(1, keyboardFit.value.height / room));
+        lift.set(0);
+        growTarget.set(1);
+        isExpanded.set(true);
+        canExpand.set(false);
+        grow.set(withSpring(1, { ...carry, velocity: -event.velocityY / room }));
         scheduleOnRN(expand);
         return;
       }
+      if (lifted > 0) lift.set(withSpring(0, { ...AnimationService.panel.snap, velocity: -event.velocityY }));
       const limit = Math.min(
         DISMISS_DISTANCE,
         contentHeight.value * DISMISS_SHARE,
       );
       if (isExpanded.value && (pulled > DISMISS_DISTANCE || (pulled > 0 && event.velocityY > DISMISS_VELOCITY))) {
-        drag.set(withTiming(0, AnimationService.config));
+        growTarget.set(0);
+        isExpanded.set(false);
+        grow.set(withSpring(0, { ...carry, velocity: -event.velocityY / room }));
+        drag.set(withSpring(0, { ...carry, velocity: event.velocityY }));
         scheduleOnRN(collapse);
         return;
       }
       if (pulled > limit || (pulled > 0 && event.velocityY > DISMISS_VELOCITY)) {
         closing.set(true);
+        drag.set(withSpring(contentHeight.value, { ...carry, velocity: event.velocityY }));
         scheduleOnRN(requestClose);
         return;
       }
       drag.set(
-        withSpring(0, { ...AnimationService.snap, velocity: event.velocityY }),
+        withSpring(0, { ...AnimationService.panel.snap, velocity: event.velocityY }),
       );
     },
     onFinalize: () => {
       dragFrom.set(-1);
       if (!closing.value && drag.value > 0)
-        drag.set(withSpring(0, AnimationService.snap));
+        drag.set(withSpring(0, AnimationService.panel.snap));
     },
   });
 
@@ -285,25 +307,20 @@ const BottomPanel = ({
     setFrame({ width: event.nativeEvent.layout.width, height: measured });
     const previous = contentHeight.get();
     contentHeight.set(measured);
-    if (morphing.current || isExpanded.get() || !visible || measured <= previous) return;
+    if (morphing.current || isExpanded.get() || lift.get() > 0 || grow.get() > 0 || !visible || measured <= previous) return;
     offset.set(previous === 0 ? measured : offset.get() + measured - previous);
     offset.set(
       withDelay(
         handoffWait(self),
-        withTiming(0, AnimationService.config),
+        withTiming(0, AnimationService.panel.resize),
       ),
     );
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const covered = -keyboardHeight.value;
-    const room = Math.max(0, contentHeight.value - innerBottom.value - keyboardGap);
-    const shift = avoided ? Math.min(covered, room) : -Math.max(0, covered - room);
-    return { transform: [{ translateY: offset.value + drag.value + shift }] };
-  });
-  const growStyle = useAnimatedStyle(() => ({
-    minHeight: Math.max(minHeight, grow.value * Math.max(0, fullHeight - keyboard.value)),
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: offset.value + drag.value + keyboardFit.value.shift }],
   }));
+  const growStyle = useAnimatedStyle(() => ({ minHeight: keyboardFit.value.height }));
   const hintStyle = useAnimatedStyle(() => ({
     opacity: 1 - Math.min(1, lift.value / EXPAND_DISTANCE) * 0.6,
     transform: [{ translateY: -Math.min(lift.value, EXPAND_DISTANCE) * 0.15 }],
@@ -358,7 +375,7 @@ const BottomPanel = ({
         style={[
           growStyle,
           styles.content,
-          { paddingBottom: skin.spacing.section + insets.bottom + BOTTOM_ROOM },
+          { paddingBottom: bottomPad },
           tall && { maxHeight: WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top },
           {
             borderColor: "transparent",

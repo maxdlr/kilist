@@ -312,9 +312,6 @@ const fr: CommonText = {
     discover: "Découvrir",
     preview: "Aperçu",
     previewAria: (name: string) => `Aperçu de ${name} avec tes données`,
-    slides: { Home: "Accueil", Play: "Jeu", Shop: "Courses" },
-    slideOf: (label: string, position: number, total: number) =>
-      `${label} · ${position}/${total}`,
   },
   deleteAccount: {
     typeName: "Écris ton nom d'utilisateur pour confirmer",

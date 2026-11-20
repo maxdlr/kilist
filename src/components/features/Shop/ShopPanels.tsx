@@ -1,7 +1,11 @@
-import { BarcodeIcon } from "@/components/icons";
+import { BarcodeIcon, FloppyDiskIcon } from "@/components/icons";
 import ActionPanel from "@/components/elements/ActionPanel";
 import BottomPanel from "@/components/elements/BottomPanel";
-import { ActionNote, FeedbackCard, useFormFeedback } from "@/components/elements/Feedback";
+import {
+  ActionNote,
+  FeedbackCard,
+  useFormFeedback,
+} from "@/components/elements/Feedback";
 import FormInput from "@/components/elements/FormInput";
 import KilButton from "@/components/elements/KilButton";
 import NameSuggestions from "@/components/elements/NameSuggestions";
@@ -18,7 +22,7 @@ import { useEffect, useRef, useState, type ComponentRef } from "react";
 import { StyleSheet, View, type TextInput } from "react-native";
 
 const LOOKUP_DELAY_MS = 250;
-const KEYBOARD_DELAY_MS = AnimationService.config.duration + 50;
+const KEYBOARD_DELAY_MS = AnimationService.panel.open.duration + 50;
 
 const AddFoodForm = ({ run }: { run: ShopRun }) => {
   const skin = useSkin();
@@ -36,7 +40,10 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
 
   useEffect(() => {
     if (scanning) return;
-    const timer = setTimeout(() => nameInput.current?.focus(), KEYBOARD_DELAY_MS);
+    const timer = setTimeout(
+      () => nameInput.current?.focus(),
+      KEYBOARD_DELAY_MS,
+    );
     return () => clearTimeout(timer);
   }, [scanning]);
 
@@ -67,7 +74,8 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
     setBusy(true);
     const failed = await run.addFood(name.trim(), action, found?.product);
     setBusy(false);
-    if (form.settle(failed, common.feedback.addFailed(name.trim()))) run.closePanel();
+    if (form.settle(failed, common.feedback.addFailed(name.trim())))
+      run.closePanel();
   };
   const held = run.inventoryReady ? null : common.feedback.inventoryWait;
 
@@ -89,6 +97,9 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
       <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {T.addTitle}
       </Title>
+      <ThemedText size={12} color={skin.panel.ink} style={styles.note}>
+        {T.addListLine}
+      </ThemedText>
       <View style={styles.nameRow}>
         <View style={styles.nameField}>
           <FormInput
@@ -104,28 +115,25 @@ const AddFoodForm = ({ run }: { run: ShopRun }) => {
           height={skin.size.input}
           variant={hasName ? skin.panel.secondary : "primary"}
           accessibilityLabel={T.scan}
-          icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
+          icon={(color) => (
+            <BarcodeIcon size={skin.size.icon.action} color={color} />
+          )}
           onTouch={() => setScanning(true)}
+        />
+        <KilButton
+          disabled={!hasName || busy || Boolean(held)}
+          height={skin.size.input}
+          accessibilityLabel={form.problem ? common.feedback.retry : T.addToList}
+          icon={(color) => (
+            <FloppyDiskIcon size={skin.size.icon.action} color={color} />
+          )}
+          onTouch={() => submit("list")}
         />
       </View>
       <NameSuggestions query={name} onPick={setName} />
       <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
       <ActionNote reason={held} collapse={skin.spacing.stack} />
-      {!run.isStarted ? (
-        <>
-          <ThemedText size={12} color={skin.panel.ink} style={styles.note}>
-            {T.addListLine}
-          </ThemedText>
-          <KilButton
-            height={skin.size.button.md}
-            fontSize={skin.type.lead}
-            variant={hasName ? "primary" : skin.panel.secondary}
-            label={T.addToList}
-            onTouch={() => submit("list")}
-            disabled={Boolean(held)}
-          />
-        </>
-      ) : (
+      {run.isStarted && (
         <>
           <ThemedText color={skin.panel.ink}>
             {existing ? T.addExists(existing) : T.addLine}
@@ -174,9 +182,13 @@ const ShopPanels = ({ run }: { run: ShopRun }) => (
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
-    nameRow: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
+    nameRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: s.spacing.inline,
+    },
     nameField: { flex: 1, minWidth: 0 },
-    note: { opacity: 0.6, textAlign: "center" },
+    note: { opacity: 0.6, textAlign: "start" },
     actions: {
       flexDirection: "row",
       flexWrap: "wrap",

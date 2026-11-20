@@ -1,9 +1,9 @@
 import { FeedbackCard, type Feedback } from "@/components/elements/Feedback";
 import KilButton from "@/components/elements/KilButton";
-import { isProblem } from "@/utils/problem";
 import QrCodeScanner from "@/components/elements/QrCodeScanner";
 import Title from "@/components/elements/Title";
 import { ThemedText } from "@/components/elements/ThemedText";
+import { XmarkIcon } from "@/components/icons";
 import useProductScan, { type ScanResult } from "@/hooks/useProductScan";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
@@ -11,6 +11,7 @@ import type { Skin } from "@/skins/types";
 import type { BarcodeType } from "expo-camera";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { isProblem } from "@/utils/problem";
 
 const PRODUCT_CODES: BarcodeType[] = ["ean13", "ean8", "upc_a", "upc_e"];
 
@@ -53,7 +54,9 @@ const ProductScanner = ({
           {T.scanWarnTitle(warning.name)}
         </Title>
         <ThemedText color={skin.panel.ink}>
-          {T.scanWarnLine(warning.conflicts.map((tag) => T.scanTags[tag] ?? tag))}
+          {T.scanWarnLine(
+            warning.conflicts.map((tag) => T.scanTags[tag] ?? tag),
+          )}
         </ThemedText>
         <View style={styles.actions}>
           <KilButton
@@ -81,14 +84,23 @@ const ProductScanner = ({
       <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {T.scan}
       </Title>
-      <ThemedText color={skin.panel.ink}>{searching ? T.scanSearching : T.scanLine}</ThemedText>
-      {!searching && <QrCodeScanner barcodeTypes={PRODUCT_CODES} notice={T.scanCamera} onScanned={scanned} />}
+      <ThemedText color={skin.panel.ink}>
+        {searching ? T.scanSearching : T.scanLine}
+      </ThemedText>
+      {!searching && (
+        <QrCodeScanner
+          barcodeTypes={PRODUCT_CODES}
+          notice={T.scanCamera}
+          onScanned={scanned}
+        />
+      )}
       <FeedbackCard feedback={problem} collapse={skin.spacing.stack} />
       <KilButton
         height={skin.size.button.md}
-        fontSize={skin.type.lead}
-        variant={skin.panel.secondary}
-        label={T.scanCancel}
+        accessibilityLabel={T.scanCancel}
+        icon={(color) => (
+          <XmarkIcon size={skin.size.icon.action} color={color} />
+        )}
         onTouch={onCancel}
       />
     </>

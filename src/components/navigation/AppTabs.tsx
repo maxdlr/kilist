@@ -53,7 +53,7 @@ export default function AppTabs() {
       <Tabs.Screen name="inventory" />
       <Tabs.Screen name="account" />
       <Tabs.Screen name="looks" />
-      <Tabs.Screen name="look-preview" options={roomForTabBar} />
+      <Tabs.Screen name="look-preview" />
       <Tabs.Screen name="admin" options={roomForTabBar} />
     </Tabs>
   );

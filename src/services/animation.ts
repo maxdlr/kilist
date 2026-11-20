@@ -2,6 +2,7 @@ import { cubicBezier, Easing } from "react-native-reanimated";
 
 const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const EASE_SHEET = Easing.bezier(0.32, 0.72, 0, 1);
+const EASE_PANEL = Easing.bezier(0.1, 0.75, 0, 1);
 
 const config = {
   duration: 300,
@@ -13,7 +14,13 @@ const AnimationService = {
   easeOut: EASE_OUT,
   screen: { duration: 280, curve: [0.32, 0.72, 0, 1] as const },
   press: { duration: 120, scale: 0.97 },
-  panelClose: { duration: 240, easing: EASE_SHEET },
+  panel: {
+    open: { duration: 600, easing: EASE_PANEL },
+    close: { duration: 240, easing: EASE_PANEL },
+    expand: { duration: 600, easing: EASE_PANEL },
+    resize: { duration: 600, easing: EASE_PANEL },
+    snap: { duration: 400, dampingRatio: 1, easing: EASE_SHEET },
+  },
   enter: { duration: 220, easing: EASE_OUT },
   exit: { duration: 180, easing: EASE_OUT },
   reflow: 200,

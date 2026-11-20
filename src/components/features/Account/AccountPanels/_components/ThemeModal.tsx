@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 const PREVIEW_EVERY_MS = 80;
+const LEVELS: LevelNumber[] = [1, 2, 3, 4, 5];
 
 type ThemeEntry = Skin["themes"][number];
 
@@ -30,12 +31,9 @@ const ThemeCard = ({
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
-  const colors = findSkin(skinId, getLang(), theme.id, theme.color).colors;
-  const rows = [
-    [colors.ground, colors.paper, colors.raised],
-    [colors.onGround, colors.muted, colors.accent],
-    [1, 2, 3, 4, 5].map((level) => colors.levels[level as LevelNumber]),
-  ];
+  const look = findSkin(skinId, getLang(), theme.id, theme.color);
+  const colors = look.colors;
+  const caption = current ? common.themeCurrent : theme.custom ? common.themeCustomEdit : null;
 
   return (
     <Press
@@ -53,21 +51,37 @@ const ThemeCard = ({
         },
       ])}
     >
-      <View style={styles.rows}>
-        {rows.map((row, index) => (
-          <View key={index} style={styles.row}>
-            {row.map((color, at) => (
-              <View
-                key={`${index}-${at}`}
-                style={[styles.swatch, index === 2 && styles.level, { backgroundColor: color, borderColor: skin.panel.line }]}
-              />
-            ))}
-          </View>
-        ))}
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.swatch, { backgroundColor: colors.ground, borderColor: skin.panel.line }]}
+      >
+        <View style={styles.levels}>
+          {LEVELS.map((level) => (
+            <View key={level} style={[styles.level, { backgroundColor: colors.levels[level] }]} />
+          ))}
+        </View>
+        <View
+          style={[
+            styles.pill,
+            {
+              backgroundColor: look.actions.primary.fill,
+              borderColor: look.actions.primary.line,
+              borderRadius: look.shape.radius,
+            },
+          ]}
+        />
       </View>
-      <ThemedText size={skin.type.label} color={skin.panel.ink} numberOfLines={1}>
-        {theme.name}
-      </ThemedText>
+      <View style={styles.text}>
+        <ThemedText size={skin.type.lead} color={skin.panel.title} numberOfLines={1}>
+          {theme.name}
+        </ThemedText>
+        {caption && (
+          <ThemedText size={skin.type.caption} color={skin.panel.ink} numberOfLines={1}>
+            {caption}
+          </ThemedText>
+        )}
+      </View>
     </Press>
   );
 };
@@ -167,7 +181,7 @@ const ThemeModal = ({ visible, onClose }: { visible: boolean; onClose: () => voi
           <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
             {common.theme}
           </Title>
-          <View accessibilityRole="radiogroup" style={styles.choices}>
+          <View accessibilityRole="radiogroup" style={styles.list}>
             {skin.themes.map((theme) => (
               <ThemeCard
                 key={theme.id}
@@ -189,22 +203,28 @@ const createStyles = (s: Skin) =>
     head: { gap: s.spacing.tight },
     choices: { flexDirection: "row", flexWrap: "wrap", gap: s.spacing.small },
     choice: { alignSelf: "auto", flex: 1 },
+    list: { gap: s.spacing.small },
     card: {
       alignItems: "center",
-      borderRadius: s.shape.radius,
-      flex: 1,
-      gap: s.spacing.small,
-      padding: s.spacing.inline,
+      borderRadius: s.shape.radius + s.spacing.tight,
+      flexDirection: "row",
+      gap: s.spacing.inline,
+      padding: s.spacing.small,
     },
-    rows: { gap: s.spacing.tight + 2 },
-    row: { flexDirection: "row", gap: s.spacing.tight, justifyContent: "center" },
     swatch: {
-      borderRadius: s.size.swatch / 2,
+      alignItems: "flex-end",
+      borderRadius: s.shape.radius,
       borderWidth: s.shape.divider,
-      height: s.size.swatch,
-      width: s.size.swatch,
+      flexDirection: "row",
+      height: s.size.swatch * 2.5,
+      justifyContent: "space-between",
+      padding: s.spacing.small,
+      width: "45%",
     },
-    level: { height: s.size.swatch * 0.6, width: s.size.swatch * 0.6 },
+    levels: { flexDirection: "row", gap: s.spacing.tight },
+    level: { borderRadius: s.spacing.small, height: s.spacing.inline, width: s.spacing.inline },
+    pill: { borderWidth: 1, height: s.spacing.inline + 2, width: s.size.swatch * 1.6 },
+    text: { flex: 1, minWidth: 0 },
   });
 
 export default ThemeModal;

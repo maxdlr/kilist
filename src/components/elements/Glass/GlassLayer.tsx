@@ -18,7 +18,7 @@ const GlassLayer = ({
     {backing && Platform.OS === "android" && (
       <View style={[StyleSheet.absoluteFill, { backgroundColor: backing }]} />
     )}
-    <GlassBlur target={target} settings={settings} />
+    <GlassBlur target={target} settings={settings} enabled />
     <View style={[StyleSheet.absoluteFill, { backgroundColor: veil, opacity: settings.veil }]} />
   </View>
 );

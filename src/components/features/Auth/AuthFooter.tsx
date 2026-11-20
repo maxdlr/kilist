@@ -12,7 +12,6 @@ import type { Skin } from "@/skins/types";
 import { router } from "expo-router";
 import { Fragment } from "react";
 import { type LayoutChangeEvent, StyleSheet, View } from "react-native";
-import useKeyboardOpen from "@/hooks/useKeyboardOpen";
 
 type Link = { label: string; onTouch: () => void };
 
@@ -32,7 +31,6 @@ const AuthFooter = ({
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const copy = skin.copy.login;
-  const isKeyboardOpen = useKeyboardOpen();
   const googleVariant = flow.isSignup ? "secondaryOnLight" : "secondary";
   const label = flow.isSignup ? (flow.isLastStep ? copy.signupAction : copy.signupNext) : copy.loginAction;
 
@@ -45,7 +43,7 @@ const AuthFooter = ({
   return (
     <View style={styles.footer} onLayout={onLayout}>
       {flow.isSignup && <FeatheredGlass target={target} look={DEFAULT_SCENE_GLASS} veil={pageFill} />}
-      <Dock style={styles.dock} overKeyboard={isKeyboardOpen}>
+      <Dock style={styles.dock} overKeyboard>
         <View style={styles.problem}>
           <FeedbackCard feedback={flow.joinStep ? null : flow.problem} />
         </View>

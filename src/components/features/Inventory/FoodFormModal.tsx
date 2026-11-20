@@ -5,7 +5,7 @@ import KilButton from "@/components/elements/KilButton";
 import NameSuggestions from "@/components/elements/NameSuggestions";
 import ProductScanner from "@/components/elements/ProductScanner";
 import Title from "@/components/elements/Title";
-import { BarcodeIcon } from "@/components/icons";
+import { BarcodeIcon, FloppyDiskIcon } from "@/components/icons";
 import common from "@/i18n/common";
 import type { ScannedProduct } from "@/offline/domain";
 import { summarize } from "@/offline/summary";
@@ -23,14 +23,20 @@ import {
   type MutableRefObject,
 } from "react";
 import { StyleSheet, View, type TextInput } from "react-native";
-import FoodDetails, { type DetailKey, type FoodDetailValues } from "./FoodDetails";
+import FoodDetails, {
+  type DetailKey,
+  type FoodDetailValues,
+} from "./FoodDetails";
 import FoodSummary from "./FoodSummary";
 
 export type FoodDetailChanges = Partial<FoodDetailValues>;
 
-type FoodFormData = { name: string; product?: ScannedProduct } & FoodDetailChanges;
+type FoodFormData = {
+  name: string;
+  product?: ScannedProduct;
+} & FoodDetailChanges;
 
-const KEYBOARD_DELAY_MS = AnimationService.config.duration + 50;
+const KEYBOARD_DELAY_MS = AnimationService.panel.open.duration + 50;
 const QUIET_SAVE_MS = 600;
 const TEXT_KEYS = ["quantity", "note"] as const;
 
@@ -86,9 +92,17 @@ const FoodForm = ({
   const quiet = !creating && Boolean(onQuietSave);
 
   const detailsTouched =
-    values.frequencyDays !== null || textOf(values.quantity) !== null || textOf(values.note) !== null;
-  const isDirty = name !== initialName || product !== undefined || (creating && detailsTouched);
-  const sentence = summarize({ boughtDates: food?.boughtDates, quantity: values.quantity }, common.summary);
+    values.frequencyDays !== null ||
+    textOf(values.quantity) !== null ||
+    textOf(values.note) !== null;
+  const isDirty =
+    name !== initialName ||
+    product !== undefined ||
+    (creating && detailsTouched);
+  const sentence = summarize(
+    { boughtDates: food?.boughtDates, quantity: values.quantity },
+    common.summary,
+  );
 
   useEffect(() => {
     setExpandable(!scanning && !confirming);
@@ -96,7 +110,10 @@ const FoodForm = ({
 
   useEffect(() => {
     if (!creating || scanning) return;
-    const timer = setTimeout(() => nameInput.current?.focus(), KEYBOARD_DELAY_MS);
+    const timer = setTimeout(
+      () => nameInput.current?.focus(),
+      KEYBOARD_DELAY_MS,
+    );
     return () => clearTimeout(timer);
   }, [creating, scanning]);
 
@@ -149,7 +166,8 @@ const FoodForm = ({
   const setText = (key: (typeof TEXT_KEYS)[number], text: string) =>
     setValues((current) => ({ ...current, [key]: text }));
 
-  const addDetail = (key: DetailKey) => setAdded((keys) => (keys.includes(key) ? keys : [...keys, key]));
+  const addDetail = (key: DetailKey) =>
+    setAdded((keys) => (keys.includes(key) ? keys : [...keys, key]));
 
   const removeDetail = (key: DetailKey) => {
     setAdded((keys) => keys.filter((entry) => entry !== key));
@@ -174,13 +192,27 @@ const FoodForm = ({
     }
     const details: FoodDetailChanges = creating
       ? {
-          ...(values.frequencyDays !== null && { frequencyDays: values.frequencyDays }),
+          ...(values.frequencyDays !== null && {
+            frequencyDays: values.frequencyDays,
+          }),
           ...(textOf(values.quantity) && { quantity: textOf(values.quantity) }),
           ...(textOf(values.note) && { note: textOf(values.note) }),
         }
       : {};
-    const failed = await onSubmit({ name: name.trim(), ...(product && { product }), ...details });
-    if (form.settle(failed, creating ? common.feedback.addFailed(name.trim()) : common.feedback.saveFailed)) onClose();
+    const failed = await onSubmit({
+      name: name.trim(),
+      ...(product && { product }),
+      ...details,
+    });
+    if (
+      form.settle(
+        failed,
+        creating
+          ? common.feedback.addFailed(name.trim())
+          : common.feedback.saveFailed,
+      )
+    )
+      onClose();
   };
 
   if (confirming) {
@@ -216,8 +248,16 @@ const FoodForm = ({
         onFound={(result) => {
           setName(result.name);
           setProduct(result.product);
-          const scanned = typeof result.product?.quantity === "string" ? result.product.quantity : null;
-          if (scanned) setValues((current) => (textOf(current.quantity) ? current : { ...current, quantity: scanned }));
+          const scanned =
+            typeof result.product?.quantity === "string"
+              ? result.product.quantity
+              : null;
+          if (scanned)
+            setValues((current) =>
+              textOf(current.quantity)
+                ? current
+                : { ...current, quantity: scanned },
+            );
           setScanning(false);
         }}
         onCancel={() => setScanning(false)}
@@ -265,18 +305,29 @@ const FoodForm = ({
             height={skin.size.input}
             variant={name.trim() ? skin.panel.secondary : "primary"}
             accessibilityLabel={common.shop.scan}
-            icon={(color) => <BarcodeIcon size={skin.size.icon.action} color={color} />}
+            icon={(color) => (
+              <BarcodeIcon size={skin.size.icon.action} color={color} />
+            )}
             onTouch={() => setScanning(true)}
           />
         )}
+        <KilButton
+          disabled={!isDirty}
+          height={skin.size.input}
+          accessibilityLabel={form.problem ? common.feedback.retry : skin.copy.common.save}
+          onTouch={handleSubmit}
+          icon={(color) => (
+            <FloppyDiskIcon size={skin.size.icon.action} color={color} />
+          )}
+        />
       </View>
       {creating && <NameSuggestions query={name} onPick={setName} />}
       {sentence && <FoodSummary parts={sentence} />}
 
       <FeedbackCard feedback={form.problem} collapse={skin.spacing.stack} />
 
-      <View style={styles.actions}>
-        {onRemove && (
+      {onRemove && (
+        <View style={styles.actions}>
           <KilButton
             flex={1}
             height={skin.size.button.md}
@@ -285,15 +336,8 @@ const FoodForm = ({
             label={copy.removeIt}
             onTouch={onRemove}
           />
-        )}
-        <KilButton
-          flex={1}
-          height={skin.size.button.md}
-          fontSize={skin.type.lead}
-          label={form.problem ? common.feedback.retry : skin.copy.common.save}
-          onTouch={handleSubmit}
-        />
-      </View>
+        </View>
+      )}
     </>
   );
 };

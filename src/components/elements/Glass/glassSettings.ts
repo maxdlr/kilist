@@ -13,6 +13,8 @@ export type SceneGlass = GlassSettings & {
   fadeCurve: number;
 };
 
+export const BLUR_ENABLED = false;
+
 export const DEFAULT_GLASS: GlassSettings = {
   enabled: true,
   blur: 30,
