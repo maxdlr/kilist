@@ -1,3 +1,4 @@
+import { PanelScrollView } from "@/components/elements/BottomPanel";
 import FormInput from "@/components/elements/FormInput";
 import KilToggleButton from "@/components/elements/KilToggleButton";
 import Press from "@/components/elements/Press";
@@ -13,6 +14,7 @@ import withPressed from "@/utils/withPressed";
 import { useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, LayoutAnimationConfig, LinearTransition } from "react-native-reanimated";
+import FoodAisle from "./FoodAisle";
 import FoodSummary from "./FoodSummary";
 
 export type FoodDetailValues = {
@@ -44,7 +46,9 @@ const FoodDetails = ({
   onRemove,
   onFrequency,
   onText,
+  aisle,
 }: {
+  aisle?: { value: string | null; onPick: (aisle: string) => void };
   name: string;
   sentence: SummaryPart[] | null;
   values: FoodDetailValues;
@@ -92,6 +96,12 @@ const FoodDetails = ({
   };
 
   return (
+    <PanelScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.body}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
     <LayoutAnimationConfig skipEntering>
       <Title size={skin.type.headline} lines={2} color={skin.panel.title}>
         {name}
@@ -103,6 +113,8 @@ const FoodDetails = ({
           {T.intro}
         </ThemedText>
       )}
+
+      {aisle && <FoodAisle name={name} value={aisle.value} onPick={aisle.onPick} />}
 
       {order.map((key) => (
         <Animated.View key={key} layout={MOVE} style={styles.slot}>
@@ -154,11 +166,14 @@ const FoodDetails = ({
         </ThemedText>
       </Animated.View>
     </LayoutAnimationConfig>
+    </PanelScrollView>
   );
 };
 
 const createStyles = (s: Skin) =>
   StyleSheet.create({
+    scroll: { flexShrink: 1, minHeight: 0 },
+    body: { gap: s.spacing.stack },
     slot: { overflow: "hidden" },
     module: {
       borderRadius: s.shape.radius + 6,

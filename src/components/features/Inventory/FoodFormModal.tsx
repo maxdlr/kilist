@@ -29,7 +29,7 @@ import FoodDetails, {
 } from "./FoodDetails";
 import FoodSummary from "./FoodSummary";
 
-export type FoodDetailChanges = Partial<FoodDetailValues>;
+export type FoodDetailChanges = Partial<FoodDetailValues> & { aisle?: string };
 
 type FoodFormData = {
   name: string;
@@ -87,6 +87,7 @@ const FoodForm = ({
   const [product, setProduct] = useState<ScannedProduct | undefined>();
   const [values, setValues] = useState<FoodDetailValues>(() => valuesOf(food));
   const [added, setAdded] = useState<DetailKey[]>([]);
+  const [aisle, setAisle] = useState<string | null>(food?.aisle ?? null);
   const saved = useRef<FoodDetailValues>(valuesOf(food));
   const nameInput = useRef<ComponentRef<typeof TextInput>>(null);
   const quiet = !creating && Boolean(onQuietSave);
@@ -161,6 +162,11 @@ const FoodForm = ({
     if (!quiet || frequencyDays === saved.current.frequencyDays) return;
     saved.current = { ...saved.current, frequencyDays };
     onQuietSave?.({ frequencyDays });
+  };
+
+  const pickAisle = (next: string) => {
+    setAisle(next);
+    if (quiet && next !== food?.aisle) onQuietSave?.({ aisle: next });
   };
 
   const setText = (key: (typeof TEXT_KEYS)[number], text: string) =>
@@ -278,6 +284,7 @@ const FoodForm = ({
         onRemove={removeDetail}
         onFrequency={setFrequency}
         onText={setText}
+        aisle={quiet ? { value: aisle, onPick: pickAisle } : undefined}
       />
     );
   }

@@ -1,6 +1,10 @@
 import type { SkinSource } from "../types";
 import calmCopy from "./copy";
-import { CALM_THEMES, calmCustomTheme, DEFAULT_CALM_THEME } from "./theme/index";
+import {
+  CALM_THEMES,
+  calmCustomTheme,
+  DEFAULT_CALM_THEME,
+} from "./theme/index";
 import { CUSTOM_NAME, DEFAULT_CUSTOM_COLOR } from "./theme/custom";
 
 const NARROW = new Set([..."iljtfrI1.,:;'!|()[]-"]);
@@ -75,7 +79,7 @@ const calm: SkinSource = {
     row: { list: 56, shop: 56, stripe: 48 },
     tabBar: 64,
     input: 50,
-    toggle: 44,
+    toggle: 64,
     check: 22,
     meter: 2,
     swatch: 22,
@@ -97,7 +101,11 @@ const calm: SkinSource = {
   copies: calmCopy,
   themes: CALM_THEMES,
   defaultTheme: DEFAULT_CALM_THEME,
-  custom: { make: calmCustomTheme, initial: DEFAULT_CUSTOM_COLOR, name: CUSTOM_NAME },
+  custom: {
+    make: calmCustomTheme,
+    initial: DEFAULT_CUSTOM_COLOR,
+    name: CUSTOM_NAME,
+  },
 };
 
 export default calm;

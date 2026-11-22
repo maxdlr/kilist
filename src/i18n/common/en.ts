@@ -211,6 +211,13 @@ const en = {
     savedAsYouGo: "Saved as you go · pull down when done",
     savedWithItem: "Saved with the item · pull down when done",
     remove: (label: string) => `Remove ${label.toLowerCase()}`,
+    aisle: {
+      title: "Aisle",
+      hint: "Where it sits in your store",
+      guessed: (aisle: string) => `${aisle}, guessed from the name`,
+      search: "Search an aisle",
+      noMatch: "No aisle matches.",
+    },
     frequency: {
       title: "Frequency",
       hint: "How often you buy it",

@@ -23,7 +23,12 @@ export type InventoryContextType = {
   removeFoodsFromList: (foodIds: number[]) => Promise<Problem | null>;
 };
 
-type FoodDetails = { frequencyDays?: number | null; quantity?: string | null; note?: string | null };
+type FoodDetails = {
+  frequencyDays?: number | null;
+  quantity?: string | null;
+  note?: string | null;
+  aisle?: string;
+};
 
 const InventoryContext = createContext<InventoryContextType>({
   foods: [],

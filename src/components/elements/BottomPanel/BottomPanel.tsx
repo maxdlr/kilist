@@ -219,7 +219,12 @@ const BottomPanel = ({
       return Math.min(tall ? fullHeight : Infinity, Math.max(rest, held, Math.min(1, grow.value) * room));
     };
     const open = heightWith(0);
-    const shut = heightWith(covered > 0 ? covered + insets.bottom + BOTTOM_ROOM : 0);
+    const lifted = covered > 0 ? covered + insets.bottom + BOTTOM_ROOM : 0;
+    const shut = heightWith(lifted);
+    if (grow.value >= 1) {
+      const kept = covered * progress;
+      return { height: Math.max(minHeight * 0.5, fullHeight - kept), shift: avoided ? 0 : -kept };
+    }
     const room = Math.max(0, shut - innerBottom.value - keyboardGap);
     const shift = avoided ? Math.min(covered, room) : -Math.max(0, covered - room);
     return { height: open + (shut - open) * progress, shift: shift * progress };
@@ -320,7 +325,14 @@ const BottomPanel = ({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: offset.value + drag.value + keyboardFit.value.shift }],
   }));
-  const growStyle = useAnimatedStyle(() => ({ minHeight: keyboardFit.value.height }));
+  const growStyle = useAnimatedStyle(() => ({
+    minHeight: keyboardFit.value.height,
+    maxHeight: grow.value >= 1 ? keyboardFit.value.height : fullHeight,
+    paddingBottom:
+      grow.value >= 1
+        ? bottomPad + (skin.spacing.small - bottomPad) * keyboardProgress.value
+        : bottomPad,
+  }));
   const hintStyle = useAnimatedStyle(() => ({
     opacity: 1 - Math.min(1, lift.value / EXPAND_DISTANCE) * 0.6,
     transform: [{ translateY: -Math.min(lift.value, EXPAND_DISTANCE) * 0.15 }],
@@ -375,7 +387,6 @@ const BottomPanel = ({
         style={[
           growStyle,
           styles.content,
-          { paddingBottom: bottomPad },
           tall && { maxHeight: WINDOW_HEIGHT - Math.max(insets.top, DEVICE_TOP) - skin.spacing.top },
           {
             borderColor: "transparent",

@@ -18,7 +18,10 @@ const fr: CommonText = {
     },
     loadLine: "Ce qui est sur ton téléphone est toujours là.",
     addFailed: (name: string) => `Impossible d'ajouter ${name}`,
-    removeFailed: (count: number) => (count > 1 ? `Impossible de retirer ${count} produits` : "Impossible de retirer ce produit"),
+    removeFailed: (count: number) =>
+      count > 1
+        ? `Impossible de retirer ${count} produits`
+        : "Impossible de retirer ce produit",
     loginFailed: "Impossible de te connecter",
     signupFailed: "Impossible de créer ton compte",
     joinFailed: "Impossible de rejoindre le foyer",
@@ -34,7 +37,8 @@ const fr: CommonText = {
     googleLine: "Réessaie, ou utilise ton nom et ton mot de passe.",
     passwordChanged: "Mot de passe changé",
     passwordChangedLine: "Connecte-toi avec le nouveau.",
-    codeSent: (seconds: number) => `Nouveau code envoyé · renvoi dans ${seconds} s`,
+    codeSent: (seconds: number) =>
+      `Nouveau code envoyé · renvoi dans ${seconds} s`,
     pushOff: "Les notifications sont coupées pour Kilist",
     pushOffLine: "Ton téléphone les bloque. Les e-mails arrivent quand même.",
     openSettings: "Ouvrir les réglages",
@@ -51,10 +55,11 @@ const fr: CommonText = {
     typeName: "Taper son nom",
     aislesFailed: (failed: number, total: number) =>
       `${failed} rayon${failed > 1 ? "s" : ""} sur ${total} non enregistré${failed > 1 ? "s" : ""}`,
-    aislesFailedLine: "Les autres sont gardés. Appuie sur Terminé pour réessayer.",
+    aislesFailedLine:
+      "Les autres sont gardés. Appuie sur Terminé pour réessayer.",
     inventoryWait: "Ton inventaire se prépare…",
     recapKept: "Pas encore sur ta liste",
-    recapKeptLine: "D'habitude il t'en reste. Ajoute-les si tu n'en as vraiment plus.",
+    recapKeptLine: "Vraiment ? Ajoute-les si tu n'en as vraiment plus.",
     addAnyway: "Ajouter",
     checking: "Vérification de ta liste…",
   },
@@ -158,7 +163,8 @@ const fr: CommonText = {
     menu: "Confirmer mon e-mail",
     title: "Confirme ton e-mail",
     line: (email: string) => `Entre le code à 6 chiffres envoyé à ${email}.`,
-    sendLine: (email: string) => `On va t'envoyer un code à 6 chiffres à ${email}.`,
+    sendLine: (email: string) =>
+      `On va t'envoyer un code à 6 chiffres à ${email}.`,
     send: "Envoyer le code",
     haveCode: "J'ai déjà un code",
     code: "Code",
@@ -210,18 +216,34 @@ const fr: CommonText = {
   },
   details: {
     pullUp: "Tire vers le haut pour les détails",
-    intro: "Kilist apprend cet article tout seul. Ajoute ce que tu sais, si tu veux.",
+    intro:
+      "Kilist apprend cet article tout seul. Ajoute ce que tu sais, si tu veux.",
     savedAsYouGo: "Enregistré au fur et à mesure · tire vers le bas pour finir",
     savedWithItem: "Enregistré avec l'article · tire vers le bas pour finir",
     remove: (label: string) => `Retirer ${label.toLowerCase()}`,
+    aisle: {
+      title: "Rayon",
+      hint: "Où il se trouve dans ton magasin",
+      guessed: (aisle: string) => `${aisle}, deviné d'après le nom`,
+      search: "Chercher un rayon",
+      noMatch: "Aucun rayon trouvé.",
+    },
     frequency: {
       title: "Fréquence",
       hint: "À quel rythme tu l'achètes",
       help: "Aide Kilist à demander au bon moment. La phrase au-dessus ne dit que ce qu'il a vu.",
       options: { "7": "Semaine", "14": "2 semaines", "30": "Mois" },
     },
-    quantity: { title: "Quantité", hint: "Le format que tu prends d'habitude", placeholder: "ex. 1 L, 500 g, 6 x 1 L" },
-    note: { title: "Note", hint: "Un mot pour qui fait les courses", placeholder: "ex. le bouchon bleu, pas le vert" },
+    quantity: {
+      title: "Quantité",
+      hint: "Le format que tu prends d'habitude",
+      placeholder: "ex. 1 L, 500 g, 6 x 1 L",
+    },
+    note: {
+      title: "Note",
+      hint: "Un mot pour qui fait les courses",
+      placeholder: "ex. le bouchon bleu, pas le vert",
+    },
   },
   tabs: {
     index: "Accueil",
@@ -248,7 +270,8 @@ const fr: CommonText = {
     stopSave: "Enregistrer mes achats",
     stopDiscard: "Ne pas compter ces courses",
     stopKeep: "Continuer les courses",
-    selected: (count: number) => `${count} ${count === 1 ? "sélectionné" : "sélectionnés"}`,
+    selected: (count: number) =>
+      `${count} ${count === 1 ? "sélectionné" : "sélectionnés"}`,
     buyLater: (count: number) => `Plus tard (${count})`,
     add: "Ajouter un produit",
     addTitle: "Ajouter un produit",

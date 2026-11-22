@@ -75,31 +75,37 @@ const fr: CalmText = {
     aisleNoMatch: "Aucun rayon trouvé.",
     aisleClear: "Effacer la recherche",
     aisleOpen: (name: string) => `Choisir un rayon pour ${name}`,
-    aislePicked: (name: string, aisle: string) => `${name}, ${aisle}. Changer le rayon`,
+    aislePicked: (name: string, aisle: string) =>
+      `${name}, ${aisle}. Changer le rayon`,
     aislesDone: "Terminé",
     aislesConfirmTitle: "Garder les rayons choisis ?",
     aislesConfirmLine: (count: number) =>
-      count === 1 ? "1 produit a un nouveau rayon." : `${count} produits ont un nouveau rayon.`,
+      count === 1
+        ? "1 produit a un nouveau rayon."
+        : `${count} produits ont un nouveau rayon.`,
     aislesConfirmKeep: "Continuer",
     aislesConfirmSave: "Les garder",
     aislesConfirmDiscard: "Tout annuler",
     title: "Liste",
     toBuy: (count: number) => `${count} à acheter`,
-    hint: "Glisse à droite quand c'est dans le panier, à gauche pour la prochaine fois.",
-    hintAria:
-      "Glisse à droite quand c'est dans le panier, à gauche pour le garder pour la prochaine fois",
     inBasket: "Dans le panier",
-    inBasketAria: (name: string) => `${name}, dans le panier`,
     nextTime: "La prochaine fois",
     later: "Plus tard",
     usuallyNext: "D'habitude juste après",
     result: (bought: number, left: number) =>
       `${bought} ${bought <= 1 ? "acheté" : "achetés"}${left ? `, ${left} pour la prochaine fois` : ""}.`,
     closeRun: "Terminé",
-    legendBasket: "Au panier",
     howAria: "Comment ça marche",
-    selectToEdit: "Touche pour reporter, maintiens pour modifier",
+    selectToEdit: "Touche pour reporter,\nmaintiens pour modifier",
     holdToEdit: "Maintiens pour modifier",
+    runHelp:
+      "Touche pour acheter,\nglisse vers le haut pour plus tard,\nmaintiens pour modifier",
+    pillHint:
+      "Touche quand c'est dans le panier. Lance-le sur le côté pour la prochaine fois. Maintiens pour modifier.",
+    aisleEmpty: "Plus rien ici",
+    aisleBar: "Rayons. Glisse le long de la barre pour changer de rayon",
+    aisleSegment: (name: string, count: number) =>
+      count ? `${name}, ${count} à acheter` : `${name}, fini`,
   },
   inventory: {
     closeSearch: "Fermer la recherche",
@@ -197,7 +203,8 @@ const fr: CalmText = {
     samples: ["Bananes", "Lait", "Riz", "Œufs", "Café"],
     readyLabel: "Entraînement",
     readyTitle: "On s'entraîne ?",
-    readyLine: (cards: number) => `${cards} cartes, puis une petite liste.\nRien n'est enregistré.`,
+    readyLine: (cards: number) =>
+      `${cards} cartes, puis une petite liste.\nRien n'est enregistré.`,
     readyGo: "C'est parti",
     practiceLabel: (at: number, total: number) =>
       `Entraînement · ${at} sur ${total}`,

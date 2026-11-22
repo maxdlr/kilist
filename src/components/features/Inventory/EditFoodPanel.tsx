@@ -23,7 +23,10 @@ const EditFoodForm = ({ food, onClose }: Props) => {
   const { editFood } = useInventory();
   const { mutate } = useSWRConfig();
   const refreshPreview = () =>
-    mutate((key) => typeof key === "object" && key !== null && (key as { url?: string }).url === "shop-list/preview");
+    mutate((key) => {
+      const url = typeof key === "object" && key !== null ? (key as { url?: string }).url : undefined;
+      return typeof url === "string" && url.startsWith("shop-list/");
+    });
 
   return (
     <FoodFormModal

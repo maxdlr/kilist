@@ -73,31 +73,36 @@ const en = {
     aisleNoMatch: "No aisle matches.",
     aisleClear: "Clear search",
     aisleOpen: (name: string) => `Choose an aisle for ${name}`,
-    aislePicked: (name: string, aisle: string) => `${name}, ${aisle}. Change the aisle`,
+    aislePicked: (name: string, aisle: string) =>
+      `${name}, ${aisle}. Change the aisle`,
     aislesDone: "Done",
     aislesConfirmTitle: "Keep the aisles you picked?",
     aislesConfirmLine: (count: number) =>
-      count === 1 ? "1 item has a new aisle." : `${count} items have a new aisle.`,
+      count === 1
+        ? "1 item has a new aisle."
+        : `${count} items have a new aisle.`,
     aislesConfirmKeep: "Keep editing",
     aislesConfirmSave: "Save them",
     aislesConfirmDiscard: "Discard all",
     title: "List",
     toBuy: (count: number) => `${count} to buy`,
-    hint: "Swipe right when it's in the basket, left for next time.",
-    hintAria:
-      "Swipe right when it's in the basket, left to keep it for next time",
     inBasket: "In the basket",
-    inBasketAria: (name: string) => `${name}, in the basket`,
     nextTime: "Next time",
     later: "Later",
     usuallyNext: "Usually next",
     result: (bought: number, left: number) =>
       `${bought} bought${left ? `, ${left} left for next time` : ""}.`,
     closeRun: "Done",
-    legendBasket: "In the basket",
     howAria: "How it works",
     selectToEdit: "Tap to postpone, hold to edit",
     holdToEdit: "Hold to edit",
+    runHelp: "Tap to buy,\nflick for next time,\nhold to edit",
+    pillHint:
+      "Tap when it's in the basket. Flick it sideways for next time. Hold to edit.",
+    aisleEmpty: "Nothing left here",
+    aisleBar: "Aisles. Slide along the bar to change aisle",
+    aisleSegment: (name: string, count: number) =>
+      count ? `${name}, ${count} to buy` : `${name}, done`,
   },
   inventory: {
     closeSearch: "Close search",
@@ -187,7 +192,8 @@ const en = {
     samples: ["Bananas", "Milk", "Rice", "Eggs", "Coffee"],
     readyLabel: "Practice",
     readyTitle: "Let's practice.",
-    readyLine: (cards: number) => `${cards} cards, then a short list.\nNothing is saved.`,
+    readyLine: (cards: number) =>
+      `${cards} cards, then a short list.\nNothing is saved.`,
     readyGo: "Let's go",
     practiceLabel: (at: number, total: number) =>
       `Practice · ${at} of ${total}`,
