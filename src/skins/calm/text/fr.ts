@@ -92,20 +92,45 @@ const fr: CalmText = {
     nextTime: "La prochaine fois",
     later: "Plus tard",
     usuallyNext: "D'habitude juste après",
-    result: (bought: number, left: number) =>
-      `${bought} ${bought <= 1 ? "acheté" : "achetés"}${left ? `, ${left} pour la prochaine fois` : ""}.`,
-    closeRun: "Terminé",
+    suggestions: "Suggestions",
+    suggestionsAria: "Suggérer ce qui vient d'habitude après",
     howAria: "Comment ça marche",
-    selectToEdit: "Touche pour reporter,\nmaintiens pour modifier",
-    holdToEdit: "Maintiens pour modifier",
-    runHelp:
-      "Touche pour acheter,\nglisse vers le haut pour plus tard,\nmaintiens pour modifier",
-    pillHint:
-      "Touche quand c'est dans le panier. Lance-le sur le côté pour la prochaine fois. Maintiens pour modifier.",
-    aisleEmpty: "Plus rien ici",
-    aisleBar: "Rayons. Glisse le long de la barre pour changer de rayon",
-    aisleSegment: (name: string, count: number) =>
-      count ? `${name}, ${count} à acheter` : `${name}, fini`,
+    rowHelp: "← Plus tard · Acheté →\nMaintiens : renommer.",
+    tripLine: (bought: number, left: number) =>
+      `${bought} dans le panier · ${left} à prendre`,
+    sectionCount: (done: number, total: number) => `${done} / ${total}`,
+    bought: "Acheté",
+    nextTag: "plus tard",
+    rowHint:
+      "Glisse à droite quand c'est dans le panier, à gauche pour la prochaine fois. Touche pour choisir. Maintiens pour renommer.",
+    select: "Choisir",
+    rename: "Renommer",
+    nameField: "Nom du produit",
+    renameSave: "Garder le nouveau nom",
+    renameCancel: "Garder l'ancien nom",
+    details: "Détails du produit",
+    deleteSelected: "Supprimer",
+    deleteTitle: (count: number) =>
+      count === 1
+        ? "Supprimer ce produit ?"
+        : `Supprimer ces ${count} produits ?`,
+    deleteLine: (count: number) =>
+      count === 1
+        ? "Il quitte ton garde-manger pour de bon, avec ce que Kilist a appris sur lui."
+        : "Ils quittent ton garde-manger pour de bon, avec ce que Kilist a appris sur eux.",
+    deleteKeep: "Les garder",
+    rail: "Rayons. Appuie et glisse pour aller à un rayon",
+    railAisle: (name: string, left: number) => `${name}, ${left} à prendre`,
+    finishTrip: "Terminé",
+    tripDone: "Courses finies",
+    recapLine: (bought: number, later: number) =>
+      `${bought} ${bought <= 1 ? "acheté" : "achetés"}${later ? ` · ${later} pour la prochaine fois` : ""}`,
+    recapBar: (bought: number, total: number) =>
+      `${bought} sur ${total} ${bought <= 1 ? "acheté" : "achetés"}`,
+    recapLaterLine: "Ils reviennent sur ta liste dans quelques jours.",
+    recapLeft: "Pas acheté",
+    recapLeftLine: "Toujours sur ta liste pour les prochaines courses.",
+    recapOk: "OK",
   },
   inventory: {
     closeSearch: "Fermer la recherche",

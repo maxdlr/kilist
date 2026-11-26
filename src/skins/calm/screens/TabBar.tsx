@@ -4,6 +4,7 @@ import T from "../text";
 import { MAIN_TABS, shownTab } from "@/components/elements/TabBar/tabs";
 import type { TabBarProps } from "@/components/elements/TabBar/types";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
+import { useDockStore, useDockTop } from "@/providers/DockStore";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
 import type { Skin } from "@/skins/types";
@@ -27,12 +28,18 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CText, Dot, GlassBackdrop, glassTargetKey } from "../components";
+import { CText, Dot } from "../components";
 import DockHost from "../components/DockHost";
 import useCheckPending from "../hooks/useCheckPending";
 import { useNewsRefresh, useUnreadNews } from "@/hooks/useNews";
 
 const ORDER = MAIN_TABS;
+
+const TINT = {
+  transitionDuration: AnimationService.feedback.tint.duration,
+  transitionProperty: ["backgroundColor"] as string[],
+  transitionTimingFunction: "ease-out",
+};
 
 
 const ICONS: Record<string, { idle: Icon; selected: Icon }> = {
@@ -49,7 +56,9 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
   const C = useCalmColors();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { isHidden, glassTarget, glassDockHeight, glassLook } = useTabBarVisibility();
+  const { isHidden } = useTabBarVisibility();
+  const ink = useDockTop(useDockStore())?.tone === "ink";
+  const tint = ink ? C.onFill : C.text;
   const { pending } = useCheckPending();
   const unreadNews = useUnreadNews();
   useNewsRefresh(state.index);
@@ -72,14 +81,8 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
     <DockHost />
     <Animated.View
       accessibilityRole="tablist"
-      style={[styles.bar, !glassTarget && styles.solid, animatedStyle]}
+      style={[styles.bar, ink ? styles.ink : styles.solid, TINT, animatedStyle]}
     >
-      {glassTarget && <GlassBackdrop
-          key={glassTargetKey(glassTarget)}
-          target={glassTarget}
-          featherFrom={glassDockHeight}
-          look={glassLook ?? undefined}
-        />}
       <View style={[styles.row, { paddingBottom: insets.bottom }]}>
         {routes.map((route) => {
           const name = route.name as keyof typeof skin.copy.tabs;
@@ -107,7 +110,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
               style={withPressed(styles.tab)}
             >
               <View style={styles.iconWrap}>
-                <TabIcon size={skin.size.icon.action + 2} color={C.text} strokeWidth={1.4} />
+                <TabIcon size={skin.size.icon.action + 2} color={tint} strokeWidth={1.4} />
                 {badge && (
                   <View style={styles.badge}>
                     <Dot color={C.pendingDot} size={7} />
@@ -118,7 +121,7 @@ const CalmTabBar = ({ state, emitter, navigateToTab }: TabBarProps) => {
                 allowFontScaling={false}
                 weight={isCurrent ? "bold" : "regular"}
                 size={skin.type.caption - 1}
-                color={C.text}
+                color={tint}
                 numberOfLines={1}
               >
                 {label}
@@ -142,6 +145,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       right: 0,
     },
     solid: { backgroundColor: C.ground },
+    ink: { backgroundColor: C.fill },
     row: { flex: 1, flexDirection: "row", paddingHorizontal: s.spacing.tight },
     tab: { alignItems: "center", flex: 1, gap: s.spacing.tight, justifyContent: "center" },
     iconWrap: { alignItems: "center", justifyContent: "center" },

@@ -12,8 +12,7 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import AnimationService from "@/services/animation";
 import { SkinScreen } from "@/skins/screens";
 import type { Skin } from "@/skins/types";
-import { BlurTargetView } from "expo-blur";
-import { type ComponentRef, useRef, useState } from "react";
+import { useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,7 +30,6 @@ const LoginScreen = () => {
   const guest = skin.copy.guest;
   const sheet = signupSheet(skin);
   const pageFill = flow.isSignup ? sheet.fill : skin.colors.ground;
-  const blurTarget = useRef<ComponentRef<typeof View>>(null);
   const [footerHeight, setFooterHeight] = useState(0);
   const [resetOpen, setResetOpen] = useState(false);
   useStatusBarStyle(flow.isSignup ? "dark" : skin.statusBarOnGround);
@@ -57,23 +55,19 @@ const LoginScreen = () => {
   const screen = (
     <AvoidKeyboard>
       <View style={[styles.flex, { backgroundColor: pageFill }]}>
-        <BlurTargetView ref={blurTarget} style={[styles.flex, { backgroundColor: pageFill }]}>
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: pageFill }]} />
-          <ScrollView
-            contentContainerStyle={[
-              styles.form,
-              { paddingTop: insets.top + skin.spacing.top, paddingBottom: footerHeight + skin.spacing.section },
-            ]}
-            keyboardShouldPersistTaps="handled"
-          >
-            {flow.isSignup ? <SignupStep flow={flow} /> : <LoginForm flow={flow} onForgot={() => setResetOpen(true)} />}
-          </ScrollView>
-        </BlurTargetView>
+        <ScrollView
+          contentContainerStyle={[
+            styles.form,
+            { paddingTop: insets.top + skin.spacing.top, paddingBottom: footerHeight + skin.spacing.section },
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          {flow.isSignup ? <SignupStep flow={flow} /> : <LoginForm flow={flow} onForgot={() => setResetOpen(true)} />}
+        </ScrollView>
 
         {!resetOpen && (
           <AuthFooter
             flow={flow}
-            target={blurTarget}
             pageFill={pageFill}
             onSwitch={() => switchMode(flow.isSignup ? "login" : "signup")}
             onLayout={(event) => setFooterHeight(event.nativeEvent.layout.height)}

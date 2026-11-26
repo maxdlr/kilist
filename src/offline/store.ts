@@ -384,6 +384,8 @@ export const saveValue = (key: string, value: unknown) => db.saveValue(key, valu
 
 export const loadValue = <T,>(key: string) => db.loadValue<T>(key);
 
+export const deleteValues = (prefix: string) => db.deleteValues(prefix);
+
 export const resetStoreForTests = () => {
   loaded = false;
   base = null;

@@ -13,7 +13,7 @@ import { InfoCircleIcon, InfoCircleSolidIcon, XmarkIcon } from "@/components/ico
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CText, GlassScene, UndoButton, useTabBarInset } from "@/skins/calm/components";
+import { CText, Scene, UndoButton, useTabBarInset } from "@/skins/calm/components";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import CheckCard from "./CheckCard";
 
@@ -49,7 +49,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
 
   return (
     <View style={styles.root}>
-      <GlassScene fade={false}>
+      <Scene>
         <Animated.View
           onTouchStart={() => setTouches((count) => count + 1)}
           style={[styles.root, { paddingTop: insets.top + skin.spacing.stack }, tabBarRoom]}
@@ -144,7 +144,7 @@ const Checking = ({ game }: { game: SwipeGame }) => {
             />
           </View>
         </Animated.View>
-      </GlassScene>
+      </Scene>
       <ActionPanel request={game.removeRequest} onClose={game.cancelRemove} />
     </View>
   );

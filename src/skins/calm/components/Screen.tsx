@@ -1,58 +1,51 @@
 import useStatusBarStyle from "@/hooks/useStatusBarStyle";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import { useDockHeight, useDockHosted, useDockStore } from "@/providers/DockStore";
+import { type DockTone, useDockHeight, useDockHosted, useDockStore } from "@/providers/DockStore";
 import { useIsPreview } from "@/providers/PreviewProvider";
 import { useTabBarVisibility } from "@/providers/TabBarProvider";
 import type { Skin } from "@/skins/types";
-import { type ComponentRef, ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useId, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors } from "../theme/useCalmColors";
-import { dockGlassHeight, dockRowPadding } from "./DockHost";
-import { DEFAULT_GLASS, GlassBackdrop, type GlassLook, GlassScene, useTabBarInset } from "./Glass";
+import { dockRowPadding } from "./DockHost";
+import { Scene, useTabBarInset } from "./Scene";
 import { createButtonStyles } from "./styles";
+
+export const screenTop = (s: Skin, inset: number) => inset + s.spacing.stack;
 
 export const Screen = ({
   children,
   dock,
   dockMode = "default",
   dockDepth = 0,
+  dockTone = "ground",
   padded = true,
-  glass = false,
-  glassLook = DEFAULT_GLASS,
+  flushTop = false,
 }: {
   children: ReactNode;
   dock?: ReactNode;
   dockMode?: string;
   dockDepth?: number;
+  dockTone?: DockTone;
   padded?: boolean;
-  glass?: boolean;
-  glassLook?: GlassLook;
+  flushTop?: boolean;
 }) => {
   const skin = useSkin();
   const styles = useSkinStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { insideTabs, setGlassDockHeight, setGlassLook } = useTabBarVisibility();
-  const target = useRef<ComponentRef<typeof View>>(null);
-  const [dockHeight, setDockHeight] = useState(0);
+  const { insideTabs } = useTabBarVisibility();
   const tabBar = useTabBarInset();
-  const dockLift = useAnimatedStyle(() => ({ bottom: tabBar.offset.value }));
   const store = useDockStore();
   const preview = useIsPreview();
   const hosted = useDockHosted(store) && insideTabs && !preview && store !== null;
   const hostHeight = useDockHeight(hosted ? store : null);
   const owner = useId();
   const [focused, setFocused] = useState(false);
-  const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value + (dock ? hostHeight : 0) }));
-  const tabbed = insideTabs && tabBar.inset > 0;
-  const hasGlassDock = Boolean(dock) || tabbed;
-  const docked = glass && hasGlassDock && insideTabs;
-  const rowHeight = dock ? dockHeight : 0;
-  const glassHeight = hosted
-    ? hostHeight
-    : Math.max(rowHeight, tabbed ? (glassLook.height ?? dockGlassHeight(skin)) : 0);
+  const dockRoom = dock ? hostHeight : 0;
+  const tabBarRoom = useAnimatedStyle(() => ({ paddingBottom: tabBar.offset.value + dockRoom }));
   useStatusBarStyle(skin.statusBarOnGround);
 
   useFocusEffect(
@@ -62,79 +55,42 @@ export const Screen = ({
     }, []),
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!docked) return;
-      setGlassLook(glassLook);
-      if (!hosted) setGlassDockHeight(glassHeight);
-      return () => {
-        if (!hosted) setGlassDockHeight(0);
-        setGlassLook(null);
-      };
-    }, [docked, hosted, glassHeight, setGlassDockHeight, glassLook, setGlassLook]),
-  );
-
   useEffect(() => {
     if (!hosted || !store) return;
-    if (focused && (dock || glass)) store.show({ owner, mode: dockMode, depth: dockDepth, node: dock ?? null, glass });
+    if (focused && dock) store.show({ owner, mode: dockMode, depth: dockDepth, node: dock, tone: dockTone });
     else store.clear(owner);
   });
 
   useEffect(() => () => store?.clear(owner), [store, owner]);
 
-  const content = [
-    styles.content,
-    padded && styles.padded,
-    { paddingTop: insets.top + skin.spacing.page - skin.spacing.small },
-  ];
-  const dockRow = [
-    styles.actionRow,
-    styles.dock,
-    !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
-    tabBar.inset > 0 && { paddingBottom: dockRowPadding(skin, true) },
-  ];
-
-  if (glass) {
-    return (
-      <View style={styles.root}>
-        <GlassScene target={target} extraInset={hasGlassDock ? glassHeight : 0} look={glassLook}>
-          <View style={[content, !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom }]}>
-            {children}
-          </View>
-        </GlassScene>
-        {hasGlassDock && !hosted && (
-          <Animated.View pointerEvents="box-none" style={[styles.glassDock, dockLift]}>
-            <View pointerEvents="none" style={[styles.glassLayer, { height: glassHeight }]}>
-              <GlassBackdrop target={target} look={glassLook} />
-            </View>
-            {dock && (
-              <View
-                style={[dockRow, styles.glassRow]}
-                onLayout={(event) => setDockHeight(event.nativeEvent.layout.height)}
-              >
-                {dock}
-              </View>
-            )}
-          </Animated.View>
-        )}
-      </View>
-    );
-  }
-
   return (
-    <GlassScene target={target} fade={false}>
+    <Scene>
       <Animated.View style={[styles.root, tabBarRoom]}>
         <View
           style={[
-            content,
+            styles.content,
+            padded && styles.padded,
+            !flushTop && { paddingTop: screenTop(skin, insets.top) },
             !dock && !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
           ]}
         >
           {children}
         </View>
-        {dock && !hosted && <View style={dockRow}>{dock}</View>}
+        {dock && !hosted && (
+          <View
+            style={[
+              styles.actionRow,
+              styles.dock,
+              dockTone === "ink" && styles.ink,
+              !insideTabs && { paddingBottom: skin.spacing.stack + insets.bottom },
+              tabBar.inset > 0 && { paddingBottom: dockRowPadding(skin, true) },
+            ]}
+          >
+            {dock}
+          </View>
+        )}
       </Animated.View>
-    </GlassScene>
+    </Scene>
   );
 };
 
@@ -144,8 +100,6 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     root: { backgroundColor: C.ground, flex: 1 },
     content: { flex: 1, gap: s.spacing.section + 4, minHeight: 0 },
     padded: { paddingHorizontal: s.spacing.gutter },
-    dock: { paddingBottom: s.spacing.gutter, paddingHorizontal: s.spacing.gutter },
-    glassDock: { bottom: 0, left: 0, position: "absolute", right: 0 },
-    glassLayer: { bottom: 0, left: 0, overflow: "hidden", position: "absolute", right: 0 },
-    glassRow: { paddingTop: s.spacing.stack },
+    dock: { paddingBottom: s.spacing.gutter, paddingHorizontal: s.spacing.gutter, paddingTop: s.spacing.stack },
+    ink: { backgroundColor: C.fill },
   });

@@ -1,50 +1,20 @@
-import React, {
-  createContext,
-  type ComponentRef,
-  type Dispatch,
-  ReactNode,
-  type RefObject,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import type { View } from "react-native";
-import type { SceneGlass } from "@/components/elements/Glass";
+import React, { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { DockStoreProvider } from "./DockStore";
-
-export type GlassTarget = RefObject<ComponentRef<typeof View> | null>;
 
 type TabBarContextType = {
   insideTabs: boolean;
   isHidden: boolean;
   hide: () => () => void;
-  glassTarget: GlassTarget | null;
-  setGlassTarget: Dispatch<SetStateAction<GlassTarget | null>>;
-  glassDockHeight: number;
-  setGlassDockHeight: Dispatch<SetStateAction<number>>;
-  glassLook: SceneGlass | null;
-  setGlassLook: Dispatch<SetStateAction<SceneGlass | null>>;
 };
 
 const TabBarContext = createContext<TabBarContextType>({
   insideTabs: false,
   isHidden: false,
   hide: () => () => {},
-  glassTarget: null,
-  setGlassTarget: () => {},
-  glassDockHeight: 0,
-  setGlassDockHeight: () => {},
-  glassLook: null,
-  setGlassLook: () => {},
 });
 
 export const TabBarProvider = ({ children }: { children: ReactNode }) => {
   const [hideCount, setHideCount] = useState(0);
-  const [glassTarget, setGlassTarget] = useState<GlassTarget | null>(null);
-  const [glassDockHeight, setGlassDockHeight] = useState(0);
-  const [glassLook, setGlassLook] = useState<SceneGlass | null>(null);
 
   const hide = useCallback(() => {
     setHideCount((count) => count + 1);
@@ -56,14 +26,8 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
       insideTabs: true,
       isHidden: hideCount > 0,
       hide,
-      glassTarget,
-      setGlassTarget,
-      glassDockHeight,
-      setGlassDockHeight,
-      glassLook,
-      setGlassLook,
     }),
-    [hideCount, hide, glassTarget, glassDockHeight, glassLook],
+    [hideCount, hide],
   );
 
   return (
@@ -76,8 +40,6 @@ export const TabBarProvider = ({ children }: { children: ReactNode }) => {
 export const useTabBarVisibility = () => React.useContext(TabBarContext);
 
 export const SceneInset = createContext(0);
-export const GlassTargetScope = createContext(false);
-export const useInsideGlassTarget = () => React.useContext(GlassTargetScope);
 export const useSceneInset = () => React.useContext(SceneInset);
 
 export const useHideTabBar = (shouldHide: boolean) => {

@@ -6,7 +6,7 @@ import CalmPlay from "./Play/Play";
 import CalmShop from "./Shop/Shop";
 import { CalmLoading } from "./States";
 import CalmTabBar from "./TabBar";
-import { GlassScene } from "../components";
+import { Scene } from "../components";
 
 const calmScreens: SkinScreens = {
   Home: CalmHome,
@@ -17,7 +17,7 @@ const calmScreens: SkinScreens = {
   Loading: CalmLoading,
   TabBar: CalmTabBar,
   floatingTabBar: true,
-  Scene: GlassScene,
+  Scene,
 };
 
 export default calmScreens;

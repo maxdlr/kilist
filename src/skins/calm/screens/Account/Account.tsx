@@ -9,13 +9,12 @@ import AccountPanels from "@/components/features/Account/AccountPanels";
 import useAccount from "@/hooks/screens/useAccount";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CText, GlassScrollView, Screen } from "@/skins/calm/components";
+import { CText, Screen } from "@/skins/calm/components";
 import Group from "./_components/Group";
 import Row from "./_components/Row";
-import GLASS from "./glass";
 
 const CalmAccount = () => {
   const skin = useSkin();
@@ -31,8 +30,8 @@ const CalmAccount = () => {
 
   return (
     <AvoidKeyboard>
-      <Screen padded={false} glass glassLook={GLASS}>
-        <GlassScrollView contentContainerStyle={styles.scroll}>
+      <Screen padded={false}>
+        <ScrollView contentContainerStyle={styles.scroll}>
           <CText weight="medium" size={skin.type.headline} accessibilityRole="header">{T.settings.title}</CText>
           <FeedbackSlot place="account" />
 
@@ -102,7 +101,7 @@ const CalmAccount = () => {
               )}
             </Group>
           )}
-        </GlassScrollView>
+        </ScrollView>
       </Screen>
       <ButtonKindOverride.Provider value="secondary">
         <AccountPanels account={account} />

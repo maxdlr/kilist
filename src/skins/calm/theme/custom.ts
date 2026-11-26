@@ -114,12 +114,6 @@ export const customElements = (color: string): CalmElements => {
       arrow: base[100],
     },
     bottomPanel: {
-      glassSettings: {
-        enabled: true,
-        blur: 30,
-        androidReduction: 4,
-        veil: 0.8,
-      },
       border: {
         gradientStroke: {
           start: "white",

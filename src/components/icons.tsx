@@ -21,6 +21,7 @@ import {
   InfoCircleSolid as InfoCircleSolidBase,
   List as ListBase,
   Mail as MailBase,
+  MoreHoriz as MoreHorizBase,
   NavArrowDown as NavArrowDownBase,
   NavArrowLeft as NavArrowLeftBase,
   NavArrowRight as NavArrowRightBase,
@@ -77,6 +78,7 @@ export const InfoCircleIcon = sized(InfoCircleBase);
 export const InfoCircleSolidIcon = sized(InfoCircleSolidBase);
 export const ListIcon = sized(ListBase);
 export const MailIcon = sized(MailBase);
+export const MoreHorizIcon = sized(MoreHorizBase);
 export const NavArrowLeftIcon = sized(NavArrowLeftBase);
 export const NavArrowDownIcon = sized(NavArrowDownBase);
 export const NavArrowRightIcon = sized(NavArrowRightBase);

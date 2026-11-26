@@ -1,4 +1,5 @@
 import Press from "@/components/elements/Press";
+import type { DockTone } from "@/providers/DockStore";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { Href, router } from "expo-router";
 import AnimationService from "@/services/animation";
@@ -18,6 +19,7 @@ export const CButton = ({
   icon,
   small = false,
   disabled = false,
+  tone = "ground",
 }: {
   disabled?: boolean;
   icon?: (color: string) => ReactNode;
@@ -28,16 +30,26 @@ export const CButton = ({
   accessibilityLabel?: string;
   small?: boolean;
   bold?: boolean;
+  tone?: DockTone;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
   const styles = useSkinStyles(createButtonStyles);
-  const look = {
-    primary: { fill: C.fill, ink: C.onFill, line: C.fill },
-    secondary: { fill: "transparent", ink: C.text, line: C.fieldLine },
-    text: { fill: "transparent", ink: C.textSoft, line: "transparent" },
-    danger: { fill: C.danger, ink: C.onFill, line: C.danger },
-  }[variant];
+  const looks = {
+    ground: {
+      primary: { fill: C.fill, ink: C.onFill, line: C.fill },
+      secondary: { fill: "transparent", ink: C.text, line: C.fieldLine },
+      text: { fill: "transparent", ink: C.textSoft, line: "transparent" },
+      danger: { fill: C.danger, ink: C.onFill, line: C.danger },
+    },
+    ink: {
+      primary: { fill: C.onFill, ink: C.fill, line: C.onFill },
+      secondary: { fill: "transparent", ink: C.onFill, line: C.onFill },
+      text: { fill: "transparent", ink: C.onFill, line: "transparent" },
+      danger: { fill: C.danger, ink: C.onFill, line: C.danger },
+    },
+  };
+  const look = looks[tone][variant];
   const round = !label;
   const held = skin.feedback.held.opacity;
   const dim = useSharedValue(disabled ? held : 1);

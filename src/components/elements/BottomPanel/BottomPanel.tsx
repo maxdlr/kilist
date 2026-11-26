@@ -2,10 +2,8 @@ import type { Skin } from "@/skins/types";
 import { useFocusEffect } from "expo-router";
 import { PanelSkin, useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import { useCoverDock } from "@/providers/DockStore";
-import { useHideTabBar, useInsideGlassTarget, useTabBarVisibility } from "@/providers/TabBarProvider";
+import { useHideTabBar } from "@/providers/TabBarProvider";
 import AnimationService from "@/services/animation";
-import PANEL_GLASS from "./panelGlass";
-import { GlassLayer, glassWith, type GlassSettings } from "@/components/elements/Glass";
 import PanelStroke from "./PanelStroke";
 import Press from "@/components/elements/Press";
 import { ThemedText } from "@/components/elements/ThemedText";
@@ -61,7 +59,6 @@ const BottomPanel = ({
   canClose,
   tall = false,
   veil = true,
-  glass: glassOverride,
   expanded = false,
   onExpand,
   onCollapse,
@@ -74,7 +71,6 @@ const BottomPanel = ({
   canClose?: () => boolean;
   tall?: boolean;
   veil?: boolean;
-  glass?: Partial<GlassSettings>;
   expanded?: boolean;
   onExpand?: () => void;
   onCollapse?: () => void;
@@ -86,11 +82,7 @@ const BottomPanel = ({
   useHideTabBar(visible);
   useCoverDock(visible);
   const insets = useSafeAreaInsets();
-  const { glassTarget } = useTabBarVisibility();
-  const insideTarget = useInsideGlassTarget();
   const gripLook = skin.bottomPanel.grip;
-  const glass = glassWith(PANEL_GLASS, skin.bottomPanel.glassSettings, glassOverride);
-  const glassy = glass.enabled !== false && Boolean(glassTarget) && !insideTarget;
   const offset = useSharedValue(SCREEN_HEIGHT);
   const contentHeight = useSharedValue(0);
   const backdropOpacity = useSharedValue(0);
@@ -367,21 +359,13 @@ const BottomPanel = ({
       style={[
         styles.panel,
         {
-          backgroundColor: glassy ? "transparent" : skin.panel.fill,
+          backgroundColor: skin.panel.fill,
           borderTopLeftRadius: skin.panel.radius,
           borderTopRightRadius: skin.panel.radius,
         },
         animatedStyle,
       ]}
     >
-      {glassy && (
-        <GlassLayer
-          target={glassTarget!}
-          settings={glass}
-          veil={skin.panel.veil ?? skin.panel.fill}
-          backing={skin.colors.ground}
-        />
-      )}
       <Animated.View
         onLayout={handleContentLayout}
         style={[

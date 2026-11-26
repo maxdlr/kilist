@@ -12,7 +12,7 @@ import { levelOf } from "@/utils/scoreUtils";
 import withPressed from "@/utils/withPressed";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { RefreshControl, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import AddFoodPanel from "@/components/features/Inventory/AddFoodPanel";
 import {
@@ -31,14 +31,12 @@ import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import {
   CButton,
   CText,
-  GlassScrollView,
   Screen,
 } from "@/skins/calm/components";
 import { NewsSlide } from "./_components/NewsSlide";
 import { StockBars } from "./_components/StockBars";
 import useCheckPending from "@/skins/calm/hooks/useCheckPending";
 import { CalmError, CalmLoading } from "../States";
-import GLASS from "./glass";
 
 const PREVIEW = 12;
 
@@ -100,8 +98,6 @@ const CalmHome = () => {
       <KeyboardAvoided.Provider value>
       <Screen
         padded={false}
-        glass
-        glassLook={GLASS}
         dock={shortcuts.map((item) => (
           <CButton
             key={item.label}
@@ -112,7 +108,7 @@ const CalmHome = () => {
           />
         ))}
       >
-        <GlassScrollView
+        <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.scroll}
           refreshControl={
@@ -315,7 +311,7 @@ const CalmHome = () => {
               ))}
             </View>
           )}
-        </GlassScrollView>
+        </ScrollView>
       </Screen>
       <AddFoodPanel visible={adding} onClose={() => setAdding(false)} />
       </KeyboardAvoided.Provider>

@@ -105,12 +105,6 @@ export const elements: CalmElements = {
     arrow: colors.stone500,
   },
   bottomPanel: {
-    glassSettings: {
-      enabled: true,
-      blur: 30,
-      androidReduction: 4,
-      veil: 0.3,
-    },
     border: {
       gradientStroke: {
         start: colors.white,

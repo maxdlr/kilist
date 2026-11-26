@@ -73,12 +73,6 @@ const roast: SkinSource = {
     attached: { fill: ink, ink: white, line: white },
   },
   bottomPanel: {
-    glassSettings: {
-      enabled: true,
-      blur: 30,
-      androidReduction: 4,
-      veil: 0.8,
-    },
     border: {
       gradientStroke: { start: white, end: acid, midPoint: 0.5 },
       width: 6,

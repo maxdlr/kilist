@@ -11,11 +11,15 @@ import { problemOf, type Problem } from "@/utils/problem";
 import axios from "@/services/axios";
 import { FoodType, ListType } from "@/types/model";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import useSWR from "swr";
 import { isQuietError } from "@/services/fetcher";
 
 export type ShopAddAction = "buy" | "later" | "list";
+
+export type TripEntry = { foodId: number; action: ShopUndo["action"]; food?: FoodType };
+
+type Pending = { food: FoodType; action: ShopUndo["action"]; resolve: (done: boolean) => void };
 
 const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) => {
   const shop = useShopList();
@@ -24,8 +28,11 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const [undoable, setUndoable] = useState<ShopUndo | null>(null);
   const [rowErrors, setRowErrors] = useState<Record<number, { message: string; retry: () => void }>>({});
   const { shopListId, startNewShopList, cancelShopList, setShopListId } = shop;
-  const [handled, setHandled] = useState(0);
-  const [bought, setBought] = useState(0);
+  const [log, setLog] = useState<TripEntry[]>([]);
+  const pending = useRef<Pending[]>([]);
+  const starting = useRef(false);
+  const handled = log.length;
+  const bought = log.filter((entry) => entry.action === "buy").length;
   const [isResuming, setIsResuming] = useState(true);
   const [panel, setPanel] = useState<"stop" | "add" | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
@@ -89,31 +96,66 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     return !failed;
   };
 
-  const buy = async (foodId: number): Promise<boolean> => {
-    const failed = await shop.buyFood(foodId);
-    if (!failed) {
-      setHandled((count) => count + 1);
-      setBought((count) => count + 1);
-      setUndoable({ action: "buy", foodId });
-    }
-    return settleRow(foodId, failed, common.feedback.notInBasket, () => buy(foodId));
+  const foodOf = (foodId: number) =>
+    shop.foods?.find((food) => food.id === foodId) ?? preview?.find((food) => food.id === foodId);
+
+  const record = (foodId: number, action: ShopUndo["action"], food?: FoodType) => {
+    setLog((entries) => [...entries, { foodId, action, food: food ?? foodOf(foodId) }]);
+    setUndoable({ action, foodId });
   };
 
-  const snooze = async (foodId: number): Promise<boolean> => {
+  const buy = async (foodId: number, food?: FoodType): Promise<boolean> => {
+    const failed = await shop.buyFood(foodId);
+    if (!failed) record(foodId, "buy", food);
+    return settleRow(foodId, failed, common.feedback.notInBasket, () => buy(foodId, food));
+  };
+
+  const snooze = async (foodId: number, food?: FoodType): Promise<boolean> => {
     const failed = await shop.snoozeFood(foodId);
-    if (!failed) {
-      setHandled((count) => count + 1);
-      setUndoable({ action: "snooze", foodId });
+    if (!failed) record(foodId, "snooze", food);
+    return settleRow(foodId, failed, common.feedback.notLater, () => snooze(foodId, food));
+  };
+
+  const drainPending = useEffectEvent(() => {
+    const queue = pending.current;
+    pending.current = [];
+    queue.reduce(
+      (chain, entry) =>
+        chain.then(async () => {
+          const done = await (entry.action === "buy" ? buy : snooze)(entry.food.id, entry.food);
+          entry.resolve(done);
+        }),
+      Promise.resolve(),
+    );
+  });
+
+  useEffect(() => {
+    if (shopListId !== undefined) drainPending();
+  }, [shopListId]);
+
+  const act = async (food: FoodType, action: ShopUndo["action"]): Promise<boolean> => {
+    if (shopListId !== undefined) return (action === "buy" ? buy : snooze)(food.id, food);
+    const done = new Promise<boolean>((resolve) => pending.current.push({ food, action, resolve }));
+    if (!starting.current) {
+      starting.current = true;
+      const id = await startNewShopList();
+      starting.current = false;
+      if (id === null) {
+        pending.current.forEach((entry) => entry.resolve(false));
+        pending.current = [];
+      }
     }
-    return settleRow(foodId, failed, common.feedback.notLater, () => snooze(foodId));
+    return done;
   };
 
   const undo = async () => {
     const undone = await shop.undoLast();
     setUndoable(null);
     if (!undone) return null;
-    setHandled((count) => Math.max(0, count - 1));
-    if (undone.action === "buy") setBought((count) => Math.max(0, count - 1));
+    setLog((entries) => {
+      const at = entries.findLastIndex((entry) => entry.foodId === undone.foodId);
+      return at < 0 ? entries : entries.filter((_, index) => index !== at);
+    });
     setRowErrors((current) => {
       const next = { ...current };
       delete next[undone.foodId];
@@ -160,8 +202,8 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const reset = () => {
     setUndoable(null);
     setShopListId(undefined);
-    setHandled(0);
-    setBought(0);
+    setLog([]);
+    setSelected([]);
     setPanel(null);
     refreshPreview();
   };
@@ -172,8 +214,7 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   };
 
   const start = async () => {
-    setHandled(0);
-    setBought(0);
+    setLog([]);
     return startNewShopList();
   };
 
@@ -230,8 +271,8 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
         ...(product && { product }),
       });
       if (!food?.id) throw new Error("no food");
-      if (action === "buy") await buy(food.id);
-      else if (action === "later") await snooze(food.id);
+      if (action === "buy") await buy(food.id, food);
+      else if (action === "later") await snooze(food.id, food);
       refreshPreview();
       mark("added", common.marks.added(name));
       return null;
@@ -243,17 +284,20 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const toggleSelect = (food: FoodType) =>
     setSelected((ids) => (ids.includes(food.id) ? ids.filter((id) => id !== food.id) : [...ids, food.id]));
 
+  const failSave = (error: unknown, retry: () => void) =>
+    report("list", {
+      tone: "error",
+      title: common.feedback.saveFailed,
+      body: problemOf(error).message,
+      action: { label: common.feedback.retry, onPress: retry },
+    });
+
   const laterIds = async (ids: number[]) => {
     try {
       await Promise.all(ids.map((id) => putFoodLevel(id, LATER_LEVEL)));
       report("list", null);
     } catch (error) {
-      report("list", {
-        tone: "error",
-        title: common.feedback.saveFailed,
-        body: problemOf(error).message,
-        action: { label: common.feedback.retry, onPress: () => laterIds(ids) },
-      });
+      failSave(error, () => laterIds(ids));
     }
     refreshPreview();
   };
@@ -261,7 +305,42 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
   const buyLater = async () => {
     const ids = selected;
     setSelected([]);
-    await laterIds(ids);
+    if (shopListId === undefined) return laterIds(ids);
+    for (const id of ids) await snooze(id);
+  };
+
+  const refreshLists = () => {
+    refreshPreview();
+    if (shopListId !== undefined) shop.mutateFood();
+  };
+
+  const rename = async (foodId: number, name: string) => {
+    const next = name.trim();
+    if (!next || next === foodOf(foodId)?.name) return;
+    try {
+      await axios.put(`foods/edit/${foodId}`, { name: next });
+      report("list", null);
+    } catch (error) {
+      failSave(error, () => rename(foodId, next));
+    }
+    refreshLists();
+  };
+
+  const removeFoods = async (ids: number[]) => {
+    if (!mainList?.id || ids.length === 0) return;
+    try {
+      await axios.put(`lists/${mainList.id}/remove-foods`, { foodIds: ids });
+      report("list", null);
+    } catch (error) {
+      failSave(error, () => removeFoods(ids));
+    }
+    refreshLists();
+  };
+
+  const removeSelected = () => {
+    const ids = selected;
+    setSelected([]);
+    return removeFoods(ids);
   };
 
   const suggestion = foods?.find((food) => food.id === shop.suggestedFoodIds[0]);
@@ -280,8 +359,12 @@ const useShopRun = ({ onSaved }: { onSaved?: (bought: number) => void } = {}) =>
     total,
     suggestion,
     rows: foods?.filter((food) => food.id !== suggestion?.id) ?? [],
+    log,
     buy,
     snooze,
+    act,
+    rename,
+    removeSelected,
     rowError: (foodId: number) => rowErrors[foodId] ?? null,
     canUndo: undoable !== null,
     undo,

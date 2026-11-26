@@ -1,12 +1,10 @@
 import Dock from "@/components/elements/Dock";
 import { FeedbackCard } from "@/components/elements/Feedback";
-import { DEFAULT_SCENE_GLASS, FeatheredGlass } from "@/components/elements/Glass";
 import KilButton from "@/components/elements/KilButton";
 import { ThemedText } from "@/components/elements/ThemedText";
 import type { AuthFlow } from "@/hooks/screens/useAuthFlow";
 import common from "@/i18n/common";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
-import type { GlassTarget } from "@/providers/TabBarProvider";
 import { googleSignInAvailable } from "@/services/googleSignIn";
 import type { Skin } from "@/skins/types";
 import { router } from "expo-router";
@@ -17,13 +15,11 @@ type Link = { label: string; onTouch: () => void };
 
 const AuthFooter = ({
   flow,
-  target,
   pageFill,
   onSwitch,
   onLayout,
 }: {
   flow: AuthFlow;
-  target: GlassTarget;
   pageFill: string;
   onSwitch: () => void;
   onLayout: (event: LayoutChangeEvent) => void;
@@ -41,8 +37,7 @@ const AuthFooter = ({
   ];
 
   return (
-    <View style={styles.footer} onLayout={onLayout}>
-      {flow.isSignup && <FeatheredGlass target={target} look={DEFAULT_SCENE_GLASS} veil={pageFill} />}
+    <View style={[styles.footer, { backgroundColor: pageFill }]} onLayout={onLayout}>
       <Dock style={styles.dock} overKeyboard>
         <View style={styles.problem}>
           <FeedbackCard feedback={flow.joinStep ? null : flow.problem} />

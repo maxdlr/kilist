@@ -13,11 +13,11 @@ import axios from "@/services/axios";
 import type { Skin } from "@/skins/types";
 import { FoodBankItemType, FoodType } from "@/types/model";
 import { useEffect, useState } from "react";
-import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View } from "react-native";
+import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, { useAnimatedRef, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useSWRConfig } from "swr";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, GlassScrollView, Screen } from "@/skins/calm/components";
+import { CButton, CText, Screen } from "@/skins/calm/components";
 import { XmarkIcon } from "@/components/icons";
 import { Sample, StepNav } from "./shared";
 import StepBar from "./StepBar";
@@ -246,7 +246,7 @@ const ProfilePick = ({
     const text = copy.questions[question.id];
 
     return (
-      <GlassScrollView
+      <ScrollView
         key={index}
         style={{ width }}
         contentContainerStyle={styles.scroll}
@@ -340,14 +340,13 @@ const ProfilePick = ({
             })}
           </View>
         )}
-      </GlassScrollView>
+      </ScrollView>
     );
   };
 
   return (
     <Screen
       padded={false}
-      glass
       dock={
         <>
           {isLast && (

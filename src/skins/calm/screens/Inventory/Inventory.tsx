@@ -13,10 +13,9 @@ import { StyleSheet, View } from "react-native";
 import { PlusIcon, SearchIcon, TrashIcon, XmarkIcon } from "@/components/icons";
 import { AvoidKeyboard } from "@/components/elements/BackBar";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
-import { CButton, CText, DockSpacer, Screen } from "@/skins/calm/components";
+import { CButton, CText, Screen } from "@/skins/calm/components";
 import { CalmLoading } from "../States";
 import FoodRow from "./_components/FoodRow";
-import GLASS from "./glass";
 
 const ROW_REFLOW = LinearTransition.duration(AnimationService.reflow);
 
@@ -114,8 +113,6 @@ const CalmInventory = () => {
     <AvoidKeyboard>
       <Screen
         padded={false}
-        glass
-        glassLook={GLASS}
         dock={searchOpen ? searchRow : actions}
         dockMode={
           searchOpen
@@ -173,7 +170,6 @@ const CalmInventory = () => {
             onRefresh={shelf.mutateFood}
             refreshing={shelf.isFoodLoading}
             keyboardShouldPersistTaps="handled"
-            ListFooterComponent={DockSpacer}
             renderItem={({ item }) => (
               <FoodRow
                 food={item}

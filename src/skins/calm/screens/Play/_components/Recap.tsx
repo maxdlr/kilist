@@ -6,7 +6,7 @@ import { DrawnMark } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { ArcadeIcon, RefreshIcon } from "@/components/icons";
 import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
@@ -14,11 +14,9 @@ import {
   CButton,
   CText,
   Dot,
-  GlassScrollView,
   HelpTip,
   Screen,
 } from "@/skins/calm/components";
-import GLASS from "../glass";
 
 const Recap = ({ game }: { game: SwipeGame }) => {
   const skin = useSkin();
@@ -35,8 +33,6 @@ const Recap = ({ game }: { game: SwipeGame }) => {
       onTouchStart={() => setTouches((count) => count + 1)}
     >
       <Screen
-        glass
-        glassLook={GLASS}
         dock={
           <>
             <CButton
@@ -82,7 +78,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
             />
           )}
         </View>
-        <GlassScrollView contentContainerStyle={styles.doneContent}>
+        <ScrollView contentContainerStyle={styles.doneContent}>
           <View style={styles.doneText}>
             <View style={styles.doneHead}>
               <DrawnMark kind="done" color={C.positive} />
@@ -150,7 +146,7 @@ const Recap = ({ game }: { game: SwipeGame }) => {
             </View>
           </Presence>
           <FeedbackSlot place="play" collapse={skin.spacing.section} />
-        </GlassScrollView>
+        </ScrollView>
       </Screen>
     </View>
   );

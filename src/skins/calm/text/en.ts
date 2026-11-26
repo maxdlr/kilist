@@ -90,19 +90,42 @@ const en = {
     nextTime: "Next time",
     later: "Later",
     usuallyNext: "Usually next",
-    result: (bought: number, left: number) =>
-      `${bought} bought${left ? `, ${left} left for next time` : ""}.`,
-    closeRun: "Done",
+    suggestions: "Suggestions",
+    suggestionsAria: "Suggest what usually comes next",
     howAria: "How it works",
-    selectToEdit: "Tap to postpone, hold to edit",
-    holdToEdit: "Hold to edit",
-    runHelp: "Tap to buy,\nflick for next time,\nhold to edit",
-    pillHint:
-      "Tap when it's in the basket. Flick it sideways for next time. Hold to edit.",
-    aisleEmpty: "Nothing left here",
-    aisleBar: "Aisles. Slide along the bar to change aisle",
-    aisleSegment: (name: string, count: number) =>
-      count ? `${name}, ${count} to buy` : `${name}, done`,
+    rowHelp: "← Next time · Bought →\nTap: select. Hold: rename.",
+    tripLine: (bought: number, left: number) =>
+      `${bought} in the basket · ${left} to go`,
+    sectionCount: (done: number, total: number) => `${done} / ${total}`,
+    bought: "Bought",
+    nextTag: "next time",
+    rowHint:
+      "Swipe right when it's in the basket, left for next time. Tap to select. Hold to rename.",
+    select: "Select",
+    rename: "Rename",
+    nameField: "Item name",
+    renameSave: "Save the new name",
+    renameCancel: "Keep the old name",
+    details: "Item details",
+    deleteSelected: "Delete",
+    deleteTitle: (count: number) =>
+      count === 1 ? "Delete this item?" : `Delete these ${count} items?`,
+    deleteLine: (count: number): string =>
+      count === 1
+        ? "It leaves your pantry for good, with what Kilist learned about it."
+        : "They leave your pantry for good, with what Kilist learned about them.",
+    deleteKeep: "Keep them",
+    rail: "Aisles. Press and slide to jump to an aisle",
+    railAisle: (name: string, left: number) => `${name}, ${left} left`,
+    finishTrip: "Done",
+    tripDone: "Trip done",
+    recapLine: (bought: number, later: number) =>
+      `${bought} bought${later ? ` · ${later} for next time` : ""}`,
+    recapBar: (bought: number, total: number) => `${bought} of ${total} bought`,
+    recapLaterLine: "They come back on your list in a few days.",
+    recapLeft: "Not bought",
+    recapLeftLine: "Still on your list for the next trip.",
+    recapOk: "OK",
   },
   inventory: {
     closeSearch: "Close search",

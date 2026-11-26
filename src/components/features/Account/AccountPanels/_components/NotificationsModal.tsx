@@ -10,7 +10,6 @@ import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
-import NOTIFICATIONS_GLASS from "./notificationsGlass";
 
 const SWITCH_COLUMN = 64;
 
@@ -96,7 +95,7 @@ const NotificationsModal = ({
   const settings = useNotificationSettings();
 
   return (
-    <BottomPanel visible={visible} onClose={onClose} dismissible tall glass={NOTIFICATIONS_GLASS}>
+    <BottomPanel visible={visible} onClose={onClose} dismissible tall>
       <Title size={skin.type.headline} lines={1} color={skin.panel.title}>
         {T.menu}
       </Title>

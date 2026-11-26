@@ -3,10 +3,10 @@ import { DrawnMark, type MarkKind } from "@/providers/MarkProvider";
 import { useSkin, useSkinStyles } from "@/providers/SkinProvider";
 import type { Skin } from "@/skins/types";
 import { useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { calmColors, useCalmColors } from "../theme/useCalmColors";
-import { CButton, CText, type GlassLook, GlassScrollView, Screen } from "../components";
+import { CButton, CText, Screen } from "../components";
 
 const BAR = 120;
 const SLIDER = 40;
@@ -67,7 +67,6 @@ export const CalmMessage = ({
   dock,
   mark,
   onRefresh,
-  glassLook,
   children,
 }: {
   title: string;
@@ -76,7 +75,6 @@ export const CalmMessage = ({
   dock?: React.ReactNode;
   mark?: MarkKind;
   onRefresh?: () => void | Promise<void>;
-  glassLook?: GlassLook;
 }) => {
   const skin = useSkin();
   const C = useCalmColors();
@@ -90,14 +88,14 @@ export const CalmMessage = ({
     </View>
   );
   return (
-    <Screen dock={dock} glass={!!onRefresh} glassLook={glassLook}>
+    <Screen dock={dock}>
       {onRefresh ? (
-        <GlassScrollView
+        <ScrollView
           contentContainerStyle={styles.grow}
           refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={C.textSoft} />}
         >
           {body}
-        </GlassScrollView>
+        </ScrollView>
       ) : (
         body
       )}

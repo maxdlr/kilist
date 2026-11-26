@@ -15,20 +15,21 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calmColors } from "../theme/useCalmColors";
-import { DEFAULT_GLASS, GlassBackdrop, glassTargetKey } from "./Glass";
 import { createButtonStyles } from "./styles";
 
 const SLIDE = 56;
 const SWITCH = { duration: AnimationService.config.duration, easing: AnimationService.easeOut };
+const TINT = {
+  transitionDuration: AnimationService.feedback.tint.duration,
+  transitionProperty: ["backgroundColor"] as string[],
+  transitionTimingFunction: "ease-out",
+};
 
 const tabBarHeadroom = (s: Skin) => {
   const icon = s.size.icon.action + 2;
   const label = Math.round((s.type.caption - 1) * 1.38);
   return (s.size.tabBar - (icon + s.spacing.tight + label)) / 2;
 };
-
-export const dockGlassHeight = (s: Skin) =>
-  s.spacing.stack + s.size.button.md + Math.max(0, s.spacing.stack - tabBarHeadroom(s));
 
 export const dockRowPadding = (s: Skin, tabbed: boolean) =>
   tabbed ? Math.max(0, s.spacing.stack - tabBarHeadroom(s)) : s.spacing.gutter;
@@ -49,16 +50,13 @@ const DockHost = () => {
   const covered = useDockCovered(store);
   const shown = useSharedValue(covered ? 0 : 1);
   const reduced = useReducedMotion();
-  const { isHidden, glassTarget, glassLook, setGlassDockHeight } = useTabBarVisibility();
+  const { isHidden } = useTabBarVisibility();
   const keyboard = useReanimatedKeyboardAnimation();
   const direction = useSharedValue(0);
   const [rowHeight, setRowHeight] = useState(0);
 
   const tabbed = !isHidden;
-  const look = glassLook ?? DEFAULT_GLASS;
-  const glass = Boolean(entry?.glass && glassTarget);
-  const fixed = tabbed ? (look.height ?? dockGlassHeight(skin)) : 0;
-  const strip = entry?.glass ? Math.max(rowHeight, fixed) : entry?.node ? rowHeight : 0;
+  const strip = entry?.node ? rowHeight : 0;
   const tabInset = tabbed ? skin.size.tabBar + insets.bottom : 0;
   const tabLift = useSharedValue(tabInset);
   const padTabbed = dockRowPadding(skin, tabbed);
@@ -86,10 +84,7 @@ const DockHost = () => {
 
   useEffect(() => {
     store?.setHeight(strip);
-    setGlassDockHeight(entry?.glass ? strip : 0);
-  }, [store, strip, entry?.glass, setGlassDockHeight]);
-
-  useEffect(() => () => setGlassDockHeight(0), [setGlassDockHeight]);
+  }, [store, strip]);
 
   const lift = useAnimatedStyle(() => ({
     bottom: Math.max(tabLift.value, Math.abs(keyboard.height.value)),
@@ -130,11 +125,10 @@ const DockHost = () => {
   return (
     <Animated.View pointerEvents={covered ? "none" : "box-none"} style={[styles.host, lift]}>
       {strip > 0 && (
-        <Animated.View pointerEvents="none" style={[styles.strip, stripStyle, !glass && styles.solid]}>
-          {glass && glassTarget && (
-            <GlassBackdrop key={glassTargetKey(glassTarget)} target={glassTarget} look={look} />
-          )}
-        </Animated.View>
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.strip, stripStyle, entry.tone === "ink" ? styles.ink : styles.solid, TINT]}
+        />
       )}
       <View style={styles.clip} onLayout={(event) => setRowHeight(event.nativeEvent.layout.height)}>
         {entry.node ? (
@@ -157,6 +151,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     host: { left: 0, position: "absolute", right: 0 },
     strip: { bottom: 0, left: 0, overflow: "hidden", position: "absolute", right: 0 },
     solid: { backgroundColor: C.ground },
+    ink: { backgroundColor: C.fill },
     clip: { overflow: "hidden" },
     row: {
       ...createButtonStyles(s).actionRow,

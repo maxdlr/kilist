@@ -1,11 +1,13 @@
 import { createContext, type ReactNode, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
+export type DockTone = "ground" | "ink";
+
 export type DockEntry = {
   owner: string;
   mode: string;
   depth: number;
   node: ReactNode;
-  glass: boolean;
+  tone: DockTone;
 };
 
 export const createDockStore = () => {
