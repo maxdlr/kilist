@@ -15,6 +15,10 @@ const MIN_SHADE = 0.15;
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
+const shadeAt = (ratio: number) => MIN_SHADE + (1 - MIN_SHADE) * clamp(ratio);
+
+const ratioOf = (shade: number) => (clamp(shade, MIN_SHADE) - MIN_SHADE) / (1 - MIN_SHADE);
+
 const R = WHEEL / 2;
 
 const slicePath = (index: number) => {
@@ -62,7 +66,7 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
   const pickShade = (x: number) => {
     const { hsv: now, width: w } = latest.current;
     if (!w) return;
-    update({ ...now, v: clamp(x / w, MIN_SHADE) });
+    update({ ...now, v: shadeAt(x / w) });
   };
 
   const wheelPan = usePanGesture({
@@ -85,6 +89,7 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
   };
   const angle = (hsv.h * Math.PI) / 180;
   const bright = hsvToHex({ h: hsv.h, s: hsv.s, v: 1 });
+  const darkest = hsvToHex({ h: hsv.h, s: hsv.s, v: MIN_SHADE });
   const current = hsvToHex(hsv);
   const knob = (left: number, top: number, fill: string) => [
     styles.knob,
@@ -146,13 +151,13 @@ const ColorPicker = ({ initial, onChange, hueLabel, shadeLabel }: Props) => {
           <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
             <Defs>
               <LinearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="#000000" />
+                <Stop offset="0" stopColor={darkest} />
                 <Stop offset="1" stopColor={bright} />
               </LinearGradient>
             </Defs>
             <Rect width="100%" height="100%" rx={STRIP_HEIGHT / 2} fill="url(#shade)" />
           </Svg>
-          {width > 0 && <View pointerEvents="none" style={knob(hsv.v * width, STRIP_HEIGHT / 2, current)} />}
+          {width > 0 && <View pointerEvents="none" style={knob(ratioOf(hsv.v) * width, STRIP_HEIGHT / 2, current)} />}
         </View>
       </GestureDetector>
     </View>

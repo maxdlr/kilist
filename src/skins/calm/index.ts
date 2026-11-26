@@ -79,7 +79,7 @@ const calm: SkinSource = {
     row: { list: 56, shop: 56, stripe: 48 },
     tabBar: 64,
     input: 50,
-    toggle: 64,
+    toggle: 44,
     check: 22,
     meter: 2,
     swatch: 22,

@@ -70,7 +70,7 @@ const AisleRail = ({
   onPick: (id: string) => void;
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
+  const R = useCalmColors().shopList.rail;
   const styles = useSkinStyles(createStyles);
   const tick = skin.size.button.xs - 2 + skin.spacing.small;
   const [at, setAt] = useState<number | null>(null);
@@ -175,7 +175,7 @@ const AisleRail = ({
                   <CText
                     size={on ? skin.type.lead : skin.type.label}
                     weight={on ? "semibold" : "medium"}
-                    color={on ? C.onFill : C.textSoft}
+                    color={on ? R.pillOn.ink : R.pill.ink}
                     numberOfLines={1}
                   >
                     {stop.label}
@@ -193,7 +193,7 @@ const AisleRail = ({
 
 const PIP = 6;
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin, R = calmColors(s).shopList.rail) =>
   StyleSheet.create({
     rail: {
       bottom: s.spacing.inline,
@@ -210,12 +210,12 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingEnd: s.spacing.stack - 2,
     },
     front: { zIndex: 2 },
-    pip: { backgroundColor: C.fieldLine, borderRadius: PIP / 2, height: PIP, width: PIP },
-    pipOn: { backgroundColor: C.fill, width: PIP * 2.6 },
+    pip: { backgroundColor: R.pip, borderRadius: PIP / 2, height: PIP, width: PIP },
+    pipOn: { backgroundColor: R.pipOn, width: PIP * 2.6 },
     pill: {
       alignItems: "center",
-      backgroundColor: C.card,
-      borderColor: C.line,
+      backgroundColor: R.pill.fill,
+      borderColor: R.pill.line,
       borderRadius: s.size.button.xs / 2,
       borderWidth: s.shape.border,
       flexDirection: "row",
@@ -226,9 +226,9 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       transformOrigin: "right center",
     },
     pillOn: {
-      backgroundColor: C.fill,
-      borderColor: C.fill,
-      boxShadow: `0 6px 18px ${C.scrim}`,
+      backgroundColor: R.pillOn.fill,
+      borderColor: R.pillOn.fill,
+      boxShadow: `0 6px 18px ${R.pillOn.shadow}`,
       minHeight: s.size.button.md - 8,
       paddingHorizontal: s.spacing.stack + 2,
       zIndex: 2,

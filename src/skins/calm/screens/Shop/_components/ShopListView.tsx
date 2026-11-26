@@ -72,6 +72,8 @@ const ShopListView = ({ run }: { run: ShopRun }) => {
 
   const running = view.running;
   const tone = running ? "ink" : "ground";
+  const L = C.shopList;
+  const head = running ? L.header.running : L.header.idle;
   const selecting = run.selected.length > 0;
   const flipped = skin.statusBarOnGround === "dark" ? "light" : "dark";
   useStatusBarStyle(running ? flipped : skin.statusBarOnGround);
@@ -260,7 +262,7 @@ const ShopListView = ({ run }: { run: ShopRun }) => {
               <CText
                 weight="semibold"
                 size={skin.type.headline}
-                color={running ? C.onFill : C.text}
+                color={head.title}
                 accessibilityRole="header"
               >
                 {T.shop.title}
@@ -268,7 +270,7 @@ const ShopListView = ({ run }: { run: ShopRun }) => {
               <View style={styles.subline}>
                 <CText
                   size={skin.type.label}
-                  color={running ? C.fieldLine : C.textSoft}
+                  color={head.subtitle}
                   accessibilityLiveRegion="polite"
                   numberOfLines={1}
                   style={running && styles.flex}
@@ -277,7 +279,7 @@ const ShopListView = ({ run }: { run: ShopRun }) => {
                 </CText>
                 {running && (
                   <View style={styles.toggle}>
-                    <CText size={skin.type.caption} color={C.fieldLine} importantForAccessibility="no">
+                    <CText size={skin.type.caption} color={L.header.running.toggleLabel} importantForAccessibility="no">
                       {T.shop.suggestions}
                     </CText>
                     <CSwitch
@@ -369,18 +371,18 @@ const ShopListView = ({ run }: { run: ShopRun }) => {
   );
 };
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin, L = calmColors(s).shopList) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     head: {
       alignItems: "center",
-      backgroundColor: C.ground,
+      backgroundColor: L.header.idle.fill,
       flexDirection: "row",
       gap: s.spacing.stack,
       paddingBottom: s.spacing.stack,
       paddingHorizontal: s.spacing.gutter,
     },
-    headInk: { backgroundColor: C.fill },
+    headInk: { backgroundColor: L.header.running.fill },
     titles: { flexShrink: 0 },
     subline: { alignItems: "center", flexDirection: "row", gap: s.spacing.inline },
     toggle: { alignItems: "center", flexDirection: "row", gap: s.spacing.small },
@@ -396,14 +398,14 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingTop: s.spacing.stack,
     },
     pinned: {
-      backgroundColor: C.ground,
-      borderTopColor: C.line,
+      backgroundColor: L.next.idle.fill,
+      borderTopColor: L.next.idle.line,
       borderTopWidth: s.shape.divider,
       paddingBottom: s.spacing.stack,
       paddingHorizontal: s.spacing.stack,
       paddingTop: s.spacing.small,
     },
-    pinnedInk: { backgroundColor: C.line, borderTopColor: C.line },
+    pinnedInk: { backgroundColor: L.next.running.fill, borderTopColor: L.next.running.line },
     nextRow: { borderRadius: s.shape.radius / 2, overflow: "hidden" },
   });
 

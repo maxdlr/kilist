@@ -5,7 +5,16 @@ import type { Skin } from "@/skins/types";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import AnimationService from "@/services/animation";
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
+import { ARM, SwipeUnder } from "@/skins/calm/screens/Shop/_components/ShopRow";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CText } from "@/skins/calm/components";
 
@@ -55,16 +64,14 @@ const PracticeRow = ({
   const nudgeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: nudge.value }],
   }));
-  const laterStyle = useAnimatedStyle(() => ({
-    opacity: drag.value + nudge.value < 0 ? 1 : 0,
-  }));
+  const moved = useDerivedValue(() => drag.value + nudge.value);
 
   return (
     <View
       accessible
       accessibilityLabel={name}
       accessibilityActions={[
-        { name: "activate", label: T.shop.inBasket },
+        { name: "activate", label: T.shop.bought },
         { name: "later", label: T.shop.nextTime },
       ]}
       onAccessibilityAction={(event) =>
@@ -72,31 +79,18 @@ const PracticeRow = ({
       }
       style={styles.slot}
     >
-      <View style={[styles.behind, styles.behindBuy]}>
-        <CText weight="medium" size={skin.type.label + 1} color={C.onPositive}>
-          {T.shop.inBasket}
-        </CText>
-      </View>
-      <Animated.View style={[styles.behind, styles.behindLater, laterStyle]}>
-        <CText weight="medium" size={skin.type.label + 1} color={C.textSoft}>
-          {T.shop.later}
-        </CText>
-      </Animated.View>
+      <SwipeUnder drag={moved} side={1} armed={C.shopList.row.swipe.buy} />
+      <SwipeUnder drag={moved} side={-1} armed={C.shopList.row.swipe.later} />
       <Animated.View style={nudgeStyle}>
         <SwipeGesture
           onSwipeRight={onBuy}
           onSwipeLeft={onLater}
           translation={drag}
-          swipeThreshold={100}
+          swipeThreshold={ARM}
           styles={{ box: styles.swipeBox }}
         >
           <View style={styles.rowMain}>
-            <CText
-              weight="bold"
-              size={skin.type.lead}
-              style={styles.flex}
-              numberOfLines={1}
-            >
+            <CText weight="medium" size={skin.type.body} style={styles.flex} numberOfLines={1}>
               {name}
             </CText>
           </View>
@@ -106,29 +100,18 @@ const PracticeRow = ({
   );
 };
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin, L = calmColors(s).shopList.row) =>
   StyleSheet.create({
     flex: { flex: 1, minWidth: 0 },
     slot: {
-      borderTopColor: C.line,
-      borderTopWidth: s.shape.divider,
+      borderBottomColor: L.divider,
+      borderBottomWidth: s.shape.divider,
       overflow: "hidden",
     },
-    behind: {
-      alignItems: "center",
-      bottom: 0,
-      flexDirection: "row",
-      left: 0,
-      paddingHorizontal: s.spacing.stack,
-      position: "absolute",
-      right: 0,
-      top: 0,
-    },
-    behindBuy: { backgroundColor: C.positive, justifyContent: "flex-start" },
-    behindLater: { backgroundColor: C.tint, justifyContent: "flex-end" },
-    swipeBox: { backgroundColor: C.ground },
+    swipeBox: { backgroundColor: L.fill },
     rowMain: {
       alignItems: "center",
+      backgroundColor: L.fill,
       flexDirection: "row",
       minHeight: s.size.row.shop,
       paddingStart: s.spacing.stack,

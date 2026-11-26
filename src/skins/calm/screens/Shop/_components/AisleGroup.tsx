@@ -39,9 +39,9 @@ const AisleGroup = ({
   children: ReactNode;
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
+  const L = useCalmColors().shopList.aisle;
   const styles = useSkinStyles(createStyles);
-  const ink = targeted ? C.text : focused || kind === "next" ? C.textSoft : C.textFaint;
+  const ink = targeted ? L.title.targeted : kind === "next" ? L.title.next : focused ? L.title.focused : L.title.idle;
 
   return (
     <Animated.View
@@ -53,7 +53,7 @@ const AisleGroup = ({
     >
       <View style={styles.label} accessibilityRole="header">
         {kind === "aisle" && (
-          <View style={[styles.corner, { borderColor: started ? C.positive : focused ? C.ring : C.fieldLine }, TINT]} />
+          <View style={[styles.corner, { borderColor: started ? L.corner.started : focused ? L.corner.focused : L.corner.idle }, TINT]} />
         )}
         <CText size={skin.type.caption} weight={targeted ? "semibold" : "medium"} color={ink} numberOfLines={1}>
           {label}
@@ -66,11 +66,11 @@ const AisleGroup = ({
       </View>
       <View style={[styles.rows, kind === "next" && styles.nextRows]}>
         {kind === "aisle" ? (
-          <View style={[styles.spine, { backgroundColor: focused ? C.ring : C.fieldLine }, TINT]}>
+          <View style={[styles.spine, { backgroundColor: focused ? L.track.focused : L.track.idle }, TINT]}>
             <View style={[styles.fill, { height: `${Math.round(progress * 100)}%` }, TINT]} />
           </View>
         ) : (
-          <View style={[styles.bar, { backgroundColor: C.fill }]} />
+          <View style={[styles.bar, { backgroundColor: L.nextBar }]} />
         )}
         {children}
       </View>
@@ -86,7 +86,7 @@ const FADE = {
   transitionTimingFunction: "ease-out",
 };
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin, L = calmColors(s).shopList.aisle) =>
   StyleSheet.create({
     label: {
       alignItems: "center",
@@ -108,7 +108,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     dot: { borderRadius: 3, height: 5, opacity: 0.9, width: 5 },
     count: { flexShrink: 0 },
     action: { flex: 1, alignItems: "flex-end" },
-    dimmed: { opacity: 0.2 },
+    dimmed: { opacity: L.dimmedOpacity },
     rows: { paddingStart: s.spacing.stack - 2 },
     nextRows: { paddingStart: LINE },
     spine: {
@@ -121,7 +121,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       top: 0,
       width: LINE,
     },
-    fill: { backgroundColor: C.positive, left: 0, position: "absolute", right: 0, top: 0 },
+    fill: { backgroundColor: L.progress, left: 0, position: "absolute", right: 0, top: 0 },
     bar: {
       borderRadius: 2,
       bottom: s.spacing.small,

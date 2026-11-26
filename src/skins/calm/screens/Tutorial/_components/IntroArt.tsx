@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
+  useDerivedValue,
   useReducedMotion,
   useSharedValue,
   withRepeat,
@@ -14,13 +15,16 @@ import Animated, {
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import T from "@/skins/calm/text";
 import { CText } from "@/skins/calm/components/CText";
+import { CartIcon, CheckIcon } from "@/components/icons";
+import { SwipeUnder } from "@/skins/calm/screens/Shop/_components/ShopRow";
 
 const SORT_LOOP_MS = 7200;
 const SHOP_LOOP_MS = 5200;
 const CARD_PUSH = 64;
 const CARD_LIFT = 48;
-const ROW_PUSH = 120;
+const ROW_PUSH = 190;
 const FINGER = 36;
+const PAD = 26;
 const SORT_RAISE = 24;
 
 const SORT_AT = [0, 0.06, 0.16, 0.26, 0.33, 0.39, 0.49, 0.59, 0.66, 0.72, 0.82, 0.92, 1];
@@ -66,40 +70,63 @@ export const SortArt = () => {
   const rightStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, x.value) }));
   const leftStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, -x.value) }));
   const upStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, -y.value) }));
-  const fingerStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, Math.abs(x.value) + Math.abs(y.value)) * 0.25,
-  }));
+  const ink = C.gameCard.title;
+  const onInk = C.gameCard.front.fill;
+  const pad = (direction: "left" | "right", lit: typeof leftStyle) => {
+    const icon = (ink: string) =>
+      direction === "left" ? (
+        <CartIcon size={PAD * 0.55} color={ink} strokeWidth={1.8} />
+      ) : (
+        <CheckIcon size={PAD * 0.55} color={ink} strokeWidth={2.2} />
+      );
+    return (
+      <View style={[styles.pad, { backgroundColor: "transparent", borderColor: ink }]}>
+        {icon(ink)}
+        <Animated.View
+          style={[styles.pad, styles.padLit, { backgroundColor: ink, borderColor: ink }, lit]}
+        >
+          {icon(onInk)}
+        </Animated.View>
+      </View>
+    );
+  };
 
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={[styles.art, styles.sortArt]}>
       <View style={styles.stage}>
         <View style={[styles.card, styles.cardBehind]}>
-          <CText weight="medium" size={skin.type.title} color={C.textFaint}>
+          <CText weight="medium" size={skin.type.title} color={C.gameCard.title} style={styles.behindName}>
             {behind}
           </CText>
         </View>
         <Animated.View style={[styles.card, cardStyle]}>
           <View style={styles.stamp}>
             <Animated.View style={[styles.stampLabel, rightStyle]}>
-              <CText weight="semibold" size={skin.type.label} color={C.positive}>
+              <CText weight="semibold" size={skin.type.label} color={ink}>
                 {stamps.right}
               </CText>
             </Animated.View>
             <Animated.View style={[styles.stampLabel, leftStyle]}>
-              <CText weight="semibold" size={skin.type.label} color={C.negative}>
+              <CText weight="semibold" size={skin.type.label} color={ink}>
                 {stamps.left}
               </CText>
             </Animated.View>
             <Animated.View style={[styles.stampLabel, upStyle]}>
-              <CText weight="semibold" size={skin.type.label} color={C.textSoft}>
+              <CText weight="semibold" size={skin.type.label} color={C.gameCard.question}>
                 {stamps.up}
               </CText>
             </Animated.View>
           </View>
-          <CText weight="medium" size={skin.type.title}>
+          <CText weight="medium" size={skin.type.title} color={C.gameCard.title}>
             {front}
           </CText>
-          <Animated.View style={[styles.finger, styles.cardFinger, fingerStyle]} />
+          <CText size={skin.type.caption} color={C.gameCard.question}>
+            {T.play.question}
+          </CText>
+          <View style={styles.pads}>
+            {pad("left", leftStyle)}
+            {pad("right", rightStyle)}
+          </View>
         </Animated.View>
       </View>
     </View>
@@ -114,25 +141,18 @@ export const ShopArt = () => {
   const x = useKeyframes(SHOP_LOOP_MS, SHOP_AT, SHOP_X);
 
   const rowStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.value * ROW_PUSH }] }));
-  const buyStyle = useAnimatedStyle(() => ({ opacity: x.value > 0 ? 1 : 0 }));
-  const laterStyle = useAnimatedStyle(() => ({ opacity: x.value < 0 ? 1 : 0 }));
+  const drag = useDerivedValue(() => x.value * ROW_PUSH);
   const fingerStyle = useAnimatedStyle(() => ({ opacity: Math.abs(x.value) * 0.25 }));
 
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.art}>
       <View style={styles.slot}>
-        <Animated.View style={[styles.behind, styles.behindBuy, buyStyle]}>
-          <CText weight="medium" size={skin.type.label + 1} color={C.onPositive}>
-            {T.shop.inBasket}
-          </CText>
-        </Animated.View>
-        <Animated.View style={[styles.behind, styles.behindLater, laterStyle]}>
-          <CText weight="medium" size={skin.type.label + 1} color={C.textSoft}>
-            {T.shop.later}
-          </CText>
-        </Animated.View>
+        <SwipeUnder drag={drag} side={1} armed={C.shopList.row.swipe.buy} />
+        <SwipeUnder drag={drag} side={-1} armed={C.shopList.row.swipe.later} />
         <Animated.View style={[styles.row, rowStyle]}>
-          <CText size={skin.type.lead}>{name}</CText>
+          <CText weight="medium" size={skin.type.body}>
+            {name}
+          </CText>
           <View pointerEvents="none" style={styles.rowFinger}>
             <Animated.View style={[styles.finger, styles.fingerCentered, fingerStyle]} />
           </View>
@@ -149,20 +169,35 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     stage: { alignItems: "center", height: 230, justifyContent: "center", width: 240 },
     card: {
       alignItems: "center",
-      backgroundColor: C.card,
-      borderColor: C.line,
+      backgroundColor: C.gameCard.front.fill,
+      borderColor: C.gameCard.front.border,
       borderRadius: s.shape.radius + 6,
-      borderWidth: s.shape.border,
+      borderWidth: C.gameCard.border.width,
+      gap: s.spacing.tight,
       height: 190,
       justifyContent: "center",
       position: "absolute",
       width: 140,
     },
-    cardBehind: { backgroundColor: C.tint, borderColor: C.tint, transform: [{ translateY: 10 }, { scale: 0.94 }] },
+    cardBehind: {
+      backgroundColor: C.gameCard.behind.fill,
+      borderColor: C.gameCard.behind.border,
+      transform: [{ translateY: 10 }, { scale: 0.94 }],
+    },
+    behindName: { opacity: C.gameCard.behind.contentOpacity },
+    pads: { bottom: s.spacing.stack, flexDirection: "row", gap: s.spacing.small, position: "absolute" },
+    pad: {
+      alignItems: "center",
+      borderRadius: PAD / 2,
+      borderWidth: s.shape.border,
+      height: PAD,
+      justifyContent: "center",
+      width: PAD,
+    },
+    padLit: { left: -s.shape.border, position: "absolute", top: -s.shape.border },
     stamp: { height: s.spacing.section, left: 0, position: "absolute", right: 0, top: s.spacing.inline },
     stampLabel: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
     finger: {
-      backgroundColor: C.text,
       borderRadius: FINGER / 2,
       height: FINGER,
       position: "absolute",
@@ -170,27 +205,18 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     },
     slot: {
       alignSelf: "stretch",
-      borderColor: C.line,
+      borderColor: C.introDemo.rowBorder,
       borderRadius: s.shape.radius,
-      borderWidth: s.shape.border,
+      borderWidth: s.shape.border * 2,
       overflow: "hidden",
     },
-    behind: {
-      ...StyleSheet.absoluteFill,
-      alignItems: "center",
-      flexDirection: "row",
-      paddingHorizontal: s.spacing.stack,
-    },
-    behindBuy: { backgroundColor: C.positive, justifyContent: "flex-start" },
-    behindLater: { backgroundColor: C.tint, justifyContent: "flex-end" },
     row: {
       alignItems: "center",
-      backgroundColor: C.card,
+      backgroundColor: C.shopList.row.fill,
       flexDirection: "row",
       minHeight: s.size.row.shop,
       paddingHorizontal: s.spacing.stack,
     },
-    cardFinger: { bottom: s.spacing.stack },
     rowFinger: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
-    fingerCentered: { position: "relative" },
+    fingerCentered: { backgroundColor: C.text, position: "relative" },
   });

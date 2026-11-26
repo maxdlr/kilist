@@ -83,9 +83,62 @@ export const customElements = (color: string): CalmElements => {
         active: { fill: base[10], border: base[5], ink: base[80] },
         haveItIcon: base[20],
         unsure: {
-          idle: { fill: "transparent", border: base[40], ink: base[50] },
-          active: { fill: base[10], border: base[5], ink: base[5] },
+          idle: { fill: "transparent", border: base[40], ink: base[60] },
+          active: { fill: "transparent", border: base[5], ink: base[5] },
         },
+      },
+    },
+    introDemo: { rowBorder: base[40] },
+    tutorialCaption: {
+      fill: base[60],
+      border: base[60],
+      title: base[5],
+      line: base[20],
+      hint: { left: base[5], up: base[20], right: colors.sage300 },
+    },
+    shopList: {
+      header: {
+        idle: { fill: base[70], title: base[5], subtitle: base[20] },
+        running: {
+          fill: base[5],
+          title: base[80],
+          subtitle: base[40],
+          toggleLabel: base[40],
+        },
+      },
+      aisle: {
+        title: {
+          idle: base[40],
+          focused: base[20],
+          targeted: base[5],
+          next: base[20],
+        },
+        corner: { idle: base[40], focused: base[30], started: colors.sage300 },
+        track: { idle: base[40], focused: base[30] },
+        progress: colors.sage300,
+        nextBar: base[5],
+        dimmedOpacity: 0.2,
+      },
+      row: {
+        fill: base[70],
+        selected: base[60],
+        divider: base[60],
+        swipe: {
+          idle: { fill: base[60], ink: base[20] },
+          buy: { fill: colors.sage300, ink: base[90] },
+          later: { fill: base[20], ink: base[80] },
+        },
+        done: { opacity: 0.45, tagLine: base[40], tagInk: base[20] },
+      },
+      next: {
+        idle: { fill: base[70], line: base[70] },
+        running: { fill: base[70], line: base[70] },
+      },
+      rail: {
+        pip: base[40],
+        pipOn: base[5],
+        pill: { fill: base[80], line: base[70], ink: base[20] },
+        pillOn: { fill: base[5], ink: base[80], shadow: veil },
       },
     },
     gameHeader: {

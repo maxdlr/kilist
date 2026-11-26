@@ -79,6 +79,49 @@ export const elements: CalmElements = {
       },
     },
   },
+  introDemo: { rowBorder: colors.stone100 },
+  tutorialCaption: {
+    fill: colors.white,
+    border: colors.stone200,
+    title: colors.ink,
+    line: colors.stone700,
+    hint: { left: colors.ink, up: colors.stone700, right: colors.sage700 },
+  },
+  shopList: {
+    header: {
+      idle: { fill: colors.paper, title: colors.ink, subtitle: colors.stone700 },
+      running: { fill: colors.ink, title: colors.paper, subtitle: colors.stone300, toggleLabel: colors.stone300 },
+    },
+    aisle: {
+      title: { idle: colors.stone500, focused: colors.stone700, targeted: colors.ink, next: colors.stone700 },
+      corner: { idle: colors.stone300, focused: colors.stone400, started: colors.sage700 },
+      track: { idle: colors.stone300, focused: colors.stone400 },
+      progress: colors.sage700,
+      nextBar: colors.ink,
+      dimmedOpacity: 0.2,
+    },
+    row: {
+      fill: colors.paper,
+      selected: colors.stone100,
+      divider: colors.stone100,
+      swipe: {
+        idle: { fill: colors.stone100, ink: colors.stone700 },
+        buy: { fill: colors.sage700, ink: colors.white },
+        later: { fill: colors.stone700, ink: colors.paper },
+      },
+      done: { opacity: 0.45, tagLine: colors.stone300, tagInk: colors.stone700 },
+    },
+    next: {
+      idle: { fill: colors.paper, line: colors.stone200 },
+      running: { fill: colors.stone200, line: colors.stone200 },
+    },
+    rail: {
+      pip: colors.stone300,
+      pipOn: colors.ink,
+      pill: { fill: colors.white, line: colors.stone200, ink: colors.stone700 },
+      pillOn: { fill: colors.ink, ink: colors.paper, shadow: colors.veil },
+    },
+  },
   gameHeader: {
     icon: colors.stone700,
     iconActive: colors.ink,

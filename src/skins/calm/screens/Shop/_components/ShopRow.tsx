@@ -15,21 +15,21 @@ import T from "@/skins/calm/text";
 import { calmColors, useCalmColors } from "@/skins/calm/theme/useCalmColors";
 import { CText } from "@/skins/calm/components";
 
-const ARM = 90;
+export const ARM = 90;
 
 const HOLD_SLOP = 10;
 
-const Under = ({
+export const SwipeUnder = ({
   drag,
   side,
   armed,
 }: {
-  drag: SharedValue<number>;
+  drag: Readonly<SharedValue<number>>;
   side: 1 | -1;
   armed: { fill: string; ink: string };
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
+  const idle = useCalmColors().shopList.row.swipe.idle;
   const styles = useSkinStyles(createStyles);
   const { width } = useWindowDimensions();
   const shown = useAnimatedStyle(() => ({ opacity: drag.value * side > 0 && Math.abs(drag.value) < width ? 1 : 0 }));
@@ -47,8 +47,8 @@ const Under = ({
   );
   const align = side > 0 ? styles.underBuy : styles.underLater;
   return (
-    <Animated.View style={[styles.under, align, { backgroundColor: C.tint }, shown]}>
-      {layer(C.textSoft)}
+    <Animated.View style={[styles.under, align, { backgroundColor: idle.fill }, shown]}>
+      {layer(idle.ink)}
       <Animated.View style={[styles.under, align, { backgroundColor: armed.fill }, lit]}>
         {layer(armed.ink)}
       </Animated.View>
@@ -102,8 +102,8 @@ export const ShopRow = ({
   return (
     <FeedbackRow error={error} retryLabel={common.feedback.rowRetry} onRetry={onRetry}>
       <View ref={rename?.anchor} style={styles.slot}>
-        <Under drag={drag} side={1} armed={{ fill: C.positive, ink: C.onPositive }} />
-        <Under drag={drag} side={-1} armed={{ fill: C.textSoft, ink: C.onFill }} />
+        <SwipeUnder drag={drag} side={1} armed={C.shopList.row.swipe.buy} />
+        <SwipeUnder drag={drag} side={-1} armed={C.shopList.row.swipe.later} />
         <SwipeGesture
           onSwipeRight={onBuy}
           onSwipeLeft={onLater}
@@ -232,7 +232,7 @@ export const SunkRow = ({ food, action }: { food: FoodType; action: "buy" | "sno
       <View style={styles.meta} />
       {action === "snooze" && (
         <View style={styles.tag}>
-          <CText size={skin.type.caption} color={C.textSoft}>
+          <CText size={skin.type.caption} color={C.shopList.row.done.tagInk}>
             {T.shop.nextTag}
           </CText>
         </View>
@@ -243,7 +243,7 @@ export const SunkRow = ({ food, action }: { food: FoodType; action: "buy" | "sno
 
 const createStyles = (s: Skin, C = calmColors(s)) =>
   StyleSheet.create({
-    slot: { borderBottomColor: C.tint, borderBottomWidth: s.shape.divider, overflow: "hidden" },
+    slot: { borderBottomColor: C.shopList.row.divider, borderBottomWidth: s.shape.divider, overflow: "hidden" },
     under: {
       alignItems: "center",
       bottom: 0,
@@ -260,7 +260,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     box: { backgroundColor: "transparent" },
     row: {
       alignItems: "center",
-      backgroundColor: C.ground,
+      backgroundColor: C.shopList.row.fill,
       flexDirection: "row",
       gap: s.spacing.inline,
       minHeight: s.size.row.shop,
@@ -269,7 +269,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       transitionDuration: AnimationService.feedback.tint.duration,
       transitionProperty: ["backgroundColor"],
     },
-    selected: { backgroundColor: C.tint },
+    selected: { backgroundColor: C.shopList.row.selected },
     renaming: { paddingEnd: s.spacing.small },
     editActions: { flexDirection: "row", gap: s.spacing.small },
     editButton: {
@@ -282,7 +282,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
     },
     editCancel: { borderColor: C.fieldLine },
     editSave: { backgroundColor: C.fill, borderColor: C.fill },
-    sunk: { minHeight: s.size.row.shop * 0.6, opacity: 0.45, paddingEnd: s.spacing.stack },
+    sunk: { minHeight: s.size.row.shop * 0.6, opacity: C.shopList.row.done.opacity, paddingEnd: s.spacing.stack },
     check: {
       alignItems: "center",
       borderColor: C.ring,
@@ -307,7 +307,7 @@ const createStyles = (s: Skin, C = calmColors(s)) =>
       paddingVertical: s.spacing.tight,
     },
     tag: {
-      borderColor: C.fieldLine,
+      borderColor: C.shopList.row.done.tagLine,
       borderRadius: s.spacing.section,
       borderWidth: s.shape.border,
       paddingHorizontal: s.spacing.small,

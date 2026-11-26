@@ -26,13 +26,9 @@ const Caption = ({
   names?: string[];
 }) => {
   const skin = useSkin();
-  const C = useCalmColors();
+  const look = useCalmColors().tutorialCaption;
   const styles = useSkinStyles(createStyles);
-  const hintColor: Record<SwipeDirection, string> = {
-    left: C.negative,
-    up: C.textSoft,
-    right: C.positive,
-  };
+  const hintColor: Record<SwipeDirection, string> = look.hint;
   const withHint = hint !== undefined;
   const [shownHint, setShownHint] = useState<SwipeDirection | null>(
     hint ?? null,
@@ -56,8 +52,8 @@ const Caption = ({
   return (
     <View accessibilityLiveRegion="polite" style={styles.caption}>
       <Animated.View style={titleStyle}>
-        <CText weight="medium" size={skin.type.lead} style={styles.center}>
-          <Named text={title} names={names} size={skin.type.lead} />
+        <CText weight="medium" size={skin.type.lead} color={look.title} style={styles.center}>
+          <Named text={title} names={names} size={skin.type.lead} color={look.title} />
         </CText>
       </Animated.View>
       {withHint && (
@@ -75,12 +71,12 @@ const Caption = ({
         </Animated.View>
       )}
       {line && (
-        <CText size={skin.type.body} color={C.textSoft} style={styles.center}>
+        <CText size={skin.type.body} color={look.line} style={styles.center}>
           <Named
             text={line}
             names={names}
             size={skin.type.body}
-            color={C.textSoft}
+            color={look.line}
           />
         </CText>
       )}
@@ -88,13 +84,13 @@ const Caption = ({
   );
 };
 
-const createStyles = (s: Skin, C = calmColors(s)) =>
+const createStyles = (s: Skin, L = calmColors(s).tutorialCaption) =>
   StyleSheet.create({
     center: { textAlign: "center" },
     hintLine: { height: hintHeight(s), justifyContent: "center" },
     caption: {
-      backgroundColor: C.card,
-      borderColor: C.line,
+      backgroundColor: L.fill,
+      borderColor: L.border,
       borderRadius: s.shape.radius,
       borderWidth: s.shape.border,
       gap: captionGap(s),

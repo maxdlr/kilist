@@ -48,6 +48,47 @@ export type GameHeaderLook = {
   progress: { track: string; fill: string; height: number };
 };
 
+export type TutorialCaptionLook = {
+  fill: string;
+  border: string;
+  title: string;
+  line: string;
+  hint: { left: string; up: string; right: string };
+};
+
+export type IntroDemoLook = { rowBorder: string };
+
+export type ShopSwipeLook = { fill: string; ink: string };
+
+export type ShopListLook = {
+  header: {
+    idle: { fill: string; title: string; subtitle: string };
+    running: { fill: string; title: string; subtitle: string; toggleLabel: string };
+  };
+  aisle: {
+    title: { idle: string; focused: string; targeted: string; next: string };
+    corner: { idle: string; focused: string; started: string };
+    track: { idle: string; focused: string };
+    progress: string;
+    nextBar: string;
+    dimmedOpacity: number;
+  };
+  row: {
+    fill: string;
+    selected: string;
+    divider: string;
+    swipe: { idle: ShopSwipeLook; buy: ShopSwipeLook; later: ShopSwipeLook };
+    done: { opacity: number; tagLine: string; tagInk: string };
+  };
+  next: { idle: { fill: string; line: string }; running: { fill: string; line: string } };
+  rail: {
+    pip: string;
+    pipOn: string;
+    pill: { fill: string; line: string; ink: string };
+    pillOn: { fill: string; ink: string; shadow: string };
+  };
+};
+
 type CalmBase = {
   statusBar: "light" | "dark";
   ground: string;
@@ -74,6 +115,9 @@ type CalmBase = {
   bottomPanel: BottomPanelLook;
   gameCard: GameCardLook;
   gameHeader: GameHeaderLook;
+  shopList: ShopListLook;
+  tutorialCaption: TutorialCaptionLook;
+  introDemo: IntroDemoLook;
   newsCard: NewsCardLook;
   sortCard: SortCardLook;
   feedback?: FeedbackOverride;
